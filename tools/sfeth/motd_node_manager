@@ -1,10 +1,14 @@
-             ___   ____ __  __ ____ ____
-            / _ \ / __// / / // __// __/
-           / // // _/ / /_/ /_\ \ / _/
-          /____//_/   \____//___//___/
+    ____ __                          _
+    / __// /_ ____ ___  ___ _ __ _   (_)___  ___ _
+   _\ \ / __// __// -_)/ _ `//  ' \ / // _ \/ _ `/
+  /___/ \__//_/   \__/ \_,_//_/_/_//_//_//_/\_, /
+                 ____           __         /___/
+                / __/___ _ ___ / /_
+               / _/ / _ `/(_-</ __/
+              /_/   \_,_//___/\__/
 
 Welcome to this node manager pod, common commands:
- - Show version           sfeth --version
+ - Show version                       sfeth --version
 
 Node manager commands (eth-... <tab> to show all):
  - Check if running                   eth-is-running
