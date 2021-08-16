@@ -1,5 +1,6 @@
 .DS_Store
 .idea/
+.vscode/
 .envrc
 /sf-data
 /sf.yaml
