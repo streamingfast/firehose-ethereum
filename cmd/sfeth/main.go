@@ -28,27 +28,9 @@ var Version = "dev"
 var IsDirty = ""
 
 func init() {
-	cli.RootCmd.Version = version()
+	cli.RootCmd.Version = cli.Version(Commit, Version, IsDirty)
 }
 
 func main() {
 	cli.Main(cli.RegisterCommonFlags, nil)
-}
-
-func version() string {
-	shortCommit := Commit
-	if len(shortCommit) >= 7 {
-		shortCommit = shortCommit[0:7]
-	}
-
-	if len(shortCommit) == 0 {
-		shortCommit = "adhoc"
-	}
-
-	out := Version + "-" + shortCommit
-	if IsDirty != "" {
-		out += "-dirty"
-	}
-
-	return out
 }

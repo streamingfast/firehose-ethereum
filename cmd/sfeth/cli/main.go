@@ -82,6 +82,24 @@ func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModu
 	derr.Check("dfuse", RootCmd.Execute())
 }
 
+func Version(version, commit, isDirty string) string {
+	shortCommit := commit
+	if len(shortCommit) >= 15 {
+		shortCommit = shortCommit[0:15]
+	}
+
+	if len(shortCommit) == 0 {
+		shortCommit = "adhoc"
+	}
+
+	out := version + "-" + shortCommit
+	if isDirty != "" {
+		out += "-dirty"
+	}
+
+	return out
+}
+
 var startCmdExample = `sfeth start relayer merger --merger-grpc-serving-addr=localhost:12345 --relayer-merger-addr=localhost:12345`
 var startCmdHelpTemplate = `Usage:{{if .Runnable}}
   {{.UseLine}}{{end}} [all|command1 [command2...]]{{if gt (len .Aliases) 0}}
