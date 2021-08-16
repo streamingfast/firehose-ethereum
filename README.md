@@ -9,7 +9,7 @@
 ```
 git clone git@github.com:streamingfast/go-ethereum.git
 cd go-ethereum
-git checkout deep-mind
+git checkout release/geth-1.10.x-dm
 go install ./cmd/geth
 go install ./cmd/bootnode
 ```
@@ -22,55 +22,48 @@ cd sf-ethereum
 go install ./cmd/sfeth
 ```
 
-## Quickstart, with an included miner on a local chain
-
-* Start from a clean folder
-
-* `sfeth init` creates the following structure:
-```
-./sf.yaml
-./miner/
-./miner/genesis.json
-./miner/password
-./mindreader/
-./mindreader/genesis.json
-```
-
-* `sfeth start`
-  * Calls bootstrap/Initiate() which will bootstrap by running `geth` for a few seconds (runs only once by checking that the files {sf-data-dir}/mindreader/data/geth/chaindata/CURRENT and {sf-data-dir}/node/data/geth/chaindata/CURRENT don't exist)
-  * Starts the stack
-
-* connect to your chain, create an account, push a transaction
-
-```
-geth attach --datadir sf-data/node/data
-> personal.newAccount()
-> eth.getAccounts(console.log) # note the two account IDs (one of them is the default miner account, the other was just created)
-> personal.unlockAccount("0x_previous existing account") # default password is 'secure'
-> eth.sendTransaction({from: "0x_previous_existing_account",to: "0x_newly_created_account", value: "74000000000000000"})
-```
-* Open your browser to Dgraphql and write the correct trx hash in the variables: http://localhost:13023/graphiql/?query=cXVlcnkgKCRoYXNoOiBTdHJpbmchKSB7CiAgdHJhbnNhY3Rpb24oaGFzaDogJGhhc2gpIHsKICAgIGhhc2gKICAgIGZyb20KICAgIHRvCiAgICB2YWx1ZShlbmNvZGluZzogRVRIRVIpCiAgICBnYXNMaW1pdAogICAgZ2FzUHJpY2UoZW5jb2Rpbmc6IEVUSEVSKQogICAgZmxhdENhbGxzIHsKICAgICAgZnJvbQogICAgICB0bwogICAgICB2YWx1ZQogICAgICBpbnB1dERhdGEKICAgICAgcmV0dXJuRGF0YQogICAgICBiYWxhbmNlQ2hhbmdlcyB7CiAgICAgICAgYWRkcmVzcwogICAgICAgIG5ld1ZhbHVlKGVuY29kaW5nOiBFVEhFUikKICAgICAgICByZWFzb24KICAgICAgfQogICAgICBsb2dzIHsKICAgICAgICBhZGRyZXNzCiAgICAgICAgdG9waWNzCiAgICAgICAgZGF0YQogICAgICB9CiAgICAgIHN0b3JhZ2VDaGFuZ2VzIHsKICAgICAgICBrZXkKICAgICAgICBvbGRWYWx1ZQogICAgICAgIG5ld1ZhbHVlCiAgICAgIH0KICAgIH0KICB9Cn0K&variables=eyJoYXNoIjoiZjE2NGIwYWY3ZmRlYzc1ZWEwMDVlODQ1MzY4MTdhMDI1OWM1NjU3ZDhhZTgyYjE0Njg0ZTEyMzU5YmRhODBiOSJ9
-
 ## Quickstart, connecting to an existing chain
 
 * Start from a clean folder
 
-* `sfeth init`
-  * select 'no'
-  * enter the networkID
-  * enter the complete enode URL(s) to connect to
+* Create a file named `sf.yaml` and put the following content:
 
-* this will create the following structure:
+  ```
+  start:
+  args:
+  - merger
+  - firehose
+  - mindreader-node
+  - relayer
+  flags:
+    common-chain-id: "1"
+    common-network-id: "1"
+    mindreader-node-bootstrap-data-url: ./mindreader/genesis.json
+    mindreader-node-log-to-zap: false
+    mindreader-node-arguments: "+--bootnodes=enode://<enode1>@<ip>:<port>,enode://<enode2>@<ip>:<port>"
+  ```
 
-```
-./sf.yaml # contains the enodes, networkID, and the default exclusion of 'node' app
-./mindreader/ # empty
-```
+  **Note** Up to date boot nodes info for Geth supported network(s) can be found [here](https://github.com/ethereum/go-ethereum/blob/master/params/bootnodes.go).
 
-* you MUST copy the genesis.json file from the chain that you want to sync to the ./mindreader folder
+* Create a folder `mindreader`
 
-* `sfeth start`
-  * calls
+* Copy the `genesis.json` file of the chain into the `mindreader` folder.
+
+  **Note** It's possible to use `geth dumpgenesis` to dump actual genesis file to disk
+    * Mainnet - `geth --mainnet dumpgenesis > ./mindreader/genesis.json`
+    * Ropsten - `geth --ropsten dumpgenesis > ./mindreader/genesis.json`
+    * Goerli - `geth --goerli dumpgenesis > ./mindreader/genesis.json`
+    * Rinkeby - `geth --rinkeby dumpgenesis > ./mindreader/genesis.json`
+
+* `sfeth start -vv`
+
+  **Note** It's recommended to launch with `-vv` the first time to more easily see what's happening under the hood.
+
+* Wait around a minute leaving enough time for the `Geth` process to start the syncing process. You should then have some merged blocks under `./sf-data/storage/merged-blocks`. You should also be able to test that Firehose is able to stream some blocks to you.
+
+  `grpcurl -insecure -import-path ../proto -import-path ../proto-ethereum -proto dfuse/ethereum/codec/v1/codec.proto -proto dfuse/bstream/v1/bstream.proto -d '{"start_block_num": -1}' 127.0.0.1:13042 dfuse.bstream.v1.BlockStreamV2.Blocks`
+
+  **Note** You will need to have [grpcurl](https://github.com/fullstorydev/grpcurl) and a clone of both https://github.com/streamingfast/proto and https://github.com/streamingfast/proto-ethereum, we assume they are sibling of the folder you are currently in, adjust `-import-path ...` flags in the command above to where the files are located.
 
 ## Contributing
 
