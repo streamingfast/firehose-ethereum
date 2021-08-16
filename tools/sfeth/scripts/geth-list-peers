@@ -1,0 +1,17 @@
+#!/bin/bash
+# description: list all currently known peers
+
+if command -v geth &> /dev/null; then
+    ipc_path="`printf /sf-data/*/ipc`"
+    /app/geth attach -exec "admin.peers.forEach(function (peer) { console.log(peer.name + ' (' + peer.enode + ')') })" "$ipc_path" 2> /tmp/geth_error
+    if [[ $? != 0 ]]; then
+        echo "Unable to list peers correctly"
+        cat /tmp/geth_error
+    fi
+elif command -v openethereum &> /dev/null; then
+    echo "The command '`basename $0`' for OpenEthereum is not supported, please add support for it in sf-ethereum repository"
+    exit 1
+else
+    echo "This was run on a node where neither Geth nor OpenEthereum could be found, cannot proceed further"
+    exit 1
+fi

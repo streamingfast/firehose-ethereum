@@ -1,0 +1,26 @@
+#!/bin/bash
+# description: show the number of currently valid connected peers
+
+if command -v geth &> /dev/null; then
+    ipc_path=`printf /sf-data/*/ipc`
+    result=`/app/geth attach --exec 'admin.peers.length > 0' "$ipc_path" 2> /tmp/geth_error`
+    if [[ $? != 0 ]]; then
+        echo "Unable to get admin peers length correctly"
+        cat /tmp/geth_error
+    fi
+
+    if printf $result | grep -q "true"; then
+        echo "Yes"
+    elif printf $result | grep -q "false"; then
+        echo "No"
+    else
+        echo "Unexpected response"
+        echo $result
+    fi
+elif command -v openethereum &> /dev/null; then
+    echo "The command '`basename $0`' for OpenEthereum is not supported, please add support for it in sf-ethereum repository"
+    exit 1
+else
+    echo "This was run on a node where neither Geth nor OpenEthereum could be found, cannot proceed further"
+    exit 1
+fi

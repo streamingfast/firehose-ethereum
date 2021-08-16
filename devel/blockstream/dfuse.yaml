@@ -1,0 +1,7 @@
+start:
+  args:
+  - blockstream
+  flags:
+    common-blockstream-addr: :9002
+    common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v5
+    blockstream-grpc-listen-secure: false

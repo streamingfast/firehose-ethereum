@@ -1,0 +1,7 @@
+start:
+  args:
+  - mindreader-node
+  flags:
+    mindreader-node-path: "openethereum"
+    mindreader-node-type: "openethereum"
+    common-network-id: "1"

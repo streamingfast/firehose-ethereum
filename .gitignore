@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+.envrc
+/sf-data
+/sf.yaml
+/sfeth

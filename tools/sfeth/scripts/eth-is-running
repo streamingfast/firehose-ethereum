@@ -1,0 +1,7 @@
+#!/bin/bash
+# description: prints either 'syncing' if this node is catching up with the network
+if curl localhost:8080/v1/is_running 2> /dev/null | grep -q "true"; then
+	echo Running
+else
+	echo "Not running"
+fi

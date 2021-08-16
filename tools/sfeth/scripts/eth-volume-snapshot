@@ -1,0 +1,6 @@
+#!/bin/bash
+# Stops geth and take a volumesnapshot of it
+
+port=${MANAGER_API_PORT:-8080}
+
+curl -sS -XPOST localhost:$port/v1/backup?sync=true

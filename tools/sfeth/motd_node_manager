@@ -1,0 +1,22 @@
+             ___   ____ __  __ ____ ____
+            / _ \ / __// / / // __// __/
+           / // // _/ / /_/ /_\ \ / _/
+          /____//_/   \____//___//___/
+
+Welcome to this node manager pod, common commands:
+ - Show version           sfeth --version
+
+Node manager commands (eth-... <tab> to show all):
+ - Check if running                   eth-is-running
+
+ - Geth: Check if syncing             geth-is-syncing
+ - Geth: Check if has peers           geth-has-peers
+ - Geth: List peers                   geth-list-peers
+ - Geth: verbosity level              geth-debug <1-10>
+ - Attach to Geth instance            geth attach /sf-data/*/ipc (See https://github.com/ethereum/go-ethereum/wiki/Management-APIs#list-of-management-apis)
+
+ - Take a volume snapshot             eth-volume-snapshot
+ - Debug Deep Mind logs for 30s       eth-debug-deep-mind-30s
+ - Stop instance                      eth-maintenance
+ - Start or restart instance          eth-resume
+

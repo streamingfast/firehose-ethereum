@@ -1,0 +1,13 @@
+start:
+  args:
+  - blockmeta
+  - merger
+  - firehose
+  - mindreader-node
+  - node
+  - relayer
+  - trxdb-loader
+  flags:
+    node-role: dev-miner
+    node-bootstrap-data-url: ./miner/bootstrap.tar.zst
+    mindreader-node-bootstrap-data-url: ./mindreader/genesis.json
