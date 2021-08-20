@@ -1249,6 +1249,8 @@ github.com/streamingfast/shutter v1.4.1 h1:a0HSmmu8vYxR4ynIv1+tH49jrv7gyenNtOJBs
 github.com/streamingfast/shutter v1.4.1/go.mod h1:/BxCU/ucC6WUyqmLbWpDhznS6Yy1HDblsstEBnTyr+4=
 github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAtyaTOgs=
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
+github.com/streamingfast/snapshotter v0.0.0-20210816225359-df3bd338f5c5 h1:N3TuOQt1B2dHEeoJIQTED6Fl84vZLRAL6+GCmPaHIpY=
+github.com/streamingfast/snapshotter v0.0.0-20210816225359-df3bd338f5c5/go.mod h1:I0FiH/5qdxYiToQhFM3tfr7foRncDEeHb6KsxSg9z6s=
 github.com/streamingfast/snapshotter v1.0.3-0.20210809210131-3fe51aefe746 h1:rZPs4qr9glEdcnbteJmPk09CVibk+Be34rDyjg/2C6E=
 github.com/streamingfast/snapshotter v1.0.3-0.20210809210131-3fe51aefe746/go.mod h1:rXQMLhbaC31ErcUkIVLB59b4eBu1YlBBQThGlWNbPI4=
 github.com/streamingfast/snapshotter v1.0.3-0.20210811193818-c9e9d4e206e3 h1:LCjsB8h6UGfJZEzvhypa5/YQYFXd7cCjo6DPv0zoBTU=

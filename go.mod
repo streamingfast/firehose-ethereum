@@ -39,7 +39,7 @@ require (
 	github.com/streamingfast/pbgo v0.0.6-0.20210812023556-e996f9c4fb86
 	github.com/streamingfast/relayer v0.0.2-0.20210811200014-6e0e8bc2814f
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/snapshotter v1.0.3-0.20210811193818-c9e9d4e206e3
+	github.com/streamingfast/snapshotter v0.0.0-20210816225359-df3bd338f5c5
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.6.1
 	go.uber.org/multierr v1.6.0
