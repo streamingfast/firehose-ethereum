@@ -73,19 +73,20 @@ func (b *GenesisBootstrapper) Bootstrap() error {
 
 	genesisFilePath := filepath.Join(b.dataDir, "genesis.json")
 
-	b.logger.Info("running bootstrap sequence", zap.String("data-dir", b.dataDir), zap.String("genesis-file-path", genesisFilePath))
-
+	b.logger.Info("running bootstrap sequence", zap.String("data_dir", b.dataDir), zap.String("genesis_file_path", genesisFilePath))
 	if err := os.MkdirAll(b.dataDir, 0755); err != nil {
 		return fmt.Errorf("cannot create folder %s to bootstrap node: %w", b.dataDir, err)
 	}
+
 	if !fileExists(genesisFilePath) {
-		b.logger.Info("fetching genesis file", zap.String("source-url", b.genesisFileURL), zap.String("dest-path", genesisFilePath))
+		b.logger.Info("fetching genesis file", zap.String("source_url", b.genesisFileURL))
 		if err := downloadDstoreObject(b.genesisFileURL, genesisFilePath); err != nil {
 			return err
 		}
 	}
 
 	cmd := exec.Command(b.nodePath, b.cmdArgs...)
+	b.logger.Info("running node init command (creating genesis block from genesis.json)", zap.Stringer("cmd", cmd))
 	if output, err := runCmd(cmd); err != nil {
 		return fmt.Errorf("failed to init node (output %s): %w", output, err)
 	}
