@@ -232,19 +232,19 @@ type nodeArgsByRole map[string]string
 var nodeArgsByTypeAndRole = map[string]nodeArgsByRole{
 	"geth": {
 		"dev-miner":  "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --rpc --rpcapi=admin,debug,eth,net,web3,personal --rpcport=" + NodeRPCPort + " --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
-		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=8546 --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --deep-mind-block-progress",
-		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=" + MindreaderNodeRPCPort + " --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --deep-mind",
+		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=8546 --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --firehose-deep-mind-block-progress",
+		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=" + MindreaderNodeRPCPort + " --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --firehose-deep-mind",
 		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
 	},
 	"lachesis": {
-		"peering":    "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=30304 --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=8546 --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --deep-mind-block-progress --config /config/config.toml",
-		"mindreader": "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=" + MindreaderNodeP2PPort + " --rpc --rpcapi personal,eth,net,web3,debug,admin --rpcport " + MindreaderNodeRPCPort + " --rpcaddr 0.0.0.0 --rpcvhosts * --nousb --deep-mind --config /config/config.toml",
+		"peering":    "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=30304 --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=8546 --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --firehose-deep-mind-block-progress --config /config/config.toml",
+		"mindreader": "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=" + MindreaderNodeP2PPort + " --rpc --rpcapi personal,eth,net,web3,debug,admin --rpcport " + MindreaderNodeRPCPort + " --rpcaddr 0.0.0.0 --rpcvhosts * --nousb --firehose-deep-mind --config /config/config.toml",
 		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
 	},
 	"openethereum": {
-		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=debug,web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --deep-mind-block-progress",
+		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=debug,web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind-block-progress",
 		//"dev-miner": ...
-		"mindreader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + MindreaderNodeP2PPort + " --jsonrpc-port=" + MindreaderNodeRPCPort + " --jsonrpc-apis=debug,web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --deep-mind --no-warp",
+		"mindreader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + MindreaderNodeP2PPort + " --jsonrpc-port=" + MindreaderNodeRPCPort + " --jsonrpc-apis=debug,web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind --no-warp",
 	},
 }
 

@@ -81,7 +81,7 @@ func dfuseAbsoluteDataDir() (string, error) {
 }
 
 //var gethVersionRegexp = regexp.MustCompile("Version: ([0-9]+)\\.([0-9]+)\\.([0-9]+)(-(.*))?")
-//var deepMindFlagRegexp = regexp.MustCompile(regexp.QuoteMeta("--deep-mind"))
+//var deepMindFlagRegexp = regexp.MustCompile(regexp.QuoteMeta("--firehose-deep-mind"))
 //
 //type gethVersion struct {
 //	full string

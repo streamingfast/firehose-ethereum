@@ -68,8 +68,8 @@ func Test_getDirsToMake(t *testing.T) {
 //		{"standard with suffix then dash", "Version: 2.0.5-beta-1", "", gethVersion{"2.0.5-beta-1", 2, 0, 5, "beta-1", false}, nil},
 //		{"standard with suffix then dot", "Version: 2.0.5-rc.1", "", gethVersion{"2.0.5-rc.1", 2, 0, 5, "rc.1", false}, nil},
 //		{"standard with suffix with number", "Version: 2.0.5-rc1", "", gethVersion{"2.0.5-rc1", 2, 0, 5, "rc1", false}, nil},
-//		{"standard with dm suffix, dash", "Version: 2.0.5-dm-12.0", "Geth Help\n\n--deep-mind  Other", gethVersion{"2.0.5-dm-12.0", 2, 0, 5, "dm-12.0", true}, nil},
-//		{"standard with dm suffix, dot", "Version: 2.0.5-dm.12.0", "Geth Help\n\n--deep-mind  Other", gethVersion{"2.0.5-dm.12.0", 2, 0, 5, "dm.12.0", true}, nil},
+//		{"standard with dm suffix, dash", "Version: 2.0.5-dm-12.0", "Geth Help\n\n--firehose-deep-mind  Other", gethVersion{"2.0.5-dm-12.0", 2, 0, 5, "dm-12.0", true}, nil},
+//		{"standard with dm suffix, dot", "Version: 2.0.5-dm.12.0", "Geth Help\n\n--firehose-deep-mind  Other", gethVersion{"2.0.5-dm.12.0", 2, 0, 5, "dm.12.0", true}, nil},
 //	}
 //
 //	for _, test := range tests {
