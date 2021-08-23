@@ -69,7 +69,6 @@ func getMindreaderLogPlugin(
 	waitTimeForUploadOnShutdown time.Duration,
 	oneBlockFileSuffix string,
 	blocksChanCapacity int,
-
 	operatorShutdownFunc func(error),
 	metricsAndReadinessManager *nodeManager.MetricsAndReadinessManager,
 	tracker *bstream.Tracker,

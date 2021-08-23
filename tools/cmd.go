@@ -15,22 +15,16 @@
 package tools
 
 import (
-	"strings"
-
-	"github.com/lithammer/dedent"
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/cli"
 )
 
 var Cmd = &cobra.Command{Use: "tools", Short: "Developer tools related to sfeth"}
 
-func cobraDescription(in string) string {
-	return dedent.Dedent(strings.Trim(in, "\n"))
+var Example = func(in string) string {
+	return string(cli.Example(in))
 }
 
-func cobraExamples(in ...string) string {
-	for i, line := range in {
-		in[i] = "  " + line
-	}
-
-	return strings.Join(in, "\n")
+var ExamplePrefixed = func(prefix, in string) string {
+	return string(cli.ExamplePrefixed(prefix, in))
 }

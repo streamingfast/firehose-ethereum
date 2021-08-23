@@ -96,14 +96,15 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger) func
 		superviser, err := buildSuperviser(
 			metricsAndReadinessManager,
 			nodeType,
-			networkID,
 			nodePath,
 			nodeIPCPath,
 			nodeDataDir,
 			nodeArguments,
 			nodeEnforcePeers,
-
-			*appLogger, *nodeLogger, logToZap, debugDeepMind,
+			*appLogger,
+			*nodeLogger,
+			logToZap,
+			debugDeepMind,
 		)
 		if err != nil {
 			return nil, err
@@ -387,7 +388,6 @@ func buildNodeArguments(networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeT
 func buildSuperviser(
 	metricsAndReadinessManager *nodeManager.MetricsAndReadinessManager,
 	nodeType string,
-	networkID string,
 	nodePath string,
 	nodeIPCPath string,
 	nodeDataDir string,
@@ -400,7 +400,6 @@ func buildSuperviser(
 
 	switch nodeType {
 	case "geth", "lachesis":
-
 		superviser, err := geth.NewGethSuperviser(
 			nodePath,
 			nodeDataDir,
@@ -458,7 +457,6 @@ func buildChainOperator(
 	bootstrapper operator.Bootstrapper,
 	appLogger *zap.Logger,
 ) (*operator.Operator, error) {
-
 	o, err := operator.New(
 		appLogger,
 		superviser,
