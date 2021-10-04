@@ -20,17 +20,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/dgrpc"
-	nodeManagerApp "github.com/streamingfast/node-manager/app/node_manager"
-	nodeMindReaderApp "github.com/streamingfast/node-manager/app/node_mindreader"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/dgrpc"
 	"github.com/streamingfast/dlauncher/flags"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
+	nodeManagerApp "github.com/streamingfast/node-manager/app/node_manager"
+	nodeMindReaderApp "github.com/streamingfast/node-manager/app/node_mindreader"
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/operator"
 	nodemanager "github.com/streamingfast/sf-ethereum/node-manager"
@@ -232,14 +231,14 @@ type nodeArgsByRole map[string]string
 
 var nodeArgsByTypeAndRole = map[string]nodeArgsByRole{
 	"geth": {
-		"dev-miner":  "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --rpc --rpcapi=admin,debug,eth,net,web3,personal --rpcport=" + NodeRPCPort + " --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
-		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=8546 --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --firehose-deep-mind-block-progress",
-		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=" + MindreaderNodeRPCPort + " --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --firehose-deep-mind",
+		"dev-miner":  "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --http --http.api=admin,debug,eth,net,web3,personal --http.port=" + NodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --nousb --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
+		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --http --http.api=admin,debug,eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --nousb --firehose-deep-mind-block-progress",
+		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --http --http.api=admin,debug,eth,net,web3 --http.port=" + MindreaderNodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --nousb --firehose-deep-mind",
 		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
 	},
 	"lachesis": {
-		"peering":    "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=30304 --rpc --rpcapi=admin,debug,eth,net,web3 --rpcport=8546 --rpcaddr=0.0.0.0 --rpcvhosts=* --nousb --firehose-deep-mind-block-progress --config /config/config.toml",
-		"mindreader": "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=" + MindreaderNodeP2PPort + " --rpc --rpcapi personal,eth,net,web3,debug,admin --rpcport " + MindreaderNodeRPCPort + " --rpcaddr 0.0.0.0 --rpcvhosts * --nousb --firehose-deep-mind --config /config/config.toml",
+		"peering":    "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=30304 --http --http.api=admin,debug,eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --nousb --firehose-deep-mind-block-progress --config /config/config.toml",
+		"mindreader": "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=" + MindreaderNodeP2PPort + " --http --http.api personal,eth,net,web3,debug,admin --http.port " + MindreaderNodeRPCPort + " --http.addr 0.0.0.0 --http.vhosts * --nousb --firehose-deep-mind --config /config/config.toml",
 		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
 	},
 	"openethereum": {
