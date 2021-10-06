@@ -39,7 +39,7 @@ const (
 	BlockstreamGRPCServingAddr   string = ":13039"
 	BlockstreamHTTPServingAddr   string = ":13040"
 	NodeManagerAPIAddr           string = ":13041"
-	FirehoseGRPCServingAddr      string = ":13042*"
+	FirehoseGRPCServingAddr      string = ":13042"
 	MetricsListenAddr            string = ":9102"
 
 	// Geth instance port definitions
