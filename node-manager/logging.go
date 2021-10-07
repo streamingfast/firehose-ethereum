@@ -34,6 +34,10 @@ func logLevelExtractor(in string) zapcore.Level {
 		return zap.InfoLevel
 	}
 
+	if strings.Contains(in, "peer connected on snap without compatible eth support") {
+		return zap.DebugLevel
+	}
+
 	groups := logLevelRegex.FindStringSubmatch(in)
 	if len(groups) <= 1 {
 		return zap.DebugLevel
