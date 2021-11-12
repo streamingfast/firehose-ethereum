@@ -39,7 +39,7 @@ require (
 	github.com/streamingfast/relayer v0.0.2-0.20210811200014-6e0e8bc2814f
 	github.com/streamingfast/sf-tools v0.0.0-20210823043548-13a30de7c1b1
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/snapshotter v0.0.0-20210816225359-df3bd338f5c5
+	github.com/streamingfast/snapshotter v0.0.0-20210906180247-1ec27a37764f
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.6.1
 	go.uber.org/multierr v1.6.0
