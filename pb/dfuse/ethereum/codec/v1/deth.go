@@ -21,10 +21,10 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/jsonpb"
 )
 
 var b0 = big.NewInt(0)
@@ -179,6 +179,22 @@ func MustBlockToBuffer(block *Block) []byte {
 		panic(err)
 	}
 	return buf
+}
+
+func (trace *TransactionTrace) PopulateTrxStatus() {
+	// transaction trace Status must be populatged according to simple rule: if call 0 fails, transaction fails.
+	if trace.Status == TransactionTraceStatus_UNKNOWN && len(trace.Calls) >= 1 {
+		call := trace.Calls[0]
+		switch {
+		case call.StatusFailed && call.StatusReverted:
+			trace.Status = TransactionTraceStatus_REVERTED
+		case call.StatusFailed:
+			trace.Status = TransactionTraceStatus_FAILED
+		default:
+			trace.Status = TransactionTraceStatus_SUCCEEDED
+		}
+	}
+	return
 }
 
 func (trace *TransactionTrace) PopulateStateReverted() {

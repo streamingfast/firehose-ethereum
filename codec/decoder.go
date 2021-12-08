@@ -53,6 +53,7 @@ func BlockDecoder(blk *bstream.Block) (interface{}, error) {
 	// sometimes, it would have been only 31 bytes long.
 	for _, trx := range block.TransactionTraces {
 		trx.PopulateStateReverted()
+		trx.PopulateTrxStatus()
 
 		if len(trx.R) > 0 && len(trx.R) != 32 {
 			trx.R = normalizeSignaturePoint(trx.R)
