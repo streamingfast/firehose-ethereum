@@ -118,14 +118,14 @@ func printBlocksE(cmd *cobra.Command, args []string) error {
 
 		seenBlockCount++
 
-		payloadSize := len(block.PayloadBuffer)
+		//payloadSize, err := len(block.Payload.Get()) //disabled after rework
 		ethBlock := block.ToNative().(*pbcodec.Block)
 
-		fmt.Printf("Block #%d (%s) (prev: %s) (%d bytes): %d transactions, %d balance changes\n",
+		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
 			block.PreviousID()[0:7],
-			payloadSize,
+			//			payloadSize,
 			len(ethBlock.TransactionTraces),
 			len(ethBlock.BalanceChanges),
 		)
@@ -196,14 +196,12 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 			)
 			continue
 		}
-		payloadSize := len(block.PayloadBuffer)
 		ethBlock := block.ToNative().(*pbcodec.Block)
 
-		fmt.Printf("Block #%d (%s) (prev: %s) (%d bytes): %d transactions, %d balance changes\n",
+		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
 			block.PreviousID()[0:7],
-			payloadSize,
 			len(ethBlock.TransactionTraces),
 			len(ethBlock.BalanceChanges),
 		)

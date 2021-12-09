@@ -34,7 +34,7 @@ func BlockFromProto(b *pbcodec.Block) (*bstream.Block, error) {
 		return nil, fmt.Errorf("unable to marshal to binary form: %s", err)
 	}
 
-	return &bstream.Block{
+	blk := &bstream.Block{
 		Id:             b.ID(),
 		Number:         b.Number,
 		PreviousId:     b.PreviousID(),
@@ -42,6 +42,7 @@ func BlockFromProto(b *pbcodec.Block) (*bstream.Block, error) {
 		LibNum:         b.LIBNum(),
 		PayloadKind:    pbbstream.Protocol_ETH,
 		PayloadVersion: b.Ver,
-		PayloadBuffer:  content,
-	}, nil
+	}
+
+	return bstream.GetBlockPayloadSetter(blk, content)
 }

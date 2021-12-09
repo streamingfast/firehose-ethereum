@@ -24,6 +24,11 @@ func RegisterCommonFlags(cmd *cobra.Command) error {
 	cmd.Flags().String("common-oneblock-store-url", OneBlockStoreURL, "[COMMON] Store URL (with prefix) to read/write one-block files.")
 	cmd.Flags().String("common-blockstream-addr", RelayerServingAddr, "[COMMON] gRPC endpoint to get real-time blocks.")
 
+	cmd.Flags().Bool("common-atm-cache-enabled", false, "[COMMON] enable ATM caching")
+	cmd.Flags().String("common-atm-cache-dir", ATMDirectory, "[COMMON] ATM cache file directory.")
+	cmd.Flags().Int("common-atm-max-recent-entry-bytes", 20*1024^3, "[COMMON] ATM cache max size in bytes of recent entry heap")
+	cmd.Flags().Int("common-atm-max-entry-by-age-bytes", 20*1024^3, "[COMMON] ATM cache max size in bytes of age entry heap")
+
 	// Network config
 	cmd.Flags().Uint32("common-chain-id", DefaultChainID, "[COMMON] ETH chain ID (from EIP-155) as returned from JSON-RPC 'eth_chainId' call Used by: dgraphql")
 	cmd.Flags().Uint32("common-network-id", DefaultNetworkID, "[COMMON] ETH network ID as returned from JSON-RPC 'net_version' call. Used by: miner-geth-node, mindreader-geth-node, mindreader-openeth-node, peering-geth-node, peering-openeth-node")

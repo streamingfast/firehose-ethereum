@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dbin"
 	pbbstream "github.com/streamingfast/pbgo/dfuse/bstream/v1"
-	"github.com/golang/protobuf/proto"
 )
 
 func blockReaderFactory(reader io.Reader) (bstream.BlockReader, error) {
@@ -60,7 +60,7 @@ func (l *BlockReader) Read() (*bstream.Block, error) {
 			return nil, fmt.Errorf("unable to read block proto: %s", err)
 		}
 
-		blk, err := bstream.BlockFromProto(pbBlock)
+		blk, err := bstream.NewBlockFromProto(pbBlock)
 		if err != nil {
 			return nil, err
 		}

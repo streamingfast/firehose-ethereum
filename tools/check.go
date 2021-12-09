@@ -178,7 +178,6 @@ func checkMergedBlocksE(cmd *cobra.Command, args []string) error {
 }
 
 func blockPrinter(block *bstream.Block) {
-	payloadSize := len(block.PayloadBuffer)
 	ethBlock := block.ToNative().(*pbcodec.Block)
 
 	callCount := 0
@@ -186,9 +185,8 @@ func blockPrinter(block *bstream.Block) {
 		callCount += len(trxTrace.Calls)
 	}
 
-	fmt.Printf("Block %s (%d bytes): %d transactions, %d calls\n",
+	fmt.Printf("Block %s %d transactions, %d calls\n",
 		block,
-		payloadSize,
 		len(ethBlock.TransactionTraces),
 		callCount,
 	)

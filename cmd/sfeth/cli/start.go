@@ -90,6 +90,17 @@ func Start(configFile string, dataDir string, args []string) (err error) {
 		Tracker:    tracker,
 	}
 
+	atmCacheEnabled := viper.GetBool("common-atm-cache-enabled")
+	if atmCacheEnabled {
+		bstream.GetBlockPayloadSetter = bstream.ATMCachedPayloadSetter
+
+		cacheDir := MustReplaceDataDir(modules.AbsDataDir, viper.GetString("common-atm-cache-dir"))
+		storeUrl := MustReplaceDataDir(modules.AbsDataDir, viper.GetString("common-blocks-store-url"))
+		maxRecentEntryBytes := viper.GetInt("common-atm-max-recent-entry-bytes")
+		maxEntryByAgeBytes := viper.GetInt("common-atm-max-entry-by-age-bytes")
+		bstream.InitCache(storeUrl, cacheDir, maxRecentEntryBytes, maxEntryByAgeBytes)
+	}
+
 	if registerCommonModulesCallback != nil {
 		zlog.Debug("invoking register common modules callback since it's set")
 		if err := registerCommonModulesCallback(modules); err != nil {

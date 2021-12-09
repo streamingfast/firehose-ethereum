@@ -50,7 +50,8 @@ func TestBlockReader(t *testing.T) {
 	assert.Equal(t, pbbstream.Protocol_ETH, blk1.Kind())
 	assert.Equal(t, int32(1), blk1.Version())
 
-	payload1 := blk1.Payload()
+	payload1, err := blk1.Payload.Get()
+	require.NoError(t, err, "getting payload")
 	assert.Equal(t, 597, len(payload1), string(payload1))
 
 	dblk1 := blk1.ToNative().(*pbcodec.Block)
@@ -81,7 +82,8 @@ func TestBlockReader(t *testing.T) {
 	assert.Equal(t, pbbstream.Protocol_ETH, blk5.Kind())
 	assert.Equal(t, int32(1), blk5.Version())
 
-	payload2 := blk5.Payload()
+	payload2, err := blk5.Payload.Get()
+	require.NoError(t, err, "getting payload")
 	assert.Equal(t, 598, len(payload2), string(payload2))
 
 	dblk5 := blk5.ToNative().(*pbcodec.Block)

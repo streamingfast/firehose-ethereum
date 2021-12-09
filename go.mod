@@ -6,6 +6,11 @@ require (
 	cloud.google.com/go/bigtable v1.2.0
 	github.com/ShinyTrinkets/overseer v0.3.0
 	github.com/coreos/etcd v3.3.13+incompatible // indirect
+	github.com/dfuse-io/dbin v0.0.0-20200406215642-ec7f22e794eb // indirect
+	github.com/dfuse-io/dgrpc v0.0.0-20210810041652-d033fee35ae0 // indirect
+	github.com/dfuse-io/dmetrics v0.0.0-20200406214800-499fc7b320ab // indirect
+	github.com/dfuse-io/dstore v0.1.0 // indirect
+	github.com/dfuse-io/jsonpb v0.0.0-20200406211248-c5cf83f0e0c0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/cel-go v0.4.1
 	github.com/google/go-cmp v0.5.6
@@ -15,10 +20,11 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/pkg/errors v0.9.1
+	github.com/rs/xid v1.2.1 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.8.1
 	github.com/streamingfast/blockmeta v0.0.2-0.20210811194956-90dc4202afda
-	github.com/streamingfast/bstream v0.0.2-0.20210901144836-9a626db444c5
+	github.com/streamingfast/bstream v0.0.2-0.20211207181549-5786e7fd4c46
 	github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d
 	github.com/streamingfast/dauth v0.0.0-20210811181149-e8fd545948cc
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
@@ -32,18 +38,18 @@ require (
 	github.com/streamingfast/firehose v0.1.1-0.20210901164748-403e4d029276
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3
-	github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a
+	github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341
 	github.com/streamingfast/merger v0.0.3-0.20210811195536-1011c89f0a67
 	github.com/streamingfast/node-manager v0.0.2-0.20210820155058-c5162e259ac0
 	github.com/streamingfast/pbgo v0.0.6-0.20210820205306-ba5335146052
-	github.com/streamingfast/relayer v0.0.2-0.20210811200014-6e0e8bc2814f
+	github.com/streamingfast/relayer v0.0.2-0.20211209133303-7e24ba57ef60
 	github.com/streamingfast/sf-tools v0.0.0-20210823043548-13a30de7c1b1
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20210906180247-1ec27a37764f
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.6.1
 	go.uber.org/multierr v1.6.0
-	go.uber.org/zap v1.17.0
+	go.uber.org/zap v1.19.1
 	google.golang.org/grpc v1.39.1
 	google.golang.org/protobuf v1.27.1
 )

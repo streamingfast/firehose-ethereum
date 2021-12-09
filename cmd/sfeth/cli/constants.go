@@ -28,6 +28,7 @@ const (
 	DefaultNetworkID     uint32 = 123
 	DefaultDeploymentID  string = "eth-local"
 
+	ATMDirectory                 string = "{sf-data-dir}/atm"
 	MindreaderNodeManagerAPIAddr string = ":13009"
 	MindreaderGRPCAddr           string = ":13010"
 	RelayerServingAddr           string = ":13011"
