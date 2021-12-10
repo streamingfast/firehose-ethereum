@@ -60,4 +60,4 @@ replace github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-
 
 replace github.com/ShinyTrinkets/overseer => github.com/dfuse-io/overseer v0.2.1-0.20210326144022-ee491780e3ef
 
-replace github.com/gorilla/rpc => github.com/dfuse-io/rpc v1.2.1-0.20201124195002-f9fc01524e38
+replace github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
