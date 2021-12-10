@@ -72,13 +72,8 @@ func init() {
 				StorageOneBlockFilesPath:       MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url")),
 				TimeBetweenStoreLookups:        viper.GetDuration("merger-time-between-store-lookups"),
 				GRPCListenAddr:                 viper.GetString("merger-grpc-listen-addr"),
-				BatchMode:                      viper.GetBool("merger-batch-mode"),
-				StartBlockNum:                  viper.GetUint64("merger-start-block-num"),
-				StopBlockNum:                   viper.GetUint64("merger-stop-block-num"),
-				MinimalBlockNum:                viper.GetUint64("merger-minimal-block-num"),
 				WritersLeewayDuration:          viper.GetDuration("merger-writers-leeway"),
 				StateFile:                      MustReplaceDataDir(sfDataDir, viper.GetString("merger-state-file")),
-				MaxFixableFork:                 viper.GetUint64("merger-max-fixable-fork"),
 				MaxOneBlockOperationsBatchSize: viper.GetInt("merger-max-one-block-operations-batch-size"),
 				OneBlockDeletionThreads:        viper.GetInt("merger-one-block-deletion-threads"),
 			}), nil

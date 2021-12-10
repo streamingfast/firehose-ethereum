@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	pbheadinfo "github.com/streamingfast/pbgo/dfuse/headinfo/v1"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/streamingfast/blockmeta"
+	pbheadinfo "github.com/streamingfast/pbgo/sf/headinfo/v1"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )

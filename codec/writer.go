@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dbin"
-	pbbstream "github.com/streamingfast/pbgo/dfuse/bstream/v1"
-	"github.com/golang/protobuf/proto"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 )
 
 func blockWriterFactory(writer io.Writer) (bstream.BlockWriter, error) {

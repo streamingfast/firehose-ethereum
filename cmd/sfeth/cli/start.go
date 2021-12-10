@@ -28,7 +28,7 @@ import (
 	_ "github.com/streamingfast/kvdb/store/badger"
 	_ "github.com/streamingfast/kvdb/store/bigkv"
 	_ "github.com/streamingfast/kvdb/store/tikv"
-	pbblockmeta "github.com/streamingfast/pbgo/dfuse/blockmeta/v1"
+	pbblockmeta "github.com/streamingfast/pbgo/sf/blockmeta/v1"
 	_ "github.com/streamingfast/sf-ethereum/codec"
 	_ "github.com/streamingfast/sf-ethereum/trxdb/kv"
 	"go.uber.org/zap"
