@@ -30,7 +30,7 @@ type FilteringPreprocessor struct {
 }
 
 func (f *FilteringPreprocessor) PreprocessBlock(blk *bstream.Block) (interface{}, error) {
-	return nil, f.Filter.TransformInPlace(blk)
+	return f.Filter.Transform(blk), nil
 }
 
 type BlockFilter struct {
@@ -55,13 +55,7 @@ func NewBlockFilter(includeProgramCode, excludeProgramCode []string) (*BlockFilt
 	}, nil
 }
 
-// TransformInPlace received a `bstream.Block` pointer, unpack it's native counterpart, a `pbcodec.Block` pointer
-// in our case and transforms it in place, modifiying the pointed object. This means that future `ToNative()` calls
-// on the bstream block will return a filtered version of this block.
-//
-// *Important* This method expect that the caller will peform the transformation in lock step, there is no lock
-//             performed by this method. It's the caller responsibility to deal with concurrency issues.
-func (f *BlockFilter) TransformInPlace(blk *bstream.Block) error {
+func (f *BlockFilter) Transform(blk *bstream.Block) *bstream.Block {
 	include := f.IncludeProgram.choose(blk.Number)
 	exclude := f.ExcludeProgram.choose(blk.Number)
 
@@ -70,25 +64,14 @@ func (f *BlockFilter) TransformInPlace(blk *bstream.Block) error {
 		return nil
 	}
 
-	block := blk.ToNative().(*pbcodec.Block)
-
-	// FIXME: Re-add when proto is changed to know about filtering
-	// if filterExprContains(block.FilteringIncludeFilterExpr, include.code) {
-	// 	include = includeNOOP
-	// }
-	// if filterExprContains(block.FilteringExcludeFilterExpr, exclude.code) {
-	// 	exclude = excludeNOOP
-	// }
-	// if include.IsNoop() && exclude.IsNoop() {
-	// 	return nil
-	// }
+	clone := blk.Clone()
+	block := clone.ToNative().(*pbcodec.Block)
 
 	transformInPlaceV2(block, include, exclude)
-	return nil
+	return clone
 }
 
 func transformInPlaceV2(block *pbcodec.Block, include, exclude *CELFilter) {
-	// FIXME: Adjust when proto changes happen
 	wasFiltered := block.FilteringApplied
 
 	block.FilteringApplied = true
