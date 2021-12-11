@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/streamingfast/bstream"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"go.uber.org/zap"
 )
 

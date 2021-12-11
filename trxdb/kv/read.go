@@ -22,8 +22,8 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/kvdb"
 	"github.com/streamingfast/kvdb/store"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
-	pbtrxdb "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/trxdb/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbtrxdb "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/trxdb/v1"
 	"go.uber.org/zap"
 )
 

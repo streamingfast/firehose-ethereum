@@ -30,7 +30,7 @@ import (
 	_ "github.com/streamingfast/kvdb/store/badger"
 	_ "github.com/streamingfast/kvdb/store/bigkv"
 	_ "github.com/streamingfast/kvdb/store/tikv"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	trxdb "github.com/streamingfast/sf-ethereum/trxdb"
 	"go.uber.org/multierr"
 )

@@ -18,8 +18,8 @@ import (
 	"sync"
 
 	"github.com/streamingfast/logging"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
-	pbtrxstream "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/trxstream/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbtrxstream "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/trxstream/v1"
 	"github.com/streamingfast/shutter"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"

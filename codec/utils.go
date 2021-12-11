@@ -24,7 +24,7 @@ import (
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 
 	"github.com/golang/protobuf/ptypes"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
 func FromInt32(input string, tag string) int32 {

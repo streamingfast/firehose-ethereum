@@ -27,7 +27,7 @@ import (
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/sf-ethereum/codec"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

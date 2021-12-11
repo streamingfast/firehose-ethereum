@@ -31,7 +31,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/logging"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

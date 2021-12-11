@@ -31,7 +31,7 @@ import (
 	"github.com/streamingfast/bstream/forkable"
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/sf-ethereum/codec"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/streamingfast/sf-ethereum/trxdb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

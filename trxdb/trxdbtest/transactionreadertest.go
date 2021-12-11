@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	ct "github.com/streamingfast/sf-ethereum/codec/testing"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/streamingfast/sf-ethereum/trxdb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

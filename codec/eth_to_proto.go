@@ -16,7 +16,7 @@ package codec
 
 import (
 	"github.com/streamingfast/eth-go"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
 func PBcodecLogToEOS(pblog *pbcodec.Log) *eth.Log {

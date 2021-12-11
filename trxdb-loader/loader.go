@@ -24,7 +24,7 @@ import (
 	"github.com/streamingfast/bstream/forkable"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/kvdb"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/dfuse/ethereum/codec/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/streamingfast/sf-ethereum/trxdb"
 	"github.com/streamingfast/sf-ethereum/trxdb-loader/metrics"
 	"github.com/streamingfast/shutter"
