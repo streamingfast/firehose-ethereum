@@ -57,6 +57,43 @@ func newCELTrxFilter(includeProgramCode, excludeProgramCode string) (*celTrxFilt
 	}, nil
 }
 
+func (f *celTrxFilter) Matches(transaction interface{}, cache *TrxFilterCache) (bool, []uint32) {
+	var calls []*pbcodec.Call
+	var trace *pbcodec.TransactionTrace
+	switch trx := transaction.(type) {
+	case *pbcodec.Transaction:
+		if matchesTrx(trx, f.ExcludeProgram, cache) {
+			return false, nil
+		}
+		return matchesTrx(trx, f.IncludeProgram, cache), nil
+
+	case *pbcodec.TransactionTrace:
+		if matchesTrace(trx, f.ExcludeProgram, cache) {
+			return false, nil
+		}
+		trace = trx
+		calls = trx.Calls
+	case *pbcodec.TransactionTraceWithBlockRef:
+		if matchesTrace(trx.Trace, f.ExcludeProgram, cache) {
+			return false, nil
+		}
+		cache.PurgeStaleCalls(trx.BlockRef.Hash)
+		trace = trx.Trace
+		calls = trx.Trace.Calls
+	}
+
+	var trxMatch bool
+	var matchingCalls []uint32
+	for i, call := range calls {
+		if matchesCall(call, trace, f.IncludeProgram, cache) && !matchesCall(call, trace, f.ExcludeProgram, cache) {
+			trxMatch = true
+			matchingCalls = append(matchingCalls, uint32(i))
+		}
+	}
+	return trxMatch, matchingCalls
+
+}
+
 func matchesCall(call *pbcodec.Call, trace *pbcodec.TransactionTrace, filter *CELFilter, cache *TrxFilterCache) bool {
 	if filter.IsNoop() {
 		return filter.valueWhenNoop

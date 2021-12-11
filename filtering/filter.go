@@ -22,6 +22,7 @@ import (
 
 type TrxFilter interface {
 	fmt.Stringer
+	Matches(transaction interface{}, cache *TrxFilterCache) (bool, []uint32)
 }
 
 type celTrxFilter struct {
