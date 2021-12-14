@@ -26,9 +26,9 @@ function main() {
   trap "cd \"$current_dir\"" EXIT
   pushd "$ROOT/pb" &> /dev/null
 
-  generate "dfuse/ethereum/codec/v1/codec.proto"
-  generate "dfuse/ethereum/trxdb/v1/trxdb.proto"
-  generate "dfuse/ethereum/trxstream/v1/trxstream.proto"
+  generate "sf/ethereum/codec/v1/codec.proto"
+  generate "sf/ethereum/trxdb/v1/trxdb.proto"
+  generate "sf/ethereum/trxstream/v1/trxstream.proto"
 
   echo "generate.sh - `date` - `whoami`" > $ROOT/pb/last_generate.txt
   echo "streamingfast/proto revision: `GIT_DIR=$PROTO/.git git rev-parse HEAD`" >> $ROOT/pb/last_generate.txt
@@ -63,9 +63,8 @@ function checks() {
     echo ""
     echo "To fix your problem, perform those commands:"
     echo ""
-    echo "  pushd /tmp"
-    echo "    GO111MODULE=on go get google.golang.org/protobuf/cmd/protoc-gen-go@v1.25.0 google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1.0"
-    echo "  popd"
+    echo "  go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.25.0"
+    echo "  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1.0"
     echo ""
     echo "If everything is working as expetcted, the command:"
     echo ""
