@@ -33,16 +33,12 @@ func init() {
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().Duration("merger-time-between-store-lookups", 5*time.Second, "delay between source store polling (should be higher for remote storage)")
 			cmd.Flags().String("merger-state-file", "{sf-data-dir}/merger/merger.seen.gob", "Path to file containing last written block number, as well as a map of all 'seen blocks' in the 'max-fixable-fork' range")
-			cmd.Flags().Bool("merger-batch-mode", false, "Ignores the state file, starts and stop based on flags")
-			cmd.Flags().Uint64("merger-start-block-num", 0, "[BATCH] Set the block number where we should start processing")
-			cmd.Flags().Uint64("merger-stop-block-num", 0, "[BATCH] Set the block number where we should stop processing (and stop the process)")
 			cmd.Flags().String("merger-grpc-listen-addr", MergerServingAddr, "Address to listen for incoming gRPC requests")
-			cmd.Flags().Uint64("merger-minimal-block-num", 0, "Never process blocks lower than that number")
 			cmd.Flags().Duration("merger-writers-leeway", 10*time.Second, "how long we wait after seeing the upper boundary, to ensure that we get as many blocks as possible in a bundle")
 			cmd.Flags().Uint64("merger-max-fixable-fork", 10000, "Size of the 'seen blocks' cache. Anything one-block-file older than this will be deleted.")
 			cmd.Flags().Int("merger-one-block-deletion-threads", 10, "number of parallel threads used to delete one-block-files (more means more stress on your storage backend)")
 			cmd.Flags().Int("merger-max-one-block-operations-batch-size", 2000, "max number of 'good' (mergeable) files to look up from storage in one polling operation")
-
+			cmd.Flags().Uint64("merger-next-exclusive-highest-block-limit", 0, "for next bundle boundary")
 			return nil
 		},
 		// FIXME: Lots of config value construction is duplicated across InitFunc and FactoryFunc, how to streamline that
@@ -68,14 +64,15 @@ func init() {
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			sfDataDir := runtime.AbsDataDir
 			return mergerApp.New(&mergerApp.Config{
-				StorageMergedBlocksFilesPath:   MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url")),
 				StorageOneBlockFilesPath:       MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url")),
-				TimeBetweenStoreLookups:        viper.GetDuration("merger-time-between-store-lookups"),
+				StorageMergedBlocksFilesPath:   MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url")),
 				GRPCListenAddr:                 viper.GetString("merger-grpc-listen-addr"),
 				WritersLeewayDuration:          viper.GetDuration("merger-writers-leeway"),
+				TimeBetweenStoreLookups:        viper.GetDuration("merger-time-between-store-lookups"),
 				StateFile:                      MustReplaceDataDir(sfDataDir, viper.GetString("merger-state-file")),
-				MaxOneBlockOperationsBatchSize: viper.GetInt("merger-max-one-block-operations-batch-size"),
 				OneBlockDeletionThreads:        viper.GetInt("merger-one-block-deletion-threads"),
+				MaxOneBlockOperationsBatchSize: viper.GetInt("merger-max-one-block-operations-batch-size"),
+				NextExclusiveHighestBlockLimit: viper.GetUint64("merger-next-exclusive-highest-block-limit"),
 			}), nil
 		},
 	})
