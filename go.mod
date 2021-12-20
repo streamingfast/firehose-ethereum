@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/bigtable v1.2.0
 	github.com/ShinyTrinkets/overseer v0.3.0
 	github.com/coreos/etcd v3.3.13+incompatible // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dfuse-io/dbin v0.0.0-20200406215642-ec7f22e794eb // indirect
 	github.com/dfuse-io/dgrpc v0.0.0-20210810041652-d033fee35ae0 // indirect
 	github.com/dfuse-io/dmetrics v0.0.0-20200406214800-499fc7b320ab // indirect
