@@ -12,6 +12,7 @@ require (
 	github.com/dfuse-io/dmetrics v0.0.0-20200406214800-499fc7b320ab // indirect
 	github.com/dfuse-io/dstore v0.1.0 // indirect
 	github.com/dfuse-io/jsonpb v0.0.0-20200406211248-c5cf83f0e0c0 // indirect
+	github.com/dfuse-io/pbgo v0.0.6-0.20210108215028-712d6889e94a // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/cel-go v0.4.1
 	github.com/google/go-cmp v0.5.6

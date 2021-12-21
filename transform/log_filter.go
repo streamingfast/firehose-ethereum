@@ -27,6 +27,10 @@ var NewBasicLogFilterFactory = func(message *anypb.Any) (transform.Transform, er
 		return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 	}
 
+	if len(filter.Addresses) == 0 && len(filter.EventSignatures) == 0 {
+		return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
+	}
+
 	f := &BasicLogFilter{}
 	for _, addr := range filter.Addresses {
 		f.Addresses = append(f.Addresses, addr)
@@ -43,6 +47,9 @@ type BasicLogFilter struct {
 }
 
 func (p *BasicLogFilter) matchAddress(src eth.Address) bool {
+	if len(p.Addresses) == 0 {
+		return true
+	}
 	for _, addr := range p.Addresses {
 		if bytes.Equal(addr, src) {
 			return true
@@ -51,7 +58,10 @@ func (p *BasicLogFilter) matchAddress(src eth.Address) bool {
 	return false
 }
 
-func (p *BasicLogFilter) matchTopic(src eth.Hash) bool {
+func (p *BasicLogFilter) matchEventSignature(src eth.Hash) bool {
+	if len(p.EventSigntures) == 0 {
+		return true
+	}
 	for _, topic := range p.EventSigntures {
 		if bytes.Equal(topic, src) {
 			return true
@@ -62,11 +72,7 @@ func (p *BasicLogFilter) matchTopic(src eth.Hash) bool {
 
 func (p *BasicLogFilter) matchCall(call *pbcodec.Call) bool {
 	for _, log := range call.Logs {
-		if p.matchAddress(log.Address) {
-			return true
-		}
-
-		if p.matchTopic(log.Topics[0]) {
+		if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics[0]) {
 			return true
 		}
 	}

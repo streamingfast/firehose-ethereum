@@ -33,19 +33,20 @@ func TestLogFilter_Transform(t *testing.T) {
 		expectTracesLength int
 	}{
 		{
-			name:               "No matches",
-			expectTracesLength: 0,
-		},
-		{
 			name:               "Transfer events",
 			topics:             []eth.Hash{eth.MustNewHash("ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")},
 			expectTracesLength: 85,
 		},
 		{
-			name:               "WETH Transfer events",
+			name:               "WETH Contract Transfer events",
 			addresses:          []eth.Address{eth.MustNewAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")},
 			topics:             []eth.Hash{eth.MustNewHash("ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")},
-			expectTracesLength: 87,
+			expectTracesLength: 39,
+		},
+		{
+			name:               "WETH Contract event logs",
+			addresses:          []eth.Address{eth.MustNewAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")},
+			expectTracesLength: 41,
 		},
 	}
 
