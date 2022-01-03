@@ -114,8 +114,8 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger) func
 
 		var bootstrapper operator.Bootstrapper
 		if bootstrapDataURL != "" {
-			if nodeType != "geth" && nodeType != "lachesis" {
-				return nil, fmt.Errorf("feature bootstrap-data-url only supported for node type geth or lachesis")
+			if nodeType != "geth" {
+				return nil, fmt.Errorf("feature bootstrap-data-url only supported for node type geth")
 			}
 
 			switch {
@@ -231,20 +231,15 @@ type nodeArgsByRole map[string]string
 
 var nodeArgsByTypeAndRole = map[string]nodeArgsByRole{
 	"geth": {
-		"dev-miner":  "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --http --http.api=admin,debug,eth,net,web3,personal --http.port=" + NodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --nousb --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
-		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --http --http.api=admin,debug,eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --nousb --firehose-deep-mind-block-progress",
-		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --http --http.api=admin,debug,eth,net,web3 --http.port=" + MindreaderNodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --nousb --firehose-deep-mind",
-		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
-	},
-	"lachesis": {
-		"peering":    "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=30304 --http --http.api=admin,debug,eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --nousb --firehose-deep-mind-block-progress --config /config/config.toml",
-		"mindreader": "--networkid={network-id} --ipcpath={node-ipc-path} --datadir={node-data-dir} --port=" + MindreaderNodeP2PPort + " --http --http.api personal,eth,net,web3,debug,admin --http.port " + MindreaderNodeRPCPort + " --http.addr 0.0.0.0 --http.vhosts * --nousb --firehose-deep-mind --config /config/config.toml",
+		"dev-miner":  "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --http --http.api=eth,net,web3,personal --http.port=" + NodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
+		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --http --http.api=eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --firehose-deep-mind-block-progress",
+		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --http --http.api=eth,net,web3 --http.port=" + MindreaderNodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --firehose-deep-mind",
 		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
 	},
 	"openethereum": {
-		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=debug,web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind-block-progress",
+		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind-block-progress",
 		//"dev-miner": ...
-		"mindreader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + MindreaderNodeP2PPort + " --jsonrpc-port=" + MindreaderNodeRPCPort + " --jsonrpc-apis=debug,web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind --no-warp",
+		"mindreader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + MindreaderNodeP2PPort + " --jsonrpc-port=" + MindreaderNodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind --no-warp",
 	},
 }
 
@@ -266,10 +261,10 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	}
 
 	cmd.Flags().String(prefix+"path", "geth", "command that will be launched by the node manager")
-	cmd.Flags().String(prefix+"type", "geth", "one of: ['geth','lachesis','openethereum']")
+	cmd.Flags().String(prefix+"type", "geth", "one of: ['geth','openethereum']")
 	cmd.Flags().String(prefix+"arguments", "", "If not empty, overrides the list of default node arguments (computed from node type and role). Start with '+' to append to default args instead of replacing. You can use the {public-ip} token, that will be matched against space-separated hostname:IP pairs in PUBLIC_IPS env var, taking hostname from HOSTNAME env var.")
 	cmd.Flags().String(prefix+"data-dir", "{sf-data-dir}/{node-role}/data", "Directory for node data ({node-role} is either mindreader, peering or dev-miner)")
-	cmd.Flags().String(prefix+"ipc-path", "{sf-data-dir}/{node-role}/ipc", "IPC path cannot be more than 64chars on geth and lachesis")
+	cmd.Flags().String(prefix+"ipc-path", "{sf-data-dir}/{node-role}/ipc", "IPC path cannot be more than 64chars on geth")
 
 	cmd.Flags().String(prefix+"manager-api-addr", managerAPIAddr, "Ethereum node manager API address")
 	cmd.Flags().Duration(prefix+"readiness-max-latency", 30*time.Second, "Determine the maximum head block latency at which the instance will be determined healthy. Some chains have more regular block production than others.")
@@ -398,7 +393,7 @@ func buildSuperviser(
 ) (nodeManager.ChainSuperviser, error) {
 
 	switch nodeType {
-	case "geth", "lachesis":
+	case "geth":
 		superviser, err := geth.NewGethSuperviser(
 			nodePath,
 			nodeDataDir,
