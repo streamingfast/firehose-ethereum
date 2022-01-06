@@ -15,30 +15,33 @@ import (
 
 var LogFilterMessageName = proto.MessageName(&pbtransforms.BasicLogFilter{})
 
-var NewBasicLogFilterFactory = func(message *anypb.Any) (transform.Transform, error) {
-	mname := message.MessageName()
-	if mname != LogFilterMessageName {
-		return nil, fmt.Errorf("expected type url %q, recevied %q ", LogFilterMessageName, message.TypeUrl)
-	}
+var BasicLogFilterFactory = &transform.Factory{
+	Obj: &pbtransforms.BasicLogFilter{},
+	NewFunc: func(message *anypb.Any) (transform.Transform, error) {
+		mname := message.MessageName()
+		if mname != LogFilterMessageName {
+			return nil, fmt.Errorf("expected type url %q, recevied %q ", LogFilterMessageName, message.TypeUrl)
+		}
 
-	filter := &pbtransforms.BasicLogFilter{}
-	err := proto.Unmarshal(message.Value, filter)
-	if err != nil {
-		return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
-	}
+		filter := &pbtransforms.BasicLogFilter{}
+		err := proto.Unmarshal(message.Value, filter)
+		if err != nil {
+			return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
+		}
 
-	if len(filter.Addresses) == 0 && len(filter.EventSignatures) == 0 {
-		return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
-	}
+		if len(filter.Addresses) == 0 && len(filter.EventSignatures) == 0 {
+			return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
+		}
 
-	f := &BasicLogFilter{}
-	for _, addr := range filter.Addresses {
-		f.Addresses = append(f.Addresses, addr)
-	}
-	for _, sig := range filter.EventSignatures {
-		f.EventSigntures = append(f.EventSigntures, sig)
-	}
-	return f, nil
+		f := &BasicLogFilter{}
+		for _, addr := range filter.Addresses {
+			f.Addresses = append(f.Addresses, addr)
+		}
+		for _, sig := range filter.EventSignatures {
+			f.EventSigntures = append(f.EventSigntures, sig)
+		}
+		return f, nil
+	},
 }
 
 type BasicLogFilter struct {

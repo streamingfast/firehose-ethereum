@@ -50,14 +50,14 @@ func TestLogFilter_Transform(t *testing.T) {
 		},
 	}
 
-	v := &pbtransforms.BasicLogFilter{}
-	transform.Register(v, NewBasicLogFilterFactory)
+	transformReg := transform.NewRegistry()
+	transformReg.Register(BasicLogFilterFactory)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			transforms := []*anypb.Any{logFilterTransform(t, test.addresses, test.topics)}
 
-			preprocFunc, err := transform.BuildFromTransforms(transforms)
+			preprocFunc, err := transformReg.BuildFromTransforms(transforms)
 			require.NoError(t, err)
 
 			blk := testBlock(t)

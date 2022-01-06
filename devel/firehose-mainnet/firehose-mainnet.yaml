@@ -1,0 +1,8 @@
+start:
+  args:
+    - firehose
+  flags:
+    firehose-blocks-store-urls: gs://dfuseio-global-blocks-us/eth-mainnet/v5
+    common-blockstream-addr: localhost:9001
+    common-blockmeta-addr: localhost:9002
+    firehose-grpc-listen-addr: :9000*

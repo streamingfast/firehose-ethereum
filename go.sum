@@ -1195,6 +1195,8 @@ github.com/streamingfast/bstream v0.0.2-0.20211217191030-5ab8f6175d41 h1:B64KaZQ
 github.com/streamingfast/bstream v0.0.2-0.20211217191030-5ab8f6175d41/go.mod h1:SyI0vRStRzRKrzYbuT/MrFvMv4K3VkUkClKl2eKS4cc=
 github.com/streamingfast/bstream v0.0.2-0.20211220173550-a75c21955e80 h1:UyxZrrOGpvIS2itQ7CGNYnr3vHypM7vi6EeiIfIbe7c=
 github.com/streamingfast/bstream v0.0.2-0.20211220173550-a75c21955e80/go.mod h1:SyI0vRStRzRKrzYbuT/MrFvMv4K3VkUkClKl2eKS4cc=
+github.com/streamingfast/bstream v0.0.2-0.20220106162949-6b5255130e51 h1:6BpbswpH+bRY/pseJUDXN4Mcsk8kmCa79Hhcge2TNNE=
+github.com/streamingfast/bstream v0.0.2-0.20220106162949-6b5255130e51/go.mod h1:SyI0vRStRzRKrzYbuT/MrFvMv4K3VkUkClKl2eKS4cc=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d h1:ZEqHQMyAI9PSziBHNUiGdtvnpPnPQlyT8HHW/OLmrgc=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d/go.mod h1:8TWHl1oWEu0JNNUz79R7e9dLPeCJhHmAys4g8cl6L/U=
 github.com/streamingfast/dauth v0.0.0-20210811181149-e8fd545948cc h1:UHQWJm2df+kNauxV2Gk+0s438Cz051FOiXn4nLr2Pyg=
@@ -1235,6 +1237,8 @@ github.com/streamingfast/firehose v0.1.1-0.20211210173007-18b09b2113ec h1:9qzSIW
 github.com/streamingfast/firehose v0.1.1-0.20211210173007-18b09b2113ec/go.mod h1:JpiWVUGTYamuUlPijGpytJ4Rqjy5gr7AJIHpDgXDpjM=
 github.com/streamingfast/firehose v0.1.1-0.20211210192158-59a582dbf6b9 h1:wdxJr7wtns4q4pyscLbdBn+FOwNPjjbjFMnY/BNFmjY=
 github.com/streamingfast/firehose v0.1.1-0.20211210192158-59a582dbf6b9/go.mod h1:w4CHBYHUZNHoqhOY3Puawxix/kdTIyznW1y0MRqh9dQ=
+github.com/streamingfast/firehose v0.1.1-0.20220106163608-f39e88186a7a h1:LRIquwJSE5R1wP2sH+iplaremx52oYxquO4PsaAgv+U=
+github.com/streamingfast/firehose v0.1.1-0.20220106163608-f39e88186a7a/go.mod h1:aKq75Kbshm4IKCHEYvpXrDruYUYSNOOOQavymrzP8Rs=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTNObq2Uofb330y05JbbZZ6RwE6QUXw5iVcHk1Fx3fk=
 github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3 h1:v1ux5D8Xm30wpFpbS6u6fKuZUx/5/UTzYlR4llYaxSM=
