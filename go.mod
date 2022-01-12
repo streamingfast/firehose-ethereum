@@ -26,7 +26,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.8.1
 	github.com/streamingfast/blockmeta v0.0.2-0.20211210154719-8c7ebd4d3302
-	github.com/streamingfast/bstream v0.0.2-0.20220110200944-b8fdce6e0f12
+	github.com/streamingfast/bstream v0.0.2-0.20220112191737-0cbb6208047f
 	github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d
 	github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
