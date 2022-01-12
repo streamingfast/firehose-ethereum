@@ -62,7 +62,7 @@ func init() {
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			sfDataDir := runtime.AbsDataDir
 			tracker := runtime.Tracker.Clone()
-			blockstreamAddr := viper.GetString("common-blockstream-add	r")
+			blockstreamAddr := viper.GetString("common-blockstream-addr")
 			if blockstreamAddr != "" {
 				tracker.AddGetter(bstream.BlockStreamLIBTarget, bstream.StreamLIBBlockRefGetter(blockstreamAddr))
 			}
