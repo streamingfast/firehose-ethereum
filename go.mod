@@ -26,7 +26,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.8.1
 	github.com/streamingfast/blockmeta v0.0.2-0.20211210154719-8c7ebd4d3302
-	github.com/streamingfast/bstream v0.0.2-0.20220112191737-0cbb6208047f
+	github.com/streamingfast/bstream v0.0.2-0.20220113132902-e4dc9ed53d86
 	github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d
 	github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
@@ -41,7 +41,7 @@ require (
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3
 	github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341
-	github.com/streamingfast/merger v0.0.3-0.20220111193505-74ca06396be5
+	github.com/streamingfast/merger v0.0.3-0.20220113160512-5f6ff271d37a
 	github.com/streamingfast/node-manager v0.0.2-0.20211207181611-383f06886a4c
 	github.com/streamingfast/pbgo v0.0.6-0.20211209212750-753f0acb6553
 	github.com/streamingfast/relayer v0.0.2-0.20211210154316-8a6048581873
