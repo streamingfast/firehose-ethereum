@@ -138,7 +138,7 @@ func (l *BigtableLoader) BuildPipelineLive(allowLiveOnEmptyTable bool) error {
 
 	forkableHandler := forkable.New(l,
 		forkable.WithLogger(zlog),
-		forkable.WithFilters(forkable.StepNew|forkable.StepIrreversible),
+		forkable.WithFilters(bstream.StepNew|bstream.StepIrreversible),
 		forkable.EnsureAllBlocksTriggerLongestChain(),
 	)
 
@@ -163,7 +163,7 @@ func (l *BigtableLoader) BuildPipelineJob(startBlockNum uint64, startBlockResolv
 
 	forkableHandler := forkable.New(gate,
 		forkable.WithLogger(zlog),
-		forkable.WithFilters(forkable.StepNew|forkable.StepIrreversible),
+		forkable.WithFilters(bstream.StepNew|bstream.StepIrreversible),
 	)
 
 	resolvedStartBlockNum, _, err := startBlockResolver(context.Background(), startBlockNum)
@@ -223,8 +223,8 @@ func (l *BigtableLoader) Healthy() bool {
 func (l *BigtableLoader) FullJob(blockNum uint64, block *pbcodec.Block, fObj *forkable.ForkableObject) (err error) {
 	blkTime := block.MustTime()
 
-	switch fObj.Step {
-	case forkable.StepNew:
+	switch fObj.Step() {
+	case bstream.StepNew:
 		l.ShowProgress(blockNum)
 		l.setHealthy()
 
@@ -253,7 +253,7 @@ func (l *BigtableLoader) FullJob(blockNum uint64, block *pbcodec.Block, fObj *fo
 			return fmt.Errorf("store block: %s", err)
 		}
 		return l.FlushIfNeeded(blockNum, blkTime)
-	case forkable.StepIrreversible:
+	case bstream.StepIrreversible:
 		if l.endBlock != 0 && blockNum >= l.endBlock && fObj.StepCount == fObj.StepIndex+1 {
 			err := l.DoFlush(blockNum)
 			if err != nil {
@@ -282,7 +282,7 @@ func (l *BigtableLoader) FullJob(blockNum uint64, block *pbcodec.Block, fObj *fo
 		return nil
 
 	default:
-		return fmt.Errorf("unsupported forkable step %q", fObj.Step)
+		return fmt.Errorf("unsupported forkable step %q", fObj.Step())
 	}
 }
 
@@ -353,12 +353,12 @@ func (l *BigtableLoader) UpdateIrreversibleData(nowIrreversibleBlocks []*bstream
 // is the effective date (`<year>-<month>-<day>`): `patch-add-trx-meta-written-2019-06-30`.
 // The branch is then deleted and the tag is pushed to the remote repository.
 func (l *BigtableLoader) PatchJob(blockNum uint64, blk *pbcodec.Block, fObj *forkable.ForkableObject) (err error) {
-	switch fObj.Step {
-	case forkable.StepNew:
+	switch fObj.Step() {
+	case bstream.StepNew:
 		l.ShowProgress(blockNum)
 		return l.FlushIfNeeded(blockNum, blk.MustTime())
 
-	case forkable.StepIrreversible:
+	case bstream.StepIrreversible:
 		if l.endBlock != 0 && blockNum >= l.endBlock && fObj.StepCount == fObj.StepIndex+1 {
 			err := l.DoFlush(blockNum)
 			if err != nil {
