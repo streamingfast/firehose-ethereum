@@ -41,7 +41,7 @@ require (
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3
 	github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341
-	github.com/streamingfast/merger v0.0.3-0.20220111193505-74ca06396be5
+	github.com/streamingfast/merger v0.0.3-0.20220113160512-5f6ff271d37a
 	github.com/streamingfast/node-manager v0.0.2-0.20211207181611-383f06886a4c
 	github.com/streamingfast/pbgo v0.0.6-0.20220104194237-6534a2f6320b
 	github.com/streamingfast/relayer v0.0.2-0.20220120224524-84b9578c9323
@@ -56,10 +56,9 @@ require (
 	google.golang.org/protobuf v1.27.1
 )
 
-replace github.com/ugorji/go/codec => github.com/ugorji/go v1.1.2
-
-replace github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
-
-replace github.com/ShinyTrinkets/overseer => github.com/dfuse-io/overseer v0.2.1-0.20210326144022-ee491780e3ef
-
-replace github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
+replace (
+	github.com/ShinyTrinkets/overseer => github.com/dfuse-io/overseer v0.2.1-0.20210326144022-ee491780e3ef
+	github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
+	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
+	github.com/ugorji/go/codec => github.com/ugorji/go v1.1.2
+)
