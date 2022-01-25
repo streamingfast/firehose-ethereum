@@ -182,7 +182,10 @@ func Trx(t testing.T, components ...interface{}) *pbcodec.Transaction {
 }
 
 func TrxTrace(t testing.T, components ...interface{}) *pbcodec.TransactionTrace {
-	trace := &pbcodec.TransactionTrace{}
+	trace := &pbcodec.TransactionTrace{
+		Receipt: &pbcodec.TransactionReceipt{},
+	}
+
 	for _, component := range components {
 		switch v := component.(type) {
 		case hash:
