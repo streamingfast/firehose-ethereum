@@ -1729,13 +1729,29 @@ type Log struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// consensus
 	Address []byte   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Topics  [][]byte `protobuf:"bytes,2,rep,name=topics,proto3" json:"topics,omitempty"`
 	Data    []byte   `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
-	// supplement
-	Index      uint32 `protobuf:"varint,4,opt,name=index,proto3" json:"index,omitempty"`           // position inside a trx
-	BlockIndex uint32 `protobuf:"varint,6,opt,name=blockIndex,proto3" json:"blockIndex,omitempty"` // position inside a block
+	// Index is the index of the log relative to the transaction. This index
+	// is always populated regardless of the state revertion of the the call
+	// that emitted this log.
+	Index uint32 `protobuf:"varint,4,opt,name=index,proto3" json:"index,omitempty"`
+	// BlockIndex represents the index of the log relative to the Block.
+	//
+	// An **important** notice is that this field will be 0 when the call
+	// that emitted the log has been reverted by the chain.
+	//
+	// Currently, there is two locations where a Log can be obtained:
+	// - block.transaction_traces[].receipt.logs[]
+	// - block.transaction_traces[].calls[].logs[]
+	//
+	// In the `receipt` case, the logs will be populated only when the call
+	// that emitted them has not been reverted by the chain and when in this
+	// position, the `blockIndex` is always populated correctly.
+	//
+	// In the case of `calls` case, for `call` where `stateReverted == true`,
+	// the `blockIndex` value will always be 0.
+	BlockIndex uint32 `protobuf:"varint,6,opt,name=blockIndex,proto3" json:"blockIndex,omitempty"`
 }
 
 func (x *Log) Reset() {
