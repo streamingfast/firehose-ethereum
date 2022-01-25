@@ -181,6 +181,32 @@ func MustBlockToBuffer(block *Block) []byte {
 	return buf
 }
 
+// PopulateLogBlockIndices fixes the `TransactionReceipt.Logs[].BlockIndex`
+// that is not properly populated by our deep mind instrumentation.
+func (block *Block) PopulateLogBlockIndices() {
+	receiptLogBlockIndex := uint32(0)
+	for _, trace := range block.TransactionTraces {
+		for _, log := range trace.Receipt.Logs {
+			log.BlockIndex = receiptLogBlockIndex
+			receiptLogBlockIndex++
+		}
+	}
+
+	callLogBlockIndex := uint32(0)
+	for _, trace := range block.TransactionTraces {
+		for _, call := range trace.Calls {
+			for _, log := range call.Logs {
+				if call.StateReverted {
+					log.BlockIndex = 0
+				} else {
+					log.BlockIndex = callLogBlockIndex
+					callLogBlockIndex++
+				}
+			}
+		}
+	}
+}
+
 func (trace *TransactionTrace) PopulateTrxStatus() {
 	// transaction trace Status must be populatged according to simple rule: if call 0 fails, transaction fails.
 	if trace.Status == TransactionTraceStatus_UNKNOWN && len(trace.Calls) >= 1 {

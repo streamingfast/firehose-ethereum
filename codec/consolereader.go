@@ -608,10 +608,10 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 			Index:   uint32(i),
 			Address: l.Address,
 			Data:    l.Data,
+			Topics:  make([][]byte, len(l.Topics)),
 		}
-
-		for _, t := range l.Topics {
-			log.Topics = append(log.Topics, t)
+		for i, t := range l.Topics {
+			log.Topics[i] = t
 		}
 
 		pbLogs = append(pbLogs, log)

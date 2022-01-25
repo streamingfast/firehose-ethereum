@@ -69,5 +69,10 @@ func BlockDecoder(blk *bstream.Block) (interface{}, error) {
 		}
 	}
 
+	// We leverage StateReverted field inside the `PopulateLogBlockIndices`
+	// and as such, it must be invoked after the `PopulateStateReverted` has
+	// been executed.
+	block.PopulateLogBlockIndices()
+
 	return block, nil
 }
