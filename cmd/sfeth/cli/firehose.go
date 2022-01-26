@@ -55,6 +55,8 @@ func init() {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection")
 			cmd.Flags().StringSlice("firehose-blocks-store-urls", nil, "If non-empty, overrides common-blocks-store-url with a list of blocks stores")
 			cmd.Flags().Duration("firehose-realtime-tolerance", 2*time.Minute, "Longest delay to consider this service as real-time (ready) on initialization")
+			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
+			cmd.Flags().Bool("firehose-write-irreversible-blocks-index", false, "If set, will also create missing irreversibility indexes and write them to firehose-irreversible-blocks-index-url")
 
 			return nil
 		},
@@ -120,11 +122,13 @@ func init() {
 			registry.Register(sftransform.LightBlockFilterFactory)
 
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
-				BlockStoreURLs:          firehoseBlocksStoreURLs,
-				BlockStreamAddr:         blockstreamAddr,
-				GRPCListenAddr:          viper.GetString("firehose-grpc-listen-addr"),
-				GRPCShutdownGracePeriod: grcpShutdownGracePeriod,
-				RealtimeTolerance:       viper.GetDuration("firehose-realtime-tolerance"),
+				BlockStoreURLs:                  firehoseBlocksStoreURLs,
+				BlockStreamAddr:                 blockstreamAddr,
+				GRPCListenAddr:                  viper.GetString("firehose-grpc-listen-addr"),
+				GRPCShutdownGracePeriod:         grcpShutdownGracePeriod,
+				RealtimeTolerance:               viper.GetDuration("firehose-realtime-tolerance"),
+				IrreversibleBlocksIndexStoreURL: viper.GetString("firehose-irreversible-blocks-index-url"),
+				WriteIrreversibleBlocksIndex:    viper.GetBool("firehose-write-irreversible-blocks-index"),
 			}, &firehoseApp.Modules{
 				Authenticator:             authenticator,
 				FilterPreprocessorFactory: filterPreprocessorFactory,
