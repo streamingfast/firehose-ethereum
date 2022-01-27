@@ -57,7 +57,7 @@ func init() {
 			cmd.Flags().Duration("firehose-realtime-tolerance", 2*time.Minute, "Longest delay to consider this service as real-time (ready) on initialization")
 			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
 			cmd.Flags().Bool("firehose-write-irreversible-blocks-index", false, "If set, will also create missing irreversibility indexes and write them to firehose-irreversible-blocks-index-url")
-
+			cmd.Flags().IntSlice("firehose-irreversible-blocks-index-bundle-sizes", []int{10000, 1000, 100}, "list of sizes for irreversible block indices")
 			return nil
 		},
 
@@ -121,6 +121,14 @@ func init() {
 			registry.Register(sftransform.BasicLogFilterFactory)
 			registry.Register(sftransform.LightBlockFilterFactory)
 
+			var bundleSizes []uint64
+			for _, size := range viper.GetIntSlice("firehose-irreversible-blocks-index-bundle-sizes") {
+				if size < 0 {
+					return nil, fmt.Errorf("invalid negative size for firehose-irreversible-blocks-index-bundle-sizes: %d", size)
+				}
+				bundleSizes = append(bundleSizes, uint64(size))
+			}
+
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
 				BlockStoreURLs:                  firehoseBlocksStoreURLs,
 				BlockStreamAddr:                 blockstreamAddr,
@@ -129,6 +137,7 @@ func init() {
 				RealtimeTolerance:               viper.GetDuration("firehose-realtime-tolerance"),
 				IrreversibleBlocksIndexStoreURL: viper.GetString("firehose-irreversible-blocks-index-url"),
 				WriteIrreversibleBlocksIndex:    viper.GetBool("firehose-write-irreversible-blocks-index"),
+				IrreversibleBlocksBundleSizes:   bundleSizes,
 			}, &firehoseApp.Modules{
 				Authenticator:             authenticator,
 				FilterPreprocessorFactory: filterPreprocessorFactory,
