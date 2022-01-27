@@ -1181,6 +1181,8 @@ github.com/streamingfast/atm v0.0.0-20211005171144-f2f3bbfda2f6 h1:S5hTdE/oi9kMq
 github.com/streamingfast/atm v0.0.0-20211005171144-f2f3bbfda2f6/go.mod h1:iISPGAstbUsPgyC3auLLi7PYUTi9lHv5z0COam0OPOY=
 github.com/streamingfast/atm v0.0.0-20211217182254-d1ed00f538eb h1:JsOT6L0BJ1WMXzrevZvo02NibpdOVslB3AA/2B45WH0=
 github.com/streamingfast/atm v0.0.0-20211217182254-d1ed00f538eb/go.mod h1:iISPGAstbUsPgyC3auLLi7PYUTi9lHv5z0COam0OPOY=
+github.com/streamingfast/atm v0.0.0-20220127221243-f4e354467f9c h1:h+UBvfJUyJlygzGft7biWJTWcns/kvdYwpQ6w7L/C9U=
+github.com/streamingfast/atm v0.0.0-20220127221243-f4e354467f9c/go.mod h1:iISPGAstbUsPgyC3auLLi7PYUTi9lHv5z0COam0OPOY=
 github.com/streamingfast/blockmeta v0.0.2-0.20210811194956-90dc4202afda h1:hc9+uYzYVqX3A9BJ/qCjlU6GVupUaiVAhPdLl3PdAFk=
 github.com/streamingfast/blockmeta v0.0.2-0.20210811194956-90dc4202afda/go.mod h1:/bONTQE1KOG7MOiXEg7Mm6lxMfJ94xL9bItkWNKJgO4=
 github.com/streamingfast/blockmeta v0.0.2-0.20211210154719-8c7ebd4d3302 h1:McgL1B3Ju3/mlI4bYI0S0pV2Hp3tq23pAprEzHNKDcM=
@@ -1219,6 +1221,8 @@ github.com/streamingfast/bstream v0.0.2-0.20220126191407-d0383f1d0059 h1:aCzIi/z
 github.com/streamingfast/bstream v0.0.2-0.20220126191407-d0383f1d0059/go.mod h1:eZj+vovnWEvfJZ1aiV2JEjUQVXzgI+IvvN6zg87yaug=
 github.com/streamingfast/bstream v0.0.2-0.20220127200536-c277fc286de9 h1:nMey7ublRoof3JIANu9UN6TMDEnuEQ2XUUmHiP0nNOA=
 github.com/streamingfast/bstream v0.0.2-0.20220127200536-c277fc286de9/go.mod h1:eZj+vovnWEvfJZ1aiV2JEjUQVXzgI+IvvN6zg87yaug=
+github.com/streamingfast/bstream v0.0.2-0.20220127221339-b184de27f231 h1:41u/KPK9TbGDgh6KSM7IuUuDuzoAfSi7qdXiKFijKKY=
+github.com/streamingfast/bstream v0.0.2-0.20220127221339-b184de27f231/go.mod h1:+09pUI7DKwmPmJer2sDUua1+OUDhwDN7p1z1M3OCG7s=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d h1:ZEqHQMyAI9PSziBHNUiGdtvnpPnPQlyT8HHW/OLmrgc=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d/go.mod h1:8TWHl1oWEu0JNNUz79R7e9dLPeCJhHmAys4g8cl6L/U=
 github.com/streamingfast/dauth v0.0.0-20210811181149-e8fd545948cc/go.mod h1:wwjRBEA7vZZ5kfy3I4LB5NJhFJWN2gaYgpBEmOnDwD8=
