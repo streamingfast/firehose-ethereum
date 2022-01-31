@@ -26,7 +26,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.8.1
 	github.com/streamingfast/blockmeta v0.0.2-0.20220120224650-4174f3af6303
-	github.com/streamingfast/bstream v0.0.2-0.20220131210623-51830229256e
+	github.com/streamingfast/bstream v0.0.2-0.20220131215301-c3b4f674a5b2
 	github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d
 	github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
@@ -37,7 +37,7 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20210811180524-8494aeb34447
 	github.com/streamingfast/dstore v0.1.1-0.20211028233549-6fa17808533b
 	github.com/streamingfast/eth-go v0.0.0-20210811181433-a73e599b102b
-	github.com/streamingfast/firehose v0.1.1-0.20220127202148-b8e21e716853
+	github.com/streamingfast/firehose v0.1.1-0.20220131220656-02506ad47bbb
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3
 	github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341

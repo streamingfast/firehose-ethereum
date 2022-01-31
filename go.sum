@@ -1227,6 +1227,8 @@ github.com/streamingfast/bstream v0.0.2-0.20220127221339-b184de27f231 h1:41u/KPK
 github.com/streamingfast/bstream v0.0.2-0.20220127221339-b184de27f231/go.mod h1:+09pUI7DKwmPmJer2sDUua1+OUDhwDN7p1z1M3OCG7s=
 github.com/streamingfast/bstream v0.0.2-0.20220131210623-51830229256e h1:L8NYocD1/qMFaGRq9eW0duP9CfXUeVUa1MvRMfKMkpk=
 github.com/streamingfast/bstream v0.0.2-0.20220131210623-51830229256e/go.mod h1:Ktj9YKK643GPmd6Lugf5EMVciWXFgzRoVPK5JRnPgkU=
+github.com/streamingfast/bstream v0.0.2-0.20220131215301-c3b4f674a5b2 h1:L5kJFrIo0DJVgrmY84gjZaYb6fswefcbXETEQTAzWvk=
+github.com/streamingfast/bstream v0.0.2-0.20220131215301-c3b4f674a5b2/go.mod h1:Ktj9YKK643GPmd6Lugf5EMVciWXFgzRoVPK5JRnPgkU=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d h1:ZEqHQMyAI9PSziBHNUiGdtvnpPnPQlyT8HHW/OLmrgc=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d/go.mod h1:8TWHl1oWEu0JNNUz79R7e9dLPeCJhHmAys4g8cl6L/U=
 github.com/streamingfast/dauth v0.0.0-20210811181149-e8fd545948cc/go.mod h1:wwjRBEA7vZZ5kfy3I4LB5NJhFJWN2gaYgpBEmOnDwD8=
@@ -1278,6 +1280,8 @@ github.com/streamingfast/firehose v0.1.1-0.20220126192116-2a4e7fd327e5 h1:FyeQGa
 github.com/streamingfast/firehose v0.1.1-0.20220126192116-2a4e7fd327e5/go.mod h1:VlNBLPZTK5XfTR/HaanOMoBGdWV8yMsXieezHacrnLs=
 github.com/streamingfast/firehose v0.1.1-0.20220127202148-b8e21e716853 h1:Gz907QBBBlg36a28LVFMy1t/3vVz3nNeQ6UCfUb9l3Q=
 github.com/streamingfast/firehose v0.1.1-0.20220127202148-b8e21e716853/go.mod h1:VlNBLPZTK5XfTR/HaanOMoBGdWV8yMsXieezHacrnLs=
+github.com/streamingfast/firehose v0.1.1-0.20220131220656-02506ad47bbb h1:IjcQnIV/tCK+UBHBhcwLa3JX7UmN2IN4GNFVIufreY8=
+github.com/streamingfast/firehose v0.1.1-0.20220131220656-02506ad47bbb/go.mod h1:v5q/Nj5annjY8DXZDuE719V85cBJvJ+wMoVXcIHSCCg=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTNObq2Uofb330y05JbbZZ6RwE6QUXw5iVcHk1Fx3fk=
 github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3 h1:v1ux5D8Xm30wpFpbS6u6fKuZUx/5/UTzYlR4llYaxSM=
