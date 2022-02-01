@@ -41,7 +41,7 @@ require (
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3
 	github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341
-	github.com/streamingfast/merger v0.0.3-0.20220113160512-5f6ff271d37a
+	github.com/streamingfast/merger v0.0.3-0.20220201165645-625f805412f0
 	github.com/streamingfast/node-manager v0.0.2-0.20211207181611-383f06886a4c
 	github.com/streamingfast/pbgo v0.0.6-0.20220104194237-6534a2f6320b
 	github.com/streamingfast/relayer v0.0.2-0.20220120224524-84b9578c9323
