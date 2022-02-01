@@ -1,13 +1,14 @@
 package transform
 
 import (
+	"testing"
+
 	"github.com/streamingfast/bstream/transform"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/anypb"
-	"testing"
 )
 
 func lightBlockTransform(t *testing.T) *anypb.Any {
@@ -26,7 +27,7 @@ func TestBlockLight_Transform(t *testing.T) {
 	preprocFunc, err := transformReg.BuildFromTransforms(transforms)
 	require.NoError(t, err)
 
-	blk := testBlock(t)
+	blk := testBlock(t, "block.json")
 
 	output, err := preprocFunc(blk)
 	require.NoError(t, err)

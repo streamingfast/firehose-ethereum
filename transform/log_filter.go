@@ -3,6 +3,7 @@ package transform
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/streamingfast/eth-go"
 	"google.golang.org/protobuf/types/known/anypb"
 
@@ -73,23 +74,15 @@ func (p *BasicLogFilter) matchEventSignature(src eth.Hash) bool {
 	return false
 }
 
-func (p *BasicLogFilter) matchCall(call *pbcodec.Call) bool {
-	for _, log := range call.Logs {
-		if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics[0]) {
-			return true
-		}
-	}
-	return false
-}
-
 func (p *BasicLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
 	ethBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
 	traces := []*pbcodec.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
 		match := false
-		for _, call := range trace.Calls {
-			if p.matchCall(call) {
+		for _, log := range trace.Receipt.Logs {
+			if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics[0]) {
 				match = true
+				break
 			}
 		}
 		if match {

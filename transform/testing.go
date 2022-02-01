@@ -1,6 +1,9 @@
 package transform
 
 import (
+	"os"
+	"testing"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/jsonpb"
@@ -8,12 +11,10 @@ import (
 	_ "github.com/streamingfast/sf-ethereum/codec"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
-func testBlock(t *testing.T) *bstream.Block {
-	file, err := os.Open("./testdata/block.json")
+func testBlock(t *testing.T, filename string) *bstream.Block {
+	file, err := os.Open("./testdata/" + filename)
 	require.NoError(t, err)
 
 	b := &pbcodec.Block{}

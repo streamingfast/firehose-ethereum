@@ -1,6 +1,8 @@
 package transform
 
 import (
+	"testing"
+
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/eth-go"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
@@ -8,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/anypb"
-	"testing"
 )
 
 func logFilterTransform(t *testing.T, addresses []eth.Address, topics []eth.Hash) *anypb.Any {
@@ -35,18 +36,18 @@ func TestLogFilter_Transform(t *testing.T) {
 		{
 			name:               "Transfer events",
 			topics:             []eth.Hash{eth.MustNewHash("ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")},
-			expectTracesLength: 85,
+			expectTracesLength: 82,
 		},
 		{
 			name:               "WETH Contract Transfer events",
 			addresses:          []eth.Address{eth.MustNewAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")},
 			topics:             []eth.Hash{eth.MustNewHash("ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")},
-			expectTracesLength: 39,
+			expectTracesLength: 36,
 		},
 		{
 			name:               "WETH Contract event logs",
 			addresses:          []eth.Address{eth.MustNewAddress("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")},
-			expectTracesLength: 41,
+			expectTracesLength: 38,
 		},
 	}
 
@@ -60,7 +61,7 @@ func TestLogFilter_Transform(t *testing.T) {
 			preprocFunc, err := transformReg.BuildFromTransforms(transforms)
 			require.NoError(t, err)
 
-			blk := testBlock(t)
+			blk := testBlock(t, "block.json")
 
 			output, err := preprocFunc(blk)
 			if test.expectError {
