@@ -21,8 +21,7 @@ type LogAddressIndex struct {
 	// TODO: add a bloomfilter, populated on load
 }
 
-func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) (out []uint64) {
-
+func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
 	addrBitmap := roaring64.NewBitmap()
 	for _, addr := range addrs {
 		addrString := addr.String()
@@ -31,9 +30,38 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		}
 		addrBitmap.Or(i.addrs[addrString])
 	}
-	out = addrBitmap.ToArray()
+	if len(eventSigs) == 0 {
+		out := addrBitmap.ToArray()
+		if len(out) == 0 {
+			return nil
+		}
+		return out
 
-	return
+	}
+
+	sigsBitmap := roaring64.NewBitmap()
+	for _, sig := range eventSigs {
+		sigString := sig.String()
+		if _, ok := i.eventSigs[sigString]; !ok {
+			continue
+		}
+		sigsBitmap.Or(i.eventSigs[sigString])
+	}
+	if addrBitmap.IsEmpty() {
+		out := sigsBitmap.ToArray()
+		if len(out) == 0 {
+			return nil
+		}
+		return out
+	}
+
+	addrBitmap.And(sigsBitmap) // transforms addrBitmap
+	out := addrBitmap.ToArray()
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+
 }
 
 func (i *LogAddressIndex) add(addr eth.Address, eventSig eth.Hash, blocknum uint64) {

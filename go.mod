@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	cloud.google.com/go/bigtable v1.2.0
+	github.com/RoaringBitmap/roaring v0.9.4 // indirect
 	github.com/ShinyTrinkets/overseer v0.3.0
 	github.com/coreos/etcd v3.3.13+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
