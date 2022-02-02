@@ -1,6 +1,7 @@
 package transform
 
 import (
+	"github.com/streamingfast/eth-go"
 	"os"
 	"testing"
 
@@ -13,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testBlock(t *testing.T, filename string) *bstream.Block {
+func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
 	file, err := os.Open("./testdata/" + filename)
 	require.NoError(t, err)
 
@@ -36,4 +37,28 @@ func testBlock(t *testing.T, filename string) *bstream.Block {
 	blk, err = bstream.GetBlockPayloadSetter(blk, protoCnt)
 	require.NoError(t, err)
 	return blk
+}
+
+func testBlockFromStructs(t *testing.T, blkNum uint64, sigs []string) *pbcodec.Block {
+
+	longest := len(addrs)
+	if len(sigs) > longest {
+		longest = len(sigs)
+	}
+
+
+
+
+	return &pbcodec.Block{
+		Number: blkNum,
+		TransactionTraces: []*pbcodec.TransactionTrace{
+			{
+				Hash:    eth.MustNewHash("0xDEADBEEF"),
+				Status:  pbcodec.TransactionTraceStatus_SUCCEEDED,
+				Receipt: &pbcodec.TransactionReceipt{
+					Logs: ,
+				},
+			},
+		},
+	}
 }

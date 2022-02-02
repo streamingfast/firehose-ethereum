@@ -1,6 +1,8 @@
 package transform
 
 import (
+	"github.com/streamingfast/dstore"
+	"io"
 	"testing"
 
 	"github.com/RoaringBitmap/roaring/roaring64"
@@ -13,19 +15,38 @@ import (
 
 func TestLogAddressIndexer(t *testing.T) {
 	tests := []struct {
-		name   string
-		blocks []*bstream.Block
-		//		lowBlockNum      uint64
-		//		indexSize        uint64
+		name             string
+		blocks           []*bstream.Block
+		indexSize        uint64
 		expectAddresses  map[string][]uint64
 		expectSignatures map[string][]uint64
 	}{
 		{
-			name: "sunny",
-			//indexSize: 100,
+			name:      "sunny with no bounds hit",
+			indexSize: 10,
 			blocks: []*bstream.Block{
-				testBlock(t, "blk10.json"),
-				testBlock(t, "blk11.json"),
+				testBlockFromFiles(t, "blk10.json"),
+				testBlockFromFiles(t, "blk11.json"),
+			},
+			expectAddresses: map[string][]uint64{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
+				"cccccccccccccccccccccccccccccccccccccccc": {10},
+				"dddddddddddddddddddddddddddddddddddddddd": {11},
+			},
+			expectSignatures: map[string][]uint64{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
+				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {10},
+				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
+			},
+		},
+		{
+			name:      "sunny and we hit the upper bound",
+			indexSize: 10,
+			blocks: []*bstream.Block{
+				testBlockFromFiles(t, "blk10.json"),
+				testBlockFromFiles(t, "blk11.json"),
 			},
 			expectAddresses: map[string][]uint64{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
@@ -45,13 +66,11 @@ func TestLogAddressIndexer(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			indexer := &LogAddressIndexer{
-				currentIndex: &LogAddressIndex{
-					//					lowBlockNum: test.lowBlockNum,
-					addrs:     make(map[string]*roaring64.Bitmap),
-					eventSigs: make(map[string]*roaring64.Bitmap),
-				},
-			}
+			accountIndexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+				return nil
+			})
+			indexer := NewLogAddressIndexer(accountIndexStore, test.indexSize)
+
 			for _, blk := range test.blocks {
 				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
 			}
@@ -200,16 +219,14 @@ func TestLogAddressIndex_Matching(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			accountIndexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+				return nil
+			})
+			indexer := NewLogAddressIndexer(accountIndexStore, 10)
 
-			indexer := &LogAddressIndexer{
-				currentIndex: &LogAddressIndex{
-					addrs:     make(map[string]*roaring64.Bitmap),
-					eventSigs: make(map[string]*roaring64.Bitmap),
-				},
-			}
 			testBlocks := []*bstream.Block{
-				testBlock(t, "blk10.json"),
-				testBlock(t, "blk11.json"),
+				testBlockFromFiles(t, "blk10.json"),
+				testBlockFromFiles(t, "blk11.json"),
 			}
 			for _, blk := range testBlocks {
 				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
@@ -230,5 +247,9 @@ func TestLogAddressIndex_Matching(t *testing.T) {
 			assert.Equal(t, test.expectBlocks, matching)
 		})
 	}
+
+}
+
+func TestLogAddressIndex_WriteIndex(t *testing.T) {
 
 }

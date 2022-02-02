@@ -1,14 +1,18 @@
 package transform
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/golang/protobuf/proto"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
+	"go.uber.org/zap"
+	"time"
 )
 
 // LogAddressIndex will return false positives when matching addr AND eventSignatures
@@ -26,21 +30,25 @@ type LogAddressIndex struct {
 
 func (i *LogAddressIndex) Marshal() ([]byte, error) {
 	var pbIndex *pbtransforms.LogAddressSignatureIndex
+
 	for k, v := range i.addrs {
 		bitmapBytes, err := v.ToBytes()
 		if err != nil {
 			return nil, err
 		}
+
 		pbIndex.Addresses = append(pbIndex.Addresses, &pbtransforms.KeyToBitmap{
 			Key:    []byte(k),
 			Bitmap: bitmapBytes,
 		})
 	}
+
 	for k, v := range i.eventSigs {
 		bitmapBytes, err := v.ToBytes()
 		if err != nil {
 			return nil, err
 		}
+
 		pbIndex.EventSignatures = append(pbIndex.EventSignatures, &pbtransforms.KeyToBitmap{
 			Key:    []byte(k),
 			Bitmap: bitmapBytes,
@@ -70,20 +78,6 @@ func (i *LogAddressIndex) Unmarshal(in []byte) error {
 	return nil
 
 }
-
-func NewLogAddressIndexer(store dstore.Store, indexSize uint64) *LogAddressIndexer {
-	return &LogAddressIndexer{
-		store:        store,
-		currentIndex: NewLogAddressIndex(0, indexSize),
-	}
-
-}
-
-// set filename := fmt.Sprintf("%010d.%d.logaddr.idx, lowBlockNum, bundleSize)
-// see what is done in bstream's irreverisbleIdx
-
-//func (i *LogAddressIndex) save() []uint64 {
-//}
 
 func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
 	addrBitmap := roaring64.NewBitmap()
@@ -154,19 +148,81 @@ func (i *LogAddressIndex) addEventSig(eventSig eth.Hash, blocknum uint64) {
 }
 
 type LogAddressIndexer struct {
-	currentIndex *LogAddressIndex
-	store        dstore.Store
+	currentIndex      *LogAddressIndex
+	store             dstore.Store
+	indexSize         uint64
+	indexWriteTimeout time.Duration
+}
+
+func NewLogAddressIndexer(store dstore.Store, indexSize uint64) *LogAddressIndexer {
+	return &LogAddressIndexer{
+		store:             store,
+		currentIndex:      nil,
+		indexSize:         indexSize,
+		indexWriteTimeout: 15 * time.Second,
+	}
+}
+
+func (i *LogAddressIndexer) ProcessEthBlock(blk *pbcodec.Block) error {
+
+	// init lower bound
+	if i.currentIndex == nil {
+		switch {
+
+		case blk.Num()%i.indexSize == 0:
+			// we're on a boundary
+			i.currentIndex = NewLogAddressIndex(blk.Number, i.indexSize)
+
+		case blk.Number == bstream.GetProtocolFirstStreamableBlock:
+			// handle offset
+			lb := lowBoundary(blk.Num(), i.indexSize)
+			i.currentIndex = NewLogAddressIndex(lb, i.indexSize)
+
+		default:
+			zlog.Warn("couldn't determine boundary for block", zap.Uint64("blk_num", blk.Num()))
+			return nil
+		}
+	}
+
+	// upper bound reached
+	if blk.Num() >= i.currentIndex.lowBlockNum+i.indexSize {
+		if err := i.writeIndex(); err != nil {
+			zlog.Warn("cannot write index", zap.Error(err))
+		}
+		lb := lowBoundary(blk.Number, i.indexSize)
+		i.currentIndex = NewLogAddressIndex(lb, i.indexSize)
+	}
+
+	for _, trace := range blk.TransactionTraces {
+		for _, log := range trace.Receipt.Logs {
+			i.currentIndex.add(log.Address, log.Topics[0], blk.Number)
+		}
+	}
+
+	return nil
 }
 
 func (i *LogAddressIndexer) String() string {
 	return fmt.Sprintf("addresses: %d, methods: %d", len(i.currentIndex.addrs), len(i.currentIndex.eventSigs))
 }
 
-func (i *LogAddressIndexer) ProcessEthBlock(blk *pbcodec.Block) {
-	// TODO: manage lowBlockNum/indexSize, call Save()
-	for _, trace := range blk.TransactionTraces {
-		for _, log := range trace.Receipt.Logs {
-			i.currentIndex.add(log.Address, log.Topics[0], blk.Number)
-		}
+func (i *LogAddressIndexer) writeIndex() error {
+	ctx, cancel := context.WithTimeout(context.Background(), i.indexWriteTimeout)
+	defer cancel()
+
+	data, err := i.currentIndex.Marshal()
+	if err != nil {
+		return err
 	}
+
+	filename := toIndexFilename(i.indexSize, i.currentIndex.lowBlockNum, "logaddr")
+
+	if err = i.store.WriteObject(ctx, filename, bytes.NewReader(data)); err != nil {
+		zlog.Warn("cannot write index file to store",
+			zap.String("filename", filename),
+			zap.Error(err),
+		)
+	}
+
+	return nil
 }
