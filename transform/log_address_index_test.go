@@ -1,9 +1,12 @@
 package transform
 
 import (
-	"github.com/streamingfast/dstore"
+	"encoding/json"
+	"fmt"
 	"io"
 	"testing"
+
+	"github.com/streamingfast/dstore"
 
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/streamingfast/bstream"
@@ -16,7 +19,7 @@ import (
 func TestLogAddressIndexer(t *testing.T) {
 	tests := []struct {
 		name             string
-		blocks           []*bstream.Block
+		blocks           []*pbcodec.Block
 		indexSize        uint64
 		expectAddresses  map[string][]uint64
 		expectSignatures map[string][]uint64
@@ -24,9 +27,15 @@ func TestLogAddressIndexer(t *testing.T) {
 		{
 			name:      "sunny with no bounds hit",
 			indexSize: 10,
-			blocks: []*bstream.Block{
-				testBlockFromFiles(t, "blk10.json"),
-				testBlockFromFiles(t, "blk11.json"),
+			blocks: []*pbcodec.Block{
+				testETHBlock(t, 10,
+					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "cccccccccccccccccccccccccccccccccccccccc"},
+					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+				),
+				testETHBlock(t, 11,
+					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "dddddddddddddddddddddddddddddddddddddddd"},
+					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+				),
 			},
 			expectAddresses: map[string][]uint64{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
@@ -41,26 +50,26 @@ func TestLogAddressIndexer(t *testing.T) {
 				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
 			},
 		},
-		{
-			name:      "sunny and we hit the upper bound",
-			indexSize: 10,
-			blocks: []*bstream.Block{
-				testBlockFromFiles(t, "blk10.json"),
-				testBlockFromFiles(t, "blk11.json"),
-			},
-			expectAddresses: map[string][]uint64{
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
-				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
-				"cccccccccccccccccccccccccccccccccccccccc": {10},
-				"dddddddddddddddddddddddddddddddddddddddd": {11},
-			},
-			expectSignatures: map[string][]uint64{
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
-				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
-				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {10},
-				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
-			},
-		},
+		//		{
+		//			name:      "sunny and we hit the upper bound",
+		//			indexSize: 10,
+		//			blocks: []*bstream.Block{
+		//				testBlockFromFiles(t, "blk10.json"),
+		//				testBlockFromFiles(t, "blk11.json"),
+		//			},
+		//			expectAddresses: map[string][]uint64{
+		//				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
+		//				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
+		//				"cccccccccccccccccccccccccccccccccccccccc": {10},
+		//				"dddddddddddddddddddddddddddddddddddddddd": {11},
+		//			},
+		//			expectSignatures: map[string][]uint64{
+		//				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
+		//				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
+		//				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {10},
+		//				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
+		//			},
+		//		},
 	}
 
 	for _, test := range tests {
@@ -72,7 +81,11 @@ func TestLogAddressIndexer(t *testing.T) {
 			indexer := NewLogAddressIndexer(accountIndexStore, test.indexSize)
 
 			for _, blk := range test.blocks {
-				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
+				bytes, err := json.Marshal(blk.TransactionTraces)
+				require.NoError(t, err)
+				fmt.Println("seeing this", string(bytes))
+				indexer.ProcessEthBlock(blk)
+				//				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
 			}
 			assert.Equal(t, len(test.expectAddresses), len(indexer.currentIndex.addrs))
 			for addr, expectMatches := range test.expectAddresses {

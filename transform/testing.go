@@ -1,9 +1,10 @@
 package transform
 
 import (
-	"github.com/streamingfast/eth-go"
 	"os"
 	"testing"
+
+	"github.com/streamingfast/eth-go"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
@@ -39,24 +40,47 @@ func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
 	return blk
 }
 
-func testBlockFromStructs(t *testing.T, blkNum uint64, sigs []string) *pbcodec.Block {
+func testETHBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Block {
 
-	longest := len(addrs)
-	if len(sigs) > longest {
-		longest = len(sigs)
+	if len(addrs) == 0 || len(sigs) == 0 {
+		t.Fatal("require at least 1 addr and 1 sig")
 	}
 
+	var logs1 []*pbcodec.Log
+	for _, addr := range addrs {
+		logs1 = append(logs1, &pbcodec.Log{
+			Address: eth.MustNewAddress(addr),
+			Topics: [][]byte{
+				eth.MustNewHash(sigs[0]),
+			},
+		})
+	}
 
-
+	var logs2 []*pbcodec.Log
+	for _, sig := range sigs {
+		logs2 = append(logs1, &pbcodec.Log{
+			Address: eth.MustNewAddress(addrs[0]),
+			Topics: [][]byte{
+				eth.MustNewHash(sig),
+			},
+		})
+	}
 
 	return &pbcodec.Block{
 		Number: blkNum,
 		TransactionTraces: []*pbcodec.TransactionTrace{
 			{
-				Hash:    eth.MustNewHash("0xDEADBEEF"),
-				Status:  pbcodec.TransactionTraceStatus_SUCCEEDED,
+				Hash:   eth.MustNewHash("0xDEADBEEF"),
+				Status: pbcodec.TransactionTraceStatus_SUCCEEDED,
 				Receipt: &pbcodec.TransactionReceipt{
-					Logs: ,
+					Logs: logs1,
+				},
+			},
+			{
+				Hash:   eth.MustNewHash("0xBEEFDEAD"),
+				Status: pbcodec.TransactionTraceStatus_SUCCEEDED,
+				Receipt: &pbcodec.TransactionReceipt{
+					Logs: logs2,
 				},
 			},
 		},
