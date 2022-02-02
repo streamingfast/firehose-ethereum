@@ -1319,6 +1319,8 @@ github.com/streamingfast/sf-tools v0.0.0-20210823043548-13a30de7c1b1 h1:vX2J66n+
 github.com/streamingfast/sf-tools v0.0.0-20210823043548-13a30de7c1b1/go.mod h1:2BLLnxvk+RsGm6+W6OO9xe4PgbEHbusqiaKzpi2aWRo=
 github.com/streamingfast/sf-tools v0.0.0-20211222184149-d5ac7ff965f7 h1:d2XZV9/Rz6stOP3b1wiGlbY0PTtDEmrXtvTO3MV1YQ0=
 github.com/streamingfast/sf-tools v0.0.0-20211222184149-d5ac7ff965f7/go.mod h1:28RUphsO45C7Pmxe5P+K/MK9EsBeIItsc/eG/f9PQCY=
+github.com/streamingfast/sf-tools v0.0.0-20220201214246-766d25d2d43b h1:ZQLW7N3TcP1JrL3d6lNJHOFo8AU+2Wht/30/OIPSIjM=
+github.com/streamingfast/sf-tools v0.0.0-20220201214246-766d25d2d43b/go.mod h1:28RUphsO45C7Pmxe5P+K/MK9EsBeIItsc/eG/f9PQCY=
 github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAtyaTOgs=
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20210906180247-1ec27a37764f h1:NlJN/D/1BqvKicNMyYRKUmTnEzTdVaPmeqxB6GDMel4=

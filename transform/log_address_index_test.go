@@ -75,6 +75,29 @@ func TestLogAddressIndexer(t *testing.T) {
 
 }
 
+func TestRoaring_SaveLoad(t *testing.T) {
+	r := roaring64.NewBitmap()
+	r.Add(1000)
+	r.Add(2000)
+	r.Add(2005)
+	r.Add(20000005)
+	r.Add(530000005)
+
+	short, err := r.ToBase64()
+	require.NoError(t, err)
+
+	bts, err := r.ToBytes()
+	require.NoError(t, err)
+
+	r2 := roaring64.NewBitmap()
+	r2.UnmarshalBinary(bts)
+
+	short2, err := r2.ToBase64()
+	require.NoError(t, err)
+
+	assert.Equal(t, short, short2)
+
+}
 func TestLogAddressIndex_Matching(t *testing.T) {
 	tests := []struct {
 		name          string

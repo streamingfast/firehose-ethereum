@@ -30,6 +30,7 @@ import (
 )
 
 var generateAccIdxCmd = &cobra.Command{
+	// TODO: make irr-index-url optional, maybe ?????
 	Use:   "generate-account-index {acct-index-url} {irr-index-url} {source-blocks-url} {start-block-num} {stop-block-num}",
 	Short: "Generate index files for eth accounts present in blocks",
 	Args:  cobra.RangeArgs(4, 5),
@@ -39,7 +40,7 @@ var generateAccIdxCmd = &cobra.Command{
 func init() {
 	Cmd.AddCommand(generateAccIdxCmd)
 
-	generateAccIdxCmd.Flags().IntSlice("bundle-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for irreversible block indices")
+	generateAccIdxCmd.Flags().IntSlice("bundle-sizes", []int{10000}, "list of sizes for irreversible block indices")
 }
 
 func generateAccIdxE(cmd *cobra.Command, args []string) error {
@@ -72,14 +73,16 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed setting up block store from url %q: %w", blocksStoreURL, err)
 	}
 
+	// we are optionally reading info from the irrIndexStore
 	irrIndexStore, err := dstore.NewStore(irrIndexStoreURL, "", "", false)
 	if err != nil {
 		return fmt.Errorf("failed setting up irreversible blocks index store from url %q: %w", irrIndexStoreURL, err)
 	}
 
+	// we are creating accountIndexStore
 	accountIndexStore, err := dstore.NewStore(accountIndexStoreURL, "", "", false)
 	if err != nil {
-		return fmt.Errorf("failed setting up bccount index store from url %q: %w", accountIndexStoreURL, err)
+		return fmt.Errorf("failed setting up account index store from url %q: %w", accountIndexStoreURL, err)
 	}
 
 	firehoseServer := firehose.NewServer(
@@ -103,7 +106,7 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
 	cmd.SilenceUsage = true
 
-	t := transform.NewLogAddressIndexer(accountIndexStore)
+	t := transform.NewLogAddressIndexer(accountIndexStore, bundleSizes[0]) // FIXME add support for multiple bundlesizes?
 
 	for {
 		resp, err := cli.Recv()

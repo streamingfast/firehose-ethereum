@@ -22,17 +22,24 @@ type LogAddressIndex struct {
 	// TODO: add a bloomfilter, populated on load
 }
 
-func NewLogAddressIndexer(store dstore.Store) *LogAddressIndexer {
+func NewLogAddressIndexer(store dstore.Store, indexSize uint64) *LogAddressIndexer {
 	return &LogAddressIndexer{
 		store: store,
 		currentIndex: &LogAddressIndex{
 			//					lowBlockNum: test.lowBlockNum,
+			indexSize: indexSize,
 			addrs:     make(map[string]*roaring64.Bitmap),
 			eventSigs: make(map[string]*roaring64.Bitmap),
 		},
 	}
 
 }
+
+// set filename := fmt.Sprintf("%010d.%d.logaddr.idx, lowBlockNum, bundleSize)
+// see what is done in bstream's irreverisbleIdx
+
+//func (i *LogAddressIndex) save() []uint64 {
+//}
 
 func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
 	addrBitmap := roaring64.NewBitmap()
