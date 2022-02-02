@@ -6,6 +6,7 @@ import (
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/eth-go"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -52,8 +53,7 @@ func TestLogAddressIndexer(t *testing.T) {
 				},
 			}
 			for _, blk := range test.blocks {
-				err := indexer.ProcessBlock(blk, nil)
-				require.NoError(t, err)
+				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
 			}
 			assert.Equal(t, len(test.expectAddresses), len(indexer.currentIndex.addrs))
 			for addr, expectMatches := range test.expectAddresses {
@@ -189,8 +189,7 @@ func TestLogAddressIndex_Matching(t *testing.T) {
 				testBlock(t, "blk11.json"),
 			}
 			for _, blk := range testBlocks {
-				err := indexer.ProcessBlock(blk, nil)
-				require.NoError(t, err)
+				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
 			}
 
 			var reqAddresses []eth.Address

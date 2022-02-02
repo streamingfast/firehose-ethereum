@@ -1,8 +1,9 @@
 package transform
 
 import (
+	"fmt"
+
 	"github.com/RoaringBitmap/roaring/roaring64"
-	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
@@ -19,6 +20,18 @@ type LogAddressIndex struct {
 	lowBlockNum uint64
 	indexSize   uint64
 	// TODO: add a bloomfilter, populated on load
+}
+
+func NewLogAddressIndexer(store dstore.Store) *LogAddressIndexer {
+	return &LogAddressIndexer{
+		store: store,
+		currentIndex: &LogAddressIndex{
+			//					lowBlockNum: test.lowBlockNum,
+			addrs:     make(map[string]*roaring64.Bitmap),
+			eventSigs: make(map[string]*roaring64.Bitmap),
+		},
+	}
+
 }
 
 func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
@@ -94,13 +107,15 @@ type LogAddressIndexer struct {
 	store        dstore.Store
 }
 
-func (i *LogAddressIndexer) ProcessBlock(blk *bstream.Block, obj interface{}) error {
+func (i *LogAddressIndexer) String() string {
+	return fmt.Sprintf("addresses: %d, methods: %d", len(i.currentIndex.addrs), len(i.currentIndex.eventSigs))
+}
+
+func (i *LogAddressIndexer) ProcessEthBlock(blk *pbcodec.Block) {
 	// TODO: manage lowBlockNum/indexSize, call Save()
-	ethBlock := blk.ToProtocol().(*pbcodec.Block)
-	for _, trace := range ethBlock.TransactionTraces {
+	for _, trace := range blk.TransactionTraces {
 		for _, log := range trace.Receipt.Logs {
 			i.currentIndex.add(log.Address, log.Topics[0], blk.Number)
 		}
 	}
-	return nil
 }
