@@ -1,9 +1,8 @@
 package transform
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
+	"io/ioutil"
 	"testing"
 
 	"github.com/streamingfast/dstore"
@@ -21,20 +20,38 @@ func TestLogAddressIndexer(t *testing.T) {
 		name             string
 		blocks           []*pbcodec.Block
 		indexSize        uint64
+		shouldWriteFile  bool
 		expectAddresses  map[string][]uint64
 		expectSignatures map[string][]uint64
 	}{
 		{
-			name:      "sunny with no bounds hit",
-			indexSize: 10,
+			name:            "sunny within bounds",
+			indexSize:       10,
+			shouldWriteFile: false,
 			blocks: []*pbcodec.Block{
 				testETHBlock(t, 10,
-					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "cccccccccccccccccccccccccccccccccccccccc"},
-					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccc",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					},
 				),
 				testETHBlock(t, 11,
-					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "dddddddddddddddddddddddddddddddddddddddd"},
-					[]string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddd",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+					},
 				),
 			},
 			expectAddresses: map[string][]uint64{
@@ -50,49 +67,73 @@ func TestLogAddressIndexer(t *testing.T) {
 				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
 			},
 		},
-		//		{
-		//			name:      "sunny and we hit the upper bound",
-		//			indexSize: 10,
-		//			blocks: []*bstream.Block{
-		//				testBlockFromFiles(t, "blk10.json"),
-		//				testBlockFromFiles(t, "blk11.json"),
-		//			},
-		//			expectAddresses: map[string][]uint64{
-		//				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
-		//				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
-		//				"cccccccccccccccccccccccccccccccccccccccc": {10},
-		//				"dddddddddddddddddddddddddddddddddddddddd": {11},
-		//			},
-		//			expectSignatures: map[string][]uint64{
-		//				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
-		//				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
-		//				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {10},
-		//				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
-		//			},
-		//		},
+		{
+			name:            "sunny and we wrote an index",
+			indexSize:       2,
+			shouldWriteFile: true,
+			blocks: []*pbcodec.Block{
+				testETHBlock(t, 10,
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccc",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					},
+				),
+				testETHBlock(t, 11,
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddd",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+					},
+				),
+				testETHBlock(t, 12,
+					[]string{"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+					[]string{"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+				),
+			},
+			expectAddresses: map[string][]uint64{
+				"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {12},
+			},
+			expectSignatures: map[string][]uint64{
+				"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {12},
+			},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
+			results := make(map[string][]byte)
 			accountIndexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+				if test.shouldWriteFile {
+					content, err := ioutil.ReadAll(f)
+					require.NoError(t, err)
+					results[base] = content
+				}
 				return nil
 			})
-			indexer := NewLogAddressIndexer(accountIndexStore, test.indexSize)
 
+			indexer := NewLogAddressIndexer(accountIndexStore, test.indexSize)
 			for _, blk := range test.blocks {
-				bytes, err := json.Marshal(blk.TransactionTraces)
-				require.NoError(t, err)
-				fmt.Println("seeing this", string(bytes))
 				indexer.ProcessEthBlock(blk)
-				//				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
 			}
-			assert.Equal(t, len(test.expectAddresses), len(indexer.currentIndex.addrs))
+
+			require.Equal(t, len(test.expectAddresses), len(indexer.currentIndex.addrs))
 			for addr, expectMatches := range test.expectAddresses {
 				m, ok := indexer.currentIndex.addrs[addr]
 				require.True(t, ok)
 				arr := m.ToArray()
-				assert.Equal(t, expectMatches, arr)
+				require.Equal(t, expectMatches, arr)
 			}
 
 			assert.Equal(t, len(test.expectSignatures), len(indexer.currentIndex.eventSigs))
@@ -100,7 +141,7 @@ func TestLogAddressIndexer(t *testing.T) {
 				m, ok := indexer.currentIndex.eventSigs[sig]
 				require.True(t, ok)
 				arr := m.ToArray()
-				assert.Equal(t, expectMatches, arr)
+				require.Equal(t, expectMatches, arr)
 			}
 		})
 	}
@@ -260,9 +301,5 @@ func TestLogAddressIndex_Matching(t *testing.T) {
 			assert.Equal(t, test.expectBlocks, matching)
 		})
 	}
-
-}
-
-func TestLogAddressIndex_WriteIndex(t *testing.T) {
 
 }

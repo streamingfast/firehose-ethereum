@@ -29,7 +29,7 @@ type LogAddressIndex struct {
 }
 
 func (i *LogAddressIndex) Marshal() ([]byte, error) {
-	var pbIndex *pbtransforms.LogAddressSignatureIndex
+	pbIndex := NewLogAddressSignatureIndex()
 
 	for k, v := range i.addrs {
 		bitmapBytes, err := v.ToBytes()

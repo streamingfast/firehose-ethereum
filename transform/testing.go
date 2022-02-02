@@ -58,7 +58,7 @@ func testETHBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Bl
 
 	var logs2 []*pbcodec.Log
 	for _, sig := range sigs {
-		logs2 = append(logs1, &pbcodec.Log{
+		logs2 = append(logs2, &pbcodec.Log{
 			Address: eth.MustNewAddress(addrs[0]),
 			Topics: [][]byte{
 				eth.MustNewHash(sig),
