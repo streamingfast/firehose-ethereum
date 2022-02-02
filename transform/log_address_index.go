@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/RoaringBitmap/roaring/roaring64"
+	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
 )
 
 // LogAddressIndex will return false positives when matching addr AND eventSignatures
@@ -22,15 +24,57 @@ type LogAddressIndex struct {
 	// TODO: add a bloomfilter, populated on load
 }
 
+func (i *LogAddressIndex) Marshal() ([]byte, error) {
+	var pbIndex *pbtransforms.LogAddressSignatureIndex
+	for k, v := range i.addrs {
+		bitmapBytes, err := v.ToBytes()
+		if err != nil {
+			return nil, err
+		}
+		pbIndex.Addresses = append(pbIndex.Addresses, &pbtransforms.KeyToBitmap{
+			Key:    []byte(k),
+			Bitmap: bitmapBytes,
+		})
+	}
+	for k, v := range i.eventSigs {
+		bitmapBytes, err := v.ToBytes()
+		if err != nil {
+			return nil, err
+		}
+		pbIndex.EventSignatures = append(pbIndex.EventSignatures, &pbtransforms.KeyToBitmap{
+			Key:    []byte(k),
+			Bitmap: bitmapBytes,
+		})
+	}
+
+	return proto.Marshal(pbIndex)
+}
+
+func NewLogAddressIndex(lowBlockNum, indexSize uint64) *LogAddressIndex {
+	return &LogAddressIndex{
+		lowBlockNum: lowBlockNum,
+		indexSize:   indexSize,
+		addrs:       make(map[string]*roaring64.Bitmap),
+		eventSigs:   make(map[string]*roaring64.Bitmap),
+	}
+
+}
+
+func (i *LogAddressIndex) Unmarshal(in []byte) error {
+
+	var protoIndex *pbtransforms.LogAddressSignatureIndex
+	if err := proto.Unmarshal(in, protoIndex); err != nil {
+		return fmt.Errorf("cannot unmarshal protobuf to LogAddressIndex: %w", err)
+	}
+	//FIXME implement
+	return nil
+
+}
+
 func NewLogAddressIndexer(store dstore.Store, indexSize uint64) *LogAddressIndexer {
 	return &LogAddressIndexer{
-		store: store,
-		currentIndex: &LogAddressIndex{
-			//					lowBlockNum: test.lowBlockNum,
-			indexSize: indexSize,
-			addrs:     make(map[string]*roaring64.Bitmap),
-			eventSigs: make(map[string]*roaring64.Bitmap),
-		},
+		store:        store,
+		currentIndex: NewLogAddressIndex(0, indexSize),
 	}
 
 }
