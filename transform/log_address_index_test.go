@@ -200,11 +200,9 @@ func TestLogAddressIndexer(t *testing.T) {
 						require.Equal(t, expectMatches, arr)
 					}
 				}
-
 			}
 		})
 	}
-
 }
 
 func TestRoaring_SaveLoad(t *testing.T) {

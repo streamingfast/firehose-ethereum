@@ -20,7 +20,6 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	firehose "github.com/streamingfast/firehose"
@@ -44,8 +43,12 @@ func init() {
 
 func generateIrrIdxE(cmd *cobra.Command, args []string) error {
 
+	sizes, err := cmd.Flags().GetIntSlice("bundle-sizes")
+	if err != nil {
+		return err
+	}
 	var bundleSizes []uint64
-	for _, size := range viper.GetIntSlice("bundle-sizes") {
+	for _, size := range sizes {
 		if size < 0 {
 			return fmt.Errorf("invalid negative size for bundle-sizes: %d", size)
 		}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
@@ -18,15 +19,13 @@ import (
 
 // LogAddressIndex will return false positives when matching addr AND eventSignatures
 type LogAddressIndex struct {
-	// TODO: implement save
-	// TODO: implement load
 	// TODO: maybe use ID() to match address
+	// TODO: add a bloomfilter, populated on load
 
 	addrs       map[string]*roaring64.Bitmap // map[eth address](blocknum bitmap)
 	eventSigs   map[string]*roaring64.Bitmap
 	lowBlockNum uint64
 	indexSize   uint64
-	// TODO: add a bloomfilter, populated on load
 }
 
 func (i *LogAddressIndex) Marshal() ([]byte, error) {
@@ -147,6 +146,9 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 
 func (i *LogAddressIndex) add(addr eth.Address, eventSig eth.Hash, blocknum uint64) {
 	i.addAddr(addr, blocknum)
+	if eventSig == nil {
+		return
+	}
 	i.addEventSig(eventSig, blocknum)
 }
 
@@ -218,7 +220,11 @@ func (i *LogAddressIndexer) ProcessEthBlock(blk *pbcodec.Block) error {
 
 	for _, trace := range blk.TransactionTraces {
 		for _, log := range trace.Receipt.Logs {
-			i.currentIndex.add(log.Address, log.Topics[0], blk.Number)
+			var evSig []byte
+			if len(log.Topics) != 0 {
+				evSig = log.Topics[0]
+			}
+			i.currentIndex.add(log.Address, evSig, blk.Number)
 		}
 	}
 
