@@ -29,7 +29,7 @@ type LogAddressIndex struct {
 }
 
 func (i *LogAddressIndex) Marshal() ([]byte, error) {
-	pbIndex := NewLogAddressSignatureIndex()
+	pbIndex := &pbtransforms.LogAddressSignatureIndex{}
 
 	for k, v := range i.addrs {
 		bitmapBytes, err := v.ToBytes()
@@ -68,7 +68,7 @@ func NewLogAddressIndex(lowBlockNum, indexSize uint64) *LogAddressIndex {
 }
 
 func (i *LogAddressIndex) Unmarshal(in []byte) error {
-	pbIndex := NewLogAddressSignatureIndex()
+	pbIndex := &pbtransforms.LogAddressSignatureIndex{}
 
 	if err := proto.Unmarshal(in, pbIndex); err != nil {
 		return fmt.Errorf("couldn't unmarshal LogAddressSignatureIndex: %s", err)
