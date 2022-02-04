@@ -1,7 +1,11 @@
 package transform
 
 import (
+	"io"
+	"io/ioutil"
 	"testing"
+
+	"github.com/streamingfast/dstore"
 
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/streamingfast/bstream"
@@ -13,27 +17,108 @@ import (
 
 func TestLogAddressIndexer(t *testing.T) {
 	tests := []struct {
-		name   string
-		blocks []*bstream.Block
-		//		lowBlockNum      uint64
-		//		indexSize        uint64
-		expectAddresses  map[string][]uint64
-		expectSignatures map[string][]uint64
+		name                       string
+		blocks                     []*pbcodec.Block
+		indexSize                  uint64
+		shouldWriteFile            bool
+		shouldReadFile             bool
+		expectAddressesAfterWrite  map[string][]uint64
+		expectSignaturesAfterWrite map[string][]uint64
+		expectAddressesAfterRead   map[string][]uint64
+		expectSignaturesAfterRead  map[string][]uint64
 	}{
 		{
-			name: "sunny",
-			//indexSize: 100,
-			blocks: []*bstream.Block{
-				testBlock(t, "blk10.json"),
-				testBlock(t, "blk11.json"),
+			name:            "sunny within bounds",
+			indexSize:       10,
+			shouldWriteFile: false,
+			shouldReadFile:  false,
+			blocks: []*pbcodec.Block{
+				testETHBlock(t, 10,
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccc",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					},
+				),
+				testETHBlock(t, 11,
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddd",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+					},
+				),
 			},
-			expectAddresses: map[string][]uint64{
+			expectAddressesAfterWrite: map[string][]uint64{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
 				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
 				"cccccccccccccccccccccccccccccccccccccccc": {10},
 				"dddddddddddddddddddddddddddddddddddddddd": {11},
 			},
-			expectSignatures: map[string][]uint64{
+			expectSignaturesAfterWrite: map[string][]uint64{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
+				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {10},
+				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
+			},
+		},
+		{
+			name:            "sunny and we wrote an index",
+			indexSize:       2,
+			shouldWriteFile: true,
+			shouldReadFile:  true,
+			blocks: []*pbcodec.Block{
+				testETHBlock(t, 10,
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccc",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+					},
+				),
+				testETHBlock(t, 11,
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddd",
+					},
+					[]string{
+						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+						"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+					},
+				),
+				testETHBlock(t, 12,
+					[]string{"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+					[]string{"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+				),
+			},
+			expectAddressesAfterWrite: map[string][]uint64{
+				"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {12},
+			},
+			expectSignaturesAfterWrite: map[string][]uint64{
+				"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {12},
+			},
+			expectAddressesAfterRead: map[string][]uint64{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
+				"cccccccccccccccccccccccccccccccccccccccc": {10},
+				"dddddddddddddddddddddddddddddddddddddddd": {11},
+			},
+			expectSignaturesAfterRead: map[string][]uint64{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
 				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
 				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {10},
@@ -45,34 +130,79 @@ func TestLogAddressIndexer(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			indexer := &LogAddressIndexer{
-				currentIndex: &LogAddressIndex{
-					//					lowBlockNum: test.lowBlockNum,
-					addrs:     make(map[string]*roaring64.Bitmap),
-					eventSigs: make(map[string]*roaring64.Bitmap),
-				},
-			}
+			results := make(map[string][]byte)
+
+			// spawn an indexStore which will populate the results
+			indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+				if test.shouldWriteFile {
+					content, err := ioutil.ReadAll(f)
+					require.NoError(t, err)
+					results[base] = content
+				}
+				return nil
+			})
+
+			// spawn an indexer with our mock indexStore
+			indexer := NewLogAddressIndexer(indexStore, test.indexSize)
 			for _, blk := range test.blocks {
-				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))
+				// feed the indexer
+				err := indexer.ProcessEthBlock(blk)
+				require.NoError(t, err)
 			}
-			assert.Equal(t, len(test.expectAddresses), len(indexer.currentIndex.addrs))
-			for addr, expectMatches := range test.expectAddresses {
+
+			// check our addrs
+			require.Equal(t, len(test.expectAddressesAfterWrite), len(indexer.currentIndex.addrs))
+			for addr, expectMatches := range test.expectAddressesAfterWrite {
 				m, ok := indexer.currentIndex.addrs[addr]
 				require.True(t, ok)
 				arr := m.ToArray()
-				assert.Equal(t, expectMatches, arr)
+				require.Equal(t, expectMatches, arr)
 			}
 
-			assert.Equal(t, len(test.expectSignatures), len(indexer.currentIndex.eventSigs))
-			for sig, expectMatches := range test.expectSignatures {
+			// check our sigs
+			assert.Equal(t, len(test.expectSignaturesAfterWrite), len(indexer.currentIndex.eventSigs))
+			for sig, expectMatches := range test.expectSignaturesAfterWrite {
 				m, ok := indexer.currentIndex.eventSigs[sig]
 				require.True(t, ok)
 				arr := m.ToArray()
-				assert.Equal(t, expectMatches, arr)
+				require.Equal(t, expectMatches, arr)
+			}
+
+			if test.shouldReadFile {
+				// populate a new indexStore with the prior results
+				indexStore = dstore.NewMockStore(nil)
+				for indexName, indexContents := range results {
+					indexStore.SetFile(indexName, indexContents)
+				}
+
+				// spawn a new indexer with the new indexStore
+				indexer = NewLogAddressIndexer(indexStore, test.indexSize)
+				for indexName, _ := range results {
+					// attempt to read back the indexes
+					err := indexer.readIndex(indexName)
+					require.NoError(t, err)
+
+					// check our addrs
+					require.Equal(t, len(test.expectAddressesAfterRead), len(indexer.currentIndex.addrs))
+					for addr, expectMatches := range test.expectAddressesAfterRead {
+						m, ok := indexer.currentIndex.addrs[addr]
+						require.True(t, ok)
+						arr := m.ToArray()
+						require.Equal(t, expectMatches, arr)
+					}
+
+					// check our sigs
+					assert.Equal(t, len(test.expectSignaturesAfterRead), len(indexer.currentIndex.eventSigs))
+					for sig, expectMatches := range test.expectSignaturesAfterRead {
+						m, ok := indexer.currentIndex.eventSigs[sig]
+						require.True(t, ok)
+						arr := m.ToArray()
+						require.Equal(t, expectMatches, arr)
+					}
+				}
 			}
 		})
 	}
-
 }
 
 func TestRoaring_SaveLoad(t *testing.T) {
@@ -96,8 +226,8 @@ func TestRoaring_SaveLoad(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, short, short2)
-
 }
+
 func TestLogAddressIndex_Matching(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -200,16 +330,14 @@ func TestLogAddressIndex_Matching(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			accountIndexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+				return nil
+			})
+			indexer := NewLogAddressIndexer(accountIndexStore, 10)
 
-			indexer := &LogAddressIndexer{
-				currentIndex: &LogAddressIndex{
-					addrs:     make(map[string]*roaring64.Bitmap),
-					eventSigs: make(map[string]*roaring64.Bitmap),
-				},
-			}
 			testBlocks := []*bstream.Block{
-				testBlock(t, "blk10.json"),
-				testBlock(t, "blk11.json"),
+				testBlockFromFiles(t, "blk10.json"),
+				testBlockFromFiles(t, "blk11.json"),
 			}
 			for _, blk := range testBlocks {
 				indexer.ProcessEthBlock(blk.ToProtocol().(*pbcodec.Block))

@@ -21,7 +21,6 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/streamingfast/dstore"
 	firehose "github.com/streamingfast/firehose"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v1"
@@ -38,15 +37,18 @@ var generateAccIdxCmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(generateAccIdxCmd)
-
 	generateAccIdxCmd.Flags().IntSlice("bundle-sizes", []int{10000}, "list of sizes for irreversible block indices")
+	Cmd.AddCommand(generateAccIdxCmd)
 }
 
 func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
+	sizes, err := cmd.Flags().GetIntSlice("bundle-sizes")
+	if err != nil {
+		return err
+	}
 	var bundleSizes []uint64
-	for _, size := range viper.GetIntSlice("bundle-sizes") {
+	for _, size := range sizes {
 		if size < 0 {
 			return fmt.Errorf("invalid negative size for bundle-sizes: %d", size)
 		}

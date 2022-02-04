@@ -61,7 +61,7 @@ func TestLogFilter_Transform(t *testing.T) {
 			preprocFunc, err := transformReg.BuildFromTransforms(transforms)
 			require.NoError(t, err)
 
-			blk := testBlock(t, "block.json")
+			blk := testBlockFromFiles(t, "block.json")
 
 			output, err := preprocFunc(blk)
 			if test.expectError {
