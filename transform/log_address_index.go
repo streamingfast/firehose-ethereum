@@ -12,6 +12,7 @@ import (
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"time"
 )
 
@@ -65,18 +66,40 @@ func NewLogAddressIndex(lowBlockNum, indexSize uint64) *LogAddressIndex {
 		addrs:       make(map[string]*roaring64.Bitmap),
 		eventSigs:   make(map[string]*roaring64.Bitmap),
 	}
-
 }
 
 func (i *LogAddressIndex) Unmarshal(in []byte) error {
+	pbIndex := NewLogAddressSignatureIndex()
 
-	var protoIndex *pbtransforms.LogAddressSignatureIndex
-	if err := proto.Unmarshal(in, protoIndex); err != nil {
-		return fmt.Errorf("cannot unmarshal protobuf to LogAddressIndex: %w", err)
+	if err := proto.Unmarshal(in, pbIndex); err != nil {
+		return fmt.Errorf("couldn't unmarshal LogAddressSignatureIndex: %s", err)
 	}
-	//FIXME implement
-	return nil
 
+	for _, addr := range pbIndex.Addresses {
+		key := string(addr.Key)
+
+		r64 := roaring64.NewBitmap()
+		err := r64.UnmarshalBinary(addr.Bitmap)
+		if err != nil {
+			return fmt.Errorf("coudln't unmarshal addr bitmap: %s", err)
+		}
+
+		i.addrs[key] = r64
+	}
+
+	for _, eventSig := range pbIndex.EventSignatures {
+		key := string(eventSig.Key)
+
+		r64 := roaring64.NewBitmap()
+		err := r64.UnmarshalBinary(eventSig.Bitmap)
+		if err != nil {
+			return fmt.Errorf("couldn't unmarshal eventSig bitmap: %s", err)
+		}
+
+		i.eventSigs[key] = r64
+	}
+
+	return nil
 }
 
 func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
@@ -148,18 +171,18 @@ func (i *LogAddressIndex) addEventSig(eventSig eth.Hash, blocknum uint64) {
 }
 
 type LogAddressIndexer struct {
-	currentIndex      *LogAddressIndex
-	store             dstore.Store
-	indexSize         uint64
-	indexWriteTimeout time.Duration
+	currentIndex    *LogAddressIndex
+	store           dstore.Store
+	indexSize       uint64
+	indexOpsTimeout time.Duration
 }
 
 func NewLogAddressIndexer(store dstore.Store, indexSize uint64) *LogAddressIndexer {
 	return &LogAddressIndexer{
-		store:             store,
-		currentIndex:      nil,
-		indexSize:         indexSize,
-		indexWriteTimeout: 15 * time.Second,
+		store:           store,
+		currentIndex:    nil,
+		indexSize:       indexSize,
+		indexOpsTimeout: 15 * time.Second,
 	}
 }
 
@@ -207,8 +230,13 @@ func (i *LogAddressIndexer) String() string {
 }
 
 func (i *LogAddressIndexer) writeIndex() error {
-	ctx, cancel := context.WithTimeout(context.Background(), i.indexWriteTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), i.indexOpsTimeout)
 	defer cancel()
+
+	if i.currentIndex == nil {
+		zlog.Warn("attempted to write nil index")
+		return nil
+	}
 
 	data, err := i.currentIndex.Marshal()
 	if err != nil {
@@ -216,12 +244,37 @@ func (i *LogAddressIndexer) writeIndex() error {
 	}
 
 	filename := toIndexFilename(i.indexSize, i.currentIndex.lowBlockNum, "logaddr")
-
 	if err = i.store.WriteObject(ctx, filename, bytes.NewReader(data)); err != nil {
 		zlog.Warn("cannot write index file to store",
 			zap.String("filename", filename),
 			zap.Error(err),
 		)
+	}
+
+	return nil
+}
+
+func (i *LogAddressIndexer) readIndex(indexName string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), i.indexOpsTimeout)
+	defer cancel()
+
+	if i.currentIndex == nil {
+		i.currentIndex = NewLogAddressIndex(0, i.indexSize)
+	}
+
+	dstoreObj, err := i.store.OpenObject(ctx, indexName)
+	if err != nil {
+		return fmt.Errorf("couldn't open object %s from dstore: %s", indexName, err)
+	}
+
+	obj, err := ioutil.ReadAll(dstoreObj)
+	if err != nil {
+		return fmt.Errorf("couldn't read %s: %s", indexName, err)
+	}
+
+	err = i.currentIndex.Unmarshal(obj)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %s: %s", indexName, err)
 	}
 
 	return nil
