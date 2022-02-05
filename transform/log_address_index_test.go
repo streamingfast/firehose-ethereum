@@ -32,32 +32,7 @@ func TestLogAddressIndexer(t *testing.T) {
 			indexSize:       10,
 			shouldWriteFile: false,
 			shouldReadFile:  false,
-			blocks: []*pbcodec.Block{
-				testETHBlock(t, 10,
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"cccccccccccccccccccccccccccccccccccccccc",
-					},
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-					},
-				),
-				testETHBlock(t, 11,
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"dddddddddddddddddddddddddddddddddddddddd",
-					},
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-					},
-				),
-			},
+			blocks:          testEthBlocks(t, 2),
 			expectAddressesAfterWrite: map[string][]uint64{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
 				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
@@ -76,41 +51,16 @@ func TestLogAddressIndexer(t *testing.T) {
 			indexSize:       2,
 			shouldWriteFile: true,
 			shouldReadFile:  true,
-			blocks: []*pbcodec.Block{
-				testETHBlock(t, 10,
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"cccccccccccccccccccccccccccccccccccccccc",
-					},
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-					},
-				),
-				testETHBlock(t, 11,
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"dddddddddddddddddddddddddddddddddddddddd",
-					},
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-					},
-				),
-				testETHBlock(t, 12,
-					[]string{"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
-					[]string{"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
-				),
-			},
+			blocks:          testEthBlocks(t, 3),
 			expectAddressesAfterWrite: map[string][]uint64{
-				"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {12},
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {12},
+				"1111111111111111111111111111111111111111": {12},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {12},
 			},
 			expectSignaturesAfterWrite: map[string][]uint64{
-				"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee": {12},
+				"0000000000000000000000000000000000000000000000000000000000000000": {12},
+				"1111111111111111111111111111111111111111111111111111111111111111": {12},
+				"2222222222222222222222222222222222222222222222222222222222222222": {12},
 			},
 			expectAddressesAfterRead: map[string][]uint64{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
@@ -192,7 +142,7 @@ func TestLogAddressIndexer(t *testing.T) {
 					}
 
 					// check our sigs
-					assert.Equal(t, len(test.expectSignaturesAfterRead), len(indexer.currentIndex.eventSigs))
+					require.Equal(t, len(test.expectSignaturesAfterRead), len(indexer.currentIndex.eventSigs))
 					for sig, expectMatches := range test.expectSignaturesAfterRead {
 						m, ok := indexer.currentIndex.eventSigs[sig]
 						require.True(t, ok)
@@ -243,7 +193,7 @@ func TestLogAddressIndex_Matching(t *testing.T) {
 			expectBlocks: []uint64{10, 11},
 		},
 		{
-			name: "single address singleblock",
+			name: "single address single block",
 			reqAddresses: []string{
 				"cccccccccccccccccccccccccccccccccccccccc",
 			},

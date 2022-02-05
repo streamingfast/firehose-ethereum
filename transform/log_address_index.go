@@ -20,6 +20,15 @@ type LogAddressIndex struct {
 	indexSize   uint64
 }
 
+func NewLogAddressIndex(lowBlockNum, indexSize uint64) *LogAddressIndex {
+	return &LogAddressIndex{
+		lowBlockNum: lowBlockNum,
+		indexSize:   indexSize,
+		addrs:       make(map[string]*roaring64.Bitmap),
+		eventSigs:   make(map[string]*roaring64.Bitmap),
+	}
+}
+
 func (i *LogAddressIndex) Marshal() ([]byte, error) {
 	pbIndex := &pbtransforms.LogAddressSignatureIndex{}
 
@@ -48,15 +57,6 @@ func (i *LogAddressIndex) Marshal() ([]byte, error) {
 	}
 
 	return proto.Marshal(pbIndex)
-}
-
-func NewLogAddressIndex(lowBlockNum, indexSize uint64) *LogAddressIndex {
-	return &LogAddressIndex{
-		lowBlockNum: lowBlockNum,
-		indexSize:   indexSize,
-		addrs:       make(map[string]*roaring64.Bitmap),
-		eventSigs:   make(map[string]*roaring64.Bitmap),
-	}
 }
 
 func (i *LogAddressIndex) Unmarshal(in []byte) error {

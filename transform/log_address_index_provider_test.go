@@ -17,45 +17,8 @@ func TestLogAddressIndexProvider_FindIndexContaining(t *testing.T) {
 	}{
 		{
 			name:      "sunny path",
-			indexSize: 3,
-			blocks: []*pbcodec.Block{
-				testETHBlock(t, 10,
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"cccccccccccccccccccccccccccccccccccccccc",
-					},
-					[]string{
-						"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-						"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-						"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-					},
-				),
-				testETHBlock(t, 11,
-					[]string{
-						"dddddddddddddddddddddddddddddddddddddddd",
-						"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-						"ffffffffffffffffffffffffffffffffffffffff",
-					},
-					[]string{
-						"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-						"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-						"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-					},
-				),
-				testETHBlock(t, 12,
-					[]string{
-						"0000000000000000000000000000000000000000",
-						"1111111111111111111111111111111111111111",
-						"2222222222222222222222222222222222222222",
-					},
-					[]string{
-						"0000000000000000000000000000000000000000000000000000000000000000",
-						"1111111111111111111111111111111111111111111111111111111111111111",
-						"2222222222222222222222222222222222222222222222222222222222222222",
-					},
-				),
-			},
+			indexSize: 2,
+			blocks:    testEthBlocks(t, 5),
 		},
 	}
 
@@ -78,6 +41,28 @@ func TestLogAddressIndexProvider_FindIndexContaining(t *testing.T) {
 				err := indexer.ProcessEthBlock(blk)
 				require.NoError(t, err)
 			}
+
+			// check that dstore wrote the index files
+			require.Equal(t, 2, len(results))
+
+			// populate a new indexStore with the prior results
+			indexStore = dstore.NewMockStore(nil)
+			for indexName, indexContents := range results {
+				indexStore.SetFile(indexName, indexContents)
+			}
+
+			// spawn an indexProvider with the new dstore
+			provider := NewLogAddressIndexProvider(indexStore)
+
+			// find the indexes containing specific block nums
+			reader := provider.findIndexContaining(10)
+			require.NotNil(t, reader)
+			reader = provider.findIndexContaining(12)
+			require.NotNil(t, reader)
+			reader = provider.findIndexContaining(42)
+			require.Nil(t, reader)
+			reader = provider.findIndexContaining(69)
+			require.Nil(t, reader)
 		})
 	}
 }

@@ -40,7 +40,7 @@ func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
 	return blk
 }
 
-func testETHBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Block {
+func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Block {
 
 	if len(addrs) == 0 || len(sigs) == 0 {
 		t.Fatal("require at least 1 addr and 1 sig")
@@ -85,4 +85,74 @@ func testETHBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Bl
 			},
 		},
 	}
+}
+
+func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
+	blocks := []*pbcodec.Block{
+		testEthBlock(t, 10,
+			[]string{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+				"cccccccccccccccccccccccccccccccccccccccc",
+			},
+			[]string{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+			},
+		),
+		testEthBlock(t, 11,
+			[]string{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+				"dddddddddddddddddddddddddddddddddddddddd",
+			},
+			[]string{
+				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			},
+		),
+		testEthBlock(t, 12,
+			[]string{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"1111111111111111111111111111111111111111",
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+			},
+			[]string{
+				"0000000000000000000000000000000000000000000000000000000000000000",
+				"1111111111111111111111111111111111111111111111111111111111111111",
+				"2222222222222222222222222222222222222222222222222222222222222222",
+			},
+		),
+		testEthBlock(t, 13,
+			[]string{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"4444444444444444444444444444444444444444",
+				"5555555555555555555555555555555555555555",
+			},
+			[]string{
+				"3333333333333333333333333333333333333333333333333333333333333333",
+				"4444444444444444444444444444444444444444444444444444444444444444",
+				"5555555555555555555555555555555555555555555555555555555555555555",
+			},
+		),
+		testEthBlock(t, 14,
+			[]string{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"7777777777777777777777777777777777777777",
+				"cccccccccccccccccccccccccccccccccccccccc",
+			},
+			[]string{
+				"6666666666666666666666666666666666666666666666666666666666666666",
+				"7777777777777777777777777777777777777777777777777777777777777777",
+				"8888888888888888888888888888888888888888888888888888888888888888",
+			},
+		),
+	}
+
+	if size != 0 {
+		return blocks[:size]
+	}
+	return blocks
 }
