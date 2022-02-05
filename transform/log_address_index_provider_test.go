@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"io"
 	"io/ioutil"
+	"strings"
 	"testing"
 )
 
@@ -54,15 +55,29 @@ func TestLogAddressIndexProvider_FindIndexContaining(t *testing.T) {
 			// spawn an indexProvider with the new dstore
 			provider := NewLogAddressIndexProvider(indexStore)
 
+			// try to load an index without finding it first
+			err := provider.loadIndex(strings.NewReader("bogus"))
+			require.Error(t, err)
+
 			// find the indexes containing specific block nums
-			reader := provider.findIndexContaining(10)
-			require.NotNil(t, reader)
-			reader = provider.findIndexContaining(12)
-			require.NotNil(t, reader)
-			reader = provider.findIndexContaining(42)
-			require.Nil(t, reader)
-			reader = provider.findIndexContaining(69)
-			require.Nil(t, reader)
+			r := provider.findIndexContaining(10)
+			require.NotNil(t, r)
+			err = provider.loadIndex(r)
+			require.Nil(t, err)
+			require.Equal(t, uint64(2), provider.currentIndex.indexSize)
+			require.Equal(t, uint64(10), provider.currentIndex.lowBlockNum)
+
+			r = provider.findIndexContaining(12)
+			require.NotNil(t, r)
+			err = provider.loadIndex(r)
+			require.Nil(t, err)
+			require.Equal(t, uint64(2), provider.currentIndex.indexSize)
+			require.Equal(t, uint64(12), provider.currentIndex.lowBlockNum)
+
+			r = provider.findIndexContaining(42)
+			require.Nil(t, r)
+			r = provider.findIndexContaining(69)
+			require.Nil(t, r)
 		})
 	}
 }

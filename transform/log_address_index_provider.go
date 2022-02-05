@@ -2,10 +2,12 @@ package transform
 
 import (
 	"context"
+	"fmt"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	"go.uber.org/zap"
 	"io"
+	"io/ioutil"
 	"math"
 	"strconv"
 	"strings"
@@ -115,6 +117,7 @@ func (ip *LogAddressIndexProvider) findIndexContaining(blockNum uint64) io.Reade
 			if err != nil {
 				zlog.Error("couldn't open dstore object", zap.Error(err))
 			}
+			ip.currentIndex = NewLogAddressIndex(lowBlockNum, indexSize)
 			return r
 		}
 	}
@@ -122,8 +125,22 @@ func (ip *LogAddressIndexProvider) findIndexContaining(blockNum uint64) io.Reade
 	return nil
 }
 
-// loadIndex will populate the indexProvider's currentIndex and currentMatchingBlocks
-// from the indexFile found in dstore
+// loadIndex will populate the indexProvider's currentIndex from the provided io.Reader
+// its currentLowBlockNum and currentIndexSize properties are determined in findIndexContaining
 func (ip *LogAddressIndexProvider) loadIndex(r io.Reader) error {
+	if ip.currentIndex == nil {
+		return fmt.Errorf("need an index before loading from file")
+	}
+
+	obj, err := ioutil.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("couldn't read index: %s", err)
+	}
+
+	err = ip.currentIndex.Unmarshal(obj)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal index: %s", err)
+	}
+
 	return nil
 }
