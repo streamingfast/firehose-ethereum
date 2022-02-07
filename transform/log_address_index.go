@@ -133,7 +133,6 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		return nil
 	}
 	return out
-
 }
 
 func (i *LogAddressIndex) add(addr eth.Address, eventSig eth.Hash, blocknum uint64) {

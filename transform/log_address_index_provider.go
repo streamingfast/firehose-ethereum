@@ -164,7 +164,7 @@ func (ip *LogAddressIndexProvider) loadIndex(r io.Reader, lowBlockNum, indexSize
 	}
 
 	newIdx := NewLogAddressIndex(lowBlockNum, indexSize)
-	err = ip.currentIndex.Unmarshal(obj)
+	err = newIdx.Unmarshal(obj)
 	if err != nil {
 		return fmt.Errorf("couldn't unmarshal index: %s", err)
 	}
