@@ -90,7 +90,7 @@ func (i *LogAddressIndexer) writeIndex() error {
 		return err
 	}
 
-	filename := toIndexFilename(i.indexSize, i.currentIndex.lowBlockNum, "logaddr")
+	filename := toIndexFilename(i.indexSize, i.currentIndex.lowBlockNum, LogAddressIdxShortname)
 	if err = i.store.WriteObject(ctx, filename, bytes.NewReader(data)); err != nil {
 		zlog.Warn("cannot write index file to store",
 			zap.String("filename", filename),

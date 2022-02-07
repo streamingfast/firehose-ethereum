@@ -1,6 +1,9 @@
 package transform
 
 import (
+	"github.com/streamingfast/dstore"
+	"io"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -155,4 +158,36 @@ func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
 		return blocks[:size]
 	}
 	return blocks
+}
+
+// testMockstoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
+func testMockstoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uint64) *dstore.MockStore {
+	results := make(map[string][]byte)
+
+	// spawn an indexStore which will populate the results
+	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+		content, err := ioutil.ReadAll(f)
+		require.NoError(t, err)
+		results[base] = content
+		return nil
+	})
+
+	// spawn an indexer with our mock indexStore
+	indexer := NewLogAddressIndexer(indexStore, indexSize)
+	for _, blk := range blocks {
+		// feed the indexer
+		err := indexer.ProcessEthBlock(blk)
+		require.NoError(t, err)
+	}
+
+	// check that dstore wrote the index files
+	require.Equal(t, 2, len(results))
+
+	// populate a new indexStore with the prior results
+	indexStore = dstore.NewMockStore(nil)
+	for indexName, indexContents := range results {
+		indexStore.SetFile(indexName, indexContents)
+	}
+
+	return indexStore
 }

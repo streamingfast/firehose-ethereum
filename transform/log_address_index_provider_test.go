@@ -1,83 +1,91 @@
 package transform
 
 import (
-	"github.com/streamingfast/dstore"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/stretchr/testify/require"
-	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 )
 
-func TestLogAddressIndexProvider_FindIndexContaining(t *testing.T) {
+func TestLogAddressIndexProvider_FindIndexContaining_LoadIndex(t *testing.T) {
 	tests := []struct {
-		name      string
-		indexSize uint64
-		blocks    []*pbcodec.Block
+		name        string
+		lowBlockNum uint64
+		indexSize   uint64
+		blocks      []*pbcodec.Block
 	}{
 		{
-			name:      "sunny path",
-			indexSize: 2,
-			blocks:    testEthBlocks(t, 5),
+			name:        "sunny path",
+			lowBlockNum: 10,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			results := make(map[string][]byte)
+			// populate a mock dstore with some index files
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 
-			// spawn an indexStore which will populate the results
-			indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
-				content, err := ioutil.ReadAll(f)
-				require.NoError(t, err)
-				results[base] = content
-				return nil
-			})
-
-			// spawn an indexer with our mock indexStore
-			indexer := NewLogAddressIndexer(indexStore, test.indexSize)
-			for _, blk := range test.blocks {
-				// feed the indexer
-				err := indexer.ProcessEthBlock(blk)
-				require.NoError(t, err)
-			}
-
-			// check that dstore wrote the index files
-			require.Equal(t, 2, len(results))
-
-			// populate a new indexStore with the prior results
-			indexStore = dstore.NewMockStore(nil)
-			for indexName, indexContents := range results {
-				indexStore.SetFile(indexName, indexContents)
-			}
-
-			// spawn an indexProvider with the new dstore
-			provider := NewLogAddressIndexProvider(indexStore)
+			// spawn an indexProvider with the populated dstore
+			provider := NewLogAddressIndexProvider(indexStore, test.lowBlockNum, test.indexSize, nil, nil, []uint64{test.indexSize})
 
 			// try to load an index without finding it first
-			err := provider.loadIndex(strings.NewReader("bogus"))
+			err := provider.loadIndex(strings.NewReader("bogus"), test.lowBlockNum, test.indexSize)
 			require.Error(t, err)
 
+			// try to find indexes with non-existent block nums
+			r, lowBlockNum, indexSize := provider.findIndexContaining(42)
+			require.Nil(t, r)
+			r, lowBlockNum, indexSize = provider.findIndexContaining(69)
+			require.Nil(t, r)
+
 			// find the indexes containing specific block nums
-			r := provider.findIndexContaining(10)
+			r, lowBlockNum, indexSize = provider.findIndexContaining(10)
 			require.NotNil(t, r)
-			err = provider.loadIndex(r)
+			require.Equal(t, test.lowBlockNum, lowBlockNum)
+			require.Equal(t, test.indexSize, indexSize)
+			err = provider.loadIndex(r, lowBlockNum, indexSize)
 			require.Nil(t, err)
-			require.Equal(t, uint64(2), provider.currentIndex.indexSize)
-			require.Equal(t, uint64(10), provider.currentIndex.lowBlockNum)
+			require.Equal(t, test.indexSize, provider.currentIndex.indexSize)
+			require.Equal(t, test.lowBlockNum, provider.currentIndex.lowBlockNum)
 
-			r = provider.findIndexContaining(12)
+			// find the indexes containing a specific block num in another file
+			r, lowBlockNum, indexSize = provider.findIndexContaining(12)
 			require.NotNil(t, r)
-			err = provider.loadIndex(r)
+			require.Equal(t, test.lowBlockNum+test.indexSize, lowBlockNum)
+			require.Equal(t, test.indexSize, indexSize)
+			err = provider.loadIndex(r, lowBlockNum, indexSize)
 			require.Nil(t, err)
-			require.Equal(t, uint64(2), provider.currentIndex.indexSize)
-			require.Equal(t, uint64(12), provider.currentIndex.lowBlockNum)
+			require.Equal(t, test.indexSize, provider.currentIndex.indexSize)
+			require.Equal(t, test.lowBlockNum+test.indexSize, provider.currentIndex.lowBlockNum)
+		})
+	}
+}
 
-			r = provider.findIndexContaining(42)
-			require.Nil(t, r)
-			r = provider.findIndexContaining(69)
-			require.Nil(t, r)
+func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
+	tests := []struct {
+		name        string
+		lowBlockNum uint64
+		indexSize   uint64
+		blocks      []*pbcodec.Block
+	}{
+		{
+			name:        "sunny path",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// populate a mock dstore with some index files
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
+
+			// spawn an indexProvider with the populated dstore
+			provider := NewLogAddressIndexProvider(indexStore, test.lowBlockNum, test.indexSize, nil, nil, []uint64{test.indexSize})
+			require.NotNil(t, provider)
 		})
 	}
 }
