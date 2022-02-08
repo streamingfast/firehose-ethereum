@@ -277,7 +277,7 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 
 			nextBlockNum, done := provider.NextMatching(test.wantedBlock)
 			require.Equal(t, nextBlockNum, test.expectedNextBlockNum)
-			require.True(t, done)
+			require.False(t, done)
 		})
 	}
 }
