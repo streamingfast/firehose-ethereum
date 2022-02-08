@@ -73,7 +73,7 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 		expectedLowBlockNum uint64
 	}{
 		{
-			name:                "sunny path, block in first index",
+			name:                "sunny path - block in first index",
 			lowBlockNum:         0,
 			indexSize:           2,
 			blocks:              testEthBlocks(t, 5),
@@ -81,7 +81,7 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 			expectedLowBlockNum: 10,
 		},
 		{
-			name:                "sunny path, block in second index",
+			name:                "sunny path - block in second index",
 			lowBlockNum:         0,
 			indexSize:           2,
 			blocks:              testEthBlocks(t, 5),
@@ -108,6 +108,52 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 			require.Nil(t, err)
 			require.Equal(t, test.expectedLowBlockNum, provider.currentIndex.lowBlockNum)
 			require.Equal(t, test.indexSize, provider.currentIndex.indexSize)
+		})
+	}
+}
+
+func TestLogAddressIndexProvider_WithinRange(t *testing.T) {
+	tests := []struct {
+		name        string
+		lowBlockNum uint64
+		indexSize   uint64
+		blocks      []*pbcodec.Block
+		wantedBlock uint64
+	}{
+		{
+			name:        "sunny path - block in first index",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 11,
+		},
+		{
+			name:        "sunny path - block in second index",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 13,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// populate a mock dstore with some index files
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
+
+			// spawn an indexProvider with the populated dstore
+			provider := NewLogAddressIndexProvider(indexStore, test.lowBlockNum, test.indexSize, nil, nil, []uint64{test.indexSize})
+			require.NotNil(t, provider)
+
+			// call WithinRange on a non-existent blockNum
+			b := provider.WithinRange(69)
+			require.False(t, b)
+
+			// call loadRange on known blocks
+			b = provider.WithinRange(test.wantedBlock)
+			require.True(t, b)
+			b = provider.WithinRange(test.wantedBlock)
+			require.True(t, b)
 		})
 	}
 }
