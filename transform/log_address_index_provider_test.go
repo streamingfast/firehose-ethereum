@@ -1,6 +1,7 @@
 package transform
 
 import (
+	"github.com/streamingfast/eth-go"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/stretchr/testify/require"
 	"strings"
@@ -154,6 +155,90 @@ func TestLogAddressIndexProvider_WithinRange(t *testing.T) {
 			require.True(t, b)
 			b = provider.WithinRange(test.wantedBlock)
 			require.True(t, b)
+		})
+	}
+}
+
+func TestLogAddressIndexProvider_Matches(t *testing.T) {
+	tests := []struct {
+		name            string
+		lowBlockNum     uint64
+		indexSize       uint64
+		blocks          []*pbcodec.Block
+		wantedBlock     uint64
+		filterAddresses []eth.Address
+		filterEventSigs []eth.Hash
+		expectedMatches bool
+	}{
+		{
+			name:        "block exists in first index and filters match",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 11,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			expectedMatches: true,
+		},
+		{
+			name:        "block exists in second index and filters match ",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 13,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("4444444444444444444444444444444444444444"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("4444444444444444444444444444444444444444444444444444444444444444"),
+			},
+			expectedMatches: true,
+		},
+		{
+			name:        "block exists but filters don't match",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 13,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("1111111111111111111111111111111111111111111111111111111111111111"),
+			},
+			expectedMatches: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// populate a mock dstore with some index files
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
+
+			// spawn an indexProvider with the populated dstore
+			provider := NewLogAddressIndexProvider(indexStore, test.lowBlockNum, test.indexSize, nil, nil, []uint64{test.indexSize})
+			require.NotNil(t, provider)
+
+			// call Matches on a non-existent blockNum
+			b := provider.Matches(69)
+			require.False(t, b)
+
+			// call Matches on a known blockNum; provider has no filters
+			b = provider.Matches(test.wantedBlock)
+			require.False(t, b)
+
+			// call Matches on a known blockNum, with a provider containing filters
+			provider = NewLogAddressIndexProvider(indexStore, test.lowBlockNum, test.indexSize, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
+			b = provider.Matches(test.wantedBlock)
+			if test.expectedMatches {
+				require.True(t, b)
+			} else {
+				require.False(t, b)
+			}
 		})
 	}
 }

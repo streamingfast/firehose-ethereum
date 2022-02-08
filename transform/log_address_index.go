@@ -102,13 +102,13 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		}
 		addrBitmap.Or(i.addrs[addrString])
 	}
+
 	if len(eventSigs) == 0 {
 		out := addrBitmap.ToArray()
 		if len(out) == 0 {
 			return nil
 		}
 		return out
-
 	}
 
 	sigsBitmap := roaring64.NewBitmap()
@@ -119,6 +119,7 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		}
 		sigsBitmap.Or(i.eventSigs[sigString])
 	}
+	
 	if addrBitmap.IsEmpty() {
 		out := sigsBitmap.ToArray()
 		if len(out) == 0 {

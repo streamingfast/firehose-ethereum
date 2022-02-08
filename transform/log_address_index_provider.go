@@ -57,7 +57,7 @@ func NewLogAddressIndexProvider(
 	}
 }
 
-// WithinRange determines if we have an index which includes this number.
+// WithinRange determines the existence of an index which includes the provided blockNum
 func (ip *LogAddressIndexProvider) WithinRange(blockNum uint64) bool {
 	r, lowBlockNum, indexSize := ip.findIndexContaining(blockNum)
 	if r == nil {
@@ -73,15 +73,17 @@ func (ip *LogAddressIndexProvider) WithinRange(blockNum uint64) bool {
 // Matches returns true if the provided blockNum matches entries in the index
 func (ip *LogAddressIndexProvider) Matches(blockNum uint64) bool {
 	if err := ip.loadRange(blockNum); err != nil {
-		log.Error("couldn't load range", zap.Error(err))
+		zlog.Error("couldn't load range", zap.Error(err))
 		// shouldn't happen; return true is the safest choice so the consumer receives all data
-		return true
+		return false
 	}
-	// asset blockNum > current.Low and blockNum < currentindex.Low + size
-	// if not
-	//    loadRange blockNum
-	// for _, matchingBlocks := range currentindex.matchingBlocks()
-	//	  if block.Num == blockNum: return true
+
+	for _, matchingBlock := range ip.currentIndex.matchingBlocks(ip.filterAddresses, ip.filterEventSigs) {
+		if blockNum == matchingBlock {
+			return true
+		}
+	}
+
 	return false
 }
 
