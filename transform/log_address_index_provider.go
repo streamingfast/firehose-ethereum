@@ -74,7 +74,6 @@ func (ip *LogAddressIndexProvider) WithinRange(blockNum uint64) bool {
 func (ip *LogAddressIndexProvider) Matches(blockNum uint64) bool {
 	if err := ip.loadRange(blockNum); err != nil {
 		zlog.Error("couldn't load range", zap.Error(err))
-		// shouldn't happen; return true is the safest choice so the consumer receives all data
 		return false
 	}
 
@@ -98,7 +97,7 @@ func (ip *LogAddressIndexProvider) NextMatching(blockNum uint64) (num uint64, do
 	for {
 		for _, block := range ip.currentMatchingBlocks {
 			if block > blockNum {
-				return blockNum, false
+				return block, false
 			}
 		}
 

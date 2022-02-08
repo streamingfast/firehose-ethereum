@@ -242,3 +242,42 @@ func TestLogAddressIndexProvider_Matches(t *testing.T) {
 		})
 	}
 }
+
+func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
+	tests := []struct {
+		name                 string
+		lowBlockNum          uint64
+		indexSize            uint64
+		blocks               []*pbcodec.Block
+		wantedBlock          uint64
+		filterAddresses      []eth.Address
+		filterEventSigs      []eth.Hash
+		expectedNextBlockNum uint64
+	}{
+		{
+			name:        "block exists in first index and filters match block in second index",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 11,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			expectedNextBlockNum: 13,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
+			provider := NewLogAddressIndexProvider(indexStore, test.lowBlockNum, test.indexSize, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
+
+			nextBlockNum, done := provider.NextMatching(test.wantedBlock)
+			require.Equal(t, nextBlockNum, test.expectedNextBlockNum)
+			require.True(t, done)
+		})
+	}
+}
