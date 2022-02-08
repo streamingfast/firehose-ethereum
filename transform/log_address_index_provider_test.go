@@ -141,22 +141,33 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 		blocks              []*pbcodec.Block
 		wantedBlock         uint64
 		expectedLowBlockNum uint64
+		expectError         bool
 	}{
 		{
-			name:                "sunny path - block in first index",
+			name:                "block exists in first index",
 			lowBlockNum:         0,
 			indexSize:           2,
 			blocks:              testEthBlocks(t, 5),
 			wantedBlock:         11,
 			expectedLowBlockNum: 10,
+			expectError:         false,
 		},
 		{
-			name:                "sunny path - block in second index",
+			name:                "block exists in second index",
 			lowBlockNum:         0,
 			indexSize:           2,
 			blocks:              testEthBlocks(t, 5),
 			wantedBlock:         13,
 			expectedLowBlockNum: 12,
+			expectError:         false,
+		},
+		{
+			name:        "block doesn't exist",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 69,
+			expectError: true,
 		},
 	}
 
@@ -171,12 +182,12 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 			provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{test.indexSize})
 			require.NotNil(t, provider)
 
-			// call loadRange on a non-existent blockNum
-			err := provider.loadRange(69)
-			require.NotNil(t, err)
-
 			// call loadRange on known block
-			err = provider.loadRange(test.wantedBlock)
+			err := provider.loadRange(test.wantedBlock)
+			if test.expectError {
+				require.Error(t, err)
+				return
+			}
 			require.Nil(t, err)
 			require.Equal(t, test.expectedLowBlockNum, provider.currentIndex.lowBlockNum)
 			require.Equal(t, test.indexSize, provider.currentIndex.indexSize)
@@ -186,25 +197,36 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 
 func TestLogAddressIndexProvider_WithinRange(t *testing.T) {
 	tests := []struct {
-		name        string
-		lowBlockNum uint64
-		indexSize   uint64
-		blocks      []*pbcodec.Block
-		wantedBlock uint64
+		name          string
+		lowBlockNum   uint64
+		indexSize     uint64
+		blocks        []*pbcodec.Block
+		wantedBlock   uint64
+		expectMatches bool
 	}{
 		{
-			name:        "sunny path - block in first index",
-			lowBlockNum: 0,
-			indexSize:   2,
-			blocks:      testEthBlocks(t, 5),
-			wantedBlock: 11,
+			name:          "block exists in first index",
+			lowBlockNum:   0,
+			indexSize:     2,
+			blocks:        testEthBlocks(t, 5),
+			wantedBlock:   11,
+			expectMatches: true,
 		},
 		{
-			name:        "sunny path - block in second index",
-			lowBlockNum: 0,
-			indexSize:   2,
-			blocks:      testEthBlocks(t, 5),
-			wantedBlock: 13,
+			name:          "block exists in second index",
+			lowBlockNum:   0,
+			indexSize:     2,
+			blocks:        testEthBlocks(t, 5),
+			wantedBlock:   13,
+			expectMatches: true,
+		},
+		{
+			name:          "block doesn't exist",
+			lowBlockNum:   0,
+			indexSize:     2,
+			blocks:        testEthBlocks(t, 5),
+			wantedBlock:   69,
+			expectMatches: false,
 		},
 	}
 
@@ -219,15 +241,13 @@ func TestLogAddressIndexProvider_WithinRange(t *testing.T) {
 			provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{test.indexSize})
 			require.NotNil(t, provider)
 
-			// call WithinRange on a non-existent blockNum
-			b := provider.WithinRange(69)
-			require.False(t, b)
-
 			// call loadRange on known blocks
-			b = provider.WithinRange(test.wantedBlock)
-			require.True(t, b)
-			b = provider.WithinRange(test.wantedBlock)
-			require.True(t, b)
+			b := provider.WithinRange(test.wantedBlock)
+			if test.expectMatches {
+				require.True(t, b)
+			} else {
+				require.False(t, b)
+			}
 		})
 	}
 }
@@ -289,12 +309,11 @@ func TestLogAddressIndexProvider_Matches(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			// populate a mock dstore with some index files
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
-
-			// call Matches on a known blockNum, with a provider containing filters
 			provider := NewLogAddressIndexProvider(indexStore, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
-			b := provider.Matches(test.wantedBlock)
+
+			b, err := provider.Matches(test.wantedBlock)
+			require.NoError(t, err)
 			if test.expectedMatches {
 				require.True(t, b)
 			} else {
@@ -306,14 +325,15 @@ func TestLogAddressIndexProvider_Matches(t *testing.T) {
 
 func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 	tests := []struct {
-		name                 string
-		lowBlockNum          uint64
-		indexSize            uint64
-		blocks               []*pbcodec.Block
-		wantedBlock          uint64
-		filterAddresses      []eth.Address
-		filterEventSigs      []eth.Hash
-		expectedNextBlockNum uint64
+		name                        string
+		lowBlockNum                 uint64
+		indexSize                   uint64
+		blocks                      []*pbcodec.Block
+		wantedBlock                 uint64
+		filterAddresses             []eth.Address
+		filterEventSigs             []eth.Hash
+		expectedNextBlockNum        uint64
+		expectedPassedIndexBoundary bool
 	}{
 		{
 			name:        "block exists in first index and filters match block in second index",
@@ -327,7 +347,8 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 			filterEventSigs: []eth.Hash{
 				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 			},
-			expectedNextBlockNum: 13,
+			expectedNextBlockNum:        13,
+			expectedPassedIndexBoundary: false,
 		},
 	}
 
@@ -336,9 +357,10 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 			provider := NewLogAddressIndexProvider(indexStore, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
 
-			nextBlockNum, done := provider.NextMatching(test.wantedBlock)
+			nextBlockNum, passedIndexBoundary, err := provider.NextMatching(test.wantedBlock)
+			require.NoError(t, err)
+			require.Equal(t, passedIndexBoundary, test.expectedPassedIndexBoundary)
 			require.Equal(t, nextBlockNum, test.expectedNextBlockNum)
-			require.False(t, done)
 		})
 	}
 }

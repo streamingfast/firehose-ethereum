@@ -40,7 +40,7 @@ func NewLogAddressIndexProvider(
 	possibleIndexSizes []uint64,
 
 ) *LogAddressIndexProvider {
-	// todo(froch, 20220702): firm up what these values will be
+	// todo(froch, 20220207): firm up what these values will be
 	if possibleIndexSizes == nil {
 		possibleIndexSizes = []uint64{100000, 10000, 1000, 100}
 	}
@@ -71,40 +71,37 @@ func (ip *LogAddressIndexProvider) WithinRange(blockNum uint64) bool {
 }
 
 // Matches returns true if the provided blockNum matches entries in the index
-func (ip *LogAddressIndexProvider) Matches(blockNum uint64) bool {
+func (ip *LogAddressIndexProvider) Matches(blockNum uint64) (bool, error) {
 	if err := ip.loadRange(blockNum); err != nil {
-		zlog.Error("couldn't load range", zap.Error(err))
-		return false
+		return false, fmt.Errorf("couldn't load range: %s", err)
 	}
 
 	for _, matchingBlock := range ip.currentMatchingBlocks {
 		if blockNum == matchingBlock {
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 // NextMatching will return the next block matching our request
-func (ip *LogAddressIndexProvider) NextMatching(blockNum uint64) (num uint64, done bool) {
-	if err := ip.loadRange(blockNum); err != nil {
-		zlog.Warn("couldn't load range", zap.Error(err))
-		// shouldn't happen; return the input blocknum and consider done
-		return blockNum, true
+func (ip *LogAddressIndexProvider) NextMatching(blockNum uint64) (num uint64, passedIndexBoundary bool, err error) {
+	if err = ip.loadRange(blockNum); err != nil {
+		return 0, false, fmt.Errorf("couldn't load range: %s", err)
 	}
 
 	for {
 		for _, block := range ip.currentMatchingBlocks {
 			if block > blockNum {
-				return block, false
+				return block, false, nil
 			}
 		}
 
 		nextBaseBlock := ip.currentIndex.lowBlockNum + ip.currentIndex.indexSize
 		err := ip.loadRange(nextBaseBlock)
 		if err != nil {
-			return nextBaseBlock, true
+			return nextBaseBlock, true, nil
 		}
 	}
 }
