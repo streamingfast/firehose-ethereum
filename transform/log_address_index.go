@@ -11,7 +11,7 @@ import (
 
 // LogAddressIndex will return false positives when matching addr AND eventSignatures
 type LogAddressIndex struct {
-	// TODO: maybe use ID() to match address
+	// TODO: maybe use ID() as uint to match address
 	// TODO: add a bloomfilter, populated on load
 
 	addrs       map[string]*roaring64.Bitmap // map[eth address](blocknum bitmap)
@@ -103,7 +103,7 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		addrBitmap.Or(i.addrs[addrString])
 	}
 
-	if len(eventSigs) == 0 {
+	if len(eventSigs) == 0 { // ONLY try to match addresses
 		out := addrBitmap.ToArray()
 		if len(out) == 0 {
 			return nil
@@ -119,8 +119,8 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		}
 		sigsBitmap.Or(i.eventSigs[sigString])
 	}
-	
-	if addrBitmap.IsEmpty() {
+
+	if len(addrs) == 0 { // ONLY try to match signatures
 		out := sigsBitmap.ToArray()
 		if len(out) == 0 {
 			return nil
@@ -128,7 +128,7 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		return out
 	}
 
-	addrBitmap.And(sigsBitmap) // transforms addrBitmap
+	addrBitmap.And(sigsBitmap) // addrBitmap is changed in-place, becomes merged data
 	out := addrBitmap.ToArray()
 	if len(out) == 0 {
 		return nil

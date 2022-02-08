@@ -3,13 +3,13 @@ package transform
 import (
 	"context"
 	"fmt"
-	"github.com/pingcap/log"
-	"github.com/streamingfast/dstore"
-	"github.com/streamingfast/eth-go"
-	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"time"
+
+	"github.com/streamingfast/dstore"
+	"github.com/streamingfast/eth-go"
+	"go.uber.org/zap"
 )
 
 const LogAddressIdxShortname string = "logaddr"
@@ -35,8 +35,6 @@ type LogAddressIndexProvider struct {
 
 func NewLogAddressIndexProvider(
 	store dstore.Store,
-	lowBlockNum uint64,
-	indexSize uint64,
 	filterAddresses []eth.Address,
 	filterEventSigs []eth.Hash,
 	possibleIndexSizes []uint64,
@@ -46,10 +44,12 @@ func NewLogAddressIndexProvider(
 	if possibleIndexSizes == nil {
 		possibleIndexSizes = []uint64{100000, 10000, 1000, 100}
 	}
+	if len(filterAddresses) == 0 && len(filterEventSigs) == 0 {
+		return nil
+	}
 
 	return &LogAddressIndexProvider{
 		store:              store,
-		currentIndex:       NewLogAddressIndex(lowBlockNum, indexSize),
 		indexOpsTimeout:    2 * time.Second,
 		filterAddresses:    filterAddresses,
 		filterEventSigs:    filterEventSigs,
@@ -77,7 +77,7 @@ func (ip *LogAddressIndexProvider) Matches(blockNum uint64) bool {
 		return false
 	}
 
-	for _, matchingBlock := range ip.currentIndex.matchingBlocks(ip.filterAddresses, ip.filterEventSigs) {
+	for _, matchingBlock := range ip.currentMatchingBlocks {
 		if blockNum == matchingBlock {
 			return true
 		}
@@ -89,7 +89,7 @@ func (ip *LogAddressIndexProvider) Matches(blockNum uint64) bool {
 // NextMatching will return the next block matching our request
 func (ip *LogAddressIndexProvider) NextMatching(blockNum uint64) (num uint64, done bool) {
 	if err := ip.loadRange(blockNum); err != nil {
-		log.Warn("couldn't load range", zap.Error(err))
+		zlog.Warn("couldn't load range", zap.Error(err))
 		// shouldn't happen; return the input blocknum and consider done
 		return blockNum, true
 	}
@@ -111,7 +111,7 @@ func (ip *LogAddressIndexProvider) NextMatching(blockNum uint64) (num uint64, do
 
 // loadRange will traverse available indexes until it finds the desired blockNum
 func (ip *LogAddressIndexProvider) loadRange(blockNum uint64) error {
-	if blockNum >= ip.currentIndex.lowBlockNum && blockNum < ip.currentIndex.lowBlockNum+ip.currentIndex.indexSize {
+	if ip.currentIndex != nil && blockNum >= ip.currentIndex.lowBlockNum && blockNum < ip.currentIndex.lowBlockNum+ip.currentIndex.indexSize {
 		return nil
 	}
 
