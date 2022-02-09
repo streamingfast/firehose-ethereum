@@ -49,6 +49,7 @@ func NewLogAddressIndexProvider(
 }
 
 // WithinRange determines the existence of an index which includes the provided blockNum
+// it also attempts to pre-emptively load the index (read-ahead)
 func (ip *LogAddressIndexProvider) WithinRange(blockNum uint64) bool {
 	r, lowBlockNum, indexSize := ip.findIndexContaining(blockNum)
 	if r == nil {
@@ -76,7 +77,10 @@ func (ip *LogAddressIndexProvider) Matches(blockNum uint64) (bool, error) {
 	return false, nil
 }
 
-// NextMatching will return the next block matching our request
+// NextMatching will return the next block matching our request.
+// This call may go through the whole index if nothing matches,
+// in which case the returned bool is true, and the returned num has specific meaning of
+// "first block num outside the currently indexed range"
 func (ip *LogAddressIndexProvider) NextMatching(blockNum uint64) (num uint64, passedIndexBoundary bool, err error) {
 	if err = ip.loadRange(blockNum); err != nil {
 		return 0, false, fmt.Errorf("couldn't load range: %s", err)
