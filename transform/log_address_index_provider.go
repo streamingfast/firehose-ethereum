@@ -14,23 +14,15 @@ import (
 
 const LogAddressIdxShortname string = "logaddr"
 
-//type IndexProvider interface {
-//	WithinRange(blockNum uint64) bool
-//	Matches(blockNum uint64) bool
-//	NextMatching(blockNum uint64) (num uint64, done bool) // when done is true, the returned blocknum is the first Unindexed block
-//}
-
 // LogAddressIndexProvider responds to queries about LogAddressIndexes
 type LogAddressIndexProvider struct {
-	store           dstore.Store
-	indexOpsTimeout time.Duration
-
-	currentIndex *LogAddressIndex
-
+	currentIndex          *LogAddressIndex
 	currentMatchingBlocks []uint64
 	filterAddresses       []eth.Address
 	filterEventSigs       []eth.Hash
+	indexOpsTimeout       time.Duration
 	possibleIndexSizes    []uint64
+	store                 dstore.Store
 }
 
 func NewLogAddressIndexProvider(
@@ -38,7 +30,6 @@ func NewLogAddressIndexProvider(
 	filterAddresses []eth.Address,
 	filterEventSigs []eth.Hash,
 	possibleIndexSizes []uint64,
-
 ) *LogAddressIndexProvider {
 	// todo(froch, 20220207): firm up what these values will be
 	if possibleIndexSizes == nil {
