@@ -91,6 +91,8 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Bl
 	}
 }
 
+// testEthBlocks returns a slice of pbcodec.Block's
+// it takes a size parameter, to truncate with [:size]
 func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
 	blocks := []*pbcodec.Block{
 		testEthBlock(t, 10,
