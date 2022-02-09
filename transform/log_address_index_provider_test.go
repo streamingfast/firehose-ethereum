@@ -350,6 +350,21 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 			expectedNextBlockNum:        14,
 			expectedPassedIndexBoundary: true,
 		},
+		{
+			name:        "filters don't match any known blocks",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 10,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("ffffffffffffffffffffffffffffffffffffffff"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+			},
+			expectedNextBlockNum:        14,
+			expectedPassedIndexBoundary: true,
+		},
 	}
 
 	for _, test := range tests {
