@@ -145,14 +145,14 @@ func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
 		),
 		testEthBlock(t, 14,
 			[]string{
-				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"5555555555555555555555555555555555555555",
 				"7777777777777777777777777777777777777777",
 				"cccccccccccccccccccccccccccccccccccccccc",
 			},
 			[]string{
 				"6666666666666666666666666666666666666666666666666666666666666666",
 				"7777777777777777777777777777777777777777777777777777777777777777",
-				"8888888888888888888888888888888888888888888888888888888888888888",
+				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
 			},
 		),
 	}

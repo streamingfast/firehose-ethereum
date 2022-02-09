@@ -336,19 +336,19 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 			expectedPassedIndexBoundary: false,
 		},
 		{
-			name:        "block exists in first index and filters match block in second index",
+			name:        "block exists in first index and filters match block outside bounds",
 			lowBlockNum: 0,
 			indexSize:   2,
 			blocks:      testEthBlocks(t, 5),
-			wantedBlock: 11,
+			wantedBlock: 10,
 			filterAddresses: []eth.Address{
-				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+				eth.MustNewAddress("cccccccccccccccccccccccccccccccccccccccc"),
 			},
 			filterEventSigs: []eth.Hash{
-				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+				eth.MustNewHash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
 			},
-			expectedNextBlockNum:        13,
-			expectedPassedIndexBoundary: false,
+			expectedNextBlockNum:        14,
+			expectedPassedIndexBoundary: true,
 		},
 	}
 
