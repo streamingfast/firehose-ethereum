@@ -3,12 +3,12 @@ package transform
 import (
 	"context"
 	"fmt"
+	"github.com/streamingfast/eth-go"
 	"io"
 	"io/ioutil"
 	"time"
 
 	"github.com/streamingfast/dstore"
-	"github.com/streamingfast/eth-go"
 	"go.uber.org/zap"
 )
 

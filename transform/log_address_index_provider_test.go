@@ -75,20 +75,20 @@ func TestLogAddressIndexProvider_NewLogAddressIndexProvider(t *testing.T) {
 }
 
 func TestLogAddressIndexProvider_FindIndexContaining_LoadIndex(t *testing.T) {
-	lowBlockNum := uint64(10)
-	indexSize := uint64(2)
+	initiallowBlockNum := uint64(10)
+	initialindexSize := uint64(2)
 	blocks := testEthBlocks(t, 5)
 	matchAddresses := []eth.Address{eth.Address("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")}
 
 	// populate a mock dstore with some index files
-	indexStore := testMockstoreWithFiles(t, blocks, indexSize)
+	indexStore := testMockstoreWithFiles(t, blocks, initialindexSize)
 
 	// spawn an indexProvider with the populated dstore
-	provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{indexSize})
+	provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{initialindexSize})
 	require.NotNil(t, provider)
 
 	// try to load an index without finding it first
-	err := provider.loadIndex(strings.NewReader("bogus"), lowBlockNum, indexSize)
+	err := provider.loadIndex(strings.NewReader("bogus"), initiallowBlockNum, initialindexSize)
 	require.Error(t, err)
 
 	// try to find indexes with non-existent block nums
@@ -110,12 +110,12 @@ func TestLogAddressIndexProvider_FindIndexContaining_LoadIndex(t *testing.T) {
 	// find the index containing a known block num, from another index file
 	r, lowBlockNum, indexSize = provider.findIndexContaining(12)
 	require.NotNil(t, r)
-	require.Equal(t, lowBlockNum+indexSize, lowBlockNum)
-	require.Equal(t, indexSize, indexSize)
+	require.Equal(t, lowBlockNum, provider.currentIndex.lowBlockNum+indexSize)
+	require.Equal(t, indexSize, provider.currentIndex.indexSize)
 	err = provider.loadIndex(r, lowBlockNum, indexSize)
 	require.Nil(t, err)
+	require.Equal(t, lowBlockNum, provider.currentIndex.lowBlockNum)
 	require.Equal(t, indexSize, provider.currentIndex.indexSize)
-	require.Equal(t, lowBlockNum+indexSize, provider.currentIndex.lowBlockNum)
 }
 
 func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
@@ -320,6 +320,21 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 		expectedNextBlockNum        uint64
 		expectedPassedIndexBoundary bool
 	}{
+		{
+			name:        "block exists in first index and filters match block in second index",
+			lowBlockNum: 0,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 11,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			expectedNextBlockNum:        13,
+			expectedPassedIndexBoundary: false,
+		},
 		{
 			name:        "block exists in first index and filters match block in second index",
 			lowBlockNum: 0,
