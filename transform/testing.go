@@ -181,11 +181,6 @@ func testMockstoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uin
 		require.NoError(t, err)
 	}
 
-	if len(blocks) != 0 {
-		// check that dstore wrote the index files
-		require.Equal(t, 2, len(results))
-	}
-
 	// populate a new indexStore with the prior results
 	indexStore = dstore.NewMockStore(nil)
 	for indexName, indexContents := range results {
