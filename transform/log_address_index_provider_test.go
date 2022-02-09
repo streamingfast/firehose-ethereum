@@ -75,62 +75,47 @@ func TestLogAddressIndexProvider_NewLogAddressIndexProvider(t *testing.T) {
 }
 
 func TestLogAddressIndexProvider_FindIndexContaining_LoadIndex(t *testing.T) {
-	tests := []struct {
-		name        string
-		lowBlockNum uint64
-		indexSize   uint64
-		blocks      []*pbcodec.Block
-	}{
-		{
-			name:        "sunny path",
-			lowBlockNum: 10,
-			indexSize:   2,
-			blocks:      testEthBlocks(t, 5),
-		},
-	}
-
+	lowBlockNum := uint64(10)
+	indexSize := uint64(2)
+	blocks := testEthBlocks(t, 5)
 	matchAddresses := []eth.Address{eth.Address("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			// populate a mock dstore with some index files
-			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
+	// populate a mock dstore with some index files
+	indexStore := testMockstoreWithFiles(t, blocks, indexSize)
 
-			// spawn an indexProvider with the populated dstore
-			provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{test.indexSize})
-			require.NotNil(t, provider)
+	// spawn an indexProvider with the populated dstore
+	provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{indexSize})
+	require.NotNil(t, provider)
 
-			// try to load an index without finding it first
-			err := provider.loadIndex(strings.NewReader("bogus"), test.lowBlockNum, test.indexSize)
-			require.Error(t, err)
+	// try to load an index without finding it first
+	err := provider.loadIndex(strings.NewReader("bogus"), lowBlockNum, indexSize)
+	require.Error(t, err)
 
-			// try to find indexes with non-existent block nums
-			r, lowBlockNum, indexSize := provider.findIndexContaining(42)
-			require.Nil(t, r)
-			r, lowBlockNum, indexSize = provider.findIndexContaining(69)
-			require.Nil(t, r)
+	// try to find indexes with non-existent block nums
+	r, lowBlockNum, indexSize := provider.findIndexContaining(42)
+	require.Nil(t, r)
+	r, lowBlockNum, indexSize = provider.findIndexContaining(69)
+	require.Nil(t, r)
 
-			// find the indexes containing specific block nums
-			r, lowBlockNum, indexSize = provider.findIndexContaining(10)
-			require.NotNil(t, r)
-			require.Equal(t, test.lowBlockNum, lowBlockNum)
-			require.Equal(t, test.indexSize, indexSize)
-			err = provider.loadIndex(r, lowBlockNum, indexSize)
-			require.Nil(t, err)
-			require.Equal(t, test.indexSize, provider.currentIndex.indexSize)
-			require.Equal(t, test.lowBlockNum, provider.currentIndex.lowBlockNum)
+	// find the index containing a known block num
+	r, lowBlockNum, indexSize = provider.findIndexContaining(10)
+	require.NotNil(t, r)
+	require.Equal(t, lowBlockNum, lowBlockNum)
+	require.Equal(t, indexSize, indexSize)
+	err = provider.loadIndex(r, lowBlockNum, indexSize)
+	require.Nil(t, err)
+	require.Equal(t, indexSize, provider.currentIndex.indexSize)
+	require.Equal(t, lowBlockNum, provider.currentIndex.lowBlockNum)
 
-			// find the indexes containing a specific block num in another file
-			r, lowBlockNum, indexSize = provider.findIndexContaining(12)
-			require.NotNil(t, r)
-			require.Equal(t, test.lowBlockNum+test.indexSize, lowBlockNum)
-			require.Equal(t, test.indexSize, indexSize)
-			err = provider.loadIndex(r, lowBlockNum, indexSize)
-			require.Nil(t, err)
-			require.Equal(t, test.indexSize, provider.currentIndex.indexSize)
-			require.Equal(t, test.lowBlockNum+test.indexSize, provider.currentIndex.lowBlockNum)
-		})
-	}
+	// find the index containing a known block num, from another index file
+	r, lowBlockNum, indexSize = provider.findIndexContaining(12)
+	require.NotNil(t, r)
+	require.Equal(t, lowBlockNum+indexSize, lowBlockNum)
+	require.Equal(t, indexSize, indexSize)
+	err = provider.loadIndex(r, lowBlockNum, indexSize)
+	require.Nil(t, err)
+	require.Equal(t, indexSize, provider.currentIndex.indexSize)
+	require.Equal(t, lowBlockNum+indexSize, provider.currentIndex.lowBlockNum)
 }
 
 func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
