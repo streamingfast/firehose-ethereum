@@ -231,24 +231,6 @@ func (l *BigtableLoader) FullJob(blockNum uint64, block *pbcodec.Block, fObj *fo
 		defer metrics.HeadBlockTimeDrift.SetBlockTime(blkTime)
 		defer metrics.HeadBlockNumber.SetUint64(blockNum)
 
-		if blockNum == bstream.GetProtocolFirstStreamableBlock {
-			genesisBlock := &pbcodec.Block{
-				Number: bstream.GetProtocolGenesisBlock,
-				Hash:   block.Header.ParentHash,
-				Header: &pbcodec.BlockHeader{
-					Hash:      block.Header.ParentHash,
-					Number:    bstream.GetProtocolGenesisBlock,
-					Timestamp: block.Header.Timestamp, // TODO FIXME when we can get the actual content of that genesis block
-				},
-			}
-			if err := l.db.PutBlock(context.Background(), genesisBlock); err != nil {
-				return fmt.Errorf("store genesis block: %w", err)
-			}
-			if err := l.db.UpdateNowIrreversibleBlock(context.Background(), genesisBlock); err != nil {
-				return fmt.Errorf("set genesis block irreversible: %w", err)
-			}
-		}
-
 		if err := l.db.PutBlock(context.Background(), block); err != nil {
 			return fmt.Errorf("store block: %s", err)
 		}
