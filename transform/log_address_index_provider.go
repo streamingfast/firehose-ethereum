@@ -41,7 +41,7 @@ func NewLogAddressIndexProvider(
 
 	return &LogAddressIndexProvider{
 		store:              store,
-		indexOpsTimeout:    2 * time.Second,
+		indexOpsTimeout:    15 * time.Second,
 		filterAddresses:    filterAddresses,
 		filterEventSigs:    filterEventSigs,
 		possibleIndexSizes: possibleIndexSizes,
