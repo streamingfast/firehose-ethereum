@@ -1,31 +1,32 @@
 package transform
 
 import (
-	"bytes"
-	"context"
 	"fmt"
 
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/golang/protobuf/proto"
-	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
-	"go.uber.org/zap"
-	"io/ioutil"
-	"time"
 )
 
 // LogAddressIndex will return false positives when matching addr AND eventSignatures
 type LogAddressIndex struct {
-	// TODO: maybe use ID() to match address
+	// TODO: maybe use ID() as uint to match address
 	// TODO: add a bloomfilter, populated on load
 
 	addrs       map[string]*roaring64.Bitmap // map[eth address](blocknum bitmap)
 	eventSigs   map[string]*roaring64.Bitmap
 	lowBlockNum uint64
 	indexSize   uint64
+}
+
+func NewLogAddressIndex(lowBlockNum, indexSize uint64) *LogAddressIndex {
+	return &LogAddressIndex{
+		lowBlockNum: lowBlockNum,
+		indexSize:   indexSize,
+		addrs:       make(map[string]*roaring64.Bitmap),
+		eventSigs:   make(map[string]*roaring64.Bitmap),
+	}
 }
 
 func (i *LogAddressIndex) Marshal() ([]byte, error) {
@@ -56,15 +57,6 @@ func (i *LogAddressIndex) Marshal() ([]byte, error) {
 	}
 
 	return proto.Marshal(pbIndex)
-}
-
-func NewLogAddressIndex(lowBlockNum, indexSize uint64) *LogAddressIndex {
-	return &LogAddressIndex{
-		lowBlockNum: lowBlockNum,
-		indexSize:   indexSize,
-		addrs:       make(map[string]*roaring64.Bitmap),
-		eventSigs:   make(map[string]*roaring64.Bitmap),
-	}
 }
 
 func (i *LogAddressIndex) Unmarshal(in []byte) error {
@@ -110,13 +102,13 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		}
 		addrBitmap.Or(i.addrs[addrString])
 	}
-	if len(eventSigs) == 0 {
+
+	if len(eventSigs) == 0 { // ONLY try to match addresses
 		out := addrBitmap.ToArray()
 		if len(out) == 0 {
 			return nil
 		}
 		return out
-
 	}
 
 	sigsBitmap := roaring64.NewBitmap()
@@ -127,7 +119,8 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		}
 		sigsBitmap.Or(i.eventSigs[sigString])
 	}
-	if addrBitmap.IsEmpty() {
+
+	if len(addrs) == 0 { // ONLY try to match signatures
 		out := sigsBitmap.ToArray()
 		if len(out) == 0 {
 			return nil
@@ -135,13 +128,12 @@ func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Ha
 		return out
 	}
 
-	addrBitmap.And(sigsBitmap) // transforms addrBitmap
+	addrBitmap.And(sigsBitmap) // addrBitmap is changed in-place, becomes merged data
 	out := addrBitmap.ToArray()
 	if len(out) == 0 {
 		return nil
 	}
 	return out
-
 }
 
 func (i *LogAddressIndex) add(addr eth.Address, eventSig eth.Hash, blocknum uint64) {
@@ -170,118 +162,4 @@ func (i *LogAddressIndex) addEventSig(eventSig eth.Hash, blocknum uint64) {
 		return
 	}
 	bitmap.Add(blocknum)
-}
-
-type LogAddressIndexer struct {
-	currentIndex    *LogAddressIndex
-	store           dstore.Store
-	indexSize       uint64
-	indexOpsTimeout time.Duration
-}
-
-func NewLogAddressIndexer(store dstore.Store, indexSize uint64) *LogAddressIndexer {
-	return &LogAddressIndexer{
-		store:           store,
-		currentIndex:    nil,
-		indexSize:       indexSize,
-		indexOpsTimeout: 15 * time.Second,
-	}
-}
-
-func (i *LogAddressIndexer) ProcessEthBlock(blk *pbcodec.Block) error {
-
-	// init lower bound
-	if i.currentIndex == nil {
-		switch {
-
-		case blk.Num()%i.indexSize == 0:
-			// we're on a boundary
-			i.currentIndex = NewLogAddressIndex(blk.Number, i.indexSize)
-
-		case blk.Number == bstream.GetProtocolFirstStreamableBlock:
-			// handle offset
-			lb := lowBoundary(blk.Num(), i.indexSize)
-			i.currentIndex = NewLogAddressIndex(lb, i.indexSize)
-
-		default:
-			zlog.Warn("couldn't determine boundary for block", zap.Uint64("blk_num", blk.Num()))
-			return nil
-		}
-	}
-
-	// upper bound reached
-	if blk.Num() >= i.currentIndex.lowBlockNum+i.indexSize {
-		if err := i.writeIndex(); err != nil {
-			zlog.Warn("cannot write index", zap.Error(err))
-		}
-		lb := lowBoundary(blk.Number, i.indexSize)
-		i.currentIndex = NewLogAddressIndex(lb, i.indexSize)
-	}
-
-	for _, trace := range blk.TransactionTraces {
-		for _, log := range trace.Receipt.Logs {
-			var evSig []byte
-			if len(log.Topics) != 0 {
-				evSig = log.Topics[0]
-			}
-			i.currentIndex.add(log.Address, evSig, blk.Number)
-		}
-	}
-
-	return nil
-}
-
-func (i *LogAddressIndexer) String() string {
-	return fmt.Sprintf("addresses: %d, methods: %d", len(i.currentIndex.addrs), len(i.currentIndex.eventSigs))
-}
-
-func (i *LogAddressIndexer) writeIndex() error {
-	ctx, cancel := context.WithTimeout(context.Background(), i.indexOpsTimeout)
-	defer cancel()
-
-	if i.currentIndex == nil {
-		zlog.Warn("attempted to write nil index")
-		return nil
-	}
-
-	data, err := i.currentIndex.Marshal()
-	if err != nil {
-		return err
-	}
-
-	filename := toIndexFilename(i.indexSize, i.currentIndex.lowBlockNum, "logaddr")
-	if err = i.store.WriteObject(ctx, filename, bytes.NewReader(data)); err != nil {
-		zlog.Warn("cannot write index file to store",
-			zap.String("filename", filename),
-			zap.Error(err),
-		)
-	}
-
-	return nil
-}
-
-func (i *LogAddressIndexer) readIndex(indexName string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), i.indexOpsTimeout)
-	defer cancel()
-
-	if i.currentIndex == nil {
-		i.currentIndex = NewLogAddressIndex(0, i.indexSize)
-	}
-
-	dstoreObj, err := i.store.OpenObject(ctx, indexName)
-	if err != nil {
-		return fmt.Errorf("couldn't open object %s from dstore: %s", indexName, err)
-	}
-
-	obj, err := ioutil.ReadAll(dstoreObj)
-	if err != nil {
-		return fmt.Errorf("couldn't read %s: %s", indexName, err)
-	}
-
-	err = i.currentIndex.Unmarshal(obj)
-	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %s: %s", indexName, err)
-	}
-
-	return nil
 }
