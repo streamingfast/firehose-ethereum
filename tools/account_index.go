@@ -124,7 +124,5 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("unmarshalling firehose message: %w", err)
 		}
 		t.ProcessEthBlock(b)
-
-		fmt.Println(t)
 	}
 }

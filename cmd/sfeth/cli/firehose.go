@@ -16,6 +16,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/streamingfast/dstore"
 	"os"
 	"strconv"
 	"strings"
@@ -55,9 +56,13 @@ func init() {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection")
 			cmd.Flags().StringSlice("firehose-blocks-store-urls", nil, "If non-empty, overrides common-blocks-store-url with a list of blocks stores")
 			cmd.Flags().Duration("firehose-realtime-tolerance", 2*time.Minute, "Longest delay to consider this service as real-time (ready) on initialization")
+			// irreversible indices
 			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
 			cmd.Flags().Bool("firehose-write-irreversible-blocks-index", false, "If set, will also create missing irreversibility indexes and write them to firehose-irreversible-blocks-index-url")
 			cmd.Flags().IntSlice("firehose-irreversible-blocks-index-bundle-sizes", []int{10000, 1000, 100}, "list of sizes for irreversible block indices")
+			// block indices
+			cmd.Flags().String("firehose-block-index-url", "", "If non-empty, will use this URL as a store to load index data used by some transforms")
+			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{10000, 1000, 100}, "list of sizes for block indices")
 			return nil
 		},
 
@@ -117,8 +122,26 @@ func init() {
 				}
 			}
 
+			indexStoreUrl := viper.GetString("firehose-block-index-url")
+			var indexStore dstore.Store
+			if indexStoreUrl != "" {
+				s, err := dstore.NewStore(indexStoreUrl, "", "", false)
+				if err != nil {
+					return nil, fmt.Errorf("couldn't create indexStore: %w", err)
+				}
+				indexStore = s
+			}
+
+			var possibleIndexSizes []uint64
+			for _, size := range viper.GetIntSlice("firehose-block-index-sizes") {
+				if size < 0 {
+					return nil, fmt.Errorf("invalid negative size for firehose-block-index-sizes: %d", size)
+				}
+				possibleIndexSizes = append(possibleIndexSizes, uint64(size))
+			}
+
 			registry := transform.NewRegistry()
-			registry.Register(sftransform.BasicLogFilterFactory)
+			registry.Register(sftransform.BasicLogFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(sftransform.LightBlockFilterFactory)
 
 			var bundleSizes []uint64

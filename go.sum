@@ -1243,6 +1243,12 @@ github.com/streamingfast/bstream v0.0.2-0.20220209223512-b9705782e2e7 h1:Ai3DPQX
 github.com/streamingfast/bstream v0.0.2-0.20220209223512-b9705782e2e7/go.mod h1:Ktj9YKK643GPmd6Lugf5EMVciWXFgzRoVPK5JRnPgkU=
 github.com/streamingfast/bstream v0.0.2-0.20220210135451-43aa5bfb9274 h1:IHKa8G885F9mp6nvOBn1AelTN+mLp0M4aw1AFG1YR+8=
 github.com/streamingfast/bstream v0.0.2-0.20220210135451-43aa5bfb9274/go.mod h1:Ktj9YKK643GPmd6Lugf5EMVciWXFgzRoVPK5JRnPgkU=
+github.com/streamingfast/bstream v0.0.2-0.20220211162847-fdfcc656111f h1:JLfndsMyPmUUh7OvcV8XgXove8a26iPCiJQhfopmm3s=
+github.com/streamingfast/bstream v0.0.2-0.20220211162847-fdfcc656111f/go.mod h1:Ktj9YKK643GPmd6Lugf5EMVciWXFgzRoVPK5JRnPgkU=
+github.com/streamingfast/bstream v0.0.2-0.20220211200329-a6532cde80b8 h1:Kn8ltZUYHFCksAMHgmz9DzC5btitVKkFZZh68lkMeVY=
+github.com/streamingfast/bstream v0.0.2-0.20220211200329-a6532cde80b8/go.mod h1:Ktj9YKK643GPmd6Lugf5EMVciWXFgzRoVPK5JRnPgkU=
+github.com/streamingfast/bstream v0.0.2-0.20220211203037-c8c9a009bd74 h1:GebahyNVLZRV3PiXSHmmJV2iXOOXgWrzjmRfLMHtxZ4=
+github.com/streamingfast/bstream v0.0.2-0.20220211203037-c8c9a009bd74/go.mod h1:Ktj9YKK643GPmd6Lugf5EMVciWXFgzRoVPK5JRnPgkU=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d h1:ZEqHQMyAI9PSziBHNUiGdtvnpPnPQlyT8HHW/OLmrgc=
 github.com/streamingfast/cli v0.0.3-0.20210811201236-5c00ec55462d/go.mod h1:8TWHl1oWEu0JNNUz79R7e9dLPeCJhHmAys4g8cl6L/U=
 github.com/streamingfast/dauth v0.0.0-20210811181149-e8fd545948cc/go.mod h1:wwjRBEA7vZZ5kfy3I4LB5NJhFJWN2gaYgpBEmOnDwD8=
@@ -1300,6 +1306,10 @@ github.com/streamingfast/firehose v0.1.1-0.20220201212634-05ca7537c9a1 h1:ax0W/v
 github.com/streamingfast/firehose v0.1.1-0.20220201212634-05ca7537c9a1/go.mod h1:wmdBFliuuD0Xu1vuBmLkyy5rkspmQL6FdtbSiQs+dbU=
 github.com/streamingfast/firehose v0.1.1-0.20220210135906-5e87c2c8c724 h1:XRw9WIr+2cSM3ACIlvEVWOfCWLTgml/W9mjNvHroO08=
 github.com/streamingfast/firehose v0.1.1-0.20220210135906-5e87c2c8c724/go.mod h1:eGUKxvD9PgAfw9rOUwvmXWQGfhtI4MfTYl1H9E5ePnM=
+github.com/streamingfast/firehose v0.1.1-0.20220211163052-a3eb1d734b7c h1:uXhdksWWHajTGh4GV6wZBR35T2AvfN7QDe0SwjeMHAs=
+github.com/streamingfast/firehose v0.1.1-0.20220211163052-a3eb1d734b7c/go.mod h1:zPoolyHOJETfGJ4hZGNx+wagjDki/yMMFhVTslluo00=
+github.com/streamingfast/firehose v0.1.1-0.20220211203454-a8faca3705ca h1:cNyqT2wdBs3PiuaSfinA64Ov9wAMHPrcmoi5gYG9fdI=
+github.com/streamingfast/firehose v0.1.1-0.20220211203454-a8faca3705ca/go.mod h1:My9zTcHpSTIJzH+1vQwVuFsseacqAsAmoppPuKv/AeU=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTNObq2Uofb330y05JbbZZ6RwE6QUXw5iVcHk1Fx3fk=
 github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3 h1:v1ux5D8Xm30wpFpbS6u6fKuZUx/5/UTzYlR4llYaxSM=

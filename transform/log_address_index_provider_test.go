@@ -1,6 +1,7 @@
 package transform
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -91,14 +92,16 @@ func TestLogAddressIndexProvider_FindIndexContaining_LoadIndex(t *testing.T) {
 	err := provider.loadIndex(strings.NewReader("bogus"), initiallowBlockNum, initialindexSize)
 	require.Error(t, err)
 
+	ctx := context.Background()
+
 	// try to find indexes with non-existent block nums
-	r, lowBlockNum, indexSize := provider.findIndexContaining(42)
+	r, lowBlockNum, indexSize := provider.findIndexContaining(ctx, 42)
 	require.Nil(t, r)
-	r, lowBlockNum, indexSize = provider.findIndexContaining(69)
+	r, lowBlockNum, indexSize = provider.findIndexContaining(ctx, 69)
 	require.Nil(t, r)
 
 	// find the index containing a known block num
-	r, lowBlockNum, indexSize = provider.findIndexContaining(10)
+	r, lowBlockNum, indexSize = provider.findIndexContaining(ctx, 10)
 	require.NotNil(t, r)
 	require.Equal(t, lowBlockNum, lowBlockNum)
 	require.Equal(t, indexSize, indexSize)
@@ -108,7 +111,7 @@ func TestLogAddressIndexProvider_FindIndexContaining_LoadIndex(t *testing.T) {
 	require.Equal(t, lowBlockNum, provider.currentIndex.lowBlockNum)
 
 	// find the index containing a known block num, from another index file
-	r, lowBlockNum, indexSize = provider.findIndexContaining(12)
+	r, lowBlockNum, indexSize = provider.findIndexContaining(ctx, 12)
 	require.NotNil(t, r)
 	require.Equal(t, lowBlockNum, provider.currentIndex.lowBlockNum+indexSize)
 	require.Equal(t, indexSize, provider.currentIndex.indexSize)
