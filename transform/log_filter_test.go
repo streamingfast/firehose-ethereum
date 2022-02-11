@@ -32,6 +32,7 @@ func TestLogFilter_Transform(t *testing.T) {
 		topics             []eth.Hash
 		expectError        bool
 		expectTracesLength int
+		possibleIndexSizes []int
 	}{
 		{
 			name:               "Transfer events",
@@ -52,7 +53,7 @@ func TestLogFilter_Transform(t *testing.T) {
 	}
 
 	transformReg := transform.NewRegistry()
-	transformReg.Register(BasicLogFilterFactory)
+	transformReg.Register(BasicLogFilterFactory(nil, nil))
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
