@@ -3,10 +3,11 @@ package transform
 import (
 	"context"
 	"fmt"
-	"github.com/streamingfast/eth-go"
 	"io"
 	"io/ioutil"
 	"time"
+
+	"github.com/streamingfast/eth-go"
 
 	"github.com/streamingfast/dstore"
 	"go.uber.org/zap"
@@ -51,7 +52,10 @@ func NewLogAddressIndexProvider(
 // WithinRange determines the existence of an index which includes the provided blockNum
 // it also attempts to pre-emptively load the index (read-ahead)
 func (ip *LogAddressIndexProvider) WithinRange(blockNum uint64) bool {
-	r, lowBlockNum, indexSize := ip.findIndexContaining(blockNum)
+	ctx, cancel := context.WithTimeout(context.Background(), ip.indexOpsTimeout)
+	defer cancel()
+
+	r, lowBlockNum, indexSize := ip.findIndexContaining(ctx, blockNum)
 	if r == nil {
 		return false
 	}
@@ -110,7 +114,10 @@ func (ip *LogAddressIndexProvider) loadRange(blockNum uint64) error {
 	// truncate any prior matching blocks
 	ip.currentMatchingBlocks = []uint64{}
 
-	r, lowBlockNum, indexSize := ip.findIndexContaining(blockNum)
+	ctx, cancel := context.WithTimeout(context.Background(), ip.indexOpsTimeout)
+	defer cancel()
+
+	r, lowBlockNum, indexSize := ip.findIndexContaining(ctx, blockNum)
 	if r == nil {
 		return fmt.Errorf("couldn't find index containing block_num: %d", blockNum)
 	}
@@ -123,9 +130,7 @@ func (ip *LogAddressIndexProvider) loadRange(blockNum uint64) error {
 
 // findIndexContaining tries to find an index file in dstore containing the provided blockNum
 // if such a file exists, returns an io.Reader; nil otherwise
-func (ip *LogAddressIndexProvider) findIndexContaining(blockNum uint64) (r io.Reader, lowBlockNum, indexSize uint64) {
-	ctx, cancel := context.WithTimeout(context.Background(), ip.indexOpsTimeout)
-	defer cancel()
+func (ip *LogAddressIndexProvider) findIndexContaining(ctx context.Context, blockNum uint64) (r io.Reader, lowBlockNum, indexSize uint64) {
 
 	for _, size := range ip.possibleIndexSizes {
 		var err error

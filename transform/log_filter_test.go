@@ -1,9 +1,10 @@
 package transform
 
 import (
-	"github.com/streamingfast/dstore"
 	"io"
 	"testing"
+
+	"github.com/streamingfast/dstore"
 
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/eth-go"
@@ -61,7 +62,7 @@ func TestLogFilter_Transform(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			transforms := []*anypb.Any{logFilterTransform(t, test.addresses, test.topics)}
 
-			preprocFunc, err := transformReg.BuildFromTransforms(transforms)
+			preprocFunc, _, err := transformReg.BuildFromTransforms(transforms)
 			require.NoError(t, err)
 
 			blk := testBlockFromFiles(t, "block.json")
