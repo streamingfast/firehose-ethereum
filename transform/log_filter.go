@@ -105,11 +105,20 @@ func (p *BasicLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Inpu
 	return ethBlock, nil
 }
 
+// GetIndexProvider will instantiate a new LogAddressIndex conforming to the bstream.BlockIndexProvider interface
 func (p *BasicLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
-	store := p.indexStore
-	addrs := p.Addresses
-	sigs := p.EventSigntures
-	sizes := p.possibleIndexSizes
+	if p.indexStore == nil {
+		return nil
+	}
 
-	return NewLogAddressIndexProvider(store, addrs, sigs, sizes)
+	if len(p.Addresses) == 0 && len(p.EventSigntures) == 0 {
+		return nil
+	}
+
+	return NewLogAddressIndexProvider(
+		p.indexStore,
+		p.Addresses,
+		p.EventSigntures,
+		p.possibleIndexSizes,
+	)
 }
