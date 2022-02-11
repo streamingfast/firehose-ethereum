@@ -5,12 +5,13 @@ import (
 	"context"
 	"fmt"
 
+	"io/ioutil"
+	"time"
+
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"time"
 )
 
 type LogAddressIndexer struct {
@@ -97,6 +98,10 @@ func (i *LogAddressIndexer) writeIndex() error {
 			zap.Error(err),
 		)
 	}
+	zlog.Info("wrote file to store",
+		zap.String("filename", filename),
+		zap.Uint64("low_block_num", i.currentIndex.lowBlockNum),
+	)
 
 	return nil
 }
