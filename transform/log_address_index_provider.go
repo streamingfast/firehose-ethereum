@@ -140,7 +140,10 @@ func (ip *LogAddressIndexProvider) findIndexContaining(ctx context.Context, bloc
 
 		r, err = ip.store.OpenObject(ctx, filename)
 		if err == dstore.ErrNotFound {
-			zlog.Debug("couldn't find index file", zap.String("filename", filename))
+			zlog.Debug("couldn't find index file",
+				zap.String("filename", filename),
+				zap.Uint64("blockNum", blockNum),
+			)
 			continue
 		}
 		if err != nil {
