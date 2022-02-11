@@ -1,6 +1,8 @@
 package transform
 
 import (
+	"github.com/streamingfast/dstore"
+	"io"
 	"testing"
 
 	"github.com/streamingfast/bstream/transform"
@@ -74,5 +76,74 @@ func TestLogFilter_Transform(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestBasicLogFilter_GetIndexProvider(t *testing.T) {
+	tests := []struct {
+		name        string
+		indexStore  dstore.Store
+		addrs       []eth.Address
+		sigs        []eth.Hash
+		expectedNil bool
+	}{
+		{
+			name: "with store and addresses and sigs",
+			indexStore: dstore.NewMockStore(func(base string, f io.Reader) (err error) {
+				return nil
+			}),
+			addrs: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			sigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			expectedNil: false,
+		},
+		{
+			name:       "no store with addresses and sigs",
+			indexStore: nil,
+			addrs: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			sigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			expectedNil: true,
+		},
+		{
+			name:       "no store no addresses with sigs",
+			indexStore: nil,
+			addrs:      nil,
+			sigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			expectedNil: true,
+		},
+		{
+			name:        "no store no addresses no sigs",
+			indexStore:  nil,
+			addrs:       nil,
+			sigs:        nil,
+			expectedNil: true,
+		},
+	}
+
+	possibleIndexSizes := []uint64{10000, 1000, 100}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			f := &BasicLogFilter{
+				indexStore:         test.indexStore,
+				possibleIndexSizes: possibleIndexSizes,
+				Addresses:          test.addrs,
+				EventSigntures:     test.sigs,
+			}
+			p := f.GetIndexProvider()
+			if test.expectedNil {
+				require.Nil(t, p)
+			} else {
+				require.NotNil(t, p)
+			}
+		})
+	}
 }
