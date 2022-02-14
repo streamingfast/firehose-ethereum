@@ -1317,6 +1317,8 @@ github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3/go.mod h1:4dQ
 github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341 h1:+9UISis7a5u0ZDRS5dUWTF23eoKg9qcV4hXUImSEaDc=
 github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
+github.com/streamingfast/logging v0.0.0-20220214194203-5c70c134fea8 h1:qFLtOabZG4svQwAVa22KXzvgSMsBWfEQU3pzB8nagPo=
+github.com/streamingfast/logging v0.0.0-20220214194203-5c70c134fea8/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/merger v0.0.3-0.20220113160512-5f6ff271d37a h1:KRHGpdzZoKw0ZscBpkJb1crh+p5yVhcvYsbg4l1SN3g=
 github.com/streamingfast/merger v0.0.3-0.20220113160512-5f6ff271d37a/go.mod h1:KqKqy/tiH4k6CuRWORhW1Rq4mlmTPTz4KFHZyZHo43g=
 github.com/streamingfast/merger v0.0.3-0.20220201165645-625f805412f0 h1:bYgU7KKbHXoAlIqnCRI13ZzyeBvMiecT/bOSJyB4hOA=
