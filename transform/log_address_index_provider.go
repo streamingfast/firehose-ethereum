@@ -55,6 +55,10 @@ func (ip *LogAddressIndexProvider) WithinRange(blockNum uint64) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), ip.indexOpsTimeout)
 	defer cancel()
 
+	if ip.currentIndex != nil && ip.currentIndex.lowBlockNum <= blockNum && (ip.currentIndex.lowBlockNum+ip.currentIndex.indexSize) > blockNum {
+		return true
+	}
+
 	r, lowBlockNum, indexSize := ip.findIndexContaining(ctx, blockNum)
 	if r == nil {
 		return false

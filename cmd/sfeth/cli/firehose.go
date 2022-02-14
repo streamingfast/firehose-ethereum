@@ -16,11 +16,12 @@ package cli
 
 import (
 	"fmt"
-	"github.com/streamingfast/dstore"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/streamingfast/dstore"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -59,10 +60,10 @@ func init() {
 			// irreversible indices
 			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
 			cmd.Flags().Bool("firehose-write-irreversible-blocks-index", false, "If set, will also create missing irreversibility indexes and write them to firehose-irreversible-blocks-index-url")
-			cmd.Flags().IntSlice("firehose-irreversible-blocks-index-bundle-sizes", []int{10000, 1000, 100}, "list of sizes for irreversible block indices")
+			cmd.Flags().IntSlice("firehose-irreversible-blocks-index-bundle-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for irreversible block indices")
 			// block indices
 			cmd.Flags().String("firehose-block-index-url", "", "If non-empty, will use this URL as a store to load index data used by some transforms")
-			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{10000, 1000, 100}, "list of sizes for block indices")
+			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for block indices")
 			return nil
 		},
 
