@@ -41,7 +41,7 @@ require (
 	github.com/streamingfast/firehose v0.1.1-0.20220211203454-a8faca3705ca
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/kvdb v0.0.2-0.20210811194032-09bf862bd2e3
-	github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341
+	github.com/streamingfast/logging v0.0.0-20220214194203-5c70c134fea8
 	github.com/streamingfast/merger v0.0.3-0.20220201165645-625f805412f0
 	github.com/streamingfast/node-manager v0.0.2-0.20211207181611-383f06886a4c
 	github.com/streamingfast/pbgo v0.0.6-0.20220104194237-6534a2f6320b
