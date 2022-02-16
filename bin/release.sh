@@ -44,6 +44,11 @@ main() {
   echo "About to release version tagged $version ($mode)"
   sleep 3
 
+  if [[ "$force" == "false" ]]; then
+    echo "Pushing to ensure GitHub knowns about the latest commit(s)"
+    git push
+  fi
+
   args="--rm-dist"
   if [[ "$force" == "false" ]]; then
     args="--skip-publish --skip-validate $args"
