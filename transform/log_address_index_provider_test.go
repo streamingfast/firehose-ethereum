@@ -66,7 +66,8 @@ func TestLogAddressIndexProvider_NewLogAddressIndexProvider(t *testing.T) {
 			}
 			require.NotNil(t, provider)
 
-			err := provider.loadRange(test.lowBlockNum)
+			ctx := context.Background()
+			err := provider.loadRange(ctx, test.lowBlockNum)
 			require.NoError(t, err)
 
 			assert.Equal(t, test.expectedNextBlocks, provider.currentMatchingBlocks)
@@ -170,8 +171,9 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 			provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{test.indexSize})
 			require.NotNil(t, provider)
 
+			ctx := context.Background()
 			// call loadRange on known block
-			err := provider.loadRange(test.wantedBlock)
+			err := provider.loadRange(ctx, test.wantedBlock)
 			if test.expectError {
 				require.Error(t, err)
 				return
@@ -230,7 +232,7 @@ func TestLogAddressIndexProvider_WithinRange(t *testing.T) {
 			require.NotNil(t, provider)
 
 			// call loadRange on known blocks
-			b := provider.WithinRange(test.wantedBlock)
+			b := provider.WithinRange(context.Background(), test.wantedBlock)
 			if test.expectMatches {
 				require.True(t, b)
 			} else {
@@ -300,7 +302,7 @@ func TestLogAddressIndexProvider_Matches(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 			provider := NewLogAddressIndexProvider(indexStore, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
 
-			b, err := provider.Matches(test.wantedBlock)
+			b, err := provider.Matches(context.Background(), test.wantedBlock)
 			require.NoError(t, err)
 			if test.expectedMatches {
 				require.True(t, b)
@@ -375,7 +377,7 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 			provider := NewLogAddressIndexProvider(indexStore, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
 
-			nextBlockNum, passedIndexBoundary, err := provider.NextMatching(test.wantedBlock)
+			nextBlockNum, passedIndexBoundary, err := provider.NextMatching(context.Background(), test.wantedBlock, 0)
 			require.NoError(t, err)
 			require.Equal(t, passedIndexBoundary, test.expectedPassedIndexBoundary)
 			require.Equal(t, nextBlockNum, test.expectedNextBlockNum)
