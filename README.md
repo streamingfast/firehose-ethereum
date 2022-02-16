@@ -65,6 +65,14 @@ go install ./cmd/sfeth
 
   **Note** You will need to have [grpcurl](https://github.com/fullstorydev/grpcurl) and a clone of both https://github.com/streamingfast/proto and https://github.com/streamingfast/proto-ethereum, we assume they are sibling of the folder you are currently in, adjust `-import-path ...` flags in the command above to where the files are located.
 
+## Release
+
+Use the `./bin/release.sh` Bash script to perform a new release. It will ask you questions
+as well as driving all the required commands, performing the necessary operation automatically.
+The Bash script runs in dry-mode by default, so you can check first that everything is all right.
+
+Releases are performed using [goreleaser](https://goreleaser.com/).
+
 ## Contributing
 
 **Issues and PR in this repo related strictly to the Ethereum on StreamingFast.**

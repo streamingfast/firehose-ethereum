@@ -15,20 +15,22 @@
 package main
 
 import (
+	"time"
+
 	"github.com/streamingfast/sf-ethereum/cmd/sfeth/cli"
 )
 
 // Commit sha1 value, injected via go build `ldflags` at build time
-var Commit = ""
+var commit = ""
 
 // Version value, injected via go build `ldflags` at build time
-var Version = "dev"
+var version = "dev"
 
-// IsDirty value, injected via go build `ldflags` at build time
-var IsDirty = ""
+// Date value, injected via go build `ldflags` at build time
+var date = time.Now().Format(time.RFC3339)
 
 func init() {
-	cli.RootCmd.Version = cli.Version(Commit, Version, IsDirty)
+	cli.RootCmd.Version = cli.Version(version, commit, date)
 }
 
 func main() {
