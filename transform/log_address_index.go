@@ -93,47 +93,55 @@ func (i *LogAddressIndex) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
-	addrBitmap := roaring64.NewBitmap()
+func nilIfEmpty(in []uint64) []uint64 {
+	if len(in) == 0 {
+		return nil
+	}
+	return in
+}
+
+func (i *LogAddressIndex) addressBitmap(addrs []eth.Address) *roaring64.Bitmap {
+	out := roaring64.NewBitmap()
 	for _, addr := range addrs {
 		addrString := addr.String()
-		if _, ok := i.addrs[addrString]; !ok {
-			continue
+		if bm, ok := i.addrs[addrString]; ok {
+			fmt.Println("adding i addrstring", addrString, bm.String())
+			out.Or(bm)
 		}
-		addrBitmap.Or(i.addrs[addrString])
 	}
-
-	if len(eventSigs) == 0 { // ONLY try to match addresses
-		out := addrBitmap.ToArray()
-		if len(out) == 0 {
-			return nil
-		}
-		return out
-	}
-
-	sigsBitmap := roaring64.NewBitmap()
-	for _, sig := range eventSigs {
+	return out
+}
+func (i *LogAddressIndex) sigsBitmap(sigs []eth.Hash) *roaring64.Bitmap {
+	out := roaring64.NewBitmap()
+	for _, sig := range sigs {
 		sigString := sig.String()
 		if _, ok := i.eventSigs[sigString]; !ok {
 			continue
 		}
-		sigsBitmap.Or(i.eventSigs[sigString])
-	}
-
-	if len(addrs) == 0 { // ONLY try to match signatures
-		out := sigsBitmap.ToArray()
-		if len(out) == 0 {
-			return nil
-		}
-		return out
-	}
-
-	addrBitmap.And(sigsBitmap) // addrBitmap is changed in-place, becomes merged data
-	out := addrBitmap.ToArray()
-	if len(out) == 0 {
-		return nil
+		out.Or(i.eventSigs[sigString])
 	}
 	return out
+}
+
+func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
+
+	wantAddresses := len(addrs) != 0
+	wantSigs := len(eventSigs) != 0
+
+	switch {
+	case wantAddresses && !wantSigs:
+		return nilIfEmpty(i.addressBitmap(addrs).ToArray())
+	case wantSigs && !wantAddresses:
+		return nilIfEmpty(i.sigsBitmap(eventSigs).ToArray())
+	case wantAddresses && wantSigs:
+		a := i.addressBitmap(addrs)
+		b := i.sigsBitmap(eventSigs)
+		a.And(b)
+		return nilIfEmpty(a.ToArray())
+	default:
+		panic("unsupported case")
+	}
+
 }
 
 func (i *LogAddressIndex) add(addr eth.Address, eventSig eth.Hash, blocknum uint64) {
