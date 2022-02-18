@@ -19,32 +19,34 @@ const LogAddressIdxShortname string = "logaddr"
 type LogAddressIndexProvider struct {
 	currentIndex          *LogAddressIndex
 	currentMatchingBlocks []uint64
-	filterAddresses       []eth.Address
-	filterEventSigs       []eth.Hash
+	filters               []*logAddressSingleFilter
 	indexOpsTimeout       time.Duration
 	possibleIndexSizes    []uint64
 	store                 dstore.Store
 }
 
+type logAddressSingleFilter struct {
+	addrs     []eth.Address
+	eventSigs []eth.Hash
+}
+
 func NewLogAddressIndexProvider(
 	store dstore.Store,
-	filterAddresses []eth.Address,
-	filterEventSigs []eth.Hash,
+	filters []*logAddressSingleFilter,
 	possibleIndexSizes []uint64,
 ) *LogAddressIndexProvider {
 	// todo(froch, 20220207): firm up what these values will be
 	if possibleIndexSizes == nil {
 		possibleIndexSizes = []uint64{100000, 10000, 1000, 100}
 	}
-	if len(filterAddresses) == 0 && len(filterEventSigs) == 0 {
+	if len(filters) == 0 {
 		return nil
 	}
 
 	return &LogAddressIndexProvider{
 		store:              store,
 		indexOpsTimeout:    15 * time.Second,
-		filterAddresses:    filterAddresses,
-		filterEventSigs:    filterEventSigs,
+		filters:            filters,
 		possibleIndexSizes: possibleIndexSizes,
 	}
 }
@@ -177,6 +179,6 @@ func (ip *LogAddressIndexProvider) loadIndex(r io.Reader, lowBlockNum, indexSize
 	}
 
 	ip.currentIndex = newIdx
-	ip.currentMatchingBlocks = ip.currentIndex.matchingBlocks(ip.filterAddresses, ip.filterEventSigs)
+	ip.currentMatchingBlocks = ip.currentIndex.matchingBlocks(ip.filters)
 	return nil
 }

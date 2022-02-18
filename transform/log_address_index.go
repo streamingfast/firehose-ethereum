@@ -105,7 +105,6 @@ func (i *LogAddressIndex) addressBitmap(addrs []eth.Address) *roaring64.Bitmap {
 	for _, addr := range addrs {
 		addrString := addr.String()
 		if bm, ok := i.addrs[addrString]; ok {
-			fmt.Println("adding i addrstring", addrString, bm.String())
 			out.Or(bm)
 		}
 	}
@@ -123,24 +122,32 @@ func (i *LogAddressIndex) sigsBitmap(sigs []eth.Hash) *roaring64.Bitmap {
 	return out
 }
 
-func (i *LogAddressIndex) matchingBlocks(addrs []eth.Address, eventSigs []eth.Hash) []uint64 {
-
-	wantAddresses := len(addrs) != 0
-	wantSigs := len(eventSigs) != 0
+func (i *LogAddressIndex) filterBitmap(f *logAddressSingleFilter) *roaring64.Bitmap {
+	wantAddresses := len(f.addrs) != 0
+	wantSigs := len(f.eventSigs) != 0
 
 	switch {
 	case wantAddresses && !wantSigs:
-		return nilIfEmpty(i.addressBitmap(addrs).ToArray())
+		return i.addressBitmap(f.addrs)
 	case wantSigs && !wantAddresses:
-		return nilIfEmpty(i.sigsBitmap(eventSigs).ToArray())
+		return i.sigsBitmap(f.eventSigs)
 	case wantAddresses && wantSigs:
-		a := i.addressBitmap(addrs)
-		b := i.sigsBitmap(eventSigs)
+		a := i.addressBitmap(f.addrs)
+		b := i.sigsBitmap(f.eventSigs)
 		a.And(b)
-		return nilIfEmpty(a.ToArray())
+		return a
 	default:
 		panic("unsupported case")
 	}
+}
+
+func (i *LogAddressIndex) matchingBlocks(filters []*logAddressSingleFilter) []uint64 {
+	out := roaring64.NewBitmap()
+	for _, f := range filters {
+		fbit := i.filterBitmap(f)
+		out.Or(fbit)
+	}
+	return nilIfEmpty(out.ToArray())
 
 }
 

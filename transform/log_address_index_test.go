@@ -303,7 +303,7 @@ func TestLogAddressIndex_Matching(t *testing.T) {
 				reqSignatures = append(reqSignatures, eth.MustNewHash("0x"+sig))
 			}
 
-			matching := indexer.currentIndex.matchingBlocks(reqAddresses, reqSignatures)
+			matching := indexer.currentIndex.matchingBlocks([]*logAddressSingleFilter{{reqAddresses, reqSignatures}})
 
 			assert.Equal(t, test.expectBlocks, matching)
 		})
