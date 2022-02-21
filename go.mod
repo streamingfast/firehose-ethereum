@@ -44,7 +44,7 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220214194203-5c70c134fea8
 	github.com/streamingfast/merger v0.0.3-0.20220201165645-625f805412f0
 	github.com/streamingfast/node-manager v0.0.2-0.20211207181611-383f06886a4c
-	github.com/streamingfast/pbgo v0.0.6-0.20220104194237-6534a2f6320b
+	github.com/streamingfast/pbgo v0.0.6-0.20220217163624-f09d2a191000
 	github.com/streamingfast/relayer v0.0.2-0.20220120224524-84b9578c9323
 	github.com/streamingfast/sf-tools v0.0.0-20220201214246-766d25d2d43b
 	github.com/streamingfast/shutter v1.5.0
@@ -61,5 +61,6 @@ replace (
 	github.com/ShinyTrinkets/overseer => github.com/dfuse-io/overseer v0.2.1-0.20210326144022-ee491780e3ef
 	github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
 	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
+	github.com/streamingfast/bstream => /Users/froch/Development/io.streamingfast/bstream
 	github.com/ugorji/go/codec => github.com/ugorji/go v1.1.2
 )

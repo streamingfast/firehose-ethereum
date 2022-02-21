@@ -1345,6 +1345,8 @@ github.com/streamingfast/pbgo v0.0.6-0.20211209212750-753f0acb6553 h1:617aWSg7BD
 github.com/streamingfast/pbgo v0.0.6-0.20211209212750-753f0acb6553/go.mod h1:fobYEIfCKwPOY+VLX7HXBVuhrn+iZrzujKrpCgfG3+Q=
 github.com/streamingfast/pbgo v0.0.6-0.20220104194237-6534a2f6320b h1:P8abwvd3psEdxZ76htpH0xy31gyrNYVWfi8iKjF7mCA=
 github.com/streamingfast/pbgo v0.0.6-0.20220104194237-6534a2f6320b/go.mod h1:fobYEIfCKwPOY+VLX7HXBVuhrn+iZrzujKrpCgfG3+Q=
+github.com/streamingfast/pbgo v0.0.6-0.20220217163624-f09d2a191000 h1:fX52MC0tttiaV2s74X/URt/zZpH8/NS23ToPTdfAvnk=
+github.com/streamingfast/pbgo v0.0.6-0.20220217163624-f09d2a191000/go.mod h1:fobYEIfCKwPOY+VLX7HXBVuhrn+iZrzujKrpCgfG3+Q=
 github.com/streamingfast/relayer v0.0.2-0.20211210154316-8a6048581873 h1:cNGyvFmhJv/YIy+91GKsyOlPB/+7F9Vrdg/TS3Xa09c=
 github.com/streamingfast/relayer v0.0.2-0.20211210154316-8a6048581873/go.mod h1:SHO05aL4t/cynBZn0uAO1gwu3kPW1vhsSBtqLdzlApM=
 github.com/streamingfast/relayer v0.0.2-0.20220120224524-84b9578c9323 h1:jOX9r6js6lFtP+hxvfy4+8z2FcrB07I7zRsjX1WZMuM=
