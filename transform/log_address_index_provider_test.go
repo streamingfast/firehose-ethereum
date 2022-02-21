@@ -15,14 +15,15 @@ func TestLogAddressIndexProvider_NewLogAddressIndexProvider(t *testing.T) {
 
 	aaaaAddr := eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	ccccAddr := eth.MustNewAddress("cccccccccccccccccccccccccccccccccccccccc")
-	//	aaaaSig := eth.Hex("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-	//	bbbbSig := eth.Hex("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+	ddddAddr := eth.MustNewAddress("dddddddddddddddddddddddddddddddddddddddd")
+	ccccSig := eth.MustNewHash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
+	ddddSig := eth.MustNewHash("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
 	tests := []struct {
 		name               string
 		lowBlockNum        uint64
 		indexSize          uint64
 		blocks             []*pbcodec.Block
-		matchingAddresses  []eth.Address
+		filters            []*logAddressSingleFilter
 		expectedNextBlocks []uint64
 		expectNilProvider  bool
 	}{
@@ -31,7 +32,7 @@ func TestLogAddressIndexProvider_NewLogAddressIndexProvider(t *testing.T) {
 			lowBlockNum:        10,
 			indexSize:          2,
 			blocks:             testEthBlocks(t, 5),
-			matchingAddresses:  []eth.Address{aaaaAddr, ccccAddr},
+			filters:            []*logAddressSingleFilter{{[]eth.Address{aaaaAddr, ccccAddr}, nil}},
 			expectedNextBlocks: []uint64{10, 11},
 			expectNilProvider:  false,
 		},
@@ -40,16 +41,29 @@ func TestLogAddressIndexProvider_NewLogAddressIndexProvider(t *testing.T) {
 			lowBlockNum:        10,
 			indexSize:          2,
 			blocks:             testEthBlocks(t, 5),
-			matchingAddresses:  []eth.Address{ccccAddr},
+			filters:            []*logAddressSingleFilter{{[]eth.Address{ccccAddr}, nil}},
 			expectedNextBlocks: []uint64{10},
 			expectNilProvider:  false,
 		},
 		{
-			name:              "new nil when no match param",
+			name:              "new nil when no filter",
 			lowBlockNum:       10,
 			indexSize:         2,
-			matchingAddresses: nil,
+			filters:           nil,
 			expectNilProvider: true,
+		},
+
+		{
+			name:        "new matching multifilter with sigs",
+			lowBlockNum: 10,
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			filters: []*logAddressSingleFilter{
+				{[]eth.Address{ccccAddr}, []eth.Hash{ccccSig}},
+				{[]eth.Address{ddddAddr}, []eth.Hash{ddddSig}},
+			},
+			expectedNextBlocks: []uint64{10, 11},
+			expectNilProvider:  false,
 		},
 	}
 
@@ -59,7 +73,7 @@ func TestLogAddressIndexProvider_NewLogAddressIndexProvider(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 
 			// spawn an indexProvider with the populated dstore
-			provider := NewLogAddressIndexProvider(indexStore, test.matchingAddresses, nil, []uint64{test.indexSize})
+			provider := NewLogAddressIndexProvider(indexStore, test.filters, []uint64{test.indexSize})
 			if test.expectNilProvider {
 				require.Nil(t, provider)
 				return
@@ -86,7 +100,7 @@ func TestLogAddressIndexProvider_FindIndexContaining_LoadIndex(t *testing.T) {
 	indexStore := testMockstoreWithFiles(t, blocks, initialindexSize)
 
 	// spawn an indexProvider with the populated dstore
-	provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{initialindexSize})
+	provider := NewLogAddressIndexProvider(indexStore, []*logAddressSingleFilter{{matchAddresses, nil}}, []uint64{initialindexSize})
 	require.NotNil(t, provider)
 
 	// try to load an index without finding it first
@@ -168,7 +182,7 @@ func TestLogAddressIndexProvider_LoadRange(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 
 			// spawn an indexProvider with the populated dstore
-			provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{test.indexSize})
+			provider := NewLogAddressIndexProvider(indexStore, []*logAddressSingleFilter{{matchAddresses, nil}}, []uint64{test.indexSize})
 			require.NotNil(t, provider)
 
 			ctx := context.Background()
@@ -228,7 +242,7 @@ func TestLogAddressIndexProvider_WithinRange(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 
 			// spawn an indexProvider with the populated dstore
-			provider := NewLogAddressIndexProvider(indexStore, matchAddresses, nil, []uint64{test.indexSize})
+			provider := NewLogAddressIndexProvider(indexStore, []*logAddressSingleFilter{{matchAddresses, nil}}, []uint64{test.indexSize})
 			require.NotNil(t, provider)
 
 			// call loadRange on known blocks
@@ -300,7 +314,7 @@ func TestLogAddressIndexProvider_Matches(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
-			provider := NewLogAddressIndexProvider(indexStore, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
+			provider := NewLogAddressIndexProvider(indexStore, []*logAddressSingleFilter{{test.filterAddresses, test.filterEventSigs}}, []uint64{test.indexSize})
 
 			b, err := provider.Matches(context.Background(), test.wantedBlock)
 			require.NoError(t, err)
@@ -375,7 +389,7 @@ func TestLogAddressIndexProvider_NextMatching(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
-			provider := NewLogAddressIndexProvider(indexStore, test.filterAddresses, test.filterEventSigs, []uint64{test.indexSize})
+			provider := NewLogAddressIndexProvider(indexStore, []*logAddressSingleFilter{{test.filterAddresses, test.filterEventSigs}}, []uint64{test.indexSize})
 
 			nextBlockNum, passedIndexBoundary, err := provider.NextMatching(context.Background(), test.wantedBlock, 0)
 			require.NoError(t, err)
