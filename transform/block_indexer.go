@@ -9,23 +9,23 @@ import (
 )
 
 type EthBlockIndexer struct {
-	bi *transform.BlockIndexer
+	BlockIndexer *transform.BlockIndexer
 }
 
 func (i *EthBlockIndexer) ProcessBlock(blk *pbcodec.Block) error {
 
 	// init lower bound
-	if i.bi.CurrentIndex == nil {
+	if i.BlockIndexer.CurrentIndex == nil {
 		switch {
 
-		case blk.Num()%i.bi.IndexSize == 0:
+		case blk.Num()%i.BlockIndexer.IndexSize == 0:
 			// we're on a boundary
-			i.bi.CurrentIndex = transform.NewBlockIndex(blk.Number, i.bi.IndexSize)
+			i.BlockIndexer.CurrentIndex = transform.NewBlockIndex(blk.Number, i.BlockIndexer.IndexSize)
 
 		case blk.Number == bstream.GetProtocolFirstStreamableBlock:
 			// handle offset
-			lb := lowBoundary(blk.Num(), i.bi.IndexSize)
-			i.bi.CurrentIndex = transform.NewBlockIndex(lb, i.bi.IndexSize)
+			lb := lowBoundary(blk.Num(), i.BlockIndexer.IndexSize)
+			i.BlockIndexer.CurrentIndex = transform.NewBlockIndex(lb, i.BlockIndexer.IndexSize)
 
 		default:
 			zlog.Warn("couldn't determine boundary for block", zap.Uint64("blk_num", blk.Num()))
@@ -34,23 +34,24 @@ func (i *EthBlockIndexer) ProcessBlock(blk *pbcodec.Block) error {
 	}
 
 	// upper bound reached
-	if blk.Num() >= i.bi.CurrentIndex.LowBlockNum()+i.bi.IndexSize {
-		if err := i.bi.WriteIndex(); err != nil {
+	if blk.Num() >= i.BlockIndexer.CurrentIndex.LowBlockNum()+i.BlockIndexer.IndexSize {
+		if err := i.BlockIndexer.WriteIndex(); err != nil {
 			zlog.Warn("couldn't write index", zap.Error(err))
 		}
-		lb := lowBoundary(blk.Number, i.bi.IndexSize)
-		i.bi.CurrentIndex = transform.NewBlockIndex(lb, i.bi.IndexSize)
+		lb := lowBoundary(blk.Number, i.BlockIndexer.IndexSize)
+		i.BlockIndexer.CurrentIndex = transform.NewBlockIndex(lb, i.BlockIndexer.IndexSize)
 	}
 
 	for _, trace := range blk.TransactionTraces {
 		for _, log := range trace.Receipt.Logs {
 			var evSig []byte
 			if len(log.Topics) != 0 {
+				// @todo(froch, 22022022) parameterize the topics of interest
 				evSig = log.Topics[0]
 			}
 
-			i.bi.CurrentIndex.Add(hex.EncodeToString(log.Address), blk.Number)
-			i.bi.CurrentIndex.Add(hex.EncodeToString(evSig), blk.Number)
+			i.BlockIndexer.CurrentIndex.Add(hex.EncodeToString(log.Address), blk.Number)
+			i.BlockIndexer.CurrentIndex.Add(hex.EncodeToString(evSig), blk.Number)
 		}
 	}
 

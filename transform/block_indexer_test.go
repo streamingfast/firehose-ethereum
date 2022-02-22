@@ -19,15 +19,44 @@ func TestEthBlockIndexer(t *testing.T) {
 		indexSize            uint64
 		shouldWriteFile      bool
 		shouldReadFile       bool
+		expectedResultsLen   int
 		expectedKvAfterWrite map[string][]uint64
+		expectedKvAfterRead  map[string][]uint64
 	}{
 		{
-			name:            "sunny within bounds",
-			indexSize:       10,
-			shouldWriteFile: false,
-			shouldReadFile:  false,
-			blocks:          testEthBlocks(t, 2),
+			name:               "sunny within bounds",
+			indexSize:          10,
+			shouldWriteFile:    false,
+			shouldReadFile:     false,
+			blocks:             testEthBlocks(t, 2),
+			expectedResultsLen: 1,
 			expectedKvAfterWrite: map[string][]uint64{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa":                         {10, 11},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb":                         {10, 11},
+				"cccccccccccccccccccccccccccccccccccccccc":                         {10},
+				"dddddddddddddddddddddddddddddddddddddddd":                         {11},
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {10, 11},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {10, 11},
+				"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": {10},
+				"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd": {11},
+			},
+		},
+		{
+			name:               "sunny and we wrote an index",
+			indexSize:          2,
+			shouldWriteFile:    true,
+			shouldReadFile:     true,
+			blocks:             testEthBlocks(t, 3),
+			expectedResultsLen: 1,
+			expectedKvAfterWrite: map[string][]uint64{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa":                         {12},
+				"1111111111111111111111111111111111111111":                         {12},
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb":                         {12},
+				"0000000000000000000000000000000000000000000000000000000000000000": {12},
+				"1111111111111111111111111111111111111111111111111111111111111111": {12},
+				"2222222222222222222222222222222222222222222222222222222222222222": {12},
+			},
+			expectedKvAfterRead: map[string][]uint64{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa":                         {10, 11},
 				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb":                         {10, 11},
 				"cccccccccccccccccccccccccccccccccccccccc":                         {10},
@@ -56,7 +85,7 @@ func TestEthBlockIndexer(t *testing.T) {
 
 			// spawn an EthBlockIndexer with our mock indexStore
 			bi := transform.NewBlockIndexer(indexStore, test.indexSize, "test")
-			indexer := EthBlockIndexer{bi: bi}
+			indexer := EthBlockIndexer{BlockIndexer: bi}
 
 			for _, blk := range test.blocks {
 				// feed the indexer
@@ -73,7 +102,39 @@ func TestEthBlockIndexer(t *testing.T) {
 				arr := actualV.ToArray()
 				require.Equal(t, arr, expectedV)
 			}
+
+			// check that we wrote-out to dstore
+			if test.shouldWriteFile {
+				require.Equal(t, test.expectedResultsLen, len(results))
+			}
+
+			if test.shouldReadFile {
+				// populate a new indexStore with the prior results
+				indexStore = dstore.NewMockStore(nil)
+				for indexName, indexContents := range results {
+					indexStore.SetFile(indexName, indexContents)
+				}
+
+				// spawn a new BlockIndexer with the new IndexStore
+				bi = transform.NewBlockIndexer(indexStore, test.indexSize, "test")
+				indexer = EthBlockIndexer{BlockIndexer: bi}
+
+				for indexName, _ := range results {
+					// attempt to read back the index
+					err := indexer.BlockIndexer.ReadIndex(indexName)
+					require.NoError(t, err)
+
+					// check our resulting KV
+					require.NotNil(t, bi.CurrentIndex.KV())
+					require.Equal(t, len(bi.CurrentIndex.KV()), len(test.expectedKvAfterRead))
+					for expectedK, expectedV := range test.expectedKvAfterRead {
+						actualV, ok := bi.CurrentIndex.KV()[expectedK]
+						require.True(t, ok)
+						arr := actualV.ToArray()
+						require.Equal(t, arr, expectedV)
+					}
+				}
+			}
 		})
 	}
-
 }
