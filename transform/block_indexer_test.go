@@ -87,17 +87,16 @@ func TestEthBlockIndexer(t *testing.T) {
 			bi := transform.NewBlockIndexer(indexStore, test.indexSize, "test")
 			indexer := EthBlockIndexer{BlockIndexer: bi}
 
+			// feed the indexer
 			for _, blk := range test.blocks {
-				// feed the indexer
-				err := indexer.ProcessBlock(blk)
-				require.NoError(t, err)
+				indexer.ProcessBlock(blk)
 			}
 
 			// check our resulting KV
-			require.NotNil(t, bi.CurrentIndex.KV())
-			require.Equal(t, len(bi.CurrentIndex.KV()), len(test.expectedKvAfterWrite))
+			require.NotNil(t, bi.KV())
+			require.Equal(t, len(bi.KV()), len(test.expectedKvAfterWrite))
 			for expectedK, expectedV := range test.expectedKvAfterWrite {
-				actualV, ok := bi.CurrentIndex.KV()[expectedK]
+				actualV, ok := bi.KV()[expectedK]
 				require.True(t, ok)
 				arr := actualV.ToArray()
 				require.Equal(t, arr, expectedV)
@@ -125,10 +124,10 @@ func TestEthBlockIndexer(t *testing.T) {
 					require.NoError(t, err)
 
 					// check our resulting KV
-					require.NotNil(t, bi.CurrentIndex.KV())
-					require.Equal(t, len(bi.CurrentIndex.KV()), len(test.expectedKvAfterRead))
+					require.NotNil(t, bi.KV())
+					require.Equal(t, len(bi.KV()), len(test.expectedKvAfterRead))
 					for expectedK, expectedV := range test.expectedKvAfterRead {
-						actualV, ok := bi.CurrentIndex.KV()[expectedK]
+						actualV, ok := bi.KV()[expectedK]
 						require.True(t, ok)
 						arr := actualV.ToArray()
 						require.Equal(t, arr, expectedV)
