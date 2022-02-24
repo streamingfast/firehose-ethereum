@@ -154,7 +154,15 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 
-	startBlockNum = skipToNextUnindexed(ctx, uint64(startBlockNum), lookupAccountIdxSizes, transform.LogAddressIdxShortname, accountIndexStore)
+	irrStart := skipToNextUnindexed(ctx, uint64(startBlockNum), irrIdxSizes, "irr", irrIndexStore)
+	accStart := skipToNextUnindexed(ctx, uint64(startBlockNum), lookupAccountIdxSizes, transform.LogAddressIdxShortname, accountIndexStore)
+
+	fmt.Println("irrStart", irrStart, "accStart", accStart)
+	if irrStart < accStart {
+		startBlockNum = irrStart
+	} else {
+		startBlockNum = accStart
+	}
 
 	cli := firehoseServer.BlocksFromLocal(ctx, &pbfirehose.Request{
 		StartBlockNum: int64(startBlockNum),
