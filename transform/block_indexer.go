@@ -3,11 +3,19 @@ package transform
 import (
 	"encoding/hex"
 	"github.com/streamingfast/bstream/transform"
+	"github.com/streamingfast/dstore"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
 type EthBlockIndexer struct {
 	BlockIndexer *transform.BlockIndexer
+}
+
+func NewEthBlockIndexer(indexStore dstore.Store, indexSize uint64, indexShortname string) *EthBlockIndexer {
+	bi := transform.NewBlockIndexer(indexStore, indexSize, indexShortname)
+	return &EthBlockIndexer{
+		BlockIndexer: bi,
+	}
 }
 
 func (i *EthBlockIndexer) ProcessBlock(blk *pbcodec.Block) {

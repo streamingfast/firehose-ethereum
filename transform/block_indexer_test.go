@@ -1,7 +1,6 @@
 package transform
 
 import (
-	"github.com/streamingfast/bstream/transform"
 	"io"
 	"io/ioutil"
 	"testing"
@@ -12,11 +11,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestNewEthBlockIndexer(t *testing.T) {
+	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+		return nil
+	})
+	indexSize := uint64(10)
+	indexShortname := "test"
+
+	indexer := NewEthBlockIndexer(indexStore, indexSize, indexShortname)
+	require.NotNil(t, indexer)
+	require.IsType(t, EthBlockIndexer{}, *indexer)
+}
+
 func TestEthBlockIndexer(t *testing.T) {
 	tests := []struct {
 		name                 string
 		blocks               []*pbcodec.Block
 		indexSize            uint64
+		indexShortname       string
 		shouldWriteFile      bool
 		shouldReadFile       bool
 		expectedResultsLen   int
@@ -26,6 +38,7 @@ func TestEthBlockIndexer(t *testing.T) {
 		{
 			name:               "sunny within bounds",
 			indexSize:          10,
+			indexShortname:     "test",
 			shouldWriteFile:    false,
 			shouldReadFile:     false,
 			blocks:             testEthBlocks(t, 2),
@@ -44,6 +57,7 @@ func TestEthBlockIndexer(t *testing.T) {
 		{
 			name:               "sunny and we wrote an index",
 			indexSize:          2,
+			indexShortname:     "test",
 			shouldWriteFile:    true,
 			shouldReadFile:     true,
 			blocks:             testEthBlocks(t, 3),
@@ -84,8 +98,7 @@ func TestEthBlockIndexer(t *testing.T) {
 			})
 
 			// spawn an EthBlockIndexer with our mock indexStore
-			bi := transform.NewBlockIndexer(indexStore, test.indexSize, "test")
-			indexer := EthBlockIndexer{BlockIndexer: bi}
+			indexer := NewEthBlockIndexer(indexStore, test.indexSize, test.indexShortname)
 
 			// feed the indexer
 			for _, blk := range test.blocks {
@@ -93,10 +106,10 @@ func TestEthBlockIndexer(t *testing.T) {
 			}
 
 			// check our resulting KV
-			require.NotNil(t, bi.KV())
-			require.Equal(t, len(bi.KV()), len(test.expectedKvAfterWrite))
+			require.NotNil(t, indexer.BlockIndexer.KV())
+			require.Equal(t, len(indexer.BlockIndexer.KV()), len(test.expectedKvAfterWrite))
 			for expectedK, expectedV := range test.expectedKvAfterWrite {
-				actualV, ok := bi.KV()[expectedK]
+				actualV, ok := indexer.BlockIndexer.KV()[expectedK]
 				require.True(t, ok)
 				arr := actualV.ToArray()
 				require.Equal(t, arr, expectedV)
@@ -115,8 +128,7 @@ func TestEthBlockIndexer(t *testing.T) {
 				}
 
 				// spawn a new BlockIndexer with the new IndexStore
-				bi = transform.NewBlockIndexer(indexStore, test.indexSize, "test")
-				indexer = EthBlockIndexer{BlockIndexer: bi}
+				indexer = NewEthBlockIndexer(indexStore, test.indexSize, test.indexShortname)
 
 				for indexName, _ := range results {
 					// attempt to read back the index
@@ -124,10 +136,10 @@ func TestEthBlockIndexer(t *testing.T) {
 					require.NoError(t, err)
 
 					// check our resulting KV
-					require.NotNil(t, bi.KV())
-					require.Equal(t, len(bi.KV()), len(test.expectedKvAfterRead))
+					require.NotNil(t, indexer.BlockIndexer.KV())
+					require.Equal(t, len(indexer.BlockIndexer.KV()), len(test.expectedKvAfterRead))
 					for expectedK, expectedV := range test.expectedKvAfterRead {
-						actualV, ok := bi.KV()[expectedK]
+						actualV, ok := indexer.BlockIndexer.KV()[expectedK]
 						require.True(t, ok)
 						arr := actualV.ToArray()
 						require.Equal(t, arr, expectedV)
