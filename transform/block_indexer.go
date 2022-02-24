@@ -7,10 +7,12 @@ import (
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
+// EthBlockIndexer wraps a bstream.transform.BlockIndexer for chain-specific use on Ethereum
 type EthBlockIndexer struct {
 	BlockIndexer *transform.BlockIndexer
 }
 
+// NewEthBlockIndexer instantiates and returns a new EthBlockIndexer
 func NewEthBlockIndexer(indexStore dstore.Store, indexSize uint64, indexShortname string) *EthBlockIndexer {
 	bi := transform.NewBlockIndexer(indexStore, indexSize, indexShortname)
 	return &EthBlockIndexer{
@@ -18,6 +20,7 @@ func NewEthBlockIndexer(indexStore dstore.Store, indexSize uint64, indexShortnam
 	}
 }
 
+// ProcessBlock implements chain-specific logic for Ethereum bstream.Block's
 func (i *EthBlockIndexer) ProcessBlock(blk *pbcodec.Block) {
 	var keys []string
 
