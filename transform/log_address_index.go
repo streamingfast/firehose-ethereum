@@ -93,13 +93,6 @@ func (i *LogAddressIndex) Unmarshal(in []byte) error {
 	return nil
 }
 
-func nilIfEmpty(in []uint64) []uint64 {
-	if len(in) == 0 {
-		return nil
-	}
-	return in
-}
-
 func (i *LogAddressIndex) addressBitmap(addrs []eth.Address) *roaring64.Bitmap {
 	out := roaring64.NewBitmap()
 	for _, addr := range addrs {
