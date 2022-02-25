@@ -56,7 +56,7 @@ func TestEthBlockIndexProvider_WithinRange(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// populate a mock dstore with some index files
-			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
+			indexStore := testEthBlockIndexerMockStoreWithFiles(t, test.blocks, test.indexSize)
 
 			// spawn an indexProvider with the populated dstore
 			indexProvider := NewEthBlockIndexProvider(
@@ -180,6 +180,77 @@ func TestEthBlockIndexProvider_Matches(t *testing.T) {
 			} else {
 				require.False(t, b)
 			}
+		})
+	}
+}
+
+func TestEthBlockIndexProvider_NextMatching(t *testing.T) {
+	tests := []struct {
+		name                        string
+		blocks                      []*pbcodec.Block
+		indexSize                   uint64
+		wantedBlock                 uint64
+		expectedNextBlockNum        uint64
+		expectedPassedIndexBoundary bool
+		filterAddresses             []eth.Address
+		filterEventSigs             []eth.Hash
+	}{
+		{
+			name:                        "block exists in first index and filters match block in second index",
+			blocks:                      testEthBlocks(t, 5),
+			indexSize:                   2,
+			wantedBlock:                 11,
+			expectedNextBlockNum:        13,
+			expectedPassedIndexBoundary: false,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+		},
+		{
+			name:        "block exists in first index and filters match block outside bounds",
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 10,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("cccccccccccccccccccccccccccccccccccccccc"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+			},
+			expectedNextBlockNum:        14,
+			expectedPassedIndexBoundary: true,
+		},
+		{
+			name:        "filters don't match any known blocks",
+			indexSize:   2,
+			blocks:      testEthBlocks(t, 5),
+			wantedBlock: 10,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("beefbeefbeefbeefbeefbeefbeefbeefbeefbeef"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef"),
+			},
+			expectedNextBlockNum:        14,
+			expectedPassedIndexBoundary: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			indexStore := testEthBlockIndexerMockStoreWithFiles(t, test.blocks, test.indexSize)
+			filters := []*logAddressSingleFilter{
+				{test.filterAddresses, test.filterEventSigs},
+			}
+			indexProvider := NewEthBlockIndexProvider(indexStore, []uint64{test.indexSize}, filters)
+
+			nextBlockNum, passedIndexBoundary, err := indexProvider.NextMatching(context.Background(), test.wantedBlock, 0)
+			require.NoError(t, err)
+			require.Equal(t, passedIndexBoundary, test.expectedPassedIndexBoundary)
+			require.Equal(t, test.expectedNextBlockNum, nextBlockNum)
 		})
 	}
 }
