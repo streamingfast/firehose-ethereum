@@ -108,7 +108,8 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
 	cmd.SilenceUsage = true
 
-	t := transform.NewLogAddressIndexer(accountIndexStore, bundleSizes[0]) // FIXME add support for multiple bundlesizes?
+	// @todo(froch, 20220225) accept multiple bundle sizes?
+	t := transform.NewEthBlockIndexer(accountIndexStore, bundleSizes[0])
 
 	for {
 		resp, err := cli.Recv()
@@ -123,6 +124,6 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("unmarshalling firehose message: %w", err)
 		}
-		t.ProcessEthBlock(b)
+		t.ProcessBlock(b)
 	}
 }
