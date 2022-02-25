@@ -56,7 +56,7 @@ func TestEthBlockIndexProvider_WithinRange(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// populate a mock dstore with some index files
-			indexStore := testEthBlockIndexerMockStoreWithFiles(t, test.blocks, test.indexSize)
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 
 			// spawn an indexProvider with the populated dstore
 			indexProvider := NewEthBlockIndexProvider(
@@ -167,7 +167,7 @@ func TestEthBlockIndexProvider_Matches(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			indexStore := testEthBlockIndexerMockStoreWithFiles(t, test.blocks, test.indexSize)
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 			filters := []*logAddressSingleFilter{
 				{test.filterAddresses, test.filterEventSigs},
 			}
@@ -241,7 +241,7 @@ func TestEthBlockIndexProvider_NextMatching(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			indexStore := testEthBlockIndexerMockStoreWithFiles(t, test.blocks, test.indexSize)
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 			filters := []*logAddressSingleFilter{
 				{test.filterAddresses, test.filterEventSigs},
 			}

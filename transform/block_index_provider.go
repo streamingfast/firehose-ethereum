@@ -9,6 +9,13 @@ import (
 
 const indexShortname = "logaddr"
 
+// logAddressSingleFilter represents a combination of interesting eth.Address and eth.Hash
+// can be composed into []*logAddressSingleFilter for more complex filtering
+type logAddressSingleFilter struct {
+	addrs     []eth.Address
+	eventSigs []eth.Hash
+}
+
 // NewEthBlockIndexProvider instantiates and returns a new EthBlockIndexProvider
 func NewEthBlockIndexProvider(
 	store dstore.Store,

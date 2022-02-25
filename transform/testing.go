@@ -163,39 +163,9 @@ func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
 	return blocks
 }
 
-// testMockstoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
-// this implementation uses a LogAddressIndexer to write the index files
-func testMockstoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uint64) *dstore.MockStore {
-	results := make(map[string][]byte)
-
-	// spawn an indexStore which will populate the results
-	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
-		content, err := ioutil.ReadAll(f)
-		require.NoError(t, err)
-		results[base] = content
-		return nil
-	})
-
-	// spawn an indexer with our mock indexStore
-	indexer := NewLogAddressIndexer(indexStore, indexSize)
-	for _, blk := range blocks {
-		// feed the indexer
-		err := indexer.ProcessEthBlock(blk)
-		require.NoError(t, err)
-	}
-
-	// populate a new indexStore with the prior results
-	indexStore = dstore.NewMockStore(nil)
-	for indexName, indexContents := range results {
-		indexStore.SetFile(indexName, indexContents)
-	}
-
-	return indexStore
-}
-
 // testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
 // this implementation uses an EthBlockIndexer to write the index files
-func testEthBlockIndexerMockStoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uint64) *dstore.MockStore {
+func testMockstoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uint64) *dstore.MockStore {
 	results := make(map[string][]byte)
 
 	// spawn an indexStore which will populate the results
