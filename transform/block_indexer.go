@@ -13,7 +13,7 @@ type EthBlockIndexer struct {
 }
 
 // NewEthBlockIndexer instantiates and returns a new EthBlockIndexer
-func NewEthBlockIndexer(indexStore dstore.Store, indexSize uint64, indexShortname string) *EthBlockIndexer {
+func NewEthBlockIndexer(indexStore dstore.Store, indexSize uint64) *EthBlockIndexer {
 	bi := transform.NewBlockIndexer(indexStore, indexSize, indexShortname)
 	return &EthBlockIndexer{
 		BlockIndexer: bi,

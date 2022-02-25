@@ -16,9 +16,8 @@ func TestNewEthBlockIndexer(t *testing.T) {
 		return nil
 	})
 	indexSize := uint64(10)
-	indexShortname := "test"
 
-	indexer := NewEthBlockIndexer(indexStore, indexSize, indexShortname)
+	indexer := NewEthBlockIndexer(indexStore, indexSize)
 	require.NotNil(t, indexer)
 	require.IsType(t, EthBlockIndexer{}, *indexer)
 }
@@ -98,7 +97,7 @@ func TestEthBlockIndexer(t *testing.T) {
 			})
 
 			// spawn an EthBlockIndexer with our mock indexStore
-			indexer := NewEthBlockIndexer(indexStore, test.indexSize, test.indexShortname)
+			indexer := NewEthBlockIndexer(indexStore, test.indexSize)
 
 			// feed the indexer
 			for _, blk := range test.blocks {
@@ -128,7 +127,7 @@ func TestEthBlockIndexer(t *testing.T) {
 				}
 
 				// spawn a new BlockIndexer with the new IndexStore
-				indexer = NewEthBlockIndexer(indexStore, test.indexSize, test.indexShortname)
+				indexer = NewEthBlockIndexer(indexStore, test.indexSize)
 
 				for indexName, _ := range results {
 					// attempt to read back the index
