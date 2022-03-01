@@ -2,19 +2,24 @@ package transform
 
 import (
 	"encoding/hex"
+
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
+type BlockIndexer interface {
+	Add(keys []string, blockNum uint64)
+}
+
 // EthBlockIndexer wraps a bstream.transform.BlockIndexer for chain-specific use on Ethereum
 type EthBlockIndexer struct {
-	BlockIndexer *transform.BlockIndexer
+	BlockIndexer BlockIndexer
 }
 
 // NewEthBlockIndexer instantiates and returns a new EthBlockIndexer
 func NewEthBlockIndexer(indexStore dstore.Store, indexSize uint64) *EthBlockIndexer {
-	bi := transform.NewBlockIndexer(indexStore, indexSize, indexShortname)
+	bi := transform.NewBlockIndexer(indexStore, indexSize, LogAddrIndexShortName)
 	return &EthBlockIndexer{
 		BlockIndexer: bi,
 	}

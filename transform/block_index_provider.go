@@ -7,7 +7,7 @@ import (
 	"github.com/streamingfast/eth-go"
 )
 
-const indexShortname = "logaddr"
+const LogAddrIndexShortName = "logaddrsig"
 
 // logAddressSingleFilter represents a combination of interesting eth.Address and eth.Hash
 // can be composed into []*logAddressSingleFilter for more complex filtering
@@ -24,7 +24,7 @@ func NewEthBlockIndexProvider(
 ) *transform.GenericBlockIndexProvider {
 	return transform.NewGenericBlockIndexProvider(
 		store,
-		indexShortname,
+		LogAddrIndexShortName,
 		possibleIndexSizes,
 		getFilterFunc(filters),
 	)
@@ -33,11 +33,11 @@ func NewEthBlockIndexProvider(
 // getFilterFunc provides the filterFunc used by the transform.GenericBlockIndexProvider.
 // Ethereum chain-specific filtering is provided by a combination of logAddressSingleFilter
 // The filterFunc accepts a transform.BlockIndex, whose KV payload is a map[string]*roaring64.bitmap
-func getFilterFunc(filters []*logAddressSingleFilter) func(index *transform.BlockIndex) (matchingBlocks []uint64) {
-	return func(index *transform.BlockIndex) (matchingBlocks []uint64) {
+func getFilterFunc(filters []*logAddressSingleFilter) func(transform.BitmapGetter) []uint64 {
+	return func(getFunc transform.BitmapGetter) (matchingBlocks []uint64) {
 		out := roaring64.NewBitmap()
 		for _, f := range filters {
-			fbit := filterBitmap(f, index)
+			fbit := filterBitmap(f, getFunc)
 			out.Or(fbit)
 		}
 		return nilIfEmpty(out.ToArray())
@@ -46,18 +46,18 @@ func getFilterFunc(filters []*logAddressSingleFilter) func(index *transform.Bloc
 
 // filterBitmap is a switchboard method which determines
 // if we're interested in filtering the provided index by eth.Address, eth.Hash, or both
-func filterBitmap(f *logAddressSingleFilter, index *transform.BlockIndex) *roaring64.Bitmap {
+func filterBitmap(f *logAddressSingleFilter, getFunc transform.BitmapGetter) *roaring64.Bitmap {
 	wantAddresses := len(f.addrs) != 0
 	wantSigs := len(f.eventSigs) != 0
 
 	switch {
 	case wantAddresses && !wantSigs:
-		return addressBitmap(f.addrs, index)
+		return addressBitmap(f.addrs, getFunc)
 	case wantSigs && !wantAddresses:
-		return sigsBitmap(f.eventSigs, index)
+		return sigsBitmap(f.eventSigs, getFunc)
 	case wantAddresses && wantSigs:
-		a := addressBitmap(f.addrs, index)
-		b := sigsBitmap(f.eventSigs, index)
+		a := addressBitmap(f.addrs, getFunc)
+		b := sigsBitmap(f.eventSigs, getFunc)
 		a.And(b)
 		return a
 	default:
@@ -66,11 +66,11 @@ func filterBitmap(f *logAddressSingleFilter, index *transform.BlockIndex) *roari
 }
 
 // addressBitmap attempts to find the blockNums corresponding to the provided eth.Address
-func addressBitmap(addrs []eth.Address, index *transform.BlockIndex) *roaring64.Bitmap {
+func addressBitmap(addrs []eth.Address, getFunc transform.BitmapGetter) *roaring64.Bitmap {
 	out := roaring64.NewBitmap()
 	for _, addr := range addrs {
 		addrString := addr.String()
-		if bm, ok := index.KV()[addrString]; ok {
+		if bm := getFunc(addrString); bm != nil {
 			out.Or(bm)
 		}
 	}
@@ -78,14 +78,14 @@ func addressBitmap(addrs []eth.Address, index *transform.BlockIndex) *roaring64.
 }
 
 // sigsBitmap attemps to find the blockNums corresponding to the provided eth.Hash
-func sigsBitmap(sigs []eth.Hash, index *transform.BlockIndex) *roaring64.Bitmap {
+func sigsBitmap(sigs []eth.Hash, getFunc transform.BitmapGetter) *roaring64.Bitmap {
 	out := roaring64.NewBitmap()
 	for _, sig := range sigs {
-		sigString := sig.String()
-		if _, ok := index.KV()[sigString]; !ok {
+		bm := getFunc(sig.String())
+		if bm == nil {
 			continue
 		}
-		out.Or(index.KV()[sigString])
+		out.Or(bm)
 	}
 	return out
 }
