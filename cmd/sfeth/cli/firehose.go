@@ -34,7 +34,6 @@ import (
 	"github.com/streamingfast/firehose"
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
 	"github.com/streamingfast/logging"
-	"github.com/streamingfast/sf-ethereum/filtering"
 	sftransform "github.com/streamingfast/sf-ethereum/transform"
 	"go.uber.org/zap"
 )
@@ -106,16 +105,6 @@ func init() {
 				grcpShutdownGracePeriod = shutdownSignalDelay - (5 * time.Second)
 			}
 
-			filterPreprocessorFactory := func(includeExpr, excludeExpr string) (bstream.PreprocessFunc, error) {
-				filter, err := filtering.NewBlockFilter([]string{includeExpr}, []string{excludeExpr})
-				if err != nil {
-					return nil, fmt.Errorf("parsing filter expressions: %w", err)
-				}
-
-				preproc := &filtering.FilteringPreprocessor{Filter: filter}
-				return preproc.PreprocessBlock, nil
-			}
-
 			if ll := os.Getenv("FIREHOSE_THREADS"); ll != "" {
 				if llint, err := strconv.ParseInt(ll, 10, 32); err == nil {
 					zlog.Info("setting blockstreamV2 parallel file downloads", zap.Int("ll", int(llint)))
@@ -164,12 +153,11 @@ func init() {
 				WriteIrreversibleBlocksIndex:    viper.GetBool("firehose-write-irreversible-blocks-index"),
 				IrreversibleBlocksBundleSizes:   bundleSizes,
 			}, &firehoseApp.Modules{
-				Authenticator:             authenticator,
-				FilterPreprocessorFactory: filterPreprocessorFactory,
-				HeadTimeDriftMetric:       headTimeDriftmetric,
-				HeadBlockNumberMetric:     headBlockNumMetric,
-				Tracker:                   tracker,
-				TransformRegistry:         registry,
+				Authenticator:         authenticator,
+				HeadTimeDriftMetric:   headTimeDriftmetric,
+				HeadBlockNumberMetric: headBlockNumMetric,
+				Tracker:               tracker,
+				TransformRegistry:     registry,
 			}), nil
 		},
 	})
