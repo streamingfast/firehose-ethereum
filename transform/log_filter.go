@@ -120,10 +120,10 @@ func (p *BasicLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
 		p.Addresses,
 		p.EventSigntures,
 	}
-	return NewLogAddressIndexProvider(
+	return NewEthBlockIndexProvider(
 		p.indexStore,
-		[]*logAddressSingleFilter{filter},
 		p.possibleIndexSizes,
+		[]*logAddressSingleFilter{filter},
 	)
 }
 
@@ -215,9 +215,9 @@ func (p *MultiLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
 		})
 	}
 
-	return NewLogAddressIndexProvider(
+	return NewEthBlockIndexProvider(
 		p.indexStore,
-		filters,
 		p.possibleIndexSizes,
+		filters,
 	)
 }
