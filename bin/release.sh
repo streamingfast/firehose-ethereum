@@ -44,7 +44,7 @@ main() {
   echo "About to release version tagged $version ($mode)"
   sleep 3
 
-  if [[ "$force" == "false" ]]; then
+  if [[ "$force" == "true" ]]; then
     echo "Pushing to ensure GitHub knowns about the latest commit(s)"
     git push
   fi
