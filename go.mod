@@ -35,7 +35,7 @@ require (
 	github.com/streamingfast/kvdb v0.1.1-0.20220228165126-18278ca47f93
 	github.com/streamingfast/logging v0.0.0-20220222131651-12c3943aac2e
 	github.com/streamingfast/merger v0.0.3-0.20220301162603-c0129b6f1ad4
-	github.com/streamingfast/node-manager v0.0.2-0.20220301162740-dc73a4519d87
+	github.com/streamingfast/node-manager v0.0.2-0.20220301170656-5dbc7988e730
 	github.com/streamingfast/pbgo v0.0.6-0.20220228185940-1bbaafec7d8a
 	github.com/streamingfast/relayer v0.0.2-0.20220301162545-2db510359d2a
 	github.com/streamingfast/sf-tools v0.0.0-20220301170200-43b1f43dde6f
@@ -50,7 +50,7 @@ require (
 )
 
 replace (
-	github.com/ShinyTrinkets/overseer => github.com/dfuse-io/overseer v0.2.1-0.20210326144022-ee491780e3ef
+	github.com/ShinyTrinkets/overseer => github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef
 	github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
 	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
 )

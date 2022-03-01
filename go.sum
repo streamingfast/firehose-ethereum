@@ -209,8 +209,6 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/decred/dcrd/lru v1.0.0/go.mod h1:mxKOwFd7lFjN2GZYsiz/ecgqR6kkYAl+0pz0tEMk218=
 github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f/go.mod h1:xH/i4TFMt8koVQZ6WFms69WAsDWr2XsYL3Hkl7jkoLE=
-github.com/dfuse-io/overseer v0.2.1-0.20210326144022-ee491780e3ef h1:WxHxSPrlZyIVajMLPVBSGJqdJjhxpvu9nNxKu2neOtc=
-github.com/dfuse-io/overseer v0.2.1-0.20210326144022-ee491780e3ef/go.mod h1:cq8CvbZ3ioFmGrHokSAJalS0lC+pVXLKhITScItUGXY=
 github.com/dgraph-io/badger/v2 v2.0.3 h1:inzdf6VF/NZ+tJ8RwwYMjJMvsOALTHYdozn0qSl6XJI=
 github.com/dgraph-io/badger/v2 v2.0.3/go.mod h1:3KY8+bsP8wI0OEnQJAKpd4wIJW/Mm32yw2j/9FUVnIM=
 github.com/dgraph-io/ristretto v0.0.2-0.20200115201040-8f368f2f2ab3 h1:MQLRM35Pp0yAyBYksjbj1nZI/w6eyRY/mWoM1sFf4kU=
@@ -727,10 +725,12 @@ github.com/streamingfast/logging v0.0.0-20220222131651-12c3943aac2e/go.mod h1:4G
 github.com/streamingfast/logging v0.0.0-20220222131651-12c3943aac2e/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/merger v0.0.3-0.20220301162603-c0129b6f1ad4 h1:YDfb3CNhq2+eab3CZWViWV8cM7tKs3eoJ4Uz1hAJn5A=
 github.com/streamingfast/merger v0.0.3-0.20220301162603-c0129b6f1ad4/go.mod h1:QrzRRzU9o0yE2j4rxtulbLMDRhr4cBDDRUBgiE9l0hU=
-github.com/streamingfast/node-manager v0.0.2-0.20220301162740-dc73a4519d87 h1:SnABqNbCYE9REA/f1ybc6xNXJM5j3Uhn9yuJLEEADKU=
-github.com/streamingfast/node-manager v0.0.2-0.20220301162740-dc73a4519d87/go.mod h1:OpuGRwMpxL+2BMFw88l3Q3Td1MdT+/PLRS4jkYb3GMA=
+github.com/streamingfast/node-manager v0.0.2-0.20220301170656-5dbc7988e730 h1:hBe0r3VU3y18g+hPKHYJkGsYQkfVWjsryPup41BQl1k=
+github.com/streamingfast/node-manager v0.0.2-0.20220301170656-5dbc7988e730/go.mod h1:I2dKCYRxKFQtGeJUO5q62I+VXGYwv7SKz65+g92WpKI=
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 h1:xlWSfi1BoPfsHtPb0VEHGUcAdBF208LUiFCwfaVPfLA=
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308/go.mod h1:K1p8Bj/wG34KJvYzPUqtzpndffmpkrVY11u2hkyxCWQ=
+github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef h1:9IVFHRsqvI+vKJwgF1OMV6L55jHbaV/ZLoU4IAG/dME=
+github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef/go.mod h1:cq8CvbZ3ioFmGrHokSAJalS0lC+pVXLKhITScItUGXY=
 github.com/streamingfast/pbgo v0.0.6-0.20220228185940-1bbaafec7d8a h1:PM5DDR1KTcesYkHhLg5UkodBlXYytFmiHvaSIsSBabY=
 github.com/streamingfast/pbgo v0.0.6-0.20220228185940-1bbaafec7d8a h1:PM5DDR1KTcesYkHhLg5UkodBlXYytFmiHvaSIsSBabY=
 github.com/streamingfast/pbgo v0.0.6-0.20220228185940-1bbaafec7d8a/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
