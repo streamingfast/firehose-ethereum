@@ -57,7 +57,7 @@ func setupCmd(cmd *cobra.Command) error {
 		}
 	}
 
-	subconf := launcher.DfuseConfig[subCommand]
+	subconf := launcher.Config[subCommand]
 	if subconf != nil {
 		for k, v := range subconf.Flags {
 			validFlag := false
@@ -82,7 +82,7 @@ func setupCmd(cmd *cobra.Command) error {
 		LogToFile:     isMatchingCommand(cmds, logToFileOn) && viper.GetBool("global-log-to-file"),
 		LogListenAddr: viper.GetString("global-log-level-switcher-listen-addr"),
 	})
-	launcher.SetupTracing()
+	launcher.SetupTracing("sf-ethereum")
 	launcher.SetupAnalyticsMetrics(viper.GetString("global-metrics-listen-addr"), viper.GetString("global-pprof-listen-addr"))
 
 	return nil

@@ -49,7 +49,7 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	configFile := viper.GetString("global-config-file")
 	userLog.Printf("Starting with config file '%s'", configFile)
 
-	err = Start(configFile, dataDir, args)
+	err = Start(dataDir, args)
 	if err != nil {
 		return fmt.Errorf("unable to launch: %w", err)
 	}
@@ -59,7 +59,7 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func Start(configFile string, dataDir string, args []string) (err error) {
+func Start(dataDir string, args []string) (err error) {
 	dataDirAbs, err := filepath.Abs(dataDir)
 	if err != nil {
 		return fmt.Errorf("unable to setup directory structure: %w", err)
@@ -119,7 +119,7 @@ func Start(configFile string, dataDir string, args []string) (err error) {
 
 	apps := launcher.ParseAppsFromArgs(args, runByDefault)
 	if len(args) == 0 {
-		apps = launcher.ParseAppsFromArgs(launcher.DfuseConfig["start"].Args, runByDefault)
+		apps = launcher.ParseAppsFromArgs(launcher.Config["start"].Args, runByDefault)
 	}
 	userLog.Printf("Launching applications: %s", strings.Join(apps, ","))
 	if err = launch.Launch(apps); err != nil {
