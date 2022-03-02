@@ -86,8 +86,9 @@ func Start(dataDir string, args []string) (err error) {
 	tracker.AddResolver(bstream.OffsetStartBlockResolver(200))
 
 	modules := &launcher.Runtime{
-		AbsDataDir: dataDirAbs,
-		Tracker:    tracker,
+		AbsDataDir:              dataDirAbs,
+		Tracker:                 tracker,
+		ProtocolSpecificModules: map[string]interface{}{},
 	}
 
 	atmCacheEnabled := viper.GetBool("common-atm-cache-enabled")
