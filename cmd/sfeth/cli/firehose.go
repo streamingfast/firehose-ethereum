@@ -21,8 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/streamingfast/dstore"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
@@ -31,6 +29,7 @@ import (
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/dmetrics"
+	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/firehose"
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
 	"github.com/streamingfast/logging"

@@ -34,5 +34,5 @@ func init() {
 }
 
 func main() {
-	cli.Main(cli.RegisterCommonFlags, nil)
+	cli.Main(cli.RegisterCommonFlags, nil, nil)
 }

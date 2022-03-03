@@ -34,7 +34,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func init() {
+func registerMindreaderNodeApp(backupModuleFactories map[string]BackupModuleFactory) {
 	appLogger := zap.NewNop()
 	nodeLogger := zap.NewNop()
 	logging.Register("github.com/streamingfast/sf-ethereum/mindreader", &appLogger)
@@ -53,7 +53,7 @@ func init() {
 		InitFunc: func(runtime *launcher.Runtime) error {
 			return nil
 		},
-		FactoryFunc: nodeFactoryFunc(true, &appLogger, &nodeLogger),
+		FactoryFunc: nodeFactoryFunc(true, &appLogger, &nodeLogger, backupModuleFactories),
 	})
 }
 

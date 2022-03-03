@@ -38,7 +38,7 @@ var RootCmd = &cobra.Command{Use: "sfeth", Short: "Ethereum on StreamingFast"}
 var allFlags = make(map[string]bool) // used as global because of async access to cobra init functions
 var registerCommonModulesCallback func(runtime *launcher.Runtime) error
 
-func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModules func(runtime *launcher.Runtime) error) {
+func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModules func(runtime *launcher.Runtime) error, backupModuleFactories map[string]BackupModuleFactory) {
 	cobra.OnInitialize(func() {
 		allFlags = flags.AutoBind(RootCmd, "SFETH")
 	})
@@ -53,6 +53,10 @@ func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModu
 	RootCmd.PersistentFlags().String("metrics-listen-addr", MetricsListenAddr, "If non-empty, the process will listen on this address to server Prometheus metrics")
 	RootCmd.PersistentFlags().String("pprof-listen-addr", "localhost:6060", "If non-empty, the process will listen on this address for pprof analysis (see https://golang.org/pkg/net/http/pprof/)")
 	RootCmd.PersistentFlags().Duration("startup-delay", 0, "[DEV] Delay before launching actual application(s), useful to leave some time to perform maintenance operations, on persisten disks for example.")
+
+	// Those must come before `launcher.RegisterFlags` call because they register themselves some flags that are checked by `launcher.RegisterFlags`
+	registerNodeApp(backupModuleFactories)
+	registerMindreaderNodeApp(backupModuleFactories)
 
 	// FIXME Should actually be a dependency on `launcher.RegisterFlags` directly!
 	launcher.RegisterCommonFlags = registerCommonFlags

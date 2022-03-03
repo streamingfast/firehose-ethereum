@@ -39,7 +39,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func init() {
+func registerNodeApp(backupModuleFactories map[string]BackupModuleFactory) {
 	appLogger := zap.NewNop()
 	nodeLogger := zap.NewNop()
 
@@ -59,10 +59,10 @@ func init() {
 		InitFunc: func(runtime *launcher.Runtime) error {
 			return nil
 		},
-		FactoryFunc: nodeFactoryFunc(false, &appLogger, &nodeLogger)})
+		FactoryFunc: nodeFactoryFunc(false, &appLogger, &nodeLogger, backupModuleFactories)})
 }
 
-func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger) func(*launcher.Runtime) (launcher.App, error) {
+func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, backupModuleFactories map[string]BackupModuleFactory) func(*launcher.Runtime) (launcher.App, error) {
 	return func(runtime *launcher.Runtime) (launcher.App, error) {
 		sfDataDir := runtime.AbsDataDir
 
@@ -149,7 +149,7 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger) func
 			return nil, err
 		}
 
-		backupModules, backupSchedules, err := parseBackupConfigs(backupConfigs)
+		backupModules, backupSchedules, err := parseBackupConfigs(*appLogger, backupConfigs, backupModuleFactories)
 		if err != nil {
 			return nil, fmt.Errorf("parsing backup configs: %w", err)
 		}
@@ -471,29 +471,38 @@ func buildChainOperator(
 	return o, nil
 }
 
-func parseBackupConfigs(backupConfigs []string) (mods map[string]operator.BackupModule, scheds []*operator.BackupSchedule, err error) {
+type BackupModuleConfig map[string]string
+
+type BackupModuleFactory func(conf BackupModuleConfig) (operator.BackupModule, error)
+
+func parseBackupConfigs(logger *zap.Logger, backupConfigs []string, backupModuleFactories map[string]BackupModuleFactory) (mods map[string]operator.BackupModule, scheds []*operator.BackupSchedule, err error) {
+	logger.Info("parsing backup configs", zap.Strings("configs", backupConfigs), zap.Int("factory_count", len(backupModuleFactories)))
+	for key := range backupModuleFactories {
+		logger.Info("parsing backup known factory", zap.String("name", key))
+	}
+
 	mods = make(map[string]operator.BackupModule)
 	for _, confStr := range backupConfigs {
 		conf, err := flags.ParseKVConfigString(confStr)
 		if err != nil {
 			return nil, nil, err
 		}
+
 		t := conf["type"]
-		switch t {
-		case "gke-pvc-snapshot":
-			mod, err := nodemanager.NewGKEPVCSnapshotter(conf)
-			if err != nil {
-				return nil, nil, err
-			}
-			mods[t] = mod
-		default:
-			return nil, nil, fmt.Errorf("unknown backup module type: %s", t)
+		factory, found := backupModuleFactories[t]
+		if !found {
+			return nil, nil, fmt.Errorf("unknown backup module type %q", t)
+		}
+
+		mods[t], err = factory(conf)
+		if err != nil {
+			return nil, nil, fmt.Errorf("backup module %q factory: %w", t, err)
 		}
 
 		if conf["freq-blocks"] != "" || conf["freq-time"] != "" {
 			newSched, err := operator.NewBackupSchedule(conf["freq-blocks"], conf["freq-time"], conf["required-hostname"], t)
 			if err != nil {
-				return nil, nil, fmt.Errorf("error setting up backup schedule for %s, %w", t, err)
+				return nil, nil, fmt.Errorf("error setting up backup schedule for %q: %w", t, err)
 			}
 
 			scheds = append(scheds, newSched)
