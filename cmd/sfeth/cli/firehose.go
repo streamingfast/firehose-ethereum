@@ -58,7 +58,6 @@ func init() {
 			cmd.Flags().Duration("firehose-realtime-tolerance", 2*time.Minute, "Longest delay to consider this service as real-time (ready) on initialization")
 			// irreversible indices
 			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
-			cmd.Flags().Bool("firehose-write-irreversible-blocks-index", false, "If set, will also create missing irreversibility indexes and write them to firehose-irreversible-blocks-index-url")
 			cmd.Flags().IntSlice("firehose-irreversible-blocks-index-bundle-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for irreversible block indices")
 			// block indices
 			cmd.Flags().String("firehose-block-index-url", "", "If non-empty, will use this URL as a store to load index data used by some transforms")
@@ -150,7 +149,6 @@ func init() {
 				GRPCShutdownGracePeriod:         grcpShutdownGracePeriod,
 				RealtimeTolerance:               viper.GetDuration("firehose-realtime-tolerance"),
 				IrreversibleBlocksIndexStoreURL: viper.GetString("firehose-irreversible-blocks-index-url"),
-				WriteIrreversibleBlocksIndex:    viper.GetBool("firehose-write-irreversible-blocks-index"),
 				IrreversibleBlocksBundleSizes:   bundleSizes,
 			}, &firehoseApp.Modules{
 				Authenticator:         authenticator,

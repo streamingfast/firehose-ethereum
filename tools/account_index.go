@@ -21,6 +21,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
+	bstransform "github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	firehose "github.com/streamingfast/firehose"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v1"
@@ -80,6 +81,10 @@ func skipToNextUnindexed(ctx context.Context, blockNum uint64, possibleIndexSize
 
 func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
+	createIrr, err := cmd.Flags().GetBool("create-irreversible-indexes")
+	if err != nil {
+		return err
+	}
 	iis, err := cmd.Flags().GetIntSlice("irreversible-indexes-sizes")
 	if err != nil {
 		return err
@@ -144,7 +149,6 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		zlog,
 		[]dstore.Store{blocksStore},
 		irrIndexStore,
-		true,
 		irrIdxSizes,
 		nil,
 		nil,
@@ -174,6 +178,11 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
 	t := transform.NewEthBlockIndexer(accountIndexStore, acctIdxSize)
 
+	var irreversibleIndexer *bstransform.IrreversibleBlocksIndexer
+	if createIrr {
+		irreversibleIndexer = bstransform.NewIrreversibleBlocksIndexer(irrIndexStore, irrIdxSizes, bstransform.IrrWithDefinedStartBlock(startBlockNum))
+	}
+
 	for {
 		resp, err := cli.Recv()
 		if err != nil {
@@ -186,6 +195,9 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		err = proto.Unmarshal(resp.Block.Value, b)
 		if err != nil {
 			return fmt.Errorf("unmarshalling firehose message: %w", err)
+		}
+		if createIrr {
+			irreversibleIndexer.Add(b)
 		}
 		t.ProcessBlock(b)
 	}

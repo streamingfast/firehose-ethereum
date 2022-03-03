@@ -19,11 +19,14 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
+	bstransform "github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	firehose "github.com/streamingfast/firehose"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v1"
+	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
 var generateIrrIdxCmd = &cobra.Command{
@@ -83,7 +86,6 @@ func generateIrrIdxE(cmd *cobra.Command, args []string) error {
 		zlog,
 		[]dstore.Store{blocksStore},
 		indexStore,
-		true,
 		bundleSizes,
 		nil,
 		nil,
@@ -97,6 +99,12 @@ func generateIrrIdxE(cmd *cobra.Command, args []string) error {
 		StopBlockNum:  stopBlockNum,
 		ForkSteps:     []pbfirehose.ForkStep{pbfirehose.ForkStep_STEP_IRREVERSIBLE},
 	})
+	var opts []bstransform.IrreversibleIndexerOption
+
+	if startBlockNum > 0 {
+		opts = append(opts, bstransform.IrrWithDefinedStartBlock(uint64(startBlockNum)))
+	}
+	irreversibleIndexer := bstransform.NewIrreversibleBlocksIndexer(indexStore, bundleSizes, opts...)
 
 	cmd.SilenceUsage = true
 	for {
@@ -113,6 +121,13 @@ func generateIrrIdxE(cmd *cobra.Command, args []string) error {
 		} else {
 			fmt.Println(cursor.Block)
 		}
+		blk := &pbcodec.Block{}
+		err = proto.Unmarshal(resp.Block.Value, blk)
+		if err != nil {
+			return fmt.Errorf("unmarshalling firehose message: %w", err)
+		}
+		irreversibleIndexer.Add(blk)
+
 	}
 
 }
