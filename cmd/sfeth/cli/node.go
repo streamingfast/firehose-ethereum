@@ -109,8 +109,12 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger) func
 			return nil, err
 		}
 
-		tracker := runtime.Tracker.Clone()
-		tracker.AddGetter(bstream.NetworkLIBTarget, bstream.NetworkLIBBlockRefGetter(blockmetaAddr))
+		tracker := runtime.Tracker
+
+		if blockmetaAddr != "" {
+			tracker = runtime.Tracker.Clone()
+			tracker.AddGetter(bstream.NetworkLIBTarget, bstream.NetworkLIBBlockRefGetter(blockmetaAddr))
+		}
 
 		var bootstrapper operator.Bootstrapper
 		if bootstrapDataURL != "" {

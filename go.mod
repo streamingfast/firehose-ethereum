@@ -3,7 +3,7 @@ module github.com/streamingfast/sf-ethereum
 go 1.16
 
 require (
-	cloud.google.com/go/bigtable v1.2.0
+	cloud.google.com/go/iam v0.2.0 // indirect
 	cloud.google.com/go/monitoring v1.3.0 // indirect
 	cloud.google.com/go/trace v1.1.0 // indirect
 	github.com/RoaringBitmap/roaring v0.9.4
@@ -15,10 +15,8 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mitchellh/go-testing-interface v1.14.1
-	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.8.1
-	github.com/streamingfast/blockmeta v0.0.2-0.20220301162623-6ca488c38501
 	github.com/streamingfast/bstream v0.0.2-0.20220303152911-1db2bc621583
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1
@@ -32,7 +30,6 @@ require (
 	github.com/streamingfast/eth-go v0.0.0-20210811181433-a73e599b102b
 	github.com/streamingfast/firehose v0.1.1-0.20220303153047-161af394ee22
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
-	github.com/streamingfast/kvdb v0.1.1-0.20220228165126-18278ca47f93
 	github.com/streamingfast/logging v0.0.0-20220222131651-12c3943aac2e
 	github.com/streamingfast/merger v0.0.3-0.20220301162603-c0129b6f1ad4
 	github.com/streamingfast/node-manager v0.0.2-0.20220301170656-5dbc7988e730
@@ -43,8 +40,10 @@ require (
 	github.com/streamingfast/snapshotter v0.0.0-20210906180247-1ec27a37764f
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.12.1
-	go.uber.org/multierr v1.7.0
+	go.uber.org/goleak v1.1.12 // indirect
+	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.21.0
+	google.golang.org/api v0.70.0 // indirect
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 )

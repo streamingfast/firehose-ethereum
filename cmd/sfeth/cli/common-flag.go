@@ -40,13 +40,9 @@ func RegisterCommonFlags(cmd *cobra.Command) error {
 	cmd.Flags().String("common-ratelimiter-plugin", "null://", "[COMMON] Rate Limiter plugin URI, see streamingfast/dauth repository")
 
 	//// Database connection strings
-	cmd.Flags().String("common-trxdb-dsn", TrxdbDSN, "[COMMON] kvdb connection string to trxdb database. Used by: trxdb-loader, dgraphql")
 
 	// System Behavior
 	cmd.Flags().Duration("common-system-shutdown-signal-delay", 0, "[COMMON] Add a delay between receiving SIGTERM signal and shutting down apps. Apps will respond negatively to /healthz during this period")
-
-	//// Service addresses
-	cmd.Flags().String("common-blockmeta-addr", BlockmetaServingAddr, "[COMMON] gRPC endpoint to reach the Blockmeta. Used by: search-indexer, search-router, search-live, dgraphql")
 
 	return nil
 }

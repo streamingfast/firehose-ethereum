@@ -25,12 +25,8 @@ import (
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dgrpc"
 	"github.com/streamingfast/dlauncher/launcher"
-	_ "github.com/streamingfast/kvdb/store/badger"
-	_ "github.com/streamingfast/kvdb/store/bigkv"
-	_ "github.com/streamingfast/kvdb/store/tikv"
 	pbblockmeta "github.com/streamingfast/pbgo/sf/blockmeta/v1"
 	_ "github.com/streamingfast/sf-ethereum/codec"
-	_ "github.com/streamingfast/sf-ethereum/trxdb/kv"
 	"go.uber.org/zap"
 )
 

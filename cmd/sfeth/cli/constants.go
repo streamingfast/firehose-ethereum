@@ -20,7 +20,6 @@ import (
 
 const (
 	Protocol                    = pbbstream.Protocol_ETH
-	TrxdbDSN             string = "badger://{sf-data-dir}/storage/trxdb"
 	MergedBlocksStoreURL string = "file://{sf-data-dir}/storage/merged-blocks"
 	OneBlockStoreURL     string = "file://{sf-data-dir}/storage/one-blocks"
 	SnapshotsURL         string = "file://{sf-data-dir}/storage/snapshots"
@@ -33,8 +32,6 @@ const (
 	MindreaderGRPCAddr           string = ":13010"
 	RelayerServingAddr           string = ":13011"
 	MergerServingAddr            string = ":13012"
-	BlockmetaServingAddr         string = ":13014"
-	TrxDBServingAddr             string = ":13020"
 	TokenMetaServingAddr         string = ":13039"
 	TraderServingAddr            string = ":13038"
 	BlockstreamGRPCServingAddr   string = ":13039"

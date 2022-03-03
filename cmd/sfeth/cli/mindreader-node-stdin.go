@@ -73,8 +73,13 @@ func init() {
 			metricsAndReadinessManager := nodeManager.NewMetricsAndReadinessManager(headBlockTimeDrift, headBlockNumber, viper.GetDuration("mindreader-geth-node-readiness-max-latency"))
 
 			blockmetaAddr := viper.GetString("common-blockmeta-addr")
-			tracker := runtime.Tracker.Clone()
-			tracker.AddGetter(bstream.NetworkLIBTarget, bstream.NetworkLIBBlockRefGetter(blockmetaAddr))
+
+			tracker := runtime.Tracker
+			if blockmetaAddr != "" {
+				tracker = runtime.Tracker.Clone()
+				tracker.AddGetter(bstream.NetworkLIBTarget, bstream.NetworkLIBBlockRefGetter(blockmetaAddr))
+			}
+
 			return nodeMindreaderStdinApp.New(&nodeMindreaderStdinApp.Config{
 				GRPCAddr:                     viper.GetString("mindreader-geth-node-grpc-listen-addr"),
 				ArchiveStoreURL:              archiveStoreURL,
