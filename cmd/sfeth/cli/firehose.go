@@ -131,6 +131,8 @@ func init() {
 			registry := transform.NewRegistry()
 			registry.Register(sftransform.LogFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(sftransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(sftransform.CallToFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(sftransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(sftransform.LightBlockFilterFactory)
 
 			var bundleSizes []uint64

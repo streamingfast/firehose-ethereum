@@ -164,7 +164,7 @@ func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
 }
 
 // testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
-// this implementation uses an EthBlockIndexer to write the index files
+// this implementation uses an EthLogIndexer to write the index files
 func testMockstoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uint64) *dstore.MockStore {
 	results := make(map[string][]byte)
 
@@ -177,7 +177,7 @@ func testMockstoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uin
 	})
 
 	// spawn an indexer with our mock indexStore
-	indexer := NewEthBlockIndexer(indexStore, indexSize)
+	indexer := NewEthLogIndexer(indexStore, indexSize)
 	for _, blk := range blocks {
 		// feed the indexer
 		indexer.ProcessBlock(blk)

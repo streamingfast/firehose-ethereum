@@ -9,18 +9,18 @@ import (
 
 const LogAddrIndexShortName = "logaddrsig"
 
-// logAddressSingleFilter represents a combination of interesting eth.Address and eth.Hash
-// can be composed into []*logAddressSingleFilter for more complex filtering
-type logAddressSingleFilter struct {
-	addrs     []eth.Address
-	eventSigs []eth.Hash
+// addrSigSingleFilter represents a combination of interesting eth.Address and eth.Hash
+// can be composed into an array for more complex filtering
+type addrSigSingleFilter struct {
+	addrs []eth.Address
+	sigs  []eth.Hash
 }
 
-// NewEthBlockIndexProvider instantiates and returns a new EthBlockIndexProvider
-func NewEthBlockIndexProvider(
+// NewEthLogIndexProvider instantiates and returns a new EthLogIndexProvider
+func NewEthLogIndexProvider(
 	store dstore.Store,
 	possibleIndexSizes []uint64,
-	filters []*logAddressSingleFilter,
+	filters []*addrSigSingleFilter,
 ) *transform.GenericBlockIndexProvider {
 	return transform.NewGenericBlockIndexProvider(
 		store,
@@ -33,7 +33,7 @@ func NewEthBlockIndexProvider(
 // getFilterFunc provides the filterFunc used by the transform.GenericBlockIndexProvider.
 // Ethereum chain-specific filtering is provided by a combination of logAddressSingleFilter
 // The filterFunc accepts a transform.BlockIndex, whose KV payload is a map[string]*roaring64.bitmap
-func getFilterFunc(filters []*logAddressSingleFilter) func(transform.BitmapGetter) []uint64 {
+func getFilterFunc(filters []*addrSigSingleFilter) func(transform.BitmapGetter) []uint64 {
 	return func(getFunc transform.BitmapGetter) (matchingBlocks []uint64) {
 		out := roaring64.NewBitmap()
 		for _, f := range filters {
@@ -46,18 +46,18 @@ func getFilterFunc(filters []*logAddressSingleFilter) func(transform.BitmapGette
 
 // filterBitmap is a switchboard method which determines
 // if we're interested in filtering the provided index by eth.Address, eth.Hash, or both
-func filterBitmap(f *logAddressSingleFilter, getFunc transform.BitmapGetter) *roaring64.Bitmap {
+func filterBitmap(f *addrSigSingleFilter, getFunc transform.BitmapGetter) *roaring64.Bitmap {
 	wantAddresses := len(f.addrs) != 0
-	wantSigs := len(f.eventSigs) != 0
+	wantSigs := len(f.sigs) != 0
 
 	switch {
 	case wantAddresses && !wantSigs:
 		return addressBitmap(f.addrs, getFunc)
 	case wantSigs && !wantAddresses:
-		return sigsBitmap(f.eventSigs, getFunc)
+		return sigsBitmap(f.sigs, getFunc)
 	case wantAddresses && wantSigs:
 		a := addressBitmap(f.addrs, getFunc)
-		b := sigsBitmap(f.eventSigs, getFunc)
+		b := sigsBitmap(f.sigs, getFunc)
 		a.And(b)
 		return a
 	default:

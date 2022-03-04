@@ -8,25 +8,25 @@ import (
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
-type BlockIndexer interface {
+type LogIndexer interface {
 	Add(keys []string, blockNum uint64)
 }
 
-// EthBlockIndexer wraps a bstream.transform.BlockIndexer for chain-specific use on Ethereum
-type EthBlockIndexer struct {
-	BlockIndexer BlockIndexer
+// EthLogIndexer wraps a bstream.transform.BlockIndexer for chain-specific use on Ethereum
+type EthLogIndexer struct {
+	BlockIndexer LogIndexer
 }
 
-// NewEthBlockIndexer instantiates and returns a new EthBlockIndexer
-func NewEthBlockIndexer(indexStore dstore.Store, indexSize uint64) *EthBlockIndexer {
+// NewEthLogIndexer instantiates and returns a new EthLogIndexer
+func NewEthLogIndexer(indexStore dstore.Store, indexSize uint64) *EthLogIndexer {
 	bi := transform.NewBlockIndexer(indexStore, indexSize, LogAddrIndexShortName)
-	return &EthBlockIndexer{
+	return &EthLogIndexer{
 		BlockIndexer: bi,
 	}
 }
 
 // ProcessBlock implements chain-specific logic for Ethereum bstream.Block's
-func (i *EthBlockIndexer) ProcessBlock(blk *pbcodec.Block) {
+func (i *EthLogIndexer) ProcessBlock(blk *pbcodec.Block) {
 	var keys []string
 
 	for _, trace := range blk.TransactionTraces {

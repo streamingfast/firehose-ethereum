@@ -223,6 +223,13 @@ func (trace *TransactionTrace) PopulateTrxStatus() {
 	return
 }
 
+func (call *Call) Method() []byte {
+	if len(call.Input) >= 4 {
+		return call.Input[0:4]
+	}
+	return nil
+}
+
 func (trace *TransactionTrace) PopulateStateReverted() {
 	// Calls are ordered by execution index. So the algo is quite simple.
 	// We loop through the flat calls, at each call, if the parent is present

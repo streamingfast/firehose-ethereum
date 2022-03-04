@@ -29,31 +29,23 @@ import (
 	"github.com/streamingfast/sf-ethereum/transform"
 )
 
-var generateAccIdxCmd = &cobra.Command{
+var generateCalltoIdxCmd = &cobra.Command{
 	// TODO: make irr-index-url optional, maybe ?????
-	Use:   "generate-account-index {acct-index-url} {irr-index-url} {source-blocks-url} {start-block-num} {stop-block-num}",
-	Short: "Generate index files for eth accounts present in blocks",
+	Use:   "generate-callto-index {acct-index-url} {irr-index-url} {source-blocks-url} {start-block-num} {stop-block-num}",
+	Short: "Generate call-to index files for eth accounts and signatures present in blocks",
 	Args:  cobra.RangeArgs(4, 5),
-	RunE:  generateAccIdxE,
+	RunE:  generateCalltoIdxE,
 }
 
 func init() {
-	generateAccIdxCmd.Flags().Uint64("account-indexes-size", 10000, "size of account index bundles that will be created")
-	generateAccIdxCmd.Flags().IntSlice("lookup-account-indexes-sizes", []int{1000000, 100000, 10000, 1000}, "account index bundle sizes that we will look for on start to find first unindexed block (should include account-indexes-size)")
-	generateAccIdxCmd.Flags().IntSlice("irreversible-indexes-sizes", []int{10000, 1000}, "size of irreversible indexes that will be used")
-	generateAccIdxCmd.Flags().Bool("create-irreversible-indexes", false, "if true, irreversible indexes will also be created")
-	Cmd.AddCommand(generateAccIdxCmd)
+	generateCalltoIdxCmd.Flags().Uint64("callto-indexes-size", 10000, "size of account index bundles that will be created")
+	generateCalltoIdxCmd.Flags().IntSlice("lookup-callto-indexes-sizes", []int{1000000, 100000, 10000, 1000}, "account index bundle sizes that we will look for on start to find first unindexed block (should include callto-indexes-size)")
+	generateCalltoIdxCmd.Flags().IntSlice("irreversible-indexes-sizes", []int{10000, 1000}, "size of irreversible indexes that will be used")
+	generateCalltoIdxCmd.Flags().Bool("create-irreversible-indexes", false, "if true, irreversible indexes will also be created")
+	Cmd.AddCommand(generateCalltoIdxCmd)
 }
 
-func lowBoundary(i uint64, mod uint64) uint64 {
-	return i - (i % mod)
-}
-
-func toIndexFilename(bundleSize, baseBlockNum uint64, shortname string) string {
-	return fmt.Sprintf("%010d.%d.%s.idx", baseBlockNum, bundleSize, shortname)
-}
-
-func generateAccIdxE(cmd *cobra.Command, args []string) error {
+func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 
 	createIrr, err := cmd.Flags().GetBool("create-irreversible-indexes")
 	if err != nil {
@@ -71,11 +63,11 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		irrIdxSizes = append(irrIdxSizes, uint64(size))
 	}
 
-	acctIdxSize, err := cmd.Flags().GetUint64("account-indexes-size")
+	acctIdxSize, err := cmd.Flags().GetUint64("callto-indexes-size")
 	if err != nil {
 		return err
 	}
-	lais, err := cmd.Flags().GetIntSlice("lookup-account-indexes-sizes")
+	lais, err := cmd.Flags().GetIntSlice("lookup-callto-indexes-sizes")
 	if err != nil {
 		return err
 	}
@@ -138,7 +130,7 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		irrStart = bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), irrIdxSizes, "irr", irrIndexStore)
 		close(done)
 	}()
-	accStart := bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), lookupAccountIdxSizes, transform.LogAddrIndexShortName, accountIndexStore)
+	accStart := bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), lookupAccountIdxSizes, transform.CallAddrIndexShortName, accountIndexStore)
 	<-done
 
 	fmt.Println("irrStart", irrStart, "accStart", accStart)
@@ -156,7 +148,7 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
 	cmd.SilenceUsage = true
 
-	t := transform.NewEthLogIndexer(accountIndexStore, acctIdxSize)
+	t := transform.NewEthCallIndexer(accountIndexStore, acctIdxSize)
 
 	var irreversibleIndexer *bstransform.IrreversibleBlocksIndexer
 	if createIrr {

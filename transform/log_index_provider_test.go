@@ -2,25 +2,26 @@ package transform
 
 import (
 	"context"
+	"io"
+	"testing"
+
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/stretchr/testify/require"
-	"io"
-	"testing"
 )
 
-func TestNewEthBlockIndexProvider(t *testing.T) {
+func TestNewEthAckIndexProvider(t *testing.T) {
 	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
 		return nil
 	})
-	indexProvider := NewEthBlockIndexProvider(indexStore, nil, nil)
+	indexProvider := NewEthLogIndexProvider(indexStore, nil, nil)
 	require.NotNil(t, indexProvider)
 	require.IsType(t, transform.GenericBlockIndexProvider{}, *indexProvider)
 }
 
-func TestEthBlockIndexProvider_WithinRange(t *testing.T) {
+func TestEthAckIndexProvider_WithinRange(t *testing.T) {
 	tests := []struct {
 		name          string
 		blocks        []*pbcodec.Block
@@ -59,10 +60,10 @@ func TestEthBlockIndexProvider_WithinRange(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 
 			// spawn an indexProvider with the populated dstore
-			indexProvider := NewEthBlockIndexProvider(
+			indexProvider := NewEthLogIndexProvider(
 				indexStore,
 				[]uint64{test.indexSize},
-				[]*logAddressSingleFilter{
+				[]*addrSigSingleFilter{
 					{matchAddresses, nil},
 				},
 			)
@@ -79,7 +80,7 @@ func TestEthBlockIndexProvider_WithinRange(t *testing.T) {
 	}
 }
 
-func TestEthBlockIndexProvider_Matches(t *testing.T) {
+func TestEthLogIndexProvider_Matches(t *testing.T) {
 	tests := []struct {
 		name            string
 		blocks          []*pbcodec.Block
@@ -168,10 +169,10 @@ func TestEthBlockIndexProvider_Matches(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
-			filters := []*logAddressSingleFilter{
+			filters := []*addrSigSingleFilter{
 				{test.filterAddresses, test.filterEventSigs},
 			}
-			indexProvider := NewEthBlockIndexProvider(indexStore, []uint64{test.indexSize}, filters)
+			indexProvider := NewEthLogIndexProvider(indexStore, []uint64{test.indexSize}, filters)
 
 			b, err := indexProvider.Matches(context.Background(), test.wantedBlock)
 			require.NoError(t, err)
@@ -184,7 +185,7 @@ func TestEthBlockIndexProvider_Matches(t *testing.T) {
 	}
 }
 
-func TestEthBlockIndexProvider_NextMatching(t *testing.T) {
+func TestEthLogIndexProvider_NextMatching(t *testing.T) {
 	tests := []struct {
 		name                        string
 		blocks                      []*pbcodec.Block
@@ -242,10 +243,10 @@ func TestEthBlockIndexProvider_NextMatching(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
-			filters := []*logAddressSingleFilter{
+			filters := []*addrSigSingleFilter{
 				{test.filterAddresses, test.filterEventSigs},
 			}
-			indexProvider := NewEthBlockIndexProvider(indexStore, []uint64{test.indexSize}, filters)
+			indexProvider := NewEthLogIndexProvider(indexStore, []uint64{test.indexSize}, filters)
 
 			nextBlockNum, passedIndexBoundary, err := indexProvider.NextMatching(context.Background(), test.wantedBlock, 0)
 			require.NoError(t, err)

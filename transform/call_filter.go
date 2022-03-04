@@ -16,29 +16,29 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var LogFilterMessageName = proto.MessageName(&pbtransform.LogFilter{})
-var MultiLogFilterMessageName = proto.MessageName(&pbtransform.MultiLogFilter{})
+var CallToFilterMessageName = proto.MessageName(&pbtransform.CallToFilter{})
+var MultiCallToFilterMessageName = proto.MessageName(&pbtransform.MultiCallToFilter{})
 
-func LogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
+func CallToFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{
-		Obj: &pbtransform.LogFilter{},
+		Obj: &pbtransform.CallToFilter{},
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 			mname := message.MessageName()
-			if mname != LogFilterMessageName {
-				return nil, fmt.Errorf("expected type url %q, recevied %q ", LogFilterMessageName, message.TypeUrl)
+			if mname != CallToFilterMessageName {
+				return nil, fmt.Errorf("expected type url %q, recevied %q ", CallToFilterMessageName, message.TypeUrl)
 			}
 
-			filter := &pbtransform.LogFilter{}
+			filter := &pbtransform.CallToFilter{}
 			err := proto.Unmarshal(message.Value, filter)
 			if err != nil {
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
 
-			if len(filter.Addresses) == 0 && len(filter.EventSignatures) == 0 {
-				return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
+			if len(filter.Addresses) == 0 && len(filter.Signatures) == 0 {
+				return nil, fmt.Errorf("a call filter transform requires at-least one address or one method signature")
 			}
 
-			f := &LogFilter{
+			f := &CallToFilter{
 				indexStore:         indexStore,
 				possibleIndexSizes: possibleIndexSizes,
 			}
@@ -46,8 +46,8 @@ func LogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *tra
 			for _, addr := range filter.Addresses {
 				f.Addresses = append(f.Addresses, addr)
 			}
-			for _, sig := range filter.EventSignatures {
-				f.EventSigntures = append(f.EventSigntures, sig)
+			for _, sig := range filter.Signatures {
+				f.Signatures = append(f.Signatures, sig)
 			}
 
 			return f, nil
@@ -55,15 +55,15 @@ func LogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *tra
 	}
 }
 
-type LogFilter struct {
-	Addresses      []eth.Address
-	EventSigntures []eth.Hash
+type CallToFilter struct {
+	Addresses  []eth.Address
+	Signatures []eth.Hash
 
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
 }
 
-func (p *LogFilter) matchAddress(src eth.Address) bool {
+func (p *CallToFilter) matchAddress(src eth.Address) bool {
 	if len(p.Addresses) == 0 {
 		return true
 	}
@@ -75,11 +75,11 @@ func (p *LogFilter) matchAddress(src eth.Address) bool {
 	return false
 }
 
-func (p *LogFilter) matchEventSignature(src eth.Hash) bool {
-	if len(p.EventSigntures) == 0 {
+func (p *CallToFilter) matchSignature(src eth.Hash) bool {
+	if len(p.Signatures) == 0 {
 		return true
 	}
-	for _, topic := range p.EventSigntures {
+	for _, topic := range p.Signatures {
 		if bytes.Equal(topic, src) {
 			return true
 		}
@@ -87,13 +87,13 @@ func (p *LogFilter) matchEventSignature(src eth.Hash) bool {
 	return false
 }
 
-func (p *LogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
+func (p *CallToFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
 	ethBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
 	traces := []*pbcodec.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
 		match := false
-		for _, log := range trace.Receipt.Logs {
-			if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics[0]) {
+		for _, call := range trace.Calls {
+			if p.matchAddress(call.Address) && p.matchSignature(call.Method()) {
 				match = true
 				break
 			}
@@ -106,62 +106,62 @@ func (p *LogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (t
 	return ethBlock, nil
 }
 
-// GetIndexProvider will instantiate a new LogAddressIndex conforming to the bstream.BlockIndexProvider interface
-func (p *LogFilter) GetIndexProvider() bstream.BlockIndexProvider {
+// GetIndexProvider will instantiate a new CallToAddressIndex conforming to the bstream.BlockIndexProvider interface
+func (p *CallToFilter) GetIndexProvider() bstream.BlockIndexProvider {
 	if p.indexStore == nil {
 		return nil
 	}
 
-	if len(p.Addresses) == 0 && len(p.EventSigntures) == 0 {
+	if len(p.Addresses) == 0 && len(p.Signatures) == 0 {
 		return nil
 	}
 
 	filter := &addrSigSingleFilter{
 		p.Addresses,
-		p.EventSigntures,
+		p.Signatures,
 	}
-	return NewEthLogIndexProvider(
+	return NewEthCallIndexProvider(
 		p.indexStore,
 		p.possibleIndexSizes,
 		[]*addrSigSingleFilter{filter},
 	)
 }
 
-func MultiLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
+func MultiCallToFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{
-		Obj: &pbtransform.MultiLogFilter{},
+		Obj: &pbtransform.MultiCallToFilter{},
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 			mname := message.MessageName()
-			if mname != MultiLogFilterMessageName {
+			if mname != MultiCallToFilterMessageName {
 				return nil, fmt.Errorf("expected type url %q, recevied %q ", LogFilterMessageName, message.TypeUrl)
 			}
 
-			filter := &pbtransform.MultiLogFilter{}
+			filter := &pbtransform.MultiCallToFilter{}
 			err := proto.Unmarshal(message.Value, filter)
 			if err != nil {
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
 
-			if len(filter.LogFilters) == 0 {
+			if len(filter.CallFilters) == 0 {
 				return nil, fmt.Errorf("a multi log filter transform requires at-least one basic log filter")
 			}
 
-			f := &MultiLogFilter{
+			f := &MultiCallToFilter{
 				indexStore:         indexStore,
 				possibleIndexSizes: possibleIndexSizes,
 			}
 
-			for _, bf := range filter.LogFilters {
-				if len(bf.Addresses) == 0 && len(bf.EventSignatures) == 0 {
+			for _, bf := range filter.CallFilters {
+				if len(bf.Addresses) == 0 && len(bf.Signatures) == 0 {
 					return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
 				}
-				ff := LogFilter{}
+				ff := CallToFilter{}
 
 				for _, addr := range bf.Addresses {
 					ff.Addresses = append(ff.Addresses, addr)
 				}
-				for _, sig := range bf.EventSignatures {
-					ff.EventSigntures = append(ff.EventSigntures, sig)
+				for _, sig := range bf.Signatures {
+					ff.Signatures = append(ff.Signatures, sig)
 				}
 				f.filters = append(f.filters, ff)
 			}
@@ -171,20 +171,20 @@ func MultiLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 	}
 }
 
-type MultiLogFilter struct {
-	filters            []LogFilter
+type MultiCallToFilter struct {
+	filters            []CallToFilter
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
 }
 
-func (p *MultiLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
+func (p *MultiCallToFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
 	ethBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
 	traces := []*pbcodec.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
 		match := false
-		for _, log := range trace.Receipt.Logs {
+		for _, call := range trace.Calls {
 			for _, filter := range p.filters {
-				if filter.matchAddress(log.Address) && filter.matchEventSignature(log.Topics[0]) {
+				if filter.matchAddress(call.Address) && filter.matchSignature(call.Method()) {
 					match = true
 					break // a single filter matching is enough
 				}
@@ -198,8 +198,8 @@ func (p *MultiLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Inpu
 	return ethBlock, nil
 }
 
-// GetIndexProvider will instantiate a new LogAddressIndex conforming to the bstream.BlockIndexProvider interface
-func (p *MultiLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
+// GetIndexProvider will instantiate a new CallAddressIndex conforming to the bstream.BlockIndexProvider interface
+func (p *MultiCallToFilter) GetIndexProvider() bstream.BlockIndexProvider {
 	if p.indexStore == nil {
 		return nil
 	}
@@ -211,11 +211,11 @@ func (p *MultiLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
 	for _, f := range p.filters {
 		filters = append(filters, &addrSigSingleFilter{
 			addrs: f.Addresses,
-			sigs:  f.EventSigntures,
+			sigs:  f.Signatures,
 		})
 	}
 
-	return NewEthLogIndexProvider(
+	return NewEthCallIndexProvider(
 		p.indexStore,
 		p.possibleIndexSizes,
 		filters,

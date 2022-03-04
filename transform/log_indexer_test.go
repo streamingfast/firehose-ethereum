@@ -11,18 +11,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewEthBlockIndexer(t *testing.T) {
+func TestNewEthLogIndexer(t *testing.T) {
 	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
 		return nil
 	})
 	indexSize := uint64(10)
 
-	indexer := NewEthBlockIndexer(indexStore, indexSize)
+	indexer := NewEthLogIndexer(indexStore, indexSize)
 	require.NotNil(t, indexer)
-	require.IsType(t, EthBlockIndexer{}, *indexer)
+	require.IsType(t, EthLogIndexer{}, *indexer)
 }
 
-func TestEthBlockIndexer(t *testing.T) {
+func TestEthLogIndexer(t *testing.T) {
 	tests := []struct {
 		name             string
 		blocks           []*pbcodec.Block
@@ -72,7 +72,7 @@ func TestEthBlockIndexer(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			testGenericIndexer := &testBlockIndexer{}
-			indexer := &EthBlockIndexer{
+			indexer := &EthLogIndexer{
 				BlockIndexer: testGenericIndexer,
 			}
 
