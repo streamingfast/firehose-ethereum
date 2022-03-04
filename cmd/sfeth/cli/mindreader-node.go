@@ -27,6 +27,7 @@ import (
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
 	"github.com/streamingfast/node-manager/mindreader"
+	"github.com/streamingfast/node-manager/operator"
 	"github.com/streamingfast/sf-ethereum/codec"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"go.uber.org/zap"
@@ -34,7 +35,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func registerMindreaderNodeApp(backupModuleFactories map[string]BackupModuleFactory) {
+func registerMindreaderNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
 	appLogger := zap.NewNop()
 	nodeLogger := zap.NewNop()
 	logging.Register("github.com/streamingfast/sf-ethereum/mindreader", &appLogger)

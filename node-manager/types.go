@@ -14,7 +14,9 @@
 
 package nodemanager
 
-import "go.uber.org/zap/zapcore"
+import (
+	"go.uber.org/zap/zapcore"
+)
 
 type StringArray []string
 

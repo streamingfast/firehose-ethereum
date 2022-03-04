@@ -26,6 +26,7 @@ import (
 	_ "github.com/streamingfast/dauth/authenticator/null"   // auth null plugin
 	_ "github.com/streamingfast/dauth/authenticator/secret" // auth secret/hard-coded plugin
 	_ "github.com/streamingfast/dauth/ratelimiter/null"     // ratelimiter plugin
+	"github.com/streamingfast/node-manager/operator"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/derr"
@@ -38,7 +39,7 @@ var RootCmd = &cobra.Command{Use: "sfeth", Short: "Ethereum on StreamingFast"}
 var allFlags = make(map[string]bool) // used as global because of async access to cobra init functions
 var registerCommonModulesCallback func(runtime *launcher.Runtime) error
 
-func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModules func(runtime *launcher.Runtime) error, backupModuleFactories map[string]BackupModuleFactory) {
+func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModules func(runtime *launcher.Runtime) error, backupModuleFactories map[string]operator.BackupModuleFactory) {
 	cobra.OnInitialize(func() {
 		allFlags = flags.AutoBind(RootCmd, "SFETH")
 	})
