@@ -12,23 +12,23 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
+	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
 	"google.golang.org/protobuf/proto"
 )
 
-var LogFilterMessageName = proto.MessageName(&pbtransforms.BasicLogFilter{})
-var MultiLogFilterMessageName = proto.MessageName(&pbtransforms.MultiLogFilter{})
+var LogFilterMessageName = proto.MessageName(&pbtransform.LogFilter{})
+var MultiLogFilterMessageName = proto.MessageName(&pbtransform.MultiLogFilter{})
 
-func BasicLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
+func LogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{
-		Obj: &pbtransforms.BasicLogFilter{},
+		Obj: &pbtransform.LogFilter{},
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 			mname := message.MessageName()
 			if mname != LogFilterMessageName {
 				return nil, fmt.Errorf("expected type url %q, recevied %q ", LogFilterMessageName, message.TypeUrl)
 			}
 
-			filter := &pbtransforms.BasicLogFilter{}
+			filter := &pbtransform.LogFilter{}
 			err := proto.Unmarshal(message.Value, filter)
 			if err != nil {
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
@@ -38,7 +38,7 @@ func BasicLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 				return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
 			}
 
-			f := &BasicLogFilter{
+			f := &LogFilter{
 				indexStore:         indexStore,
 				possibleIndexSizes: possibleIndexSizes,
 			}
@@ -55,7 +55,7 @@ func BasicLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 	}
 }
 
-type BasicLogFilter struct {
+type LogFilter struct {
 	Addresses      []eth.Address
 	EventSigntures []eth.Hash
 
@@ -63,7 +63,7 @@ type BasicLogFilter struct {
 	possibleIndexSizes []uint64
 }
 
-func (p *BasicLogFilter) matchAddress(src eth.Address) bool {
+func (p *LogFilter) matchAddress(src eth.Address) bool {
 	if len(p.Addresses) == 0 {
 		return true
 	}
@@ -75,7 +75,7 @@ func (p *BasicLogFilter) matchAddress(src eth.Address) bool {
 	return false
 }
 
-func (p *BasicLogFilter) matchEventSignature(src eth.Hash) bool {
+func (p *LogFilter) matchEventSignature(src eth.Hash) bool {
 	if len(p.EventSigntures) == 0 {
 		return true
 	}
@@ -87,7 +87,7 @@ func (p *BasicLogFilter) matchEventSignature(src eth.Hash) bool {
 	return false
 }
 
-func (p *BasicLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
+func (p *LogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
 	ethBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
 	traces := []*pbcodec.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
@@ -107,7 +107,7 @@ func (p *BasicLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Inpu
 }
 
 // GetIndexProvider will instantiate a new LogAddressIndex conforming to the bstream.BlockIndexProvider interface
-func (p *BasicLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
+func (p *LogFilter) GetIndexProvider() bstream.BlockIndexProvider {
 	if p.indexStore == nil {
 		return nil
 	}
@@ -129,20 +129,20 @@ func (p *BasicLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
 
 func MultiLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{
-		Obj: &pbtransforms.MultiLogFilter{},
+		Obj: &pbtransform.MultiLogFilter{},
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 			mname := message.MessageName()
 			if mname != MultiLogFilterMessageName {
 				return nil, fmt.Errorf("expected type url %q, recevied %q ", LogFilterMessageName, message.TypeUrl)
 			}
 
-			filter := &pbtransforms.MultiLogFilter{}
+			filter := &pbtransform.MultiLogFilter{}
 			err := proto.Unmarshal(message.Value, filter)
 			if err != nil {
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
 
-			if len(filter.BasicLogFilters) == 0 {
+			if len(filter.LogFilters) == 0 {
 				return nil, fmt.Errorf("a multi log filter transform requires at-least one basic log filter")
 			}
 
@@ -151,11 +151,11 @@ func MultiLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 				possibleIndexSizes: possibleIndexSizes,
 			}
 
-			for _, bf := range filter.BasicLogFilters {
+			for _, bf := range filter.LogFilters {
 				if len(bf.Addresses) == 0 && len(bf.EventSignatures) == 0 {
 					return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
 				}
-				ff := BasicLogFilter{}
+				ff := LogFilter{}
 
 				for _, addr := range bf.Addresses {
 					ff.Addresses = append(ff.Addresses, addr)
@@ -172,7 +172,7 @@ func MultiLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 }
 
 type MultiLogFilter struct {
-	filters            []BasicLogFilter
+	filters            []LogFilter
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
 }

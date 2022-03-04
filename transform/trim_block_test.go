@@ -5,14 +5,14 @@ import (
 
 	"github.com/streamingfast/bstream/transform"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
+	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
 func lightBlockTransform(t *testing.T) *anypb.Any {
-	transform := &pbtransforms.LightBlock{}
+	transform := &pbtransform.LightBlock{}
 	a, err := anypb.New(transform)
 	require.NoError(t, err)
 	return a

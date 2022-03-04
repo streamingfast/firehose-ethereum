@@ -9,14 +9,14 @@ import (
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/eth-go"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
+	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
 func logFilterTransform(t *testing.T, addresses []eth.Address, topics []eth.Hash) *anypb.Any {
-	transform := &pbtransforms.BasicLogFilter{}
+	transform := &pbtransform.LogFilter{}
 	for _, addr := range addresses {
 		transform.Addresses = append(transform.Addresses, addr.Bytes())
 	}
@@ -56,7 +56,7 @@ func TestLogFilter_Transform(t *testing.T) {
 	}
 
 	transformReg := transform.NewRegistry()
-	transformReg.Register(BasicLogFilterFactory(nil, nil))
+	transformReg.Register(LogFilterFactory(nil, nil))
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -79,7 +79,7 @@ func TestLogFilter_Transform(t *testing.T) {
 	}
 }
 
-func TestBasicLogFilter_GetIndexProvider(t *testing.T) {
+func TestLogFilter_GetIndexProvider(t *testing.T) {
 	tests := []struct {
 		name        string
 		indexStore  dstore.Store
@@ -133,7 +133,7 @@ func TestBasicLogFilter_GetIndexProvider(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			f := &BasicLogFilter{
+			f := &LogFilter{
 				indexStore:         test.indexStore,
 				possibleIndexSizes: possibleIndexSizes,
 				Addresses:          test.addrs,

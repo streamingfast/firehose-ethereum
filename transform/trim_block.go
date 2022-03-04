@@ -3,26 +3,27 @@ package transform
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransforms "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transforms/v1"
+	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-var LightBlockMessageName = proto.MessageName(&pbtransforms.LightBlock{})
+var LightBlockMessageName = proto.MessageName(&pbtransform.LightBlock{})
 
 var LightBlockFilterFactory = &transform.Factory{
-	Obj: &pbtransforms.LightBlock{},
+	Obj: &pbtransform.LightBlock{},
 	NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 		mname := message.MessageName()
 		if mname != LightBlockMessageName {
 			return nil, fmt.Errorf("expected type url %q, recevied %q ", LightBlockMessageName, message.TypeUrl)
 		}
 
-		filter := &pbtransforms.LightBlock{}
+		filter := &pbtransform.LightBlock{}
 		err := proto.Unmarshal(message.Value, filter)
 		if err != nil {
 			return nil, fmt.Errorf("unexpected unmarshall error: %w", err)

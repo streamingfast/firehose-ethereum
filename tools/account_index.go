@@ -158,8 +158,14 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 
-	irrStart := skipToNextUnindexed(ctx, uint64(startBlockNum), irrIdxSizes, "irr", irrIndexStore)
-	accStart := skipToNextUnindexed(ctx, uint64(startBlockNum), lookupAccountIdxSizes, transform.LogAddrIndexShortName, accountIndexStore)
+	var irrStart uint64
+	done := make(chan struct{})
+	go func() { // both checks in parallel
+		irrStart = bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), irrIdxSizes, "irr", irrIndexStore)
+		close(done)
+	}()
+	accStart := bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), lookupAccountIdxSizes, transform.LogAddrIndexShortName, accountIndexStore)
+	<-done
 
 	fmt.Println("irrStart", irrStart, "accStart", accStart)
 	if irrStart < accStart {
