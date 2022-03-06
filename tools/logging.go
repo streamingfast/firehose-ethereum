@@ -16,12 +16,6 @@ package tools
 
 import (
 	"github.com/streamingfast/logging"
-	"go.uber.org/zap"
 )
 
-var traceEnabled = logging.IsTraceEnabled("tools", "github.com/streamingfast/sf-ethereum/tools")
-var zlog = zap.NewNop()
-
-func init() {
-	logging.Register("github.com/streamingfast/sf-ethereum/tools", &zlog)
-}
+var zlog, tracer = logging.PackageLogger("tools", "github.com/streamingfast/sf-ethereum/tools")

@@ -21,14 +21,14 @@ require (
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
 	github.com/streamingfast/derr v0.0.0-20220301163149-de09cb18fc70
 	github.com/streamingfast/dgrpc v0.0.0-20220301153539-536adf71b594
-	github.com/streamingfast/dlauncher v0.0.0-20220302154156-935fc12be373
+	github.com/streamingfast/dlauncher v0.0.0-20220304184304-e5045b95f9ad
 	github.com/streamingfast/dmetering v0.0.0-20220301165106-a642bb6a21bd
 	github.com/streamingfast/dmetrics v0.0.0-20210811180524-8494aeb34447
 	github.com/streamingfast/dstore v0.1.1-0.20220304164644-696f9c5fc231
-	github.com/streamingfast/eth-go v0.0.0-20210811181433-a73e599b102b
+	github.com/streamingfast/eth-go v0.0.0-20220306004150-d6567bb604ec
 	github.com/streamingfast/firehose v0.1.1-0.20220303153047-161af394ee22
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
-	github.com/streamingfast/logging v0.0.0-20220222131651-12c3943aac2e
+	github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424
 	github.com/streamingfast/merger v0.0.3-0.20220301162603-c0129b6f1ad4
 	github.com/streamingfast/node-manager v0.0.2-0.20220304000605-53b995bb111e
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff

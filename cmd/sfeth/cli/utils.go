@@ -23,8 +23,11 @@ import (
 	"github.com/lithammer/dedent"
 	"github.com/logrusorgru/aurora"
 	"github.com/spf13/viper"
+	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 )
+
+var DefaultLevelInfo = logging.LoggerDefaultLevel(zap.InfoLevel)
 
 // MustReplaceDataDir is used in sf-ethereum-priv
 func MustReplaceDataDir(dataDir, in string) string {
@@ -38,7 +41,7 @@ func MustReplaceDataDir(dataDir, in string) string {
 }
 
 func mkdirStorePathIfLocal(storeURL string) (err error) {
-	userLog.Debug("creating directory and its parent(s)", zap.String("directory", storeURL))
+	zlog.Debug("creating directory and its parent(s)", zap.String("directory", storeURL))
 	if dirs := getDirsToMake(storeURL); len(dirs) > 0 {
 		err = makeDirs(dirs)
 	}
@@ -123,7 +126,7 @@ func dfuseAbsoluteDataDir() (string, error) {
 //		return
 //	}
 //
-//	userLog.Debug("geth version regexp matched", zap.Reflect("matches", matches))
+//	zlog.Debug("geth version regexp matched", zap.Reflect("matches", matches))
 //
 //	// We don't care for multiple matches for now
 //	match := matches[0]
@@ -161,7 +164,7 @@ func dfuseAbsoluteDataDir() (string, error) {
 //
 //	version, err := newGethVersionFromSystem()
 //	if err != nil {
-//		userLog.Debug("unable to extract geth version from system", zap.Error(err))
+//		zlog.Debug("unable to extract geth version from system", zap.Error(err))
 //		cliErrorAndExit(dedentf(`
 //			We were unable to detect "geth" version on your system. This can be due to
 //			one of the following reasons:

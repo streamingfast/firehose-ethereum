@@ -16,12 +16,6 @@ package filtering
 
 import (
 	"github.com/streamingfast/logging"
-	"go.uber.org/zap"
 )
 
-var traceEnabled = logging.IsTraceEnabled("filtering", "github.com/streamingfast/sf-ethereum/filtering")
-var zlog *zap.Logger
-
-func init() {
-	logging.Register("github.com/streamingfast/sf-ethereum/filtering", &zlog)
-}
+var zlog, tracer = logging.PackageLogger("filtering", "github.com/streamingfast/sf-ethereum/filtering")

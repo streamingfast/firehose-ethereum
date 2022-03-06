@@ -101,7 +101,7 @@ func NewSuperviser(
 	superviser.RegisterLogPlugin(logplugin.LogPluginFunc(superviser.lastBlockSeenLogPlugin))
 
 	if logToZap {
-		superviser.RegisterLogPlugin(nodemanager.NewToZapLogPlugin(debugDeepMind, nodelogger))
+		superviser.RegisterLogPlugin(nodemanager.NewGethToZapLogPlugin(debugDeepMind, nodelogger))
 	} else {
 		superviser.RegisterLogPlugin(logplugin.NewToConsoleLogPlugin(debugDeepMind))
 	}

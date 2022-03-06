@@ -35,34 +35,35 @@ import (
 	"github.com/streamingfast/sf-ethereum/node-manager/geth"
 	"github.com/streamingfast/sf-ethereum/node-manager/openeth"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
+var nodeLogger, _ = logging.PackageLogger("node", "github.com/streamingfast/sf-ethereum/node")
+var nodeGethLogger, _ = logging.PackageLogger("node.geth", "github.com/streamingfast/sf-ethereum/node/geth", DefaultLevelInfo)
+var nodeOpenEthereumLogger, _ = logging.PackageLogger("node.openethereum", "github.com/streamingfast/sf-ethereum/node/open-ethereum", DefaultLevelInfo)
+
+var mindreaderLogger, _ = logging.PackageLogger("mindreader", "github.com/streamingfast/sf-ethereum/mindreader")
+var mindreaderGethLogger, _ = logging.PackageLogger("mindreader.geth", "github.com/streamingfast/sf-ethereum/mindreader/geth", DefaultLevelInfo)
+var mindreaderOpenEthereumLogger, _ = logging.PackageLogger("mindreader.open-ethereum", "github.com/streamingfast/sf-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
+
 func registerNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
-	appLogger := zap.NewNop()
-	nodeLogger := zap.NewNop()
-
-	logging.Register("github.com/streamingfast/sf-ethereum/node", &appLogger)
-	logging.Register("github.com/streamingfast/sf-ethereum/node/node", &nodeLogger)
-
-	launcher.RegisterApp(&launcher.AppDef{
-		ID:          "node",
-		Title:       "Ethereum Node",
-		Description: "Ethereum node with built-in operational manager",
-		MetricsID:   "node",
-		Logger: launcher.NewLoggingDef(
-			"github.com/streamingfast/sf-ethereum/node.*",
-			[]zapcore.Level{zap.WarnLevel, zap.WarnLevel, zap.InfoLevel, zap.DebugLevel},
-		),
+	launcher.RegisterApp(zlog, &launcher.AppDef{
+		ID:            "node",
+		Title:         "Ethereum Node",
+		Description:   "Ethereum node with built-in operational manager",
 		RegisterFlags: registerEthereumNodeFlags,
 		InitFunc: func(runtime *launcher.Runtime) error {
 			return nil
 		},
-		FactoryFunc: nodeFactoryFunc(false, &appLogger, &nodeLogger, backupModuleFactories)})
+		FactoryFunc: nodeFactoryFunc(false, backupModuleFactories)})
 }
 
-func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, backupModuleFactories map[string]operator.BackupModuleFactory) func(*launcher.Runtime) (launcher.App, error) {
+func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operator.BackupModuleFactory) func(*launcher.Runtime) (launcher.App, error) {
 	return func(runtime *launcher.Runtime) (launcher.App, error) {
+		appLogger := nodeLogger
+		if isMindreader {
+			appLogger = mindreaderLogger
+		}
+
 		sfDataDir := runtime.AbsDataDir
 
 		nodePath,
@@ -80,7 +81,7 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 			backupConfigs,
 			shutdownDelay,
 			nodeArguments,
-			err := parseCommonNodeFlags(sfDataDir, isMindreader)
+			err := parseCommonNodeFlags(appLogger, sfDataDir, isMindreader)
 		if err != nil {
 			return nil, err
 		}
@@ -91,6 +92,8 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 		}
 		metricsAndReadinessManager := buildMetricsAndReadinessManager(prefix, readinessMaxLatency)
 
+		nodeLogger := getSupervisedProcessLogger(isMindreader, nodeType)
+
 		superviser, err := buildSuperviser(
 			metricsAndReadinessManager,
 			nodeType,
@@ -99,8 +102,8 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 			nodeDataDir,
 			nodeArguments,
 			nodeEnforcePeers,
-			*appLogger,
-			*nodeLogger,
+			appLogger,
+			nodeLogger,
 			logToZap,
 			debugDeepMind,
 		)
@@ -123,18 +126,17 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 
 			switch {
 			case strings.HasSuffix(bootstrapDataURL, "tar.zst") || strings.HasSuffix(bootstrapDataURL, "tar.zstd"):
-				bootstrapper = geth.NewTarballBootstrapper(bootstrapDataURL, nodeDataDir, *nodeLogger)
+				bootstrapper = geth.NewTarballBootstrapper(bootstrapDataURL, nodeDataDir, nodeLogger)
 			case strings.HasSuffix(bootstrapDataURL, "json"):
 				// special bootstrap case
-				bootstrapArgs, err := buildNodeArguments(networkID, nodeDataDir, nodeIPCPath, "", nodeType, "bootstrap")
+				bootstrapArgs, err := buildNodeArguments(appLogger, networkID, nodeDataDir, nodeIPCPath, "", nodeType, "bootstrap")
 				if err != nil {
 					return nil, fmt.Errorf("cannot build node bootstrap arguments")
 				}
-				bootstrapper = geth.NewGenesisBootstrapper(nodeDataDir, bootstrapDataURL, nodePath, bootstrapArgs, *nodeLogger)
+				bootstrapper = geth.NewGenesisBootstrapper(nodeDataDir, bootstrapDataURL, nodePath, bootstrapArgs, nodeLogger)
 			default:
 				return nil, fmt.Errorf("bootstrap-data-url should point to either an archive ending in '.tar.zstd' or a genesis file ending in '.json', not %s", bootstrapDataURL)
 			}
-
 		}
 
 		chainOperator, err := buildChainOperator(
@@ -142,30 +144,30 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 			metricsAndReadinessManager,
 			shutdownDelay,
 			bootstrapper,
-			*appLogger,
+			appLogger,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		backupModules, backupSchedules, err := operator.ParseBackupConfigs(*appLogger, backupConfigs, backupModuleFactories)
+		backupModules, backupSchedules, err := operator.ParseBackupConfigs(appLogger, backupConfigs, backupModuleFactories)
 		if err != nil {
 			return nil, fmt.Errorf("parsing backup configs: %w", err)
 		}
 
-		zlog.Info("backup config",
+		appLogger.Info("backup config",
 			zap.Strings("config", backupConfigs),
 			zap.Int("backup_module_count", len(backupModules)),
 			zap.Int("backup_schedule_count", len(backupSchedules)),
 		)
 
 		for name, mod := range backupModules {
-			zlog.Info("registering backup module", zap.String("name", name), zap.Any("module", mod))
+			appLogger.Info("registering backup module", zap.String("name", name), zap.Any("module", mod))
 			err := chainOperator.RegisterBackupModule(name, mod)
 			if err != nil {
 				return nil, fmt.Errorf("unable to register backup module %s: %w", name, err)
 			}
-			zlog.Info("backup module registered", zap.String("name", name), zap.Any("module", mod))
+			appLogger.Info("backup module registered", zap.String("name", name), zap.Any("module", mod))
 		}
 
 		for _, sched := range backupSchedules {
@@ -178,7 +180,7 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 			}, &nodeManagerApp.Modules{
 				Operator:                   chainOperator,
 				MetricsAndReadinessManager: metricsAndReadinessManager,
-			}, *appLogger), nil
+			}, appLogger), nil
 		} else {
 			GRPCAddr := viper.GetString("mindreader-node-grpc-listen-addr")
 			oneBlockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
@@ -192,7 +194,7 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 			waitTimeForUploadOnShutdown := viper.GetDuration("mindreader-node-wait-upload-complete-on-shutdown")
 			oneBlockFileSuffix := viper.GetString("mindreader-node-oneblock-suffix")
 			blocksChanCapacity := viper.GetInt("mindreader-node-blocks-chan-capacity")
-			gs := dgrpc.NewServer(dgrpc.WithLogger(*appLogger))
+			gs := dgrpc.NewServer(dgrpc.WithLogger(appLogger))
 
 			mindreaderPlugin, err := getMindreaderLogPlugin(
 				oneBlockStoreURL,
@@ -210,7 +212,7 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 				metricsAndReadinessManager,
 				tracker,
 				gs,
-				*appLogger,
+				appLogger,
 			)
 			if err != nil {
 				return nil, err
@@ -218,7 +220,7 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 
 			superviser.RegisterLogPlugin(mindreaderPlugin)
 
-			trxPoolLogPlugin := nodemanager.NewTrxPoolLogPlugin(*appLogger)
+			trxPoolLogPlugin := nodemanager.NewTrxPoolLogPlugin(appLogger)
 			superviser.RegisterLogPlugin(trxPoolLogPlugin)
 			trxPoolLogPlugin.RegisterServices(gs)
 
@@ -229,9 +231,28 @@ func nodeFactoryFunc(isMindreader bool, appLogger, nodeLogger **zap.Logger, back
 				Operator:                   chainOperator,
 				MetricsAndReadinessManager: metricsAndReadinessManager,
 				GrpcServer:                 gs,
-			}, *appLogger), nil
+			}, appLogger), nil
 
 		}
+	}
+}
+
+func getSupervisedProcessLogger(isMindreader bool, nodeType string) *zap.Logger {
+	switch nodeType {
+	case "geth":
+		if isMindreader {
+			return mindreaderGethLogger
+		} else {
+			return nodeGethLogger
+		}
+	case "openethereum":
+		if isMindreader {
+			return mindreaderOpenEthereumLogger
+		} else {
+			return nodeOpenEthereumLogger
+		}
+	default:
+		panic(fmt.Errorf("unknown node type %q, only knows about %q and %q", nodeType, "geth", "openethereum"))
 	}
 }
 
@@ -286,7 +307,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	cmd.Flags().Bool(prefix+"debug-deep-mind", false, "[DEV] Prints deep mind instrumentation logs to standard output, should be use for debugging purposes only")
 }
 
-func parseCommonNodeFlags(sfDataDir string, isMindreader bool) (
+func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader bool) (
 	nodePath string,
 	blockmetaAddr string,
 	networkID string,
@@ -329,6 +350,7 @@ func parseCommonNodeFlags(sfDataDir string, isMindreader bool) (
 	shutdownDelay = viper.GetDuration("common-system-shutdown-signal-delay") // we reuse this global value
 
 	nodeArguments, err = buildNodeArguments(
+		appLogger,
 		networkID,
 		nodeDataDir,
 		nodeIPCPath,
@@ -340,7 +362,7 @@ func parseCommonNodeFlags(sfDataDir string, isMindreader bool) (
 	return
 }
 
-func buildNodeArguments(networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole string) ([]string, error) {
+func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole string) ([]string, error) {
 	typeRoles, ok := nodeArgsByTypeAndRole[nodeType]
 	if !ok {
 		return nil, fmt.Errorf("invalid node type: %s", nodeType)
@@ -378,7 +400,7 @@ func buildNodeArguments(networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeT
 		}
 
 		if foundPublicIP == "" {
-			zlog.Warn("cannot find public IP in environment variable PUBLIC_IPS (format: 'HOSTNAME:a.b.c.d HOSTNAME2:e.f.g.h'), using 127.0.0.1 as fallback", zap.String("hostname", hostname))
+			appLogger.Warn("cannot find public IP in environment variable PUBLIC_IPS (format: 'HOSTNAME:a.b.c.d HOSTNAME2:e.f.g.h'), using 127.0.0.1 as fallback", zap.String("hostname", hostname))
 			foundPublicIP = "127.0.0.1"
 		}
 		args = strings.Replace(args, "{public-ip}", foundPublicIP, -1)
@@ -396,7 +418,7 @@ func buildSuperviser(
 	nodeArguments []string,
 	enforcedPeers string,
 
-	appLogger, gethLogger *zap.Logger,
+	appLogger, supervisedProcessLogger *zap.Logger,
 	logToZap, debugDeepMind bool,
 ) (nodeManager.ChainSuperviser, error) {
 
@@ -411,7 +433,8 @@ func buildSuperviser(
 			metricsAndReadinessManager.UpdateHeadBlock,
 			enforcedPeers,
 			logToZap,
-			appLogger, gethLogger,
+			appLogger,
+			supervisedProcessLogger,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("unable to create chain superviser: %w", err)
@@ -428,7 +451,7 @@ func buildSuperviser(
 			metricsAndReadinessManager.UpdateHeadBlock,
 			enforcedPeers,
 			logToZap,
-			appLogger, gethLogger,
+			appLogger, nodeGethLogger,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("unable to create chain superviser: %w", err)

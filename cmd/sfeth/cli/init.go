@@ -37,7 +37,7 @@ func sfInitE(cmd *cobra.Command, args []string) (err error) {
 	return fmt.Errorf("disabled init command")
 
 	//	configFile := viper.GetString("global-config-file")
-	//	userLog.Debug("starting init", zap.String("config-file", configFile))
+	//	zlog.Debug("starting init", zap.String("config-file", configFile))
 	//
 	//	if !viper.GetBool("skip-checks") {
 	//		checkGethVersionOrExit()
@@ -136,7 +136,7 @@ func sfInitE(cmd *cobra.Command, args []string) (err error) {
 	//`
 	//	}
 	//
-	//	userLog.Printf(msg)
+	//	zlog.Info(msg)
 	//
 	//	return nil
 }
@@ -177,23 +177,23 @@ var knownNetworks = map[string]bool{
 //			return fmt.Errorf("mkdir miner keystore dir: %w", err)
 //		}
 //
-//		userLog.Printf("Writing: %s", paths.MinerCfgNodekeyFilePath)
+//		zlog.Info(fmt.Sprintf("writing: %s", paths.MinerCfgNodekeyFilePath_))
 //		if err = ioutil.WriteFile(paths.MinerCfgNodekeyFilePath, []byte(bootstrap.NodekeyFile), 0600); err != nil {
 //			return fmt.Errorf("writing %s file: %w", paths.MinerCfgGenesisFilePath, err)
 //		}
 //
-//		userLog.Printf("Writing: %s", paths.MinerCfgGenesisFilePath)
+//		zlog.Info(fmt.Sprintf("writing: %s", paths.MinerCfgGenesisFilePath))
 //		if err = ioutil.WriteFile(paths.MinerCfgGenesisFilePath, []byte(fmt.Sprintf(bootstrap.GenesisDotJson, secondsBetweenBlocks)), 0600); err != nil {
 //			return fmt.Errorf("writing %s file: %w", paths.MinerCfgGenesisFilePath, err)
 //		}
 //
 //		keystoreFilePath := filepath.Join(paths.MinerCfgKeystoreDir, "miner-private-key-62d9ad344366c268c3062764bbf67d318ec2c8fd")
-//		userLog.Printf("Writing: %s", keystoreFilePath)
+//		zlog.Info(fmt.Sprintf("writing: %s", keystoreFilePath))
 //		if err = ioutil.WriteFile(keystoreFilePath, []byte(bootstrap.KeystoreJSON), 0600); err != nil {
 //			return fmt.Errorf("writing %s file: %w", keystoreFilePath, err)
 //		}
 //
-//		userLog.Printf("Mining account created")
+//		zlog.Info("mining account created")
 //	}
 //
 //	if err := os.MkdirAll(paths.MindreaderConfigDir, 0755); err != nil {
@@ -201,12 +201,12 @@ var knownNetworks = map[string]bool{
 //	}
 //
 //	if runMiner {
-//		userLog.Printf("Writing: %s", paths.MindreaderCfgStaticNodesFilePath)
+//		zlog.Info(fmt.Sprintf("writing: %s", paths.MindreaderCfgStaticNodesFilePath))
 //		if err = ioutil.WriteFile(paths.MindreaderCfgStaticNodesFilePath, []byte(bootstrap.StaticNodesDotJSON), 0600); err != nil {
 //			return fmt.Errorf("writing %s file: %s", paths.MinerCfgGenesisFilePath, err)
 //		}
 //
-//		userLog.Printf("Writing: %s", paths.MindreaderCfgGenesisFilePath)
+//		zlog.Info(fmt.Sprintf("writing: %s", paths.MindreaderCfgGenesisFilePath))
 //		if err = ioutil.WriteFile(paths.MindreaderCfgGenesisFilePath, []byte(fmt.Sprintf(bootstrap.GenesisDotJson, secondsBetweenBlocks)), 0600); err != nil {
 //			return fmt.Errorf("writing %s file: %s", paths.MindreaderCfgGenesisFilePath, err)
 //		}
@@ -217,7 +217,7 @@ var knownNetworks = map[string]bool{
 //		return err
 //	}
 //
-//	userLog.Printf("Writing config '%s'", strings.TrimPrefix(configFile, "./"))
+//	zlog.Info(fmt.Sprintf("writing config '%s'", strings.TrimPrefix(configFile, "./")))
 //	if err = ioutil.WriteFile(configFile, configBytes, 0644); err != nil {
 //		return fmt.Errorf("writing config file %s: %w", configFile, err)
 //	}
@@ -329,9 +329,8 @@ func askEnode(first bool) (string, error) {
 }
 
 func askProducer() (bool, error) {
-	userLog.Printf(`Ethereum on StreamingFast - can run a local test node configured for local mining.
-
-Alternatively, Ethereum on StreamingFast can connect to an already existing network.`)
+	zlog.Info(`ethereum on StreamingFast - can run a local test node configured for local mining`)
+	zlog.Info(`alternatively, Ethereum on StreamingFast can connect to an already existing network`)
 
 	prompt := promptui.Prompt{
 		Label:     "Do you want to setup a local miner",
@@ -349,9 +348,8 @@ Alternatively, Ethereum on StreamingFast can connect to an already existing netw
 }
 
 func askKnownNetworks() (string, bool, error) {
-	userLog.Printf(`Ethereum on StreamingFast can connect you to a known network directly.
-
-Select 'Other' if you want to specify the network peers and ID manually.`)
+	zlog.Info(`ethereum on StreamingFast can connect you to a known network directly`)
+	zlog.Info(`select 'Other' if you want to specify the network peers and ID manually`)
 
 	prompt := promptui.Select{
 		Label: "Choose known network",

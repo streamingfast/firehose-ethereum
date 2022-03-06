@@ -16,11 +16,6 @@ package codec
 
 import (
 	"github.com/streamingfast/logging"
-	"go.uber.org/zap"
 )
 
-var zlog *zap.Logger
-
-func init() {
-	logging.Register("github.com/streamingfast/sf-ethereum/codec", &zlog)
-}
+var zlog, _ = logging.PackageLogger("codec", "github.com/streamingfast/sf-ethereum/codec")

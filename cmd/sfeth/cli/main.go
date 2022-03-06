@@ -39,7 +39,11 @@ var RootCmd = &cobra.Command{Use: "sfeth", Short: "Ethereum on StreamingFast"}
 var allFlags = make(map[string]bool) // used as global because of async access to cobra init functions
 var registerCommonModulesCallback func(runtime *launcher.Runtime) error
 
-func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModules func(runtime *launcher.Runtime) error, backupModuleFactories map[string]operator.BackupModuleFactory) {
+func Main(
+	registerCommonFlags func(logger *zap.Logger, cmd *cobra.Command) error,
+	registerCommonModules func(runtime *launcher.Runtime) error,
+	backupModuleFactories map[string]operator.BackupModuleFactory,
+) {
 	cobra.OnInitialize(func() {
 		allFlags = flags.AutoBind(RootCmd, "SFETH")
 	})
@@ -61,7 +65,7 @@ func Main(registerCommonFlags func(cmd *cobra.Command) error, registerCommonModu
 
 	// FIXME Should actually be a dependency on `launcher.RegisterFlags` directly!
 	launcher.RegisterCommonFlags = registerCommonFlags
-	derr.Check("registering application flags", launcher.RegisterFlags(StartCmd))
+	derr.Check("registering application flags", launcher.RegisterFlags(zlog, StartCmd))
 
 	registerCommonModulesCallback = registerCommonModules
 

@@ -38,11 +38,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var zlog *zap.Logger
-
-func init() {
-	logging.Register("github.com/streamingfast/sf-ethereum/codec/testing", &zlog)
-}
+var zlog, _ = logging.PackageLogger("codec.testing", "github.com/streamingfast/sf-ethereum/codec/testing")
 
 type from hexString
 

@@ -17,19 +17,30 @@ package nodemanager
 import (
 	"regexp"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	logplugin "github.com/streamingfast/node-manager/log_plugin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var logLevelRegex = regexp.MustCompile("^(INFO|WARN|ERROR)")
+var gethLogLevelRegex = regexp.MustCompile("^(DEBUG|INFO|WARN|ERROR)")
 
-func NewToZapLogPlugin(debugDeepMind bool, logger *zap.Logger) *logplugin.ToZapLogPlugin {
-	return logplugin.NewToZapLogPlugin(debugDeepMind, logger, logplugin.ToZapLogPluginLogLevel(logLevelExtractor))
+func NewGethToZapLogPlugin(debugDeepMind bool, logger *zap.Logger) *logplugin.ToZapLogPlugin {
+	return logplugin.NewToZapLogPlugin(debugDeepMind, logger,
+		logplugin.ToZapLogPluginLogLevel(gethLogLevelExtractor),
+		logplugin.ToZapLogPluginTransformer(gethLogTransformer),
+	)
 }
 
-func logLevelExtractor(in string) zapcore.Level {
+func NewOpenEthereumToZapLogPlugin(debugDeepMind bool, logger *zap.Logger) *logplugin.ToZapLogPlugin {
+	// FIXME: This uses Geth version for now, fix this by running our OpenEthereum instrumentation
+	// and created new extractor and transformer.
+	return NewGethToZapLogPlugin(debugDeepMind, logger)
+}
+
+func gethLogLevelExtractor(in string) zapcore.Level {
 	if strings.Contains(in, "Upgrade blockchain database version") {
 		return zap.InfoLevel
 	}
@@ -38,9 +49,9 @@ func logLevelExtractor(in string) zapcore.Level {
 		return zap.DebugLevel
 	}
 
-	groups := logLevelRegex.FindStringSubmatch(in)
+	groups := gethLogLevelRegex.FindStringSubmatch(in)
 	if len(groups) <= 1 {
-		return zap.DebugLevel
+		return zap.InfoLevel
 	}
 
 	switch groups[1] {
@@ -50,7 +61,24 @@ func logLevelExtractor(in string) zapcore.Level {
 		return zap.WarnLevel
 	case "ERROR":
 		return zap.ErrorLevel
-	default:
+	case "DEBUG":
 		return zap.DebugLevel
+	default:
+		return zap.InfoLevel
 	}
+}
+
+var gethLogTransformRegex = regexp.MustCompile(`^[A-Z]{3,}\s+\[[0-9-_:\|\.]+\]\s+`)
+
+func gethLogTransformer(in string) string {
+	return lowerFirst(gethLogTransformRegex.ReplaceAllString(in, ""))
+}
+
+func lowerFirst(s string) string {
+	if s == "" {
+		return ""
+	}
+
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToLower(r)) + s[n:]
 }

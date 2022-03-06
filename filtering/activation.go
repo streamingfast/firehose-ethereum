@@ -74,7 +74,7 @@ func (a *CallActivation) GetTo() string {
 }
 
 func (a *CallActivation) ResolveName(name string) (interface{}, bool) {
-	if traceEnabled {
+	if tracer.Enabled() {
 		zlog.Debug("trying to resolve activation name", zap.String("name", name))
 	}
 	if a.Cache == nil {

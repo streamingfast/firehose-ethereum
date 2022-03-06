@@ -40,7 +40,7 @@ func sfPurgeE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	userLog.Printf("Purged data. Start a fresh instance with 'sfeth start'")
+	zlog.Info("Purged data. Start a fresh instance with 'sfeth start'")
 
 	return nil
 }

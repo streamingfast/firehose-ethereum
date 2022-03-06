@@ -75,7 +75,7 @@ func setupCmd(cmd *cobra.Command) error {
 		}
 	}
 
-	launcher.SetupLogger(&launcher.LoggingOptions{
+	launcher.SetupLogger(zlog, &launcher.LoggingOptions{
 		WorkingDir:    viper.GetString("global-data-dir"),
 		Verbosity:     viper.GetInt("global-verbose"),
 		LogFormat:     viper.GetString("global-log-format"),
@@ -83,7 +83,7 @@ func setupCmd(cmd *cobra.Command) error {
 		LogListenAddr: viper.GetString("global-log-level-switcher-listen-addr"),
 	})
 	launcher.SetupTracing("sf-ethereum")
-	launcher.SetupAnalyticsMetrics(viper.GetString("global-metrics-listen-addr"), viper.GetString("global-pprof-listen-addr"))
+	launcher.SetupAnalyticsMetrics(zlog, viper.GetString("global-metrics-listen-addr"), viper.GetString("global-pprof-listen-addr"))
 
 	return nil
 }

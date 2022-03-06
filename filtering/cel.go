@@ -200,7 +200,7 @@ func (f *CELFilter) match(activation interpreter.Activation) (matched bool) {
 
 	res, _, err := f.program.Eval(activation)
 	if err != nil {
-		if traceEnabled {
+		if tracer.Enabled() {
 			zlog.Debug("filter program failed", zap.String("name", f.name), zap.Error(err))
 		}
 		return f.valueWhenNoop
@@ -212,7 +212,7 @@ func (f *CELFilter) match(activation interpreter.Activation) (matched bool) {
 		return f.valueWhenNoop
 	}
 
-	if traceEnabled {
+	if tracer.Enabled() {
 		zlog.Debug("filter program executed correctly", zap.String("name", f.name), zap.Bool("matched", bool(retval)))
 	}
 

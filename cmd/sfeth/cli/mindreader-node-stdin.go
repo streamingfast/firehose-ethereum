@@ -28,23 +28,16 @@ import (
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/sf-ethereum/codec"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 func init() {
-	appLogger := zap.NewNop()
-	logging.Register("github.com/streamingfast/sf-ethereum/mindreader-node-stdin", &appLogger)
+	appLogger, _ := logging.PackageLogger("mindreader-node-stdin", "github.com/streamingfast/sf-ethereum/mindreader-node-stdin")
 
-	launcher.RegisterApp(&launcher.AppDef{
-		ID:          "mindreader-node-stdin",
-		Title:       "Mindreader Node (stdin)",
-		Description: "Blocks reading node, unmanaged, reads deep mind from standard input",
-		MetricsID:   "mindreader-geth-node-stdin",
-		Logger:      launcher.NewLoggingDef("github.com/streamingfast/sf-ethereum/mindreader-node-stdin$", []zapcore.Level{zap.WarnLevel, zap.WarnLevel, zap.InfoLevel, zap.DebugLevel}),
-		RegisterFlags: func(cmd *cobra.Command) error {
-			return nil
-		},
+	launcher.RegisterApp(zlog, &launcher.AppDef{
+		ID:            "mindreader-node-stdin",
+		Title:         "Mindreader Node (stdin)",
+		Description:   "Blocks reading node, unmanaged, reads deep mind from standard input",
+		RegisterFlags: func(cmd *cobra.Command) error { return nil },
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			sfDataDir := runtime.AbsDataDir
 			archiveStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))

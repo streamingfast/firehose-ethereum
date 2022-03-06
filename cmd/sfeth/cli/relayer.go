@@ -25,12 +25,10 @@ import (
 
 func init() {
 	// Relayer
-	launcher.RegisterApp(&launcher.AppDef{
+	launcher.RegisterApp(zlog, &launcher.AppDef{
 		ID:          "relayer",
 		Title:       "Relayer",
 		Description: "Serves blocks as a stream, with a buffer",
-		MetricsID:   "relayer",
-		Logger:      launcher.NewLoggingDef("github.com/streamingfast/relayer.*", nil),
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("relayer-grpc-listen-addr", RelayerServingAddr, "Address to listen for incoming gRPC requests")
 			cmd.Flags().StringSlice("relayer-source", []string{MindreaderGRPCAddr}, "List of Blockstream sources (mindreaders) to connect to for live block feeds (repeat flag as needed)")

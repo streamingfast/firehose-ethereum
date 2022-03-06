@@ -16,9 +16,10 @@ package cli
 
 import (
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
-func RegisterCommonFlags(cmd *cobra.Command) error {
+func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	//Common stores configuration flags
 	cmd.Flags().String("common-blocks-store-url", MergedBlocksStoreURL, "[COMMON] Store URL (with prefix) where to read/write merged blocks.")
 	cmd.Flags().String("common-oneblock-store-url", OneBlockStoreURL, "[COMMON] Store URL (with prefix) to read/write one-block files.")

@@ -32,34 +32,34 @@ func TestToZapLogPlugin_LogLevel(t *testing.T) {
 		{
 			"debug",
 			"DEBUG [10-05|09:54:00.585] message ...",
-			`{"level":"debug","msg":"DEBUG [10-05|09:54:00.585] message ..."}`,
+			`{"level":"debug","msg":"message ..."}`,
 		},
 		{
 			"info",
 			"INFO [10-05|09:54:00.585] message ...",
-			`{"level":"info","msg":"INFO [10-05|09:54:00.585] message ..."}`,
+			`{"level":"info","msg":"message ..."}`,
 		},
 		{
 			"warn",
 			"WARN [10-05|09:54:00.585] message ...",
-			`{"level":"warn","msg":"WARN [10-05|09:54:00.585] message ..."}`,
+			`{"level":"warn","msg":"message ..."}`,
 		},
 		{
 			"error",
 			"ERROR [10-05|09:54:00.585] message ...",
-			`{"level":"error","msg":"ERROR [10-05|09:54:00.585] message ..."}`,
+			`{"level":"error","msg":"message ..."}`,
 		},
 		{
 			"other",
 			"OTHER [10-05|09:54:00.585] message ...",
-			`{"level":"debug","msg":"OTHER [10-05|09:54:00.585] message ..."}`,
+			`{"level":"info","msg":"message ..."}`,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			wrapper := logging.NewTestLogger(t)
-			plugin := NewToZapLogPlugin(false, wrapper.Instance())
+			plugin := NewGethToZapLogPlugin(false, wrapper.Instance())
 			plugin.LogLine(test.in)
 
 			loggedLines := wrapper.RecordedLines(t)

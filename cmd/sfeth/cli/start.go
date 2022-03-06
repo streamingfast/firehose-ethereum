@@ -40,10 +40,10 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	cmd.SilenceUsage = true
 
 	dataDir := viper.GetString("global-data-dir")
-	userLog.Debug("sfeth binary started", zap.String("data_dir", dataDir))
+	zlog.Debug("sfeth binary started", zap.String("data_dir", dataDir))
 
 	configFile := viper.GetString("global-config-file")
-	userLog.Printf("Starting with config file '%s'", configFile)
+	zlog.Info(fmt.Sprintf("starting with config file '%s'", configFile))
 
 	err = Start(dataDir, args)
 	if err != nil {
@@ -51,7 +51,7 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// If an error occurred, saying Goodbye is not greate
-	userLog.Printf("Goodbye")
+	zlog.Info("goodbye")
 	return
 }
 
@@ -72,7 +72,7 @@ func Start(dataDir string, args []string) (err error) {
 	if blockmetaAddr != "" {
 		conn, err := dgrpc.NewInternalClient(blockmetaAddr)
 		if err != nil {
-			userLog.Warn("cannot get grpc connection to blockmeta, disabling this startBlockResolver for search indexer", zap.Error(err), zap.String("blockmeta_addr", blockmetaAddr))
+			zlog.Warn("cannot get grpc connection to blockmeta, disabling this startBlockResolver for search indexer", zap.Error(err), zap.String("blockmeta_addr", blockmetaAddr))
 		} else {
 			blockmetaCli := pbblockmeta.NewBlockIDClient(conn)
 			tracker.AddResolver(pbblockmeta.StartBlockResolver(blockmetaCli))
@@ -110,15 +110,15 @@ func Start(dataDir string, args []string) (err error) {
 		return fmt.Errorf("protocol specific hooks not configured correctly: %w", err)
 	}
 
-	launch := launcher.NewLauncher(modules)
-	userLog.Debug("launcher created")
+	launch := launcher.NewLauncher(zlog, modules)
+	zlog.Debug("launcher created")
 	runByDefault := func(app string) bool { return true }
 
 	apps := launcher.ParseAppsFromArgs(args, runByDefault)
 	if len(args) == 0 {
 		apps = launcher.ParseAppsFromArgs(launcher.Config["start"].Args, runByDefault)
 	}
-	userLog.Printf("Launching applications: %s", strings.Join(apps, ","))
+	zlog.Info(fmt.Sprintf("launching applications: %s", strings.Join(apps, ",")))
 	if err = launch.Launch(apps); err != nil {
 		return err
 	}
@@ -128,13 +128,13 @@ func Start(dataDir string, args []string) (err error) {
 	signalHandler := derr.SetupSignalHandler(viper.GetDuration("common-system-shutdown-signal-delay"))
 	select {
 	case <-signalHandler:
-		userLog.Printf("Received termination signal, quitting")
+		zlog.Info("received termination signal, quitting")
 		go launch.Close()
 	case appID := <-launch.Terminating():
 		if launch.Err() == nil {
-			userLog.Printf("Application %s triggered a clean shutdown, quitting", appID)
+			zlog.Info(fmt.Sprintf("application %s triggered a clean shutdown, quitting", appID))
 		} else {
-			userLog.Printf("Application %s shutdown unexpectedly, quitting", appID)
+			zlog.Info(fmt.Sprintf("application %s shutdown unexpectedly, quitting", appID))
 			err = launch.Err()
 		}
 	}
@@ -152,7 +152,7 @@ func printWelcomeMessage(apps []string) {
 		return
 	}
 
-	userLog.Printf("Your instance should be ready in a few seconds")
+	zlog.Info("your instance should be ready in a few seconds")
 }
 
 func containsApp(apps []string, searchedApp string) bool {
