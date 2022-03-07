@@ -94,12 +94,6 @@ func init() {
 				firehoseBlocksStoreURLs[i] = MustReplaceDataDir(sfDataDir, url)
 			}
 
-			shutdownSignalDelay := viper.GetDuration("common-system-shutdown-signal-delay")
-			grcpShutdownGracePeriod := time.Duration(0)
-			if shutdownSignalDelay.Seconds() > 5 {
-				grcpShutdownGracePeriod = shutdownSignalDelay - (5 * time.Second)
-			}
-
 			if ll := os.Getenv("FIREHOSE_THREADS"); ll != "" {
 				if llint, err := strconv.ParseInt(ll, 10, 32); err == nil {
 					zlog.Info("setting blockstreamV2 parallel file downloads", zap.Int("ll", int(llint)))
@@ -144,7 +138,7 @@ func init() {
 				BlockStoreURLs:                  firehoseBlocksStoreURLs,
 				BlockStreamAddr:                 blockstreamAddr,
 				GRPCListenAddr:                  viper.GetString("firehose-grpc-listen-addr"),
-				GRPCShutdownGracePeriod:         grcpShutdownGracePeriod,
+				GRPCShutdownGracePeriod:         time.Second,
 				RealtimeTolerance:               viper.GetDuration("firehose-realtime-tolerance"),
 				IrreversibleBlocksIndexStoreURL: viper.GetString("firehose-irreversible-blocks-index-url"),
 				IrreversibleBlocksBundleSizes:   bundleSizes,
