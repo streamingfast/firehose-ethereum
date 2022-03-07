@@ -15,25 +15,25 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.8.1
-	github.com/streamingfast/bstream v0.0.2-0.20220304190510-043a67c90804
+	github.com/streamingfast/bstream v0.0.2-0.20220307182042-937c5b625f6f
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
-	github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1
+	github.com/streamingfast/dauth v0.0.0-20220307162109-cca1810ae757
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
-	github.com/streamingfast/derr v0.0.0-20220301163149-de09cb18fc70
-	github.com/streamingfast/dgrpc v0.0.0-20220301153539-536adf71b594
-	github.com/streamingfast/dlauncher v0.0.0-20220304184304-e5045b95f9ad
-	github.com/streamingfast/dmetering v0.0.0-20220301165106-a642bb6a21bd
-	github.com/streamingfast/dmetrics v0.0.0-20210811180524-8494aeb34447
-	github.com/streamingfast/dstore v0.1.1-0.20220304164644-696f9c5fc231
+	github.com/streamingfast/derr v0.0.0-20220307162255-f277e08753fa
+	github.com/streamingfast/dgrpc v0.0.0-20220307180102-b2d417ac8da7
+	github.com/streamingfast/dlauncher v0.0.0-20220307153121-5674e1b64d40
+	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
+	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
+	github.com/streamingfast/dstore v0.1.1-0.20220307184722-b70ae52b9e6a
 	github.com/streamingfast/eth-go v0.0.0-20220306004150-d6567bb604ec
-	github.com/streamingfast/firehose v0.1.1-0.20220303153047-161af394ee22
+	github.com/streamingfast/firehose v0.1.1-0.20220307162825-0f43305f7436
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424
-	github.com/streamingfast/merger v0.0.3-0.20220301162603-c0129b6f1ad4
-	github.com/streamingfast/node-manager v0.0.2-0.20220304000605-53b995bb111e
+	github.com/streamingfast/merger v0.0.3-0.20220307182136-ea57e6c34740
+	github.com/streamingfast/node-manager v0.0.2-0.20220307185037-161ddaa94582
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff
-	github.com/streamingfast/relayer v0.0.2-0.20220301162545-2db510359d2a
-	github.com/streamingfast/sf-tools v0.0.0-20220301170200-43b1f43dde6f
+	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
+	github.com/streamingfast/sf-tools v0.0.0-20220307162924-1a39f7035cd5
 	github.com/streamingfast/shutter v1.5.0
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.12.1
