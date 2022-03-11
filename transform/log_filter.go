@@ -75,12 +75,15 @@ func (p *LogFilter) matchAddress(src eth.Address) bool {
 	return false
 }
 
-func (p *LogFilter) matchEventSignature(src eth.Hash) bool {
+func (p *LogFilter) matchEventSignature(topics [][]byte) bool {
 	if len(p.EventSigntures) == 0 {
 		return true
 	}
+	if len(topics) == 0 {
+		return false
+	}
 	for _, topic := range p.EventSigntures {
-		if bytes.Equal(topic, src) {
+		if bytes.Equal(topic, topics[0]) {
 			return true
 		}
 	}
@@ -93,7 +96,7 @@ func (p *LogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (t
 	for _, trace := range ethBlock.TransactionTraces {
 		match := false
 		for _, log := range trace.Receipt.Logs {
-			if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics[0]) {
+			if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics) {
 				match = true
 				break
 			}
@@ -184,7 +187,8 @@ func (p *MultiLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Inpu
 		match := false
 		for _, log := range trace.Receipt.Logs {
 			for _, filter := range p.filters {
-				if filter.matchAddress(log.Address) && filter.matchEventSignature(log.Topics[0]) {
+
+				if filter.matchAddress(log.Address) && filter.matchEventSignature(log.Topics) {
 					match = true
 					break // a single filter matching is enough
 				}
