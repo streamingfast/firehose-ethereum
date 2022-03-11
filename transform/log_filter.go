@@ -3,6 +3,7 @@ package transform
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/streamingfast/dstore"
 
@@ -47,7 +48,7 @@ func LogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *tra
 				f.Addresses = append(f.Addresses, addr)
 			}
 			for _, sig := range filter.EventSignatures {
-				f.EventSigntures = append(f.EventSigntures, sig)
+				f.EventSignatures = append(f.EventSignatures, sig)
 			}
 
 			return f, nil
@@ -56,11 +57,24 @@ func LogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *tra
 }
 
 type LogFilter struct {
-	Addresses      []eth.Address
-	EventSigntures []eth.Hash
+	Addresses       []eth.Address
+	EventSignatures []eth.Hash
 
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
+}
+
+func (p *LogFilter) String() string {
+	var addresses []string
+	var signatures []string
+	for _, a := range p.Addresses {
+		addresses = append(addresses, a.Pretty())
+	}
+	for _, s := range p.EventSignatures {
+		signatures = append(signatures, s.Pretty())
+	}
+	return fmt.Sprintf("LogFilter{addrs: %s, evt_sigs: %s}", strings.Join(addresses, ","), strings.Join(signatures, ","))
+
 }
 
 func (p *LogFilter) matchAddress(src eth.Address) bool {
@@ -76,13 +90,13 @@ func (p *LogFilter) matchAddress(src eth.Address) bool {
 }
 
 func (p *LogFilter) matchEventSignature(topics [][]byte) bool {
-	if len(p.EventSigntures) == 0 {
+	if len(p.EventSignatures) == 0 {
 		return true
 	}
 	if len(topics) == 0 {
 		return false
 	}
-	for _, topic := range p.EventSigntures {
+	for _, topic := range p.EventSignatures {
 		if bytes.Equal(topic, topics[0]) {
 			return true
 		}
@@ -115,13 +129,13 @@ func (p *LogFilter) GetIndexProvider() bstream.BlockIndexProvider {
 		return nil
 	}
 
-	if len(p.Addresses) == 0 && len(p.EventSigntures) == 0 {
+	if len(p.Addresses) == 0 && len(p.EventSignatures) == 0 {
 		return nil
 	}
 
 	filter := &addrSigSingleFilter{
 		p.Addresses,
-		p.EventSigntures,
+		p.EventSignatures,
 	}
 	return NewEthLogIndexProvider(
 		p.indexStore,
@@ -164,7 +178,7 @@ func MultiLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 					ff.Addresses = append(ff.Addresses, addr)
 				}
 				for _, sig := range bf.EventSignatures {
-					ff.EventSigntures = append(ff.EventSigntures, sig)
+					ff.EventSignatures = append(ff.EventSignatures, sig)
 				}
 				f.filters = append(f.filters, ff)
 			}
@@ -178,6 +192,14 @@ type MultiLogFilter struct {
 	filters            []LogFilter
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
+}
+
+func (p *MultiLogFilter) String() string {
+	var descs []string
+	for _, f := range p.filters {
+		descs = append(descs, f.String())
+	}
+	return fmt.Sprintf("(%s)", strings.Join(descs, "),("))
 }
 
 func (p *MultiLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
@@ -215,7 +237,7 @@ func (p *MultiLogFilter) GetIndexProvider() bstream.BlockIndexProvider {
 	for _, f := range p.filters {
 		filters = append(filters, &addrSigSingleFilter{
 			addrs: f.Addresses,
-			sigs:  f.EventSigntures,
+			sigs:  f.EventSignatures,
 		})
 	}
 

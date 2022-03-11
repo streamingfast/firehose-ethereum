@@ -3,6 +3,7 @@ package transform
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/streamingfast/dstore"
 
@@ -61,6 +62,19 @@ type CallToFilter struct {
 
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
+}
+
+func (p *CallToFilter) String() string {
+	var addresses []string
+	var signatures []string
+	for _, a := range p.Addresses {
+		addresses = append(addresses, a.Pretty())
+	}
+	for _, s := range p.Signatures {
+		signatures = append(signatures, s.Pretty())
+	}
+	return fmt.Sprintf("CallFilter:{addrs: %s, sigs: %s}", strings.Join(addresses, ","), strings.Join(signatures, ","))
+
 }
 
 func (p *CallToFilter) matchAddress(src eth.Address) bool {
@@ -175,6 +189,14 @@ type MultiCallToFilter struct {
 	filters            []CallToFilter
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
+}
+
+func (p *MultiCallToFilter) String() string {
+	var descs []string
+	for _, f := range p.filters {
+		descs = append(descs, f.String())
+	}
+	return fmt.Sprintf("(%s)", strings.Join(descs, "),("))
 }
 
 func (p *MultiCallToFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
