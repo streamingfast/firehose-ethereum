@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.8.1
-	github.com/streamingfast/bstream v0.0.2-0.20220311205756-3937f4d2871e
+	github.com/streamingfast/bstream v0.0.2-0.20220312192323-e6b8e55c4e99
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220307162109-cca1810ae757
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
