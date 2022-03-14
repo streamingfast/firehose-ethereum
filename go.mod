@@ -30,7 +30,7 @@ require (
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424
 	github.com/streamingfast/merger v0.0.3-0.20220307182136-ea57e6c34740
-	github.com/streamingfast/node-manager v0.0.2-0.20220307185037-161ddaa94582
+	github.com/streamingfast/node-manager v0.0.2-0.20220314185208-f537a45c064f
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
 	github.com/streamingfast/sf-tools v0.0.0-20220307162924-1a39f7035cd5
