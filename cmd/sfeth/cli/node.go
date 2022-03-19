@@ -188,6 +188,9 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-node-working-dir"))
 			mergeAndStoreDirectly := viper.GetBool("mindreader-node-merge-and-store-directly")
 			mergeThresholdBlockAge := viper.GetDuration("mindreader-node-merge-threshold-block-age")
+			if mergeThresholdBlockAge < 30*time.Second {
+				return nil, fmt.Errorf("invalid value for mindreader-node-merge-threshold-block-age: should be more than 30 seconds. Use --mindreader-node-merge-and-store-directly to merge everything directly")
+			}
 			batchStartBlockNum := viper.GetUint64("mindreader-node-start-block-num")
 			batchStopBlockNum := viper.GetUint64("mindreader-node-stop-block-num")
 			failOnNonContiguousBlock := false //FIXME ?
