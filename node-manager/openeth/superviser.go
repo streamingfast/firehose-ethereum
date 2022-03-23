@@ -114,7 +114,7 @@ func NewSuperviser(
 
 	if enforcePeersStr != "" {
 		enforcedPeers := strings.Split(enforcePeersStr, ",")
-		appLogger.Info("enforcing peering by dns", zap.Strings("peers", enforcedPeers))
+		appLogger.Info("enforcing peers by dns", zap.Strings("peers", enforcedPeers))
 		go superviser.EnsurePeersByDNS(enforcedPeers)
 	}
 

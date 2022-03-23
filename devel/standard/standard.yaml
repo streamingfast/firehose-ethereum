@@ -9,3 +9,4 @@ start:
     node-role: dev-miner
     node-bootstrap-data-url: ./miner/bootstrap.tar.zst
     mindreader-node-bootstrap-data-url: ./mindreader/genesis.json
+    mindreader-node-enforce-peers: localhost:13041 # App `node` manager API port

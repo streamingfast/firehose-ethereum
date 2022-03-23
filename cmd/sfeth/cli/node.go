@@ -285,11 +285,9 @@ func registerEthereumNodeFlags(cmd *cobra.Command) error {
 func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	prefix := "node-"
 	managerAPIAddr := NodeManagerAPIAddr
-	defaultEnforcedPeers := ""
 	if isMindreader {
 		prefix = "mindreader-node-"
 		managerAPIAddr = MindreaderNodeManagerAPIAddr
-		defaultEnforcedPeers = "localhost" + NodeManagerAPIAddr
 	}
 
 	cmd.Flags().String(prefix+"path", "geth", "command that will be launched by the node manager")
@@ -302,7 +300,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	cmd.Flags().Duration(prefix+"readiness-max-latency", 30*time.Second, "Determine the maximum head block latency at which the instance will be determined healthy. Some chains have more regular block production than others.")
 
 	cmd.Flags().String(prefix+"bootstrap-data-url", "", "URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)")
-	cmd.Flags().String(prefix+"enforce-peers", defaultEnforcedPeers, "Comma-separated list of operator nodes that will be queried for an 'enode' value and added as a peer")
+	cmd.Flags().String(prefix+"enforce-peers", "", "Comma-separated list of operator nodes that will be queried for an 'enode' value and added as a peer")
 
 	cmd.Flags().StringSlice(prefix+"backups", []string{}, "Repeatable, space-separated key=values definitions for backups. Example: 'type=gke-pvc-snapshot prefix= tag=v1 freq-blocks=1000 freq-time= project=myproj'")
 

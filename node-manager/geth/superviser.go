@@ -97,7 +97,7 @@ func NewGethSuperviser(
 
 	if enforcePeersStr != "" {
 		enforcedPeers := strings.Split(enforcePeersStr, ",")
-		appLogger.Info("enforcing peering by dns", zap.Strings("peers", enforcedPeers))
+		appLogger.Info("enforcing peers by dns", zap.Strings("peers", enforcedPeers))
 		go gethSuperviser.EnsurePeersByDNS(enforcedPeers)
 	}
 
@@ -218,7 +218,7 @@ func (s *Superviser) EnsurePeersByDNS(wantedPeersHostnames []string) {
 	for {
 		time.Sleep(10 * time.Second)
 		if !s.IsRunning() {
-			s.Logger.Info("supervisor not running, will retry to add peers")
+			s.Logger.Info("supervisor not running, will try to add peers later")
 			continue
 		}
 		if len(s.enodeStr) < 20 {
