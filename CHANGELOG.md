@@ -4,9 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v0.10.0-rc.2
 
-### Changed
+#### Added
+
+* substreams-alpha client
+
+#### Changed
 
 * Default value for flag `--mindreader-node-enforce-peers` is now `""`, this has been changed because the default value was useful only in development when running a local `node-manager` as either the miner or a peering node.
 
@@ -19,7 +23,7 @@ for instructions to keep up to date.
 * Added support for irreversibility indexes in firehose to prevent replaying reorgs when streaming old blocks.
 * Added support for log and call indexes to skip old blocks that do not match any transform filter.
 
-### Changed
+#### Changed
 
 * Updated all Firehose stack direct dependencies.
 * Updated confusing flag behavior for `--common-system-shutdown-signal-delay` and its interaction with `gRPC` connection draining in `firehose` component sometimes preventing it from shutting down.
