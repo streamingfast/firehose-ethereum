@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/iam v0.2.0 // indirect
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/cel-go v0.4.1
 	github.com/google/go-cmp v0.5.7
@@ -17,6 +18,7 @@ require (
 	github.com/spf13/viper v1.8.1
 	github.com/streamingfast/bstream v0.0.2-0.20220312192323-e6b8e55c4e99
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
+	github.com/streamingfast/client-go v0.2.1-0.20220328132410-afd23e7857ca
 	github.com/streamingfast/dauth v0.0.0-20220307162109-cca1810ae757
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
 	github.com/streamingfast/derr v0.0.0-20220307162255-f277e08753fa
@@ -38,8 +40,8 @@ require (
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/goleak v1.1.12 // indirect
-	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.21.0
+	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 )
