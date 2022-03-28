@@ -608,6 +608,8 @@ github.com/streamingfast/bstream v0.0.2-0.20220307182042-937c5b625f6f/go.mod h1:
 github.com/streamingfast/bstream v0.0.2-0.20220311190556-572f5584dd56/go.mod h1:Cd/32kGRHt2aqJ62PLQZQ9O3azBT/vCPvCrP7vBc2cs=
 github.com/streamingfast/bstream v0.0.2-0.20220312192323-e6b8e55c4e99 h1:HQfchnFTW3oXFOTdGXyY/pR+d1WoMKlxChqpmmZF9jc=
 github.com/streamingfast/bstream v0.0.2-0.20220312192323-e6b8e55c4e99/go.mod h1:Cd/32kGRHt2aqJ62PLQZQ9O3azBT/vCPvCrP7vBc2cs=
+github.com/streamingfast/bstream v0.0.2-0.20220328194113-e36a9f64f958 h1:VaZES4s2mBNTuGiJEc7j+P9392WvdpF/nnAPFqqwtX4=
+github.com/streamingfast/bstream v0.0.2-0.20220328194113-e36a9f64f958/go.mod h1:Cd/32kGRHt2aqJ62PLQZQ9O3azBT/vCPvCrP7vBc2cs=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e h1:RNQiFMOloBPAMA5PCwShiOoMQ1FeKsVJXcwo9Lq0iHI=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e/go.mod h1:0+crhXhsHDBwb1EWceYcFM5Z3zp6gXsxNxkl+rTMZj0=
 github.com/streamingfast/client-go v0.2.1-0.20220328132410-afd23e7857ca h1:qTm0M7qYv8WnPNnLQeVZgZU3zFqvlOlO794AhP8IFRY=
@@ -645,6 +647,8 @@ github.com/streamingfast/eth-go v0.0.0-20220312041930-62a1ff104ff6 h1:OXDajDt4Zz
 github.com/streamingfast/eth-go v0.0.0-20220312041930-62a1ff104ff6/go.mod h1:2NpyJ/M0rOQVxf67tnnfhYdE8DqtBSea1HtSKBNOfO4=
 github.com/streamingfast/firehose v0.1.1-0.20220311191632-347bfad300b0 h1:dlS5rTrqNEuyfb1r7we4eXYb7yOmZpmfbGgCyl/Zx18=
 github.com/streamingfast/firehose v0.1.1-0.20220311191632-347bfad300b0/go.mod h1:hBrWvBeGMA/UH3WlFl0XmpfgTpn1vRNirHKf0tOLXqA=
+github.com/streamingfast/firehose v0.1.1-0.20220328200521-97fd1f6b0e5c h1:Fjn4txxz7x1gEDyuWV22N7cpZun5o2CD2I6SVhB/lWE=
+github.com/streamingfast/firehose v0.1.1-0.20220328200521-97fd1f6b0e5c/go.mod h1:lq/GpXOdUKXZo5Y7cZk7AeVtHH8252QdsuqvXGODXD4=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTNObq2Uofb330y05JbbZZ6RwE6QUXw5iVcHk1Fx3fk=
 github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=

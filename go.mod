@@ -14,7 +14,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220312192323-e6b8e55c4e99
+	github.com/streamingfast/bstream v0.0.2-0.20220328194113-e36a9f64f958
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/client-go v0.2.1-0.20220328132410-afd23e7857ca
 	github.com/streamingfast/dauth v0.0.0-20220307162109-cca1810ae757
@@ -26,7 +26,7 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
 	github.com/streamingfast/dstore v0.1.1-0.20220315134935-980696943a79
 	github.com/streamingfast/eth-go v0.0.0-20220312041930-62a1ff104ff6
-	github.com/streamingfast/firehose v0.1.1-0.20220311191632-347bfad300b0
+	github.com/streamingfast/firehose v0.1.1-0.20220328200521-97fd1f6b0e5c
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424
 	github.com/streamingfast/merger v0.0.3-0.20220318152213-9ab5185b44e8

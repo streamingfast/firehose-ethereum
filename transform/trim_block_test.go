@@ -24,7 +24,7 @@ func TestBlockLight_Transform(t *testing.T) {
 
 	transforms := []*anypb.Any{lightBlockTransform(t)}
 
-	preprocFunc, x, _, err := transformReg.BuildFromTransforms(transforms)
+	preprocFunc, x, _, _, err := transformReg.BuildFromTransforms(transforms)
 	require.NoError(t, err)
 	require.Nil(t, x)
 
