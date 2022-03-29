@@ -619,6 +619,8 @@ github.com/streamingfast/dauth v0.0.0-20220307162109-cca1810ae757 h1:s5Mu2vfCAum
 github.com/streamingfast/dauth v0.0.0-20220307162109-cca1810ae757/go.mod h1:4+HcM+4yK96jDhpXaiLEb0uPSuZaeB8AK4JboJpR/TY=
 github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5 h1:m/3aIPNXCwZ9m/dfYdOs8ftrS7GJl82ipVr6K2aZiBs=
 github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5/go.mod h1:YStE7K5/GH47JsWpY7LMKsDaXXpMLU/M26vYFzXHYRk=
+github.com/streamingfast/dbin v0.9.0 h1:oX0WN2XmoI0ml4RB/Npah1NPoOzzPUmQvWJmwgc7qq0=
+github.com/streamingfast/dbin v0.9.0/go.mod h1:YStE7K5/GH47JsWpY7LMKsDaXXpMLU/M26vYFzXHYRk=
 github.com/streamingfast/derr v0.0.0-20210811180100-9138d738bcec/go.mod h1:ulVfui/yGXmPBbt9aAqCWdAjM7YxnZkYHzvQktLfw3M=
 github.com/streamingfast/derr v0.0.0-20220301163149-de09cb18fc70/go.mod h1:vOthcUeXFQj09HFzlnzkw6uAXqwloC+lDEdpLaVhoDQ=
 github.com/streamingfast/derr v0.0.0-20220307162255-f277e08753fa h1:tw7AxPyk14L8gQbjvyHPaU6gFJKilk0zC17NRCjCnsI=

@@ -18,7 +18,7 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/client-go v0.2.1-0.20220328132410-afd23e7857ca
 	github.com/streamingfast/dauth v0.0.0-20220307162109-cca1810ae757
-	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
+	github.com/streamingfast/dbin v0.9.0
 	github.com/streamingfast/derr v0.0.0-20220307162255-f277e08753fa
 	github.com/streamingfast/dgrpc v0.0.0-20220307180102-b2d417ac8da7
 	github.com/streamingfast/dlauncher v0.0.0-20220307153121-5674e1b64d40

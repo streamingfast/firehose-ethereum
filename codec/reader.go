@@ -35,15 +35,13 @@ type BlockReader struct {
 
 func NewBlockReader(reader io.Reader) (out *BlockReader, err error) {
 	dbinReader := dbin.NewReader(reader)
-	contentType, version, err := dbinReader.ReadHeader()
+	contentType, err := dbinReader.ReadHeader()
 	if err != nil {
 		return nil, fmt.Errorf("unable to read file header: %s", err)
 	}
 
-	Protocol := pbbstream.Protocol(pbbstream.Protocol_value[contentType])
-
-	if Protocol != pbbstream.Protocol_ETH && version != 1 {
-		return nil, fmt.Errorf("reader only knows about %s block kind at version 1, got %s at version %d", Protocol, contentType, version)
+	if contentType != "ETH01" && contentType != "sf.ethereum.type.v1.Block" {
+		return nil, fmt.Errorf("invalid content type in dbin file, expected ETH01 or sf.ethereum.type.v1.Block, got %q", contentType)
 	}
 
 	return &BlockReader{

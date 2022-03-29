@@ -21,7 +21,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dbin"
-	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 )
 
 func blockWriterFactory(writer io.Writer) (bstream.BlockWriter, error) {
@@ -35,7 +34,7 @@ type BlockWriter struct {
 
 func NewBlockWriter(writer io.Writer) (*BlockWriter, error) {
 	dbinWriter := dbin.NewWriter(writer)
-	err := dbinWriter.WriteHeader(pbbstream.Protocol_ETH.String(), 1)
+	err := dbinWriter.WriteHeader("sf.ethereum.type.v1.Block")
 	if err != nil {
 		return nil, fmt.Errorf("unable to write file header: %s", err)
 	}
