@@ -62,7 +62,7 @@ func TestLogFilter_Transform(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			transforms := []*anypb.Any{logFilterTransform(t, test.addresses, test.topics)}
 
-			preprocFunc, _, _, _, err := transformReg.BuildFromTransforms(transforms)
+			preprocFunc, _, _, err := transformReg.BuildFromTransforms(transforms)
 			require.NoError(t, err)
 
 			blk := testBlockFromFiles(t, "block.json")
