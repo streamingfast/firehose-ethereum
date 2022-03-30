@@ -26,7 +26,7 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
 	github.com/streamingfast/dstore v0.1.1-0.20220315134935-980696943a79
 	github.com/streamingfast/eth-go v0.0.0-20220312041930-62a1ff104ff6
-	github.com/streamingfast/firehose v0.1.1-0.20220330132243-8bebec58df04
+	github.com/streamingfast/firehose v0.1.1-0.20220330200655-9a92471b9be3
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424
 	github.com/streamingfast/merger v0.0.3-0.20220318152213-9ab5185b44e8
@@ -35,7 +35,7 @@ require (
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
 	github.com/streamingfast/sf-tools v0.0.0-20220307162924-1a39f7035cd5
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v0.0.0-20220330143707-152f0cff7cba
+	github.com/streamingfast/substreams v0.0.0-20220330202408-382efc49ea6b
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/goleak v1.1.12 // indirect
