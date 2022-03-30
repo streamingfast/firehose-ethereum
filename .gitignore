@@ -6,3 +6,5 @@
 /sf.yaml
 /sfeth
 /dist
+/rpc-cache
+/localdata
