@@ -34,7 +34,7 @@ import (
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
 	"github.com/streamingfast/logging"
 	sftransform "github.com/streamingfast/sf-ethereum/transform"
-	"github.com/streamingfast/substreams"
+	sstransform "github.com/streamingfast/substreams/transform"
 	"go.uber.org/zap"
 )
 
@@ -126,7 +126,7 @@ func init() {
 			registry.Register(sftransform.CallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(sftransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(sftransform.LightBlockFilterFactory)
-			registry.Register(substreams.TransformFactory(os.Getenv("STREAMING_FAST_ETH_MAINNET_RPC"), "", "/tmp/states", "sf.ethereum.type.v1.Block"))
+			registry.Register(sstransform.TransformFactory(os.Getenv("SUBSTREAMS_RPC_ENDPOINT"), "./rpc-cache", "./localdata", "sf.ethereum.type.v1.Block"))
 
 			var bundleSizes []uint64
 			for _, size := range viper.GetIntSlice("firehose-irreversible-blocks-index-bundle-sizes") {
