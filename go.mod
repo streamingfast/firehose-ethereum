@@ -35,7 +35,7 @@ require (
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
 	github.com/streamingfast/sf-tools v0.0.0-20220307162924-1a39f7035cd5
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v0.0.0-20220330214602-4f77f842d609
+	github.com/streamingfast/substreams v0.0.0-20220331123103-1b3b88d2cb5a
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/goleak v1.1.12 // indirect
@@ -50,5 +50,3 @@ replace (
 	github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
 	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
 )
-
-//replace github.com/streamingfast/substreams => /Users/cbillett/devel/sf/substreams
