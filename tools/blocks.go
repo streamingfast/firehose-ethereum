@@ -26,7 +26,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
@@ -77,14 +76,14 @@ func init() {
 }
 
 func printBlocksE(cmd *cobra.Command, args []string) error {
-	printTransactions := viper.GetBool("transactions")
+	printTransactions := mustGetBool(cmd, "transactions")
 
 	blockNum, err := strconv.ParseUint(args[0], 10, 64)
 	if err != nil {
 		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
 	}
 
-	str := viper.GetString("store")
+	str := mustGetString(cmd, "store")
 
 	store, err := dstore.NewDBinStore(str)
 	if err != nil {
@@ -140,8 +139,9 @@ func printBlocksE(cmd *cobra.Command, args []string) error {
 }
 
 func printBlockE(cmd *cobra.Command, args []string) error {
-	printTransactions := viper.GetBool("transactions")
-	transactionFilter := viper.GetString("transaction")
+	printTransactions := mustGetBool(cmd, "transactions")
+	printCall := mustGetBool(cmd, "calls")
+	transactionFilter := mustGetString(cmd, "transaction")
 
 	zlog.Info("printing block",
 		zap.Bool("print_transactions", printTransactions),
@@ -153,7 +153,7 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
 	}
 
-	str := viper.GetString("store")
+	str := mustGetString(cmd, "store")
 
 	store, err := dstore.NewDBinStore(str)
 	if err != nil {
@@ -214,7 +214,7 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 						continue
 					}
 				}
-				printTrx(t)
+				printTrx(t, printCall)
 			}
 
 		}
@@ -231,7 +231,7 @@ func printOneBlockE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
 	}
 
-	str := viper.GetString("store")
+	str := mustGetString(cmd, "store")
 
 	store, err := dstore.NewDBinStore(str)
 	if err != nil {
@@ -293,12 +293,11 @@ func printBlock(block *bstream.Block) error {
 	return nil
 }
 
-func printTrx(trx *pbcodec.TransactionTrace) {
-	printCall := viper.GetBool("calls")
+func printTrx(trx *pbcodec.TransactionTrace, withCall bool) {
 	hash := eth.Hash(trx.Hash)
 
 	fmt.Printf("  * %s\n", hash.Pretty())
-	if printCall {
+	if withCall {
 		for _, call := range trx.Calls {
 
 			str := ""
