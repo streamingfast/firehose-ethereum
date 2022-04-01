@@ -33,7 +33,7 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20220319133814-75361e421e41
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
-	github.com/streamingfast/sf-tools v0.0.0-20220401174024-1bdc1d385288
+	github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/substreams v0.0.0-20220401195627-67b9fab21070
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
