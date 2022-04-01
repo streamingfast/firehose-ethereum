@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	sftools "github.com/streamingfast/sf-tools"
@@ -63,11 +62,11 @@ func checkMergedBlocksE(cmd *cobra.Command, args []string) error {
 	}
 
 	printDetails := sftools.PrintNothing
-	if viper.GetBool("print-stats") {
+	if mustGetBool(cmd, "print-stats") {
 		printDetails = sftools.PrintStats
 	}
 
-	if viper.GetBool("print-full") {
+	if mustGetBool(cmd, "print-full") {
 		printDetails = sftools.PrintFull
 	}
 
