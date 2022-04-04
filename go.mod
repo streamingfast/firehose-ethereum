@@ -35,7 +35,7 @@ require (
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
 	github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v0.0.0-20220404164933-5e17d6da94e6
+	github.com/streamingfast/substreams v0.0.0-20220404170406-24e52dc2bad7
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/goleak v1.1.12 // indirect
