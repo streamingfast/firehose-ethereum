@@ -79,7 +79,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest
-          VERSION=$(docker inspect --format='{{index .Config.Labels org.opencontainers.image.version}}' ghcr.io/streamingfast/go-ethereum:geth-latest)
+          VERSION=$(docker inspect --format='{{index .Config.Labels \"org.opencontainers.image.version\"}}' ghcr.io/streamingfast/go-ethereum:geth-latest)
           echo VERSION=$VERSION >> $GITHUB_ENV
       - name: Generate docker tags/labels from github build context
         id: meta
