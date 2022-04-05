@@ -88,7 +88,9 @@ jobs:
           tags: |
             type=ref,event=tag,suffix=${{ env.VERSION }}
           flavor: latest=false
-      - run: echo "${{ steps.meta.outputs.tags }}"
+      - run: echo FOUND=$(curl -I -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://ghcr.io/v2/streamingfast/sf-ethereum/manifests/${{ steps.meta.outputs.tags }} |grep -c '^HTTP.* 200$') >> $GITHUB_ENV
+
+      - run: echo found is "${{ env.FOUND }}"
 
 #      - name: Build and push Docker image
 #        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
