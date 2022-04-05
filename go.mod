@@ -28,7 +28,7 @@ require (
 	github.com/streamingfast/eth-go v0.0.0-20220306004150-d6567bb604ec
 	github.com/streamingfast/firehose v0.1.1-0.20220311191632-347bfad300b0
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
-	github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424
+	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
 	github.com/streamingfast/merger v0.0.3-0.20220318152213-9ab5185b44e8
 	github.com/streamingfast/node-manager v0.0.2-0.20220319133814-75361e421e41
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff

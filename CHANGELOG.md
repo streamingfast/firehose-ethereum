@@ -8,6 +8,7 @@ for instructions to keep up to date.
 
 ### Changed
 
+* The default text `encoder` use to encode log entries now emits the level when coloring is disabled.
 * Default value for flag `--mindreader-node-enforce-peers` is now `""`, this has been changed because the default value was useful only in development when running a local `node-manager` as either the miner or a peering node.
 
 ## v0.10.0-rc.1
