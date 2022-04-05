@@ -85,7 +85,12 @@ jobs:
           tags: |
             type=ref,event=tag,suffix=${{ matrix.binaries }}
           flavor: latest=false
-      - run: echo "${{ steps.meta.outputs.tags }}"
+      - run: |
+          docker pull ghcr.io/streamingfast/go-ethereum:geth-latest
+          VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' ghcr.io/streamingfast/go-ethereum:geth-latest)
+          echo VERSION=$VERSION >> $GITHUB_ENV
+      - run: echo "${{ steps.meta.outputs.tags }}${{ env.VERSION }}"
+
 #      - name: Build and push Docker image
 #        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
 #        with:
@@ -93,4 +98,3 @@ jobs:
 #          push: true
 #          tags: ${{ steps.meta.outputs.tags }}
 #          labels: ${{ steps.meta.outputs.labels }}
-
