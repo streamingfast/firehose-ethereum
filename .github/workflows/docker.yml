@@ -18,8 +18,26 @@ jobs:
       contents: read
       packages: write
 
+    strategy:
+      matrix:
+        go-version: [1.18.x]
+        os: [ubuntu-20.04]
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+      - name: Build
+        run: go build -v -ldflags "-X main.Version=${{ github.event.ref }} -X main.Commit=${{ github.sha }}" -o ./sfeth ./cmd/sfeth
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
@@ -37,11 +55,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          build-args: |
-            REV=${{ github.sha }}
-            VERSION=${{ steps.meta.outputs.labels['org.opencontainers.image.version'] }}
           context: .
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
