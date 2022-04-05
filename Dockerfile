@@ -2,7 +2,7 @@ FROM golang:1.18 as builder
 ARG REV
 ARG VERSION
 #RUN go build -v -ldflags "-X main.Version=$VERSION -X main.Commit=${REV}" -o /sfeth ./cmd/sfeth
-RUN pwd && ls
+RUN pwd && find .
 #RUN find /
 
 #FROM ubuntu:20.04
