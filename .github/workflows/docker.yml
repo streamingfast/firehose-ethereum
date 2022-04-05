@@ -40,7 +40,8 @@ jobs:
           build-args: |
             REV=${{ github.sha }}
             VERSION=${{ steps.meta.outputs.labels['org.opencontainers.image.version'] }}
-          push: true
+          context: .
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
