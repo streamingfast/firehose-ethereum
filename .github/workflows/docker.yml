@@ -83,7 +83,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=tag,suffix=${{ matrix.go-version }}
+            type=ref,event=tag,suffix=${{ matrix.binaries }}
           flavor: latest=false
       - run: echo "${{ steps.meta.outputs.tags }}"
 #      - name: Build and push Docker image
