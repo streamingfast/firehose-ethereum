@@ -1,7 +1,9 @@
 FROM golang:1.18 as builder
 ARG REV
 ARG VERSION
-RUN go build -v -ldflags "-X main.Version=$VERSION -X main.Commit=${REV}" -o /sfeth ./cmd/sfeth
+#RUN go build -v -ldflags "-X main.Version=$VERSION -X main.Commit=${REV}" -o /sfeth ./cmd/sfeth
+RUN pwd
+RUN find /
 
 #FROM ubuntu:20.04
 #RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
