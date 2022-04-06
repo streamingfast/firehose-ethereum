@@ -101,7 +101,6 @@ jobs:
 #
 #      - run: echo found is "${{ env.FOUND }}"
       - run: |
-          #echo ${{index .Config.Labels "org.opencontainers.image.version"}}
           echo "the tags are: ${{needs.build-vanilla.outputs.tags}}"
 
 #      - name: Build and push Docker image
