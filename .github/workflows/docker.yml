@@ -23,6 +23,10 @@ jobs:
     strategy:
       matrix:
         go-version: [1.18.x]
+
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -96,7 +100,10 @@ jobs:
 #          echo FOUND=$(curl -I -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://ghcr.io/v2/streamingfast/sf-ethereum/manifests/${{ steps.meta.outputs.tags }} |grep -c "^HTTP.* 200$") >> $GITHUB_ENV
 #
 #      - run: echo found is "${{ env.FOUND }}"
-#
+      - run: |
+          #echo ${{index .Config.Labels "org.opencontainers.image.version"}}
+          echo "the tags are: ${{needs.build-vanilla.outputs.tags}}"
+
 #      - name: Build and push Docker image
 #        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
 #        with:
@@ -107,4 +114,4 @@ jobs:
 #          file: ./Dockerfile-bundle
 #          build-args: |
 #            CHAIN_VERSION: ${{ env.VERSION }}
-#            SF_VERSION: ${{  }}
+#            SF_VERSION: ${{ env. }}
