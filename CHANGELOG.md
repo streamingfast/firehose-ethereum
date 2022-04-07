@@ -6,6 +6,17 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+#### Fixed
+
+* Fixed `tools check merged-blocks` block hole detection behavior on missing ranges (bumped `sf-tools`)
+
+#### Added
+
+* Added `tools download-from-firehose` command to fetch blocks and save them as merged-blocks files locally.
+* Added `cloud-gcp://` auth module (bumped `dauth`)
+
+## v0.10.0-rc.4
+
 ### Changed
 
 * The default text `encoder` use to encode log entries now emits the level when coloring is disabled.
