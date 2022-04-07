@@ -4,13 +4,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v0.10.0-rc.2
-
 #### Added
 
 * substreams-alpha client
 
-#### Changed
+## Unreleased (target: v0.10.0 release)
+
+### Changed
+
+* Renamed common `atm` 4 flags to `blocks-cache`: 
+  `--common-blocks-cache-{enabled|dir|max-recent-entry-bytes|max-entry-by-age-bytes}`
+
+#### Fixed
+
+* Fixed `tools check merged-blocks` block hole detection behavior on missing ranges (bumped `sf-tools`)
+
+#### Added
+
+* Added `tools download-from-firehose` command to fetch blocks and save them as merged-blocks files locally.
+* Added `cloud-gcp://` auth module (bumped `dauth`)
+
+## v0.10.0-rc.4
+
+### Changed
 
 * The default text `encoder` use to encode log entries now emits the level when coloring is disabled.
 * Default value for flag `--mindreader-node-enforce-peers` is now `""`, this has been changed because the default value was useful only in development when running a local `node-manager` as either the miner or a peering node.
@@ -24,7 +40,7 @@ for instructions to keep up to date.
 * Added support for irreversibility indexes in firehose to prevent replaying reorgs when streaming old blocks.
 * Added support for log and call indexes to skip old blocks that do not match any transform filter.
 
-#### Changed
+### Changed
 
 * Updated all Firehose stack direct dependencies.
 * Updated confusing flag behavior for `--common-system-shutdown-signal-delay` and its interaction with `gRPC` connection draining in `firehose` component sometimes preventing it from shutting down.
