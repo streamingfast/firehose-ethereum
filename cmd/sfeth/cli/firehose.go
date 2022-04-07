@@ -33,7 +33,7 @@ import (
 	"github.com/streamingfast/firehose"
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
 	"github.com/streamingfast/logging"
-	sftransform "github.com/streamingfast/sf-ethereum/transform"
+	ethtransform "github.com/streamingfast/sf-ethereum/transform"
 	sstransform "github.com/streamingfast/substreams/transform"
 	"go.uber.org/zap"
 )
@@ -121,11 +121,11 @@ func init() {
 			}
 
 			registry := transform.NewRegistry()
-			registry.Register(sftransform.LogFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(sftransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(sftransform.CallToFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(sftransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(sftransform.LightBlockFilterFactory)
+			registry.Register(ethtransform.LogFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.CallToFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.LightBlockFilterFactory)
 			registry.Register(sstransform.TransformFactory(os.Getenv("SUBSTREAMS_RPC_ENDPOINT"), "./rpc-cache", "./localdata", "sf.ethereum.type.v1.Block"))
 
 			var bundleSizes []uint64
