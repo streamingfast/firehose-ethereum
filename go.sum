@@ -634,7 +634,6 @@ github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a/go.mod h1:4G
 github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/logging v0.0.0-20220222131651-12c3943aac2e/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/logging v0.0.0-20220304183711-ddba33d79e27/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
-github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424 h1:qKt1W13L7GXL3xqvD6z2ufSkIy/KDm9oGrfurypC78E=
 github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
 github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75 h1:ZqpS7rAhhKD7S7DnrpEdrnW1/gZcv82ytpMviovkli4=
 github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
@@ -655,8 +654,8 @@ github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5 h1:lSAHWGm3
 github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5/go.mod h1:Kp4oyh3LEPEkBurdimDrWVRQbk3iFcrYzY/o/cM94Ik=
 github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAtyaTOgs=
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
-github.com/streamingfast/substreams v0.0.0-20220405185137-ae83b681bb4e h1:1Uh73IR5kKxCCEYcM6dGbh0ofhgbdS2cijCepzbEvRs=
-github.com/streamingfast/substreams v0.0.0-20220405185137-ae83b681bb4e/go.mod h1:NvbWI17CO5oMCUWRhMA+wNhGxQ0CoG77pr3x4QTBjHY=
+github.com/streamingfast/substreams v0.0.0-20220407152813-c721a331f4ad h1:J/iruDZWs5e8bcISlct0io+ExF+Q4JPGKLUuLINzzWQ=
+github.com/streamingfast/substreams v0.0.0-20220407152813-c721a331f4ad/go.mod h1:NvbWI17CO5oMCUWRhMA+wNhGxQ0CoG77pr3x4QTBjHY=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
