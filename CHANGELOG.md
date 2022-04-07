@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased (target: v0.10.0 release)
+## v0.10.0-rc.5
 
 ### Changed
 
@@ -14,6 +14,7 @@ for instructions to keep up to date.
 #### Fixed
 
 * Fixed `tools check merged-blocks` block hole detection behavior on missing ranges (bumped `sf-tools`)
+* Fixed a deadlock issue related to s3 storage error handling (bumped `dstore`)
 
 #### Added
 
