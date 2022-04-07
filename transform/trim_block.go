@@ -34,6 +34,10 @@ var LightBlockFilterFactory = &transform.Factory{
 
 type LightBlockFilter struct{}
 
+func (p *LightBlockFilter) String() string {
+	return "light block filter"
+}
+
 func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
 	ethFullBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
 	zlog.Debug("running light block transformer",

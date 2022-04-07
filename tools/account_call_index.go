@@ -19,11 +19,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/bstream"
 	bstransform "github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
-	firehose "github.com/streamingfast/firehose"
+	"github.com/streamingfast/firehose"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v1"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/streamingfast/sf-ethereum/transform"
@@ -111,8 +111,7 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed setting up account index store from url %q: %w", accountIndexStoreURL, err)
 	}
 
-	firehoseServer := firehose.NewServer(
-		zlog,
+	streamFactory := firehose.NewStreamFactory(
 		[]dstore.Store{blocksStore},
 		irrIndexStore,
 		irrIdxSizes,
@@ -121,6 +120,7 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 		nil,
 		nil,
 	)
+	cmd.SilenceUsage = true
 
 	ctx := context.Background()
 
@@ -140,14 +140,6 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 		startBlockNum = accStart
 	}
 
-	cli := firehoseServer.BlocksFromLocal(ctx, &pbfirehose.Request{
-		StartBlockNum: int64(startBlockNum),
-		StopBlockNum:  stopBlockNum,
-		ForkSteps:     []pbfirehose.ForkStep{pbfirehose.ForkStep_STEP_IRREVERSIBLE},
-	})
-
-	cmd.SilenceUsage = true
-
 	t := transform.NewEthCallIndexer(accountIndexStore, acctIdxSize)
 
 	var irreversibleIndexer *bstransform.IrreversibleBlocksIndexer
@@ -155,22 +147,28 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 		irreversibleIndexer = bstransform.NewIrreversibleBlocksIndexer(irrIndexStore, irrIdxSizes, bstransform.IrrWithDefinedStartBlock(startBlockNum))
 	}
 
-	for {
-		resp, err := cli.Recv()
-		if err != nil {
-			return fmt.Errorf("receiving firehose message: %w", err)
-		}
-		if resp == nil {
-			return nil
-		}
-		b := &pbcodec.Block{}
-		err = proto.Unmarshal(resp.Block.Value, b)
-		if err != nil {
-			return fmt.Errorf("unmarshalling firehose message: %w", err)
-		}
+	handler := bstream.HandlerFunc(func(blk *bstream.Block, obj interface{}) error {
 		if createIrr {
-			irreversibleIndexer.Add(b)
+			irreversibleIndexer.Add(blk)
 		}
-		t.ProcessBlock(b)
+		t.ProcessBlock(blk.ToNative().(*pbcodec.Block))
+		return nil
+	})
+
+	req := &pbfirehose.Request{
+		StartBlockNum: int64(startBlockNum),
+		StopBlockNum:  stopBlockNum,
+		ForkSteps:     []pbfirehose.ForkStep{pbfirehose.ForkStep_STEP_IRREVERSIBLE},
 	}
+	stream, err := streamFactory.New(
+		ctx,
+		handler,
+		req,
+		zlog,
+	)
+	if err != nil {
+		return fmt.Errorf("getting firehose stream: %w", err)
+	}
+
+	return stream.Run(ctx)
 }
