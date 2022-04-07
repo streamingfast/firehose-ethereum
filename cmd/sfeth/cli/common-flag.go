@@ -15,7 +15,11 @@
 package cli
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/cli"
 	"go.uber.org/zap"
 )
 
@@ -25,10 +29,26 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().String("common-oneblock-store-url", OneBlockStoreURL, "[COMMON] Store URL (with prefix) to read/write one-block files.")
 	cmd.Flags().String("common-blockstream-addr", RelayerServingAddr, "[COMMON] gRPC endpoint to get real-time blocks.")
 
-	cmd.Flags().Bool("common-atm-cache-enabled", false, "[COMMON] enable ATM caching")
-	cmd.Flags().String("common-atm-cache-dir", ATMDirectory, "[COMMON] ATM cache file directory.")
-	cmd.Flags().Int("common-atm-max-recent-entry-bytes", 20*1024^3, "[COMMON] ATM cache max size in bytes of recent entry heap")
-	cmd.Flags().Int("common-atm-max-entry-by-age-bytes", 20*1024^3, "[COMMON] ATM cache max size in bytes of age entry heap")
+	cmd.Flags().Bool("common-blocks-cache-enabled", false, FlagDescription(`
+				[COMMON] Use a disk cache to store the blocks data to disk and instead of keeping it in RAM. By enabling this, block's Protobuf content, in bytes,
+				is kept on file system instead of RAM. This is done as soon the block is downloaded from storage. This is a tradeoff between RAM and Disk, if you
+				are going to serve only a handful of concurrent requests, it's suggested to keep is disabled, if you encounter heavy RAM consumption issue, specially
+				by the firehose component, it's definitely a good idea to enable it and configure it properly through the other 'common-blocks-cache-...' flags. The cache is
+				split in two portions, one keeping N total bytes of blocks of the most recently used blocks and the other one keeping the N earliest blocks as
+				requested by the various consumers of the cache.
+			`))
+	cmd.Flags().String("common-blocks-cache-dir", BlocksCacheDirectory, FlagDescription(`
+				[COMMON] Blocks cache directory where all the block's bytes will be cached to disk instead of being kept in RAM.
+				This should be a disk that persists across restarts of the Firehose component to reduce the the strain on the disk
+				when restarting and streams reconnects. The size of disk must at least big (with a 10% buffer) in bytes as the sum of flags'
+				value for  'common-blocks-cache-max-recent-entry-bytes' and 'common-blocks-cache-max-entry-by-age-bytes'.
+			`))
+	cmd.Flags().Int("common-blocks-cache-max-recent-entry-bytes", 20*1024^3, FlagDescription(`
+				[COMMON] Blocks cache max size in bytes of the most recently used blocks, after the limit is reached, blocks are evicted from the cache.
+			`))
+	cmd.Flags().Int("common-blocks-cache-max-entry-by-age-bytes", 20*1024^3, FlagDescription(`
+				[COMMON] Blocks cache max size in bytes of the earliest used blocks, after the limit is reached, blocks are evicted from the cache.
+			`))
 
 	// Network config
 	cmd.Flags().Uint32("common-chain-id", DefaultChainID, "[COMMON] ETH chain ID (from EIP-155) as returned from JSON-RPC 'eth_chainId' call Used by: dgraphql")
@@ -46,4 +66,8 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().Duration("common-system-shutdown-signal-delay", 0, "[COMMON] Add a delay between receiving SIGTERM signal and shutting down apps. Apps will respond negatively to /healthz during this period")
 
 	return nil
+}
+
+func FlagDescription(in string, args ...interface{}) string {
+	return fmt.Sprintf(strings.Join(strings.Split(string(cli.Description(in)), "\n"), " "), args...)
 }
