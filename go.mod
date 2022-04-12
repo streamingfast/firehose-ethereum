@@ -25,12 +25,12 @@ require (
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
 	github.com/streamingfast/dstore v0.1.1-0.20220407175237-64df508c455b
-	github.com/streamingfast/eth-go v0.0.0-20220412135558-30a3403b6c8f  //rpc_cache feature branch
+	github.com/streamingfast/eth-go v0.0.0-20220412135558-30a3403b6c8f //rpc_cache feature branch
 	github.com/streamingfast/firehose v0.1.1-0.20220331194041-2bf2b9689682
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
-	github.com/streamingfast/merger v0.0.3-0.20220318152213-9ab5185b44e8
-	github.com/streamingfast/node-manager v0.0.2-0.20220319133814-75361e421e41
+	github.com/streamingfast/merger v0.0.3-0.20220412144000-3ad818763ec5
+	github.com/streamingfast/node-manager v0.0.2-0.20220412154458-7cacfb2b8560
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
 	github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5
