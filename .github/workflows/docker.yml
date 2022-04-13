@@ -94,7 +94,7 @@ jobs:
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest) >> $GITHUB_ENV
-          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | head -n 1) >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -v develop | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
       - name: Generate docker tags/labels from github build context
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
