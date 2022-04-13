@@ -9,6 +9,10 @@ for instructions to keep up to date.
 #### Added
 
 * substreams-alpha client
+* gke-pvc-snapshot backup module
+
+#### Fixed
+* Fixed a potential 'panic' in `merger` on a new chain
 
 ## v0.10.0
 
