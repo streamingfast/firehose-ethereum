@@ -94,6 +94,7 @@ jobs:
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest) >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | head -n 1) >> $GITHUB_ENV
       - name: Generate docker tags/labels from github build context
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -116,12 +117,15 @@ jobs:
           file: ./Dockerfile.bundle
           build-args: |
             CHAIN_VERSION=${{ env.VERSION }}
-            SF_VERSION=${{ needs.build-vanilla.outputs.tags[0] }}
-      - uses: actions/github-script@v5
-        id: set-output
-        with:
-          script: |
-            core.setOutput("${{ matrix.binary }}", `${{ steps.meta.outputs.tags }}`);
+            SF_VERSION=${{ env.SF_VERSION }}
+
+      - id: print
+        run: |
+          OUT="${{ steps.meta.outputs.tags }}"
+          OUT="${OUT//'%'/'%25'}"
+          OUT="${OUT//$'\n'/'%0A'}"
+          OUT="${OUT//$'\r'/'%0D'}"
+          echo "::set-output name=${{ matrix.binary }}::$OUT"
 
   slack-notifications:
     needs: [build-vanilla, bundle-docker-versions]
