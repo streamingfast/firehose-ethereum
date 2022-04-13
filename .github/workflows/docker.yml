@@ -1,3 +1,4 @@
+---
 name: Build docker image
 
 on:
@@ -56,6 +57,7 @@ jobs:
           tags: |
             type=ref,event=tag
             type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: latest=${{ startsWith(github.ref, 'refs/tags/') }}
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -68,6 +70,7 @@ jobs:
   bundle-docker-versions:
     needs: build-vanilla
     runs-on: ubuntu-20.04
+    if: ${{ startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') }}
 
     permissions:
       contents: read
@@ -91,6 +94,7 @@ jobs:
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest) >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -v develop | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
       - name: Generate docker tags/labels from github build context
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -101,6 +105,8 @@ jobs:
             type=ref,event=tag,suffix=-${{ matrix.binary }}
             type=sha,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }}
             type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }}
+            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: latest=false
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -110,11 +116,16 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           file: ./Dockerfile.bundle
           build-args: |
-            CHAIN_VERSION: ${{ env.VERSION }}
-            SF_VERSION: ${{ needs.build-vanilla.outputs.tags[0] }}
-      - id: print
-        run: echo "::set-output name=${{ matrix.binary }}::${{ join(steps.meta.outputs.tags, ' ') }}"
+            CHAIN_VERSION=${{ env.VERSION }}
+            SF_VERSION=${{ env.SF_VERSION }}
 
+      - id: print
+        run: |
+          OUT="${{ steps.meta.outputs.tags }}"
+          OUT="${OUT//'%'/'%25'}"
+          OUT="${OUT//$'\n'/'%0A'}"
+          OUT="${OUT//$'\r'/'%0D'}"
+          echo "::set-output name=${{ matrix.binary }}::$OUT"
 
   slack-notifications:
     needs: [build-vanilla, bundle-docker-versions]
