@@ -4,9 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v0.10.1
+
+#### Fixed
+
+* Fixed an issue where the merger could panic on a new deployment
+
 ## v0.10.0
 
 #### Fixed
+
 * Fixed an issue where the `merger` would get stuck when too many (more than 2000) one-block-files were lying around, with block numbers below the current bundle high boundary.
 
 ## v0.10.0-rc.5
