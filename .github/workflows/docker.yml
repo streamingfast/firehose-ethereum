@@ -117,9 +117,11 @@ jobs:
           build-args: |
             CHAIN_VERSION=${{ env.VERSION }}
             SF_VERSION=${{ needs.build-vanilla.outputs.tags[0] }}
-      - id: print
-        run: echo "::set-output name=${{ matrix.binary }}::${{ join(steps.meta.outputs.tags, ',') }}"
-
+      - uses: actions/github-script@v5
+        id: set-output
+        with:
+          script: |
+            core.setOutput("${{ matrix.binary }}", `${{ steps.meta.outputs.tags }}`);
 
   slack-notifications:
     needs: [build-vanilla, bundle-docker-versions]
