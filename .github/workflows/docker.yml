@@ -113,7 +113,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ./Dockerfile.bundle
-          build-args: |
+          build-args:
             CHAIN_VERSION: ${{ env.VERSION }}
             SF_VERSION: ${{ needs.build-vanilla.outputs.tags[0] }}
       - id: print
