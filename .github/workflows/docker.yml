@@ -1,3 +1,4 @@
+---
 name: Build docker image
 
 on:
@@ -113,9 +114,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ./Dockerfile.bundle
-          build-args:
-            CHAIN_VERSION: ${{ env.VERSION }}
-            SF_VERSION: ${{ needs.build-vanilla.outputs.tags[0] }}
+          build-args: |
+            CHAIN_VERSION=${{ env.VERSION }}
+            SF_VERSION=${{ needs.build-vanilla.outputs.tags[0] }}
       - id: print
         run: echo "::set-output name=${{ matrix.binary }}::${{ join(steps.meta.outputs.tags, ',') }}"
 
