@@ -24,10 +24,10 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Cache Go modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           # In order:
           # * Module download cache
@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Run Tests
-        run: ./bin/test
+        run: ./bin/test.sh
 
       - name: Build
         run: go build ./...
