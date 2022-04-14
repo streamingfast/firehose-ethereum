@@ -26,7 +26,7 @@ require (
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
 	github.com/streamingfast/dstore v0.1.1-0.20220413192207-2fee479ed742
-	github.com/streamingfast/eth-go v0.0.0-20220412160230-798f77abad9d //rpc_cache feature branch
+	github.com/streamingfast/eth-go v0.0.0-20220412135558-30a3403b6c8f //rpc_cache feature branch
 	github.com/streamingfast/firehose v0.1.1-0.20220331194041-2bf2b9689682
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
@@ -34,7 +34,7 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20220412144215-e449d2d99908
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
-	github.com/streamingfast/sf-ethereum/pb v0.0.0-20220414184816-3ff04a241f05 // indirect
+	github.com/streamingfast/sf-ethereum/pb v0.0.0-20220414190917-c4a4b1b6e6d7
 	github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
