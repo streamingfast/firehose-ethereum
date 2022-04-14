@@ -17,7 +17,7 @@ ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 # Protobuf definitions
 PROTO=${1:-"$ROOT/../proto"}
-PROTO_ETHEREUM=${2:-"$ROOT/../proto-ethereum"}
+PROTO_ETHEREUM=${2:-"$ROOT/proto"}
 
 function main() {
   checks
@@ -27,14 +27,13 @@ function main() {
   pushd "$ROOT/pb" &> /dev/null
 
   generate "sf/ethereum/codec/v1/codec.proto"
-  generate "sf/ethereum/trxdb/v1/trxdb.proto"
-  generate "sf/ethereum/trxstream/v1/trxstream.proto"
-  generate "sf/ethereum/transform/v1/transforms.proto"
   generate "sf/ethereum/transform/v1/indexes.proto"
+  generate "sf/ethereum/transform/v1/transforms.proto"
+  generate "sf/ethereum/trxstream/v1/trxstream.proto"
 
   echo "generate.sh - `date` - `whoami`" > $ROOT/pb/last_generate.txt
   echo "streamingfast/proto revision: `GIT_DIR=$PROTO/.git git rev-parse HEAD`" >> $ROOT/pb/last_generate.txt
-  echo "streamingfast/proto-ethereum revision: `GIT_DIR=$PROTO_ETHEREUM/.git git rev-parse HEAD`" >> $ROOT/pb/last_generate.txt
+  echo "streamingfast/sf-ethereum/proto revision: `git log -n 1 --pretty=format:%h -- proto`" >> $ROOT/pb/last_generate.txt
 }
 
 # usage:

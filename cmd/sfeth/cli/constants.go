@@ -19,26 +19,33 @@ import (
 )
 
 const (
-	Protocol                    = pbbstream.Protocol_ETH
-	MergedBlocksStoreURL string = "file://{sf-data-dir}/storage/merged-blocks"
+	Protocol = pbbstream.Protocol_ETH
+
+	DefaultChainID      uint32 = 123
+	DefaultNetworkID    uint32 = 123
+	DefaultDeploymentID string = "eth-local"
+
 	OneBlockStoreURL     string = "file://{sf-data-dir}/storage/one-blocks"
+	MergedBlocksStoreURL string = "file://{sf-data-dir}/storage/merged-blocks"
 	SnapshotsURL         string = "file://{sf-data-dir}/storage/snapshots"
-	DefaultChainID       uint32 = 123
-	DefaultNetworkID     uint32 = 123
-	DefaultDeploymentID  string = "eth-local"
+	StateDBDSN           string = "badger://{sf-data-dir}/storage/statedb"
+
+	MetricsListenAddr string = ":9102"
 
 	BlocksCacheDirectory         string = "{sf-data-dir}/blocks-cache"
-	MindreaderNodeManagerAPIAddr string = ":13009"
-	MindreaderGRPCAddr           string = ":13010"
-	RelayerServingAddr           string = ":13011"
-	MergerServingAddr            string = ":13012"
-	TokenMetaServingAddr         string = ":13039"
-	TraderServingAddr            string = ":13038"
 	BlockstreamGRPCServingAddr   string = ":13039"
 	BlockstreamHTTPServingAddr   string = ":13040"
-	NodeManagerAPIAddr           string = ":13041"
+	EVMExecutorGRPCServingAddr   string = ":13036"
 	FirehoseGRPCServingAddr      string = ":13042"
-	MetricsListenAddr            string = ":9102"
+	MergerServingAddr            string = ":13012"
+	MindreaderNodeManagerAPIAddr string = ":13009"
+	MindreaderGRPCAddr           string = ":13010"
+	NodeManagerAPIAddr           string = ":13041"
+	RelayerServingAddr           string = ":13011"
+	TokenMetaServingAddr         string = ":13039"
+	TraderServingAddr            string = ":13038"
+	StateDBServingAddr           string = ":13029"
+	StateDBGRPCServingAddr       string = ":13035"
 
 	// Geth instance port definitions
 	MindreaderNodeP2PPort string = "30305"
