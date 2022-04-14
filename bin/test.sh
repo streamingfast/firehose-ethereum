@@ -14,6 +14,8 @@ main() {
   done
   shift $((OPTIND-1))
 
+  set -e
+
   pushd pb &> /dev/null
     go test ./... "$@"
   popd&> /dev/null

@@ -30,15 +30,12 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
-	"github.com/streamingfast/logging"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
-	"github.com/streamingfast/sf-ethereum/codec"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
-
-var zlog, _ = logging.PackageLogger("codec.testing", "github.com/streamingfast/sf-ethereum/codec/testing")
 
 type from hexString
 
@@ -351,7 +348,7 @@ func ToTimestamp(t time.Time) *tspb.Timestamp {
 }
 
 func ToBstreamBlock(t testing.T, block *pbcodec.Block) *bstream.Block {
-	blk, err := codec.BlockFromProto(block)
+	blk, err := blockFromProto(block)
 	require.NoError(t, err)
 
 	return blk
@@ -469,4 +466,29 @@ func failInvalidComponent(t testing.T, tag string, component interface{}, option
 
 func logInvalidComponent(tag string, component interface{}) {
 	zlog.Info(fmt.Sprintf("invalid %s component of type %T", tag, component))
+}
+
+// blockFromProto has been copied from codec.BlockFromProto to reduce the dependency for now on it.
+func blockFromProto(b *pbcodec.Block) (*bstream.Block, error) {
+	blockTime, err := b.Time()
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := proto.Marshal(b)
+	if err != nil {
+		return nil, fmt.Errorf("unable to marshal to binary form: %s", err)
+	}
+
+	blk := &bstream.Block{
+		Id:             b.ID(),
+		Number:         b.Number,
+		PreviousId:     b.PreviousID(),
+		Timestamp:      blockTime,
+		LibNum:         b.LIBNum(),
+		PayloadKind:    pbbstream.Protocol_ETH,
+		PayloadVersion: b.Ver,
+	}
+
+	return bstream.GetBlockPayloadSetter(blk, content)
 }
