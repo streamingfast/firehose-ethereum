@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package sf.ethereum.trxstream.v1;
+
+option go_package = "github.com/streamingfast/sf-ethereum-priv/pb/sf/ethereum/trxstream/v1;pbtrxstream";
+
+import "sf/ethereum/codec/v1/codec.proto";
+
+service TransactionStream {
+  rpc Transactions(TransactionRequest) returns (stream sf.ethereum.codec.v1.Transaction);
+}
+
+message TransactionRequest {
+}

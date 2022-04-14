@@ -33,7 +33,7 @@ function main() {
 
   echo "generate.sh - `date` - `whoami`" > $ROOT/pb/last_generate.txt
   echo "streamingfast/proto revision: `GIT_DIR=$PROTO/.git git rev-parse HEAD`" >> $ROOT/pb/last_generate.txt
-  echo "streamingfast/sf-ethereum/proto revision: `git log -n 1 --pretty=format:%h -- proto`" >> $ROOT/pb/last_generate.txt
+  echo "streamingfast/sf-ethereum/proto revision: `GIT_DIR=$ROOT/.git git log -n 1 --pretty=format:%h -- proto`" >> $ROOT/pb/last_generate.txt
 }
 
 # usage:
