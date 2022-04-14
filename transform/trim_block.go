@@ -35,7 +35,7 @@ var LightBlockFilterFactory = &transform.Factory{
 type LightBlockFilter struct{}
 
 func (p *LightBlockFilter) String() string {
-	return "light_block_filter"
+	return "light block filter"
 }
 
 func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {

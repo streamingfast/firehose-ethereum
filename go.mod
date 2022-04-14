@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/compute v1.5.0 // indirect
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/cel-go v0.4.1
 	github.com/google/go-cmp v0.5.7
@@ -24,7 +25,7 @@ require (
 	github.com/streamingfast/dlauncher v0.0.0-20220307153121-5674e1b64d40
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
-	github.com/streamingfast/dstore v0.1.1-0.20220407175237-64df508c455b
+	github.com/streamingfast/dstore v0.1.1-0.20220413192207-2fee479ed742
 	github.com/streamingfast/eth-go v0.0.0-20220412135558-30a3403b6c8f //rpc_cache feature branch
 	github.com/streamingfast/firehose v0.1.1-0.20220331194041-2bf2b9689682
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
@@ -53,5 +54,4 @@ replace (
 	github.com/ShinyTrinkets/overseer => github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef
 	github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
 	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
-//github.com/streamingfast/substreams => /Users/cbillett/devel/sf/substreams
 )
