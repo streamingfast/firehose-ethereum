@@ -4,27 +4,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v0.10.2
+## UNRELEASED
 
-#### Fixed
+* Removed `firehose-blocks-store-urls` flag (feature for using multiple stores now deprecated -> causes confusion and issues with block-caching), use `common-blocks-sture-url` instead.
+
+## v0.10.2
 
 * Fixed problem using S3 provider where the S3 API returns empty filename (we ignore at the consuming time when we receive an empty filename result).
 
 ## v0.10.1
 
-#### Fixed
-
 * Fixed an issue where the merger could panic on a new deployment
 
 ## v0.10.0
-
-#### Fixed
 
 * Fixed an issue where the `merger` would get stuck when too many (more than 2000) one-block-files were lying around, with block numbers below the current bundle high boundary.
 
 ## v0.10.0-rc.5
 
-### Changed
+#### Changed
 
 * Renamed common `atm` 4 flags to `blocks-cache`:
   `--common-blocks-cache-{enabled|dir|max-recent-entry-bytes|max-entry-by-age-bytes}`

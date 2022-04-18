@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -51,7 +50,6 @@ func init() {
 		Description: "Provides on-demand filtered blocks, depends on common-blocks-store-url and common-blockstream-addr",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection")
-			cmd.Flags().StringSlice("firehose-blocks-store-urls", nil, "If non-empty, overrides common-blocks-store-url with a list of blocks stores")
 			cmd.Flags().Duration("firehose-realtime-tolerance", 2*time.Minute, "Longest delay to consider this service as real-time (ready) on initialization")
 			// irreversible indices
 			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
@@ -83,17 +81,8 @@ func init() {
 			}
 			dmetering.SetDefaultMeter(metering)
 
-			firehoseBlocksStoreURLs := viper.GetStringSlice("firehose-blocks-store-urls")
-			if len(firehoseBlocksStoreURLs) == 0 {
-				firehoseBlocksStoreURLs = []string{MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))}
-			} else if len(firehoseBlocksStoreURLs) == 1 && strings.Contains(firehoseBlocksStoreURLs[0], ",") {
-				// Providing multiple elements from config doesn't work with `viper.GetStringSlice`, so let's also handle the case where a single element has separator
-				firehoseBlocksStoreURLs = strings.Split(firehoseBlocksStoreURLs[0], ",")
-			}
-
-			for i, url := range firehoseBlocksStoreURLs {
-				firehoseBlocksStoreURLs[i] = MustReplaceDataDir(sfDataDir, url)
-			}
+			blocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
+			firehoseBlocksStoreURLs := []string{blocksStoreURL}
 
 			if ll := os.Getenv("FIREHOSE_THREADS"); ll != "" {
 				if llint, err := strconv.ParseInt(ll, 10, 32); err == nil {
