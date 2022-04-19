@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/compute v1.5.0 // indirect
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
-	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/cel-go v0.4.1
 	github.com/google/go-cmp v0.5.7
@@ -15,7 +14,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220418185022-87972b944a53
+	github.com/streamingfast/bstream v0.0.2-0.20220405231532-f0e867085763
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5
@@ -24,20 +23,20 @@ require (
 	github.com/streamingfast/dlauncher v0.0.0-20220307153121-5674e1b64d40
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
-	github.com/streamingfast/dstore v0.1.1-0.20220413192207-2fee479ed742
-	github.com/streamingfast/eth-go v0.0.0-20220412135558-30a3403b6c8f //rpc_cache feature branch
+	github.com/streamingfast/dstore v0.1.1-0.20220419122426-72c87c8ca668
+	github.com/streamingfast/eth-go v0.0.0-20220412160230-798f77abad9d
 	github.com/streamingfast/firehose v0.1.1-0.20220331194041-2bf2b9689682
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
-	github.com/streamingfast/merger v0.0.3-0.20220413123550-ce6dd50e2ac0
-	github.com/streamingfast/node-manager v0.0.2-0.20220412144215-e449d2d99908
+	github.com/streamingfast/merger v0.0.3-0.20220318152213-9ab5185b44e8
+	github.com/streamingfast/node-manager v0.0.2-0.20220319133814-75361e421e41
 	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
-	github.com/streamingfast/sf-ethereum/pb v0.0.0-20220414190917-c4a4b1b6e6d7
+	github.com/streamingfast/sf-ethereum/pb v0.0.0-20220418185120-af48875b0cd5
 	github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.0-20220412152233-04782172bbf8
+	github.com/streamingfast/substreams v0.0.0-20220419131722-eee6574019ac
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/goleak v1.1.12 // indirect
@@ -54,4 +53,5 @@ replace (
 	github.com/ShinyTrinkets/overseer => github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef
 	github.com/gorilla/rpc => github.com/streamingfast/rpc v1.2.1-0.20201124195002-f9fc01524e38
 	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
+//github.com/streamingfast/substreams => /Users/cbillett/devel/sf/substreams
 )
