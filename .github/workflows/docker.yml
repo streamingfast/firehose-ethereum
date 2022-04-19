@@ -7,6 +7,7 @@ on:
       - "v*"
     branches:
       - "develop"
+      - "fix/firehose-hang"
 
 env:
   REGISTRY: ghcr.io
@@ -58,6 +59,8 @@ jobs:
             type=ref,event=tag
             type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/fix/firehose-hang' }}
+            type=raw,enable=${{ github.ref == 'refs/heads/fix/firehose-hang' }},value=fix-firehose-hang
           flavor: latest=${{ startsWith(github.ref, 'refs/tags/') }}
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
