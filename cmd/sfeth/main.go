@@ -15,8 +15,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/streamingfast/node-manager/operator"
 	"github.com/streamingfast/sf-ethereum/cmd/sfeth/cli"
 	"github.com/streamingfast/snapshotter"
@@ -29,7 +27,7 @@ var commit = ""
 var version = "dev"
 
 // Date value, injected via go build `ldflags` at build time
-var date = time.Now().Format(time.RFC3339)
+var date = ""
 
 func init() {
 	cli.RootCmd.Version = cli.Version(version, commit, date)
