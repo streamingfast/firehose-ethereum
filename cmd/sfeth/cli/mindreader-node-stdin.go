@@ -26,8 +26,9 @@ import (
 	nodeMindreaderStdinApp "github.com/streamingfast/node-manager/app/node_mindreader_stdin"
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/mindreader"
-	"github.com/streamingfast/sf-ethereum/codec"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	"github.com/streamingfast/sf-ethereum/node-manager/codec"
+	"github.com/streamingfast/sf-ethereum/types"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
 func init() {
@@ -44,7 +45,7 @@ func init() {
 			mergeArchiveStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
 
 			consoleReaderFactory := func(lines chan string) (mindreader.ConsolerReader, error) {
-				r, err := codec.NewConsoleReader(lines)
+				r, err := codec.NewConsoleReader(appLogger, lines)
 				if err != nil {
 					return nil, fmt.Errorf("initiating console reader: %w", err)
 				}
@@ -52,12 +53,12 @@ func init() {
 			}
 
 			consoleReaderBlockTransformer := func(obj interface{}) (*bstream.Block, error) {
-				blk, ok := obj.(*pbcodec.Block)
+				blk, ok := obj.(*pbeth.Block)
 				if !ok {
-					return nil, fmt.Errorf("expected *pbcodec.Block, got %T", obj)
+					return nil, fmt.Errorf("expected *pbeth.Block, got %T", obj)
 				}
 
-				return codec.BlockFromProto(blk)
+				return types.BlockFromProto(blk)
 			}
 
 			metricID := "mindreader-geth-node-stdin"

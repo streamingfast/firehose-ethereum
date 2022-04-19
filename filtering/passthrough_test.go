@@ -17,7 +17,7 @@ package filtering
 import (
 	"testing"
 
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +29,7 @@ func TestPassthrough(t *testing.T) {
 	}{
 		{
 			"erc20",
-			&pbcodec.Transaction{
+			&pbeth.Transaction{
 				Input: toBytes(t, transferMethod+
 					leftPad32b("aaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb")+
 					leftPad32b("00")),

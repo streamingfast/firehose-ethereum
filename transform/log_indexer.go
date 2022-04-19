@@ -5,7 +5,7 @@ import (
 
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
 type LogIndexer interface {
@@ -26,7 +26,7 @@ func NewEthLogIndexer(indexStore dstore.Store, indexSize uint64) *EthLogIndexer 
 }
 
 // ProcessBlock implements chain-specific logic for Ethereum bstream.Block's
-func (i *EthLogIndexer) ProcessBlock(blk *pbcodec.Block) {
+func (i *EthLogIndexer) ProcessBlock(blk *pbeth.Block) {
 	var keys []string
 
 	for _, trace := range blk.TransactionTraces {

@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/streamingfast/bstream"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 )
 
@@ -65,20 +65,20 @@ func (f *BlockFilter) Transform(blk *bstream.Block) *bstream.Block {
 	}
 
 	clone := blk.Clone()
-	block := clone.ToNative().(*pbcodec.Block)
+	block := clone.ToNative().(*pbeth.Block)
 
 	transformInPlaceV2(block, include, exclude)
 	return clone
 }
 
-func transformInPlaceV2(block *pbcodec.Block, include, exclude *CELFilter) {
+func transformInPlaceV2(block *pbeth.Block, include, exclude *CELFilter) {
 	wasFiltered := block.FilteringApplied
 
 	block.FilteringApplied = true
 	block.FilteringIncludeFilterExpr = combineFilters(block.FilteringIncludeFilterExpr, include)
 	block.FilteringExcludeFilterExpr = combineFilters(block.FilteringExcludeFilterExpr, exclude)
 
-	var filteredTrxTrace []*pbcodec.TransactionTrace
+	var filteredTrxTrace []*pbeth.TransactionTrace
 	filteredTotalCallCount := uint32(0)
 
 	trxTraces := block.TransactionTraces
@@ -114,7 +114,7 @@ func transformInPlaceV2(block *pbcodec.Block, include, exclude *CELFilter) {
 	zlog.Debug("filtered transaction traces", zap.Uint32("filtered_call_count", filteredTotalCallCount), zap.Int("filtered_transaction_trace_count", len(filteredTrxTrace)))
 }
 
-func shouldProcess(trxTrace *pbcodec.TransactionTrace, call *pbcodec.Call, include, exclude *CELFilter) (pass bool) {
+func shouldProcess(trxTrace *pbeth.TransactionTrace, call *pbeth.Call, include, exclude *CELFilter) (pass bool) {
 	activation := &CallActivation{trxTrace, nil, call, nil}
 	// If the include program does not match, there is nothing more to do here
 	if !include.match(activation) {

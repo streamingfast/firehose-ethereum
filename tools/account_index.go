@@ -25,8 +25,8 @@ import (
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/firehose"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v1"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"github.com/streamingfast/sf-ethereum/transform"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
 var generateAccIdxCmd = &cobra.Command{
@@ -158,7 +158,7 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		if createIrr {
 			irreversibleIndexer.Add(blk)
 		}
-		t.ProcessBlock(blk.ToNative().(*pbcodec.Block))
+		t.ProcessBlock(blk.ToNative().(*pbeth.Block))
 		return nil
 	})
 

@@ -6,8 +6,8 @@ import (
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
+	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -39,7 +39,7 @@ func (p *LightBlockFilter) String() string {
 }
 
 func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
-	ethFullBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
+	ethFullBlock := readOnlyBlk.ToProtocol().(*pbeth.Block)
 	zlog.Debug("running light block transformer",
 		zap.String("hash", hex.EncodeToString(ethFullBlock.Hash)),
 		zap.Uint64("num", ethFullBlock.Num()),
@@ -52,27 +52,27 @@ func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.In
 	//        we work on our own copy of the block. So we can re-write this code to avoid
 	//        all the extra allocation and simply nillify the values that we want to hide
 	//        instead
-	block := &pbcodec.Block{
+	block := &pbeth.Block{
 		Hash:   ethFullBlock.Hash,
 		Number: ethFullBlock.Number,
-		Header: &pbcodec.BlockHeader{
+		Header: &pbeth.BlockHeader{
 			Timestamp:  ethFullBlock.Header.Timestamp,
 			ParentHash: ethFullBlock.Header.ParentHash,
 		},
 	}
 
-	var newTrace func(fullTrxTrace *pbcodec.TransactionTrace) (trxTrace *pbcodec.TransactionTrace)
-	newTrace = func(fullTrxTrace *pbcodec.TransactionTrace) (trxTrace *pbcodec.TransactionTrace) {
-		trxTrace = &pbcodec.TransactionTrace{
+	var newTrace func(fullTrxTrace *pbeth.TransactionTrace) (trxTrace *pbeth.TransactionTrace)
+	newTrace = func(fullTrxTrace *pbeth.TransactionTrace) (trxTrace *pbeth.TransactionTrace) {
+		trxTrace = &pbeth.TransactionTrace{
 			Hash:    fullTrxTrace.Hash,
 			Receipt: fullTrxTrace.Receipt,
 			From:    fullTrxTrace.From,
 			To:      fullTrxTrace.To,
 		}
 
-		trxTrace.Calls = make([]*pbcodec.Call, len(fullTrxTrace.Calls))
+		trxTrace.Calls = make([]*pbeth.Call, len(fullTrxTrace.Calls))
 		for i, fullCall := range fullTrxTrace.Calls {
-			call := &pbcodec.Call{
+			call := &pbeth.Call{
 				Index:               fullCall.Index,
 				ParentIndex:         fullCall.ParentIndex,
 				Depth:               fullCall.Depth,
@@ -97,7 +97,7 @@ func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.In
 		return trxTrace
 	}
 
-	traces := make([]*pbcodec.TransactionTrace, len(ethFullBlock.TransactionTraces))
+	traces := make([]*pbeth.TransactionTrace, len(ethFullBlock.TransactionTraces))
 	for i, fullTrxTrace := range ethFullBlock.TransactionTraces {
 		traces[i] = newTrace(fullTrxTrace)
 	}

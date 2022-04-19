@@ -27,8 +27,9 @@ import (
 	nodeManager "github.com/streamingfast/node-manager"
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
-	"github.com/streamingfast/sf-ethereum/codec"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	"github.com/streamingfast/sf-ethereum/node-manager/codec"
+	"github.com/streamingfast/sf-ethereum/types"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -86,16 +87,16 @@ func getMindreaderLogPlugin(
 	blockStreamServer := blockstream.NewServer(gs, blockstream.ServerOptionWithLogger(appLogger))
 
 	consoleReaderFactory := func(lines chan string) (mindreader.ConsolerReader, error) {
-		return codec.NewConsoleReader(lines)
+		return codec.NewConsoleReader(appLogger, lines)
 	}
 
 	consoleReaderBlockTransformer := func(obj interface{}) (*bstream.Block, error) {
-		blk, ok := obj.(*pbcodec.Block)
+		blk, ok := obj.(*pbeth.Block)
 		if !ok {
-			return nil, fmt.Errorf("expected *pbcodec.Block, got %T", obj)
+			return nil, fmt.Errorf("expected *pbeth.Block, got %T", obj)
 		}
 
-		return codec.BlockFromProto(blk)
+		return types.BlockFromProto(blk)
 	}
 
 	logPlugin, err := mindreader.NewMindReaderPlugin(

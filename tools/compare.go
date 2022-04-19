@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
 var compareBlocksCmd = &cobra.Command{
@@ -60,11 +60,11 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unable to create store at path %q: %w", storeBDef, err)
 	}
 
-	blocksA := make(map[string]*pbcodec.Block)
-	blocksB := make(map[string]*pbcodec.Block)
+	blocksA := make(map[string]*pbeth.Block)
+	blocksB := make(map[string]*pbeth.Block)
 
 	filePrefix := fmt.Sprintf("%010d", blockNum)
-	collectBlocks := func(store dstore.Store, blockMap map[string]*pbcodec.Block) error {
+	collectBlocks := func(store dstore.Store, blockMap map[string]*pbeth.Block) error {
 		var files []string
 		err = storeA.Walk(ctx, filePrefix, "", func(filename string) (err error) {
 			files = append(files, filename)
@@ -98,7 +98,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 				if err != nil {
 					return err
 				}
-				blockMap[block.ID()] = block.ToNative().(*pbcodec.Block)
+				blockMap[block.ID()] = block.ToNative().(*pbeth.Block)
 			}
 		}
 		return nil

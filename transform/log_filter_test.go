@@ -8,8 +8,8 @@ import (
 
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/eth-go"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
+	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -72,7 +72,7 @@ func TestLogFilter_Transform(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				pbcodecBlock := output.(*pbcodec.Block)
+				pbcodecBlock := output.(*pbeth.Block)
 				assert.Equal(t, test.expectTracesLength, len(pbcodecBlock.TransactionTraces))
 			}
 		})

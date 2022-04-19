@@ -21,7 +21,7 @@ import (
 
 	"github.com/google/cel-go/interpreter"
 	"github.com/streamingfast/eth-go"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 )
 
@@ -36,9 +36,9 @@ var aGWEI = big.NewInt(1e9)
 //
 // *Warning* We reserve the rights to change it's signature at all time
 type CallActivation struct {
-	Trace *pbcodec.TransactionTrace
-	Trx   *pbcodec.Transaction
-	Call  *pbcodec.Call
+	Trace *pbeth.TransactionTrace
+	Trx   *pbeth.Transaction
+	Call  *pbeth.Call
 	Cache *TrxFilterCache
 }
 

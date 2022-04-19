@@ -2,12 +2,12 @@ syntax = "proto3";
 
 package sf.ethereum.trxstream.v1;
 
-option go_package = "github.com/streamingfast/sf-ethereum-priv/pb/sf/ethereum/trxstream/v1;pbtrxstream";
+option go_package = "github.com/streamingfast/sf-ethereum-priv/types/pb/sf/ethereum/trxstream/v1;pbtrxstream";
 
-import "sf/ethereum/codec/v1/codec.proto";
+import "sf/ethereum/type/v1/type.proto";
 
 service TransactionStream {
-  rpc Transactions(TransactionRequest) returns (stream sf.ethereum.codec.v1.Transaction);
+  rpc Transactions(TransactionRequest) returns (stream sf.ethereum.type.v1.Transaction);
 }
 
 message TransactionRequest {

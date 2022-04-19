@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/streamingfast/dstore"
-
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,7 +24,7 @@ func TestNewEthLogIndexer(t *testing.T) {
 func TestEthLogIndexer(t *testing.T) {
 	tests := []struct {
 		name             string
-		blocks           []*pbcodec.Block
+		blocks           []*pbeth.Block
 		expectedAddCalls []addCall
 	}{
 		{

@@ -14,9 +14,7 @@
 
 package filtering
 
-import (
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-)
+import pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 
 type passthroughFilter struct{}
 
@@ -30,13 +28,13 @@ func newPassthroughFilter() *passthroughFilter {
 
 func (f *passthroughFilter) Matches(transaction interface{}, cache *TrxFilterCache) (bool, []uint32) {
 
-	var calls []*pbcodec.Call
+	var calls []*pbeth.Call
 	switch trx := transaction.(type) {
-	case *pbcodec.Transaction:
+	case *pbeth.Transaction:
 		return true, nil
-	case *pbcodec.TransactionTrace:
+	case *pbeth.TransactionTrace:
 		calls = trx.Calls
-	case *pbcodec.TransactionTraceWithBlockRef:
+	case *pbeth.TransactionTraceWithBlockRef:
 		calls = trx.Trace.Calls
 	}
 

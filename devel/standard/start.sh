@@ -46,7 +46,7 @@ usage() {
   echo "    -c             Clean actual data directory first"
   echo ""
   echo "Examples"
-  echo "   Stream blocks    grpcurl -insecure -import-path ../proto -import-path ../proto-ethereum -proto dfuse/ethereum/codec/v1/codec.proto -proto dfuse/bstream/v1/bstream.proto -d '{\"start_block_num\": -1}' localhost:13042 dfuse.bstream.v1.BlockStreamV2.Blocks"
+  echo "   Stream blocks    grpcurl -plaintext -import-path ../proto -import-path ./proto -proto sf/ethereum/type/v1/type.proto -proto sf/firehose/v1/firehose.proto -d '{\"start_block_num\": -1}' localhost:13042 sf.firehose.v1.Stream.Blocks"
 }
 
 main "$@"

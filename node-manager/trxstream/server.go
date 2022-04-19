@@ -18,8 +18,8 @@ import (
 	"sync"
 
 	"github.com/streamingfast/logging"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtrxstream "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/trxstream/v1"
+	pbtrxstream "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/trxstream/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/streamingfast/shutter"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -74,7 +74,7 @@ func (s *Server) Ready() bool {
 	return true
 }
 
-func (s *Server) PushTransaction(trx *pbcodec.Transaction) {
+func (s *Server) PushTransaction(trx *pbeth.Transaction) {
 	if s.IsTerminating() {
 		return
 	}

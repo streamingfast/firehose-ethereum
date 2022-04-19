@@ -22,7 +22,7 @@ import (
 	"github.com/google/cel-go/checker/decls"
 	"github.com/google/cel-go/common/types"
 	"github.com/google/cel-go/interpreter"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 )
 
@@ -58,22 +58,22 @@ func newCELTrxFilter(includeProgramCode, excludeProgramCode string) (*celTrxFilt
 }
 
 func (f *celTrxFilter) Matches(transaction interface{}, cache *TrxFilterCache) (bool, []uint32) {
-	var calls []*pbcodec.Call
-	var trace *pbcodec.TransactionTrace
+	var calls []*pbeth.Call
+	var trace *pbeth.TransactionTrace
 	switch trx := transaction.(type) {
-	case *pbcodec.Transaction:
+	case *pbeth.Transaction:
 		if matchesTrx(trx, f.ExcludeProgram, cache) {
 			return false, nil
 		}
 		return matchesTrx(trx, f.IncludeProgram, cache), nil
 
-	case *pbcodec.TransactionTrace:
+	case *pbeth.TransactionTrace:
 		if matchesTrace(trx, f.ExcludeProgram, cache) {
 			return false, nil
 		}
 		trace = trx
 		calls = trx.Calls
-	case *pbcodec.TransactionTraceWithBlockRef:
+	case *pbeth.TransactionTraceWithBlockRef:
 		if matchesTrace(trx.Trace, f.ExcludeProgram, cache) {
 			return false, nil
 		}
@@ -94,7 +94,7 @@ func (f *celTrxFilter) Matches(transaction interface{}, cache *TrxFilterCache) (
 
 }
 
-func matchesCall(call *pbcodec.Call, trace *pbcodec.TransactionTrace, filter *CELFilter, cache *TrxFilterCache) bool {
+func matchesCall(call *pbeth.Call, trace *pbeth.TransactionTrace, filter *CELFilter, cache *TrxFilterCache) bool {
 	if filter.IsNoop() {
 		return filter.valueWhenNoop
 	}
@@ -102,7 +102,7 @@ func matchesCall(call *pbcodec.Call, trace *pbcodec.TransactionTrace, filter *CE
 	return filter.match(&activation)
 }
 
-func matchesTrx(trx *pbcodec.Transaction, filter *CELFilter, cache *TrxFilterCache) bool {
+func matchesTrx(trx *pbeth.Transaction, filter *CELFilter, cache *TrxFilterCache) bool {
 	if filter.IsNoop() {
 		return filter.valueWhenNoop
 	}
@@ -110,7 +110,7 @@ func matchesTrx(trx *pbcodec.Transaction, filter *CELFilter, cache *TrxFilterCac
 	return filter.match(&activation)
 }
 
-func matchesTrace(trace *pbcodec.TransactionTrace, filter *CELFilter, cache *TrxFilterCache) bool {
+func matchesTrace(trace *pbeth.TransactionTrace, filter *CELFilter, cache *TrxFilterCache) bool {
 	if filter.IsNoop() {
 		return filter.valueWhenNoop
 	}

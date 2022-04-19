@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/streamingfast/bstream/transform"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
+	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -33,6 +33,6 @@ func TestBlockLight_Transform(t *testing.T) {
 	output, err := preprocFunc(blk)
 	require.NoError(t, err)
 
-	pbcodecBlock := output.(*pbcodec.Block)
+	pbcodecBlock := output.(*pbeth.Block)
 	assert.Equal(t, blk.Number, pbcodecBlock.Number)
 }

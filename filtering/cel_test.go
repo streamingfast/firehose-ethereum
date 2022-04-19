@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/streamingfast/eth-go"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -119,7 +119,7 @@ func TestCELActivation(t *testing.T) {
 			"to match trx",
 			`erc20_to == "0xaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb"`,
 			&CallActivation{
-				Trx: &pbcodec.Transaction{
+				Trx: &pbeth.Transaction{
 					Input: toBytes(t, transferMethod+
 						leftPad32b("aaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb")+
 						leftPad32b("00")),
@@ -131,7 +131,7 @@ func TestCELActivation(t *testing.T) {
 			"erc20_from match trx",
 			`erc20_from == "0xaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb"`,
 			&CallActivation{
-				Trx: &pbcodec.Transaction{
+				Trx: &pbeth.Transaction{
 					From: toBytes(t, "aaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb"),
 					Input: toBytes(t, transferMethod+
 						leftPad32b("1111111111111111111111111111111111111111")+
@@ -144,7 +144,7 @@ func TestCELActivation(t *testing.T) {
 			"from match trace",
 			`from == "0xaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb"`,
 			&CallActivation{
-				Trace: &pbcodec.TransactionTrace{
+				Trace: &pbeth.TransactionTrace{
 					From:  toBytes(t, "aaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb"),
 					To:    toBytes(t, "cccccccccccccccccccddddddddddddddddddddd"),
 					Input: toBytes(t, "12345678"),
@@ -156,7 +156,7 @@ func TestCELActivation(t *testing.T) {
 			"from nomatch trace",
 			`from == "0xeeeeeeeeeeeeeeeeeeefffffffffffffffffffff"`,
 			&CallActivation{
-				Trace: &pbcodec.TransactionTrace{
+				Trace: &pbeth.TransactionTrace{
 					From:  toBytes(t, "aaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbb"),
 					To:    toBytes(t, "cccccccccccccccccccddddddddddddddddddddd"),
 					Input: toBytes(t, "12345678"),

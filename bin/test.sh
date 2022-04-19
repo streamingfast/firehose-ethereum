@@ -16,7 +16,7 @@ main() {
 
   set -e
 
-  pushd pb &> /dev/null
+  pushd types &> /dev/null
     go test ./... "$@"
   popd&> /dev/null
 

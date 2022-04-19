@@ -15,7 +15,7 @@
 package main
 
 import (
-	_ "github.com/streamingfast/sf-ethereum/codec"
+	_ "github.com/streamingfast/sf-ethereum/types"
 	"github.com/streamingfast/substreams/cli"
 )
 

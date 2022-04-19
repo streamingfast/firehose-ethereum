@@ -18,7 +18,7 @@ import (
 	"bytes"
 
 	"github.com/streamingfast/eth-go"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
 type trxHashFilter struct {
@@ -47,16 +47,16 @@ func newTrxHashFilter(hash eth.Hash) *trxHashFilter {
 
 func (f *trxHashFilter) Matches(transaction interface{}, cache *TrxFilterCache) (bool, []uint32) {
 
-	var calls []*pbcodec.Call
+	var calls []*pbeth.Call
 	switch trx := transaction.(type) {
-	case *pbcodec.Transaction:
+	case *pbeth.Transaction:
 		return bytes.Equal(trx.Hash, f.hash), nil
-	case *pbcodec.TransactionTrace:
+	case *pbeth.TransactionTrace:
 		if !bytes.Equal(trx.Hash, f.hash) {
 			return false, nil
 		}
 		calls = trx.Calls
-	case *pbcodec.TransactionTraceWithBlockRef:
+	case *pbeth.TransactionTraceWithBlockRef:
 		calls = trx.Trace.Calls
 		if !bytes.Equal(trx.Trace.Hash, f.hash) {
 			return false, nil

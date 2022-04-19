@@ -5,16 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/streamingfast/dstore"
-
-	"github.com/streamingfast/eth-go"
-	"google.golang.org/protobuf/types/known/anypb"
-
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
-	pbtransform "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/transform/v1"
+	"github.com/streamingfast/dstore"
+	"github.com/streamingfast/eth-go"
+	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 var LogFilterMessageName = proto.MessageName(&pbtransform.LogFilter{})
@@ -105,8 +103,8 @@ func (p *LogFilter) matchEventSignature(topics [][]byte) bool {
 }
 
 func (p *LogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
-	ethBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
-	traces := []*pbcodec.TransactionTrace{}
+	ethBlock := readOnlyBlk.ToProtocol().(*pbeth.Block)
+	traces := []*pbeth.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
 		match := false
 		for _, log := range trace.Receipt.Logs {
@@ -203,8 +201,8 @@ func (p *MultiLogFilter) String() string {
 }
 
 func (p *MultiLogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
-	ethBlock := readOnlyBlk.ToProtocol().(*pbcodec.Block)
-	traces := []*pbcodec.TransactionTrace{}
+	ethBlock := readOnlyBlk.ToProtocol().(*pbeth.Block)
+	traces := []*pbeth.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
 		match := false
 		for _, log := range trace.Receipt.Logs {

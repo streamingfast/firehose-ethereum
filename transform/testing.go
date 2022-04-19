@@ -6,16 +6,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/streamingfast/dstore"
-
-	"github.com/streamingfast/eth-go"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/dstore"
+	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
-	_ "github.com/streamingfast/sf-ethereum/codec"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	_ "github.com/streamingfast/sf-ethereum/types"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +21,7 @@ func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
 	file, err := os.Open("./testdata/" + filename)
 	require.NoError(t, err)
 
-	b := &pbcodec.Block{}
+	b := &pbeth.Block{}
 	err = jsonpb.Unmarshal(file, b)
 	require.NoError(t, err)
 
@@ -44,15 +42,15 @@ func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
 	return blk
 }
 
-func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Block {
+func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Block {
 
 	if len(addrs) == 0 || len(sigs) == 0 {
 		t.Fatal("require at least 1 addr and 1 sig")
 	}
 
-	var logs1 []*pbcodec.Log
+	var logs1 []*pbeth.Log
 	for _, addr := range addrs {
-		logs1 = append(logs1, &pbcodec.Log{
+		logs1 = append(logs1, &pbeth.Log{
 			Address: eth.MustNewAddress(addr),
 			Topics: [][]byte{
 				eth.MustNewHash(sigs[0]),
@@ -60,9 +58,9 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Bl
 		})
 	}
 
-	var logs2 []*pbcodec.Log
+	var logs2 []*pbeth.Log
 	for _, sig := range sigs {
-		logs2 = append(logs2, &pbcodec.Log{
+		logs2 = append(logs2, &pbeth.Log{
 			Address: eth.MustNewAddress(addrs[0]),
 			Topics: [][]byte{
 				eth.MustNewHash(sig),
@@ -70,20 +68,20 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Bl
 		})
 	}
 
-	return &pbcodec.Block{
+	return &pbeth.Block{
 		Number: blkNum,
-		TransactionTraces: []*pbcodec.TransactionTrace{
+		TransactionTraces: []*pbeth.TransactionTrace{
 			{
 				Hash:   eth.MustNewHash("0xDEADBEEF"),
-				Status: pbcodec.TransactionTraceStatus_SUCCEEDED,
-				Receipt: &pbcodec.TransactionReceipt{
+				Status: pbeth.TransactionTraceStatus_SUCCEEDED,
+				Receipt: &pbeth.TransactionReceipt{
 					Logs: logs1,
 				},
 			},
 			{
 				Hash:   eth.MustNewHash("0xBEEFDEAD"),
-				Status: pbcodec.TransactionTraceStatus_SUCCEEDED,
-				Receipt: &pbcodec.TransactionReceipt{
+				Status: pbeth.TransactionTraceStatus_SUCCEEDED,
+				Receipt: &pbeth.TransactionReceipt{
 					Logs: logs2,
 				},
 			},
@@ -91,10 +89,10 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbcodec.Bl
 	}
 }
 
-// testEthBlocks returns a slice of pbcodec.Block's
+// testEthBlocks returns a slice of pbeth.Block's
 // it takes a size parameter, to truncate with [:size]
-func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
-	blocks := []*pbcodec.Block{
+func testEthBlocks(t *testing.T, size int) []*pbeth.Block {
+	blocks := []*pbeth.Block{
 		testEthBlock(t, 10,
 			[]string{
 				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -165,7 +163,7 @@ func testEthBlocks(t *testing.T, size int) []*pbcodec.Block {
 
 // testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
 // this implementation uses an EthLogIndexer to write the index files
-func testMockstoreWithFiles(t *testing.T, blocks []*pbcodec.Block, indexSize uint64) *dstore.MockStore {
+func testMockstoreWithFiles(t *testing.T, blocks []*pbeth.Block, indexSize uint64) *dstore.MockStore {
 	results := make(map[string][]byte)
 
 	// spawn an indexStore which will populate the results

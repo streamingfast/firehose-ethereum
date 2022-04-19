@@ -21,14 +21,12 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/streamingfast/eth-go"
-
-	"go.uber.org/zap"
-
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	"github.com/streamingfast/eth-go"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	"go.uber.org/zap"
 )
 
 var printCmd = &cobra.Command{
@@ -118,7 +116,7 @@ func printBlocksE(cmd *cobra.Command, args []string) error {
 		seenBlockCount++
 
 		//payloadSize, err := len(block.Payload.Get()) //disabled after rework
-		ethBlock := block.ToNative().(*pbcodec.Block)
+		ethBlock := block.ToNative().(*pbeth.Block)
 
 		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
 			block.Num(),
@@ -196,7 +194,7 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 			)
 			continue
 		}
-		ethBlock := block.ToNative().(*pbcodec.Block)
+		ethBlock := block.ToNative().(*pbeth.Block)
 
 		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
 			block.Num(),
@@ -281,7 +279,7 @@ func printOneBlockE(cmd *cobra.Command, args []string) error {
 }
 
 func printBlock(block *bstream.Block) error {
-	nativeBlock := block.ToNative().(*pbcodec.Block)
+	nativeBlock := block.ToNative().(*pbeth.Block)
 
 	data, err := json.MarshalIndent(nativeBlock, "", "  ")
 	if err != nil {
@@ -293,7 +291,7 @@ func printBlock(block *bstream.Block) error {
 	return nil
 }
 
-func printTrx(trx *pbcodec.TransactionTrace, withCall bool) {
+func printTrx(trx *pbeth.TransactionTrace, withCall bool) {
 	hash := eth.Hash(trx.Hash)
 
 	fmt.Printf("  * %s\n", hash.Pretty())

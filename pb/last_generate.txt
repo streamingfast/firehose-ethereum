@@ -1,3 +1,0 @@
-generate.sh - Thu Apr 14 13:51:22 EDT 2022 - maoueh
-streamingfast/proto revision: 64f4cd9cc0d995ce4207abd1917941d622795962
-streamingfast/sf-ethereum/proto revision: ca1ec08

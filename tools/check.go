@@ -19,7 +19,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	sftools "github.com/streamingfast/sf-tools"
 )
 
@@ -74,7 +74,7 @@ func checkMergedBlocksE(cmd *cobra.Command, args []string) error {
 }
 
 func blockPrinter(block *bstream.Block) {
-	ethBlock := block.ToNative().(*pbcodec.Block)
+	ethBlock := block.ToNative().(*pbeth.Block)
 
 	callCount := 0
 	for _, trxTrace := range ethBlock.TransactionTraces {

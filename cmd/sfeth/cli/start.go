@@ -26,7 +26,7 @@ import (
 	"github.com/streamingfast/dgrpc"
 	"github.com/streamingfast/dlauncher/launcher"
 	pbblockmeta "github.com/streamingfast/pbgo/sf/blockmeta/v1"
-	_ "github.com/streamingfast/sf-ethereum/codec"
+	_ "github.com/streamingfast/sf-ethereum/types"
 	"go.uber.org/zap"
 )
 

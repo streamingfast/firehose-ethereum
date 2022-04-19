@@ -17,25 +17,25 @@ package trxstream
 import (
 	"sync"
 
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 )
 
 func newSubscription(chanSize int, logger *zap.Logger) (out *subscription) {
 	return &subscription{
-		incomingTrx: make(chan *pbcodec.Transaction, chanSize),
+		incomingTrx: make(chan *pbeth.Transaction, chanSize),
 		logger:      logger,
 	}
 }
 
 type subscription struct {
-	incomingTrx chan *pbcodec.Transaction
+	incomingTrx chan *pbeth.Transaction
 	closed      bool
 	quitOnce    sync.Once
 	logger      *zap.Logger
 }
 
-func (s *subscription) Push(trx *pbcodec.Transaction) {
+func (s *subscription) Push(trx *pbeth.Transaction) {
 	if len(s.incomingTrx) == cap(s.incomingTrx) {
 		s.quitOnce.Do(func() {
 			s.logger.Info("reach max buffer size for subscription, closing channel")

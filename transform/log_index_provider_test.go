@@ -8,7 +8,7 @@ import (
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +24,7 @@ func TestNewEthAckIndexProvider(t *testing.T) {
 func TestEthAckIndexProvider_WithinRange(t *testing.T) {
 	tests := []struct {
 		name          string
-		blocks        []*pbcodec.Block
+		blocks        []*pbeth.Block
 		indexSize     uint64
 		wantedBlock   uint64
 		isWithinRange bool
@@ -83,7 +83,7 @@ func TestEthAckIndexProvider_WithinRange(t *testing.T) {
 func TestEthLogIndexProvider_Matches(t *testing.T) {
 	tests := []struct {
 		name            string
-		blocks          []*pbcodec.Block
+		blocks          []*pbeth.Block
 		indexSize       uint64
 		wantedBlock     uint64
 		expectMatches   bool
@@ -188,7 +188,7 @@ func TestEthLogIndexProvider_Matches(t *testing.T) {
 func TestEthLogIndexProvider_NextMatching(t *testing.T) {
 	tests := []struct {
 		name                        string
-		blocks                      []*pbcodec.Block
+		blocks                      []*pbeth.Block
 		indexSize                   uint64
 		wantedBlock                 uint64
 		expectedNextBlockNum        uint64
