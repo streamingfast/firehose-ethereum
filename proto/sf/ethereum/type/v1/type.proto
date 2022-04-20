@@ -90,6 +90,7 @@ message BlockHeader {
   bytes mix_hash = 14;  /* geth: MixDigest + mixHash, parity: mixHash */
   uint64 nonce = 15;
   bytes hash = 16;
+  BigInt total_difficulty = 17; /* geth: totalDifficulty, sum of all previous blocks difficulty, looked up in DB on rpc call */
 }
 
 message BigInt {

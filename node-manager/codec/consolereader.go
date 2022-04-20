@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
@@ -824,8 +825,9 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbeth.Block, error) {
 	}
 
 	var endBlockInfo struct {
-		Header *BlockHeader   `json:"header"`
-		Uncles []*BlockHeader `json:"uncles"`
+		Header          *BlockHeader   `json:"header"`
+		Uncles          []*BlockHeader `json:"uncles"`
+		TotalDifficulty eth.Hex        `json:"totalDifficulty"`
 	}
 
 	if err := json.Unmarshal([]byte(chunks[2]), &endBlockInfo); err != nil {
@@ -836,6 +838,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbeth.Block, error) {
 	if header.Number != ctx.currentBlock.Number {
 		return nil, fmt.Errorf("header end block does not match active block num, got block num %d but current is block num %d", header.Number, ctx.currentBlock.Number)
 	}
+	header.TotalDifficulty = pbeth.BigIntFromBytes(endBlockInfo.TotalDifficulty)
 
 	ctx.currentBlock.Size = size
 	ctx.currentBlock.Hash = header.Hash
