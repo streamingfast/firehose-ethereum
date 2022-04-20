@@ -353,7 +353,7 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 		return fmt.Errorf("received when trx already begun")
 	}
 
-	chunks, err := SplitInChunks(line, 11)
+	chunks, err := SplitInChunks(line, 11, 13)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -373,18 +373,28 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	nonce := FromUint64(chunks[8], "BEGIN_APPLY_TRX nonce")
 	input := FromHex(chunks[9], "BEGIN_APPLY_TRX input")
 
+	// geth london fork only
+	var maxFee *pbeth.BigInt
+	var trxType pbeth.TransactionTrace_Type //default: unknown
+	if len(chunks) == 13 {
+		maxFee = pbeth.BigIntFromBytes(FromHex(chunks[10], "BEGIN_APPLY_TRX maxFee"))
+		trxType = pbeth.TransactionTrace_Type(FromInt32(chunks[11], "BEGIN_APPLY_TRX trxType"))
+	}
+
 	ctx.currentTraceLogCount = 0
 	ctx.currentTrace = &pbeth.TransactionTrace{
-		Index:    uint32(len(ctx.transactionTraces)),
-		Hash:     hash,
-		Value:    value,
-		V:        v,
-		R:        types.NormalizeSignaturePoint(r),
-		S:        types.NormalizeSignaturePoint(s),
-		GasLimit: gas,
-		GasPrice: gasPrice,
-		Nonce:    nonce,
-		Input:    input,
+		Index:        uint32(len(ctx.transactionTraces)),
+		Hash:         hash,
+		Value:        value,
+		V:            v,
+		R:            types.NormalizeSignaturePoint(r),
+		S:            types.NormalizeSignaturePoint(s),
+		GasLimit:     gas,
+		GasPrice:     gasPrice,
+		Nonce:        nonce,
+		Input:        input,
+		Type:         trxType,
+		MaxFeePerGas: maxFee,
 	}
 
 	// A contract creation will have the `to` being null. In such case,
@@ -1189,15 +1199,23 @@ func (ctx *parseCtx) getCall(indexString string, tag string) (*pbeth.Call, error
 	return ctx.currentTrace.Calls[idx-1], nil
 }
 
-// splitInChunks split the line in `count` chunks and returns the slice `chunks[1:count]` (so exclusive end), but verifies
-// that there are only exactly `count` chunks, and nothing more.
-func SplitInChunks(line string, count int) ([]string, error) {
+// splitInChunks split the line in chunks and returns the slice `chunks[1:]`, but verifies
+// that there are only exactly one of `validCounts` number of chunks
+func SplitInChunks(line string, validCounts ...int) ([]string, error) {
 	chunks := strings.SplitN(line, " ", -1)
-	if len(chunks) != count {
-		return nil, fmt.Errorf("%d fields required but found %d fields for line %q", count, len(chunks), line)
+
+	var valid bool
+	for _, c := range validCounts {
+		if len(chunks) == c {
+			valid = true
+			break
+		}
+	}
+	if !valid {
+		return nil, fmt.Errorf("one of %v fields required but found %d fields for line %q", validCounts, len(chunks), line)
 	}
 
-	return chunks[1:count], nil
+	return chunks[1:], nil
 }
 
 // splitInBoundedChunks split the line in `count` chunks and returns the slice `chunks[1:count]` (so exclusive end),

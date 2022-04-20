@@ -19,22 +19,23 @@ import (
 )
 
 type BlockHeader struct {
-	Hash        eth.Hash    `json:"hash"`
-	ParentHash  eth.Hash    `json:"parentHash"`
-	UncleHash   eth.Hash    `json:"sha3Uncles"`
-	Coinbase    eth.Address `json:"miner"`
-	Root        eth.Hash    `json:"stateRoot"`
-	TxHash      eth.Hash    `json:"transactionsRoot"`
-	ReceiptHash eth.Hash    `json:"receiptsRoot"`
-	Bloom       eth.Hex     `json:"logsBloom"`
-	Difficulty  eth.Hex     `json:"difficulty"`
-	Number      eth.Uint64  `json:"number"`
-	GasLimit    eth.Uint64  `json:"gasLimit"`
-	GasUsed     eth.Uint64  `json:"gasUsed"`
-	Time        eth.Uint64  `json:"timestamp"`
-	Extra       eth.Hex     `json:"extraData"`
-	MixDigest   eth.Hash    `json:"mixHash"`
-	Nonce       eth.Uint64  `json:"nonce"`
+	Hash          eth.Hash    `json:"hash"`
+	ParentHash    eth.Hash    `json:"parentHash"`
+	UncleHash     eth.Hash    `json:"sha3Uncles"`
+	Coinbase      eth.Address `json:"miner"`
+	Root          eth.Hash    `json:"stateRoot"`
+	TxHash        eth.Hash    `json:"transactionsRoot"`
+	ReceiptHash   eth.Hash    `json:"receiptsRoot"`
+	Bloom         eth.Hex     `json:"logsBloom"`
+	Difficulty    eth.Hex     `json:"difficulty"`
+	Number        eth.Uint64  `json:"number"`
+	GasLimit      eth.Uint64  `json:"gasLimit"`
+	GasUsed       eth.Uint64  `json:"gasUsed"`
+	Time          eth.Uint64  `json:"timestamp"`
+	Extra         eth.Hex     `json:"extraData"`
+	MixDigest     eth.Hash    `json:"mixHash"`
+	Nonce         eth.Uint64  `json:"nonce"`
+	BaseFeePerGas eth.Hex     `json:"baseFeePerGas"`
 }
 
 type Log struct {
