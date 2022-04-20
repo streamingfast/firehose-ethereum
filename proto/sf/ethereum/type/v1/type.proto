@@ -91,6 +91,7 @@ message BlockHeader {
   uint64 nonce = 15;
   bytes hash = 16;
   BigInt total_difficulty = 17; /* geth: totalDifficulty, sum of all previous blocks difficulty, looked up in DB on rpc call */
+  BigInt base_fee_per_gas = 18; /* geth: only set after EIP-1559 */
 }
 
 message BigInt {
@@ -161,6 +162,15 @@ message TransactionTrace {
   bytes r = 8;
   bytes s = 9;
   uint64 gas_used = 10;
+  BigInt max_fee_per_gas = 11;
+  Type type = 12;
+
+  enum Type {
+    TRX_TYPE_UNKNOWN = 0;
+    TRX_TYPE_LEGACY = 1;
+    TRX_TYPE_ACCESS_LIST = 2;
+    TRX_TYPE_DYNAMIC_FEE = 3;
+  }
 
   // meta
   uint32 index = 20;
