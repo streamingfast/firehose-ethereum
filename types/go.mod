@@ -3,7 +3,6 @@ module github.com/streamingfast/sf-ethereum/types
 go 1.17
 
 require (
-	github.com/golang/protobuf v1.5.2
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/streamingfast/bstream v0.0.2-0.20220419143921-1612cfa6b659
 	github.com/streamingfast/eth-go v0.0.0-20220421042603-ebe2c94fcc92
@@ -37,6 +36,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
