@@ -17,10 +17,10 @@ package types
 import (
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	"google.golang.org/protobuf/proto"
 )
 
 func BlockDecoder(blk *bstream.Block) (interface{}, error) {

@@ -24,8 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	tspb "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/mitchellh/go-testing-interface"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/eth-go"
@@ -36,6 +34,7 @@ import (
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var zlog, _ = logging.PackageLogger("sfeth", "github.com/streamingfast/sf-ethereum/types/testing")
@@ -70,12 +69,9 @@ func Block(t testing.T, blkHash string, components ...interface{}) *pbeth.Block 
 	blockTime, err := time.Parse(time.RFC3339, "2006-01-02T15:04:05.5Z")
 	require.NoError(t, err)
 
-	blockTimestamp, err := ptypes.TimestampProto(blockTime)
-	require.NoError(t, err)
-
 	pbblock.Header = &pbeth.BlockHeader{
 		ParentHash: toBytes(t, fmt.Sprintf("%08x%s", pbblock.Number-1, blkHash[8:])),
-		Timestamp:  blockTimestamp,
+		Timestamp:  timestamppb.New(blockTime),
 	}
 
 	for _, component := range components {
@@ -341,13 +337,8 @@ func Log(t testing.T, address address, components ...interface{}) *pbeth.Log {
 	return log
 }
 
-func ToTimestamp(t time.Time) *tspb.Timestamp {
-	el, err := ptypes.TimestampProto(t)
-	if err != nil {
-		panic(err)
-	}
-
-	return el
+func ToTimestamp(t time.Time) *timestamppb.Timestamp {
+	return timestamppb.New(t)
 }
 
 func ToBstreamBlock(t testing.T, block *pbeth.Block) *bstream.Block {

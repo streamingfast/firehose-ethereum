@@ -22,10 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/jsonpb"
+	"google.golang.org/protobuf/proto"
 )
 
 var b0 = big.NewInt(0)
@@ -62,12 +61,7 @@ func (b *Block) Num() uint64 {
 }
 
 func (b *Block) Time() (time.Time, error) {
-	timestamp, err := ptypes.Timestamp(b.Header.Timestamp)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("unable to turn google proto Timestamp into time.Time: %s", err)
-	}
-
-	return timestamp, nil
+	return b.Header.Timestamp.AsTime(), nil
 }
 
 func (b *Block) MustTime() time.Time {
