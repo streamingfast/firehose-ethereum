@@ -18,26 +18,10 @@ message Block {
   repeated BalanceChange balance_changes = 11;
   repeated CodeChange code_changes = 20;
 
-  // Wheter or not a filtering process was run on this block. The filtering process populated the
-  // `transaction_traces` according to the `filtering_include_filter_expr` and
-  // `filtering_exclude_filter_expr` CEL expressions. A transaction will be present in the `transaction_traces`
-  // array if it matched the `filtering_include_filter_expr` and did *NOT* match the `filtering_exclude_filter_expr`.
-  //
-  // Moreover, each matching call that brought the transaction to be in `transaction_traces`
-  // array will have a `filtering_matched` flag set on it to broadcast the fact that this call
-  // match the inclusion/exclusion list.
-  //
-  // This flag controls all `transaction_traces` elements on the Block structure and on
-  // substructures if present.
-  bool filtering_applied = 40;
 
-  // The CEL filter expression used to include transaction in `transaction_traces` array, works
-  // in combination with `filtering_exclude_filter_expr` value.
-  string filtering_include_filter_expr = 41;
-
-  // The CEL filter expression used to exclude transaction in `transaction_traces` array, works
-  // in combination with `filtering_include_filter_expr` value.
-  string filtering_exclude_filter_expr = 42;
+  bool filtering_applied = 40 [deprecated = true];
+  string filtering_include_filter_expr = 41 [deprecated = true];
+  string filtering_exclude_filter_expr = 42 [deprecated = true];
 }
 
 // HeaderOnlyBlock is a standard [Block] structure where all other fields are
@@ -178,6 +162,8 @@ message TransactionTrace {
   bytes from = 22;
   bytes return_data = 23;
   bytes public_key = 24;
+  uint64 begin_ordinal = 25;
+  uint64 end_ordinal = 26;
 
   TransactionTraceStatus status = 30;
   TransactionReceipt receipt = 31;
@@ -250,6 +236,8 @@ message Log {
   // In the case of `calls` case, for `call` where `stateReverted == true`,
   // the `blockIndex` value will always be 0.
   uint32 blockIndex = 6;
+
+  uint64 ordinal = 7;
 }
 
 message Call {
@@ -316,13 +304,13 @@ message Call {
   // status `EXECUTED`
   bool state_reverted = 30;
 
+  uint64 begin_ordinal = 31;
+  uint64 end_ordinal = 32;
+
   repeated ERC20BalanceChange erc20_balance_changes = 50;
   repeated ERC20TransferEvent erc20_transfer_events = 51;
 
-  // Whether this call trace was a successful match, present only when filtering was applied on block. This
-  // will be `true` if the Block `filtering_applied` is `true`, if the include CEL filter matched and
-  // if the exclude CEL filter did NOT match.
-  bool filtering_matched = 60;
+  bool filtering_matched = 60 [deprecated = true];
 }
 
 message ERC20BalanceChange {
@@ -351,6 +339,8 @@ message StorageChange {
   bytes key = 2;
   bytes old_value = 3;
   bytes new_value = 4;
+
+  uint64 ordinal = 5;
 }
 
 message BalanceChange {
@@ -383,12 +373,15 @@ message BalanceChange {
     // Used on chain(s) where some Ether burning happens
     REASON_BURN = 15;
   }
+
+  uint64 ordinal = 5;
 }
 
 message NonceChange {
   bytes address = 1;
   uint64 old_value = 2;
   uint64 new_value = 3;
+  uint64 ordinal = 4;
 }
 
 message CodeChange {
@@ -397,6 +390,8 @@ message CodeChange {
   bytes old_code = 3;
   bytes new_hash = 4;
   bytes new_code = 5;
+
+  uint64 ordinal = 6;
 }
 
 // The gas change model represents the reason why some gas cost has occurred.
@@ -440,6 +435,8 @@ message GasChange {
     // Added in Berlin fork (Geth 1.10+)
     REASON_STATE_COLD_ACCESS = 20;
   }
+
+  uint64 ordinal = 4;
 }
 
 // Gas events are emitted to faciliate gas tracking avoid the execution
@@ -447,19 +444,13 @@ message GasChange {
 //
 // We currently have events for tracing of gas amount before and after
 // each child call.
-message GasEvent {
-  Id id = 1;
-  uint64 gas = 2;
-  uint64 linked_call_index = 3;
 
-  // Obtain all gas change reasons under deep mind repository:
-  //
-  // ```shell
-  // ack -ho 'GasEventID\(".*"\)' | grep -Eo '".*"' | sort | uniq
-  // ```
-  enum Id {
-    ID_UNKNOWN = 0;
-    ID_AFTER_CALL = 1;
-    ID_BEFORE_CALL = 2;
-  }
+// *FIXME* stepd remove ID, remove linked_call_index
+// keep gas, add ordinal
+message GasEvent {
+  reserved 1; // Deprecated: Id
+  uint64 gas = 2;
+  reserved 3; // Deprecated: linked_call_index
+
+  uint64 ordinal = 4;
 }
