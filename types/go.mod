@@ -6,7 +6,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/streamingfast/bstream v0.0.2-0.20220419143921-1612cfa6b659
-	github.com/streamingfast/eth-go v0.0.0-20220419161629-0c08380c1460
+	github.com/streamingfast/eth-go v0.0.0-20220421042603-ebe2c94fcc92
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424
 	github.com/streamingfast/pbgo v0.0.6-0.20220228185940-1bbaafec7d8a
