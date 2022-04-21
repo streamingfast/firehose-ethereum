@@ -19,13 +19,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/streamingfast/bstream"
 	"io"
 	"math/big"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
@@ -130,7 +130,7 @@ func (c *ConsoleReader) ReadBlock() (out *bstream.Block, err error) {
 		return nil, err
 	}
 
-	return types.BlockFromProto(v.(*pbeth.Block))
+	return v.(*bstream.Block), nil
 }
 
 func (c ConsoleReader) ReadTransaction() (trace *pbeth.TransactionTrace, err error) {
@@ -884,7 +884,7 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 
 // Formats
 // DMLOG END_BLOCK <NUM> <SIZE> { header: <BlockHeader>, uncles: []<BlockHeader> }
-func (ctx *parseCtx) readEndBlock(line string) (*pbeth.Block, error) {
+func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	if ctx.currentBlock == nil {
 		return nil, fmt.Errorf("no block started")
 	}
@@ -942,7 +942,8 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbeth.Block, error) {
 	ctx.currentBlock = nil
 	ctx.finalizing = false
 	ctx.stats.log()
-	return block, nil
+	types.NormalizeBlockInPlace(block)
+	return types.BlockFromProto(block)
 }
 
 // Formats

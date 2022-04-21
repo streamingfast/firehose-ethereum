@@ -43,6 +43,11 @@ func BlockDecoder(blk *bstream.Block) (interface{}, error) {
 		return nil, fmt.Errorf("unable to decode payload: %s", err)
 	}
 
+	NormalizeBlockInPlace(block)
+	return block, nil
+}
+
+func NormalizeBlockInPlace(block *pbeth.Block) {
 	// This whole BlockDecoder method is being called through the `bstream.Block.ToNative()`
 	// method. Hence, it's a great place to add temporary data normalization calls to backport
 	// some features that were not in all blocks yet (because we did not re-process all blocks
@@ -73,6 +78,4 @@ func BlockDecoder(blk *bstream.Block) (interface{}, error) {
 	// and as such, it must be invoked after the `PopulateStateReverted` has
 	// been executed.
 	block.PopulateLogBlockIndices()
-
-	return block, nil
 }
