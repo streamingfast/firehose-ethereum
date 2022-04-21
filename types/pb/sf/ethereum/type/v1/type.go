@@ -276,12 +276,3 @@ func MustGasChangeReasonFromString(reason string) GasChange_Reason {
 
 	return GasChange_Reason(enumID)
 }
-
-func MustGasEventIDFromString(reason string) GasEvent_Id {
-	enumID := GasEvent_Id_value["ID_"+strings.ToUpper(reason)]
-	if enumID == 0 {
-		panic(fmt.Errorf("receive unknown gas event id, received id string is %q", reason))
-	}
-
-	return GasEvent_Id(enumID)
-}
