@@ -60,8 +60,6 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().String("common-metering-plugin", "null://", "[COMMON] Metering plugin URI, see streamingfast/dmetering repository")
 	cmd.Flags().String("common-ratelimiter-plugin", "null://", "[COMMON] Rate Limiter plugin URI, see streamingfast/dauth repository")
 
-	//// Database connection strings
-
 	// System Behavior
 	cmd.Flags().Duration("common-system-shutdown-signal-delay", 0, "[COMMON] Add a delay between receiving SIGTERM signal and shutting down apps. Apps will respond negatively to /healthz during this period")
 
