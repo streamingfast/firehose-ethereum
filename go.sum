@@ -714,6 +714,10 @@ github.com/streamingfast/sf-ethereum/types v0.0.0-20220420202749-8c8c2d4fa7a6 h1
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220420202749-8c8c2d4fa7a6/go.mod h1:2cOH/h1rtP/dKlq0T/V3QZpWJA2UhSwFLB8M5pHZ55g=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220421042756-b9703bacd654 h1:qai5FIkV/Io0X/Kc1D+ogWf9n0QOsh8q2oHdYT8r0ZE=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220421042756-b9703bacd654/go.mod h1:CecX2nTg93B0xRBMwaDXR6dKIsLHwfK9PvXST0Nf9+w=
+github.com/streamingfast/sf-ethereum/types v0.0.0-20220421043401-f31393899d4d h1:2f9H67EFIp+dnLcCuy0vmGzHkCocCjU+hHuNK01unbo=
+github.com/streamingfast/sf-ethereum/types v0.0.0-20220421043401-f31393899d4d/go.mod h1:CecX2nTg93B0xRBMwaDXR6dKIsLHwfK9PvXST0Nf9+w=
+github.com/streamingfast/sf-ethereum/types v0.0.0-20220421043501-f50112a572b8 h1:egmddDVYkgpePXS7ux61oBEdzrb/WsiPmo8VF+PcLSI=
+github.com/streamingfast/sf-ethereum/types v0.0.0-20220421043501-f50112a572b8/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5 h1:lSAHWGm3adFOFE9dVtqnUHnqfto3XfdH1ICCt9YPjB0=
 github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5/go.mod h1:Kp4oyh3LEPEkBurdimDrWVRQbk3iFcrYzY/o/cM94Ik=
 github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAtyaTOgs=
