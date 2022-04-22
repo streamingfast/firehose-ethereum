@@ -6,6 +6,13 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+#### BREAKING CHANGES --requires reprocessing all merged block files--
+* Requires deepmind node (extractor) with instrumentation version *2.0*
+* Produced / consumed block protobuf payload version bumped 1 -> 2
+  * Fixed Gas Price on dynamic transactions (post-London-fork on ethereum mainnet)
+  * Added "Total Ordering" concept, 'Ordinal' field on all events within a block (trx begin/end, call, log, balance change, etc.)
+  * Added TotalDifficulty field to ethereum blocks
+
 ## v0.10.2
 
 * Removed `firehose-blocks-store-urls` flag (feature for using multiple stores now deprecated -> causes confusion and issues with block-caching), use `common-blocks-sture-url` instead.

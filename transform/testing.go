@@ -31,7 +31,7 @@ func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
 		PreviousId:     b.PreviousID(),
 		LibNum:         1,
 		PayloadKind:    pbbstream.Protocol_ETH,
-		PayloadVersion: 1,
+		PayloadVersion: 2,
 	}
 
 	protoCnt, err := proto.Marshal(b)

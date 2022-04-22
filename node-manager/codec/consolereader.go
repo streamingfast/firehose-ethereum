@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var BlockVersion = int32(1) //FIXME this should become 2
+var BlockVersion = int32(2)
 
 // ConsoleReader is what reads the `geth` output directly. It builds
 // up some LogEntry objects. See `LogReader to read those entries .
