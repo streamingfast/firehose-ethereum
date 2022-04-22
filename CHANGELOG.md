@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+#### Changed
+
+* Stop warning about no tracker being defined when calling 'bstream.Tracker.Get(ctx, bstream.NetworkLIBTarget)' in 'mindreader' and 'node'.
+
+* Removed 'blockmeta' mention when 'bstream.Tracker.Get(ctx, bstream.NetworkLIBTarget)' is called as it might not be backed by 'blockmeta' at all.
+
 ## v0.10.2
 
 #### Fixed

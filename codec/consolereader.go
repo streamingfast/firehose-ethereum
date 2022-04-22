@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/streamingfast/bstream"
 	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 	"go.uber.org/zap"
 )
@@ -106,8 +107,13 @@ type parseCtx struct {
 	stats         *parsingStats
 }
 
-func (c *ConsoleReader) Read() (out interface{}, err error) {
-	return c.next(readBlock)
+func (c *ConsoleReader) ReadBlock() (out *bstream.Block, err error) {
+	v, err := c.next(readBlock)
+	if err != nil {
+		return nil, err
+	}
+
+	return BlockFromProto(v.(*pbcodec.Block))
 }
 
 func (c ConsoleReader) ReadTransaction() (trace *pbcodec.TransactionTrace, err error) {

@@ -27,7 +27,6 @@ import (
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/sf-ethereum/codec"
-	pbcodec "github.com/streamingfast/sf-ethereum/pb/sf/ethereum/codec/v1"
 )
 
 func init() {
@@ -48,16 +47,8 @@ func init() {
 				if err != nil {
 					return nil, fmt.Errorf("initiating console reader: %w", err)
 				}
+
 				return r, nil
-			}
-
-			consoleReaderBlockTransformer := func(obj interface{}) (*bstream.Block, error) {
-				blk, ok := obj.(*pbcodec.Block)
-				if !ok {
-					return nil, fmt.Errorf("expected *pbcodec.Block, got %T", obj)
-				}
-
-				return codec.BlockFromProto(blk)
 			}
 
 			metricID := "mindreader-geth-node-stdin"
@@ -89,7 +80,6 @@ func init() {
 				OneblockSuffix:               viper.GetString("mindreader-geth-node-oneblock-suffix"),
 			}, &nodeMindreaderStdinApp.Modules{
 				ConsoleReaderFactory:       consoleReaderFactory,
-				ConsoleReaderTransformer:   consoleReaderBlockTransformer,
 				MetricsAndReadinessManager: metricsAndReadinessManager,
 				Tracker:                    tracker,
 			}, appLogger), nil

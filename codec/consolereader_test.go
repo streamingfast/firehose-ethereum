@@ -76,7 +76,15 @@ func TestParseFromFile(t *testing.T) {
 			first := true
 
 			for {
-				var reader ObjectReader = cr.Read
+				var reader ObjectReader = func() (interface{}, error) {
+					out, err := cr.ReadBlock()
+					if err != nil {
+						return nil, err
+					}
+
+					return out.ToProtocol().(*pbcodec.Block), nil
+				}
+
 				if test.readTransaction {
 					reader = func() (interface{}, error) {
 						return cr.ReadTransaction()
@@ -138,16 +146,17 @@ func TestGeneratePBBlocks(t *testing.T) {
 	cr := testFileConsoleReader(t, "testdata/deep-mind.dmlog")
 
 	for {
-		out, err := cr.Read()
-		if out != nil && out.(*pbcodec.Block) != nil {
-			dethBlock := out.(*pbcodec.Block)
-			bstreamBlock, err := BlockFromProto(dethBlock)
+		out, err := cr.ReadBlock()
+		if out != nil {
+			block := out.ToProtocol().(*pbcodec.Block)
+
+			bstreamBlock, err := BlockFromProto(block)
 			require.NoError(t, err)
 
 			pbBlock, err := bstreamBlock.ToProto()
 			require.NoError(t, err)
 
-			outputFile, err := os.Create(fmt.Sprintf("testdata/pbblocks/battlefield-block.%d.pb", dethBlock.Number))
+			outputFile, err := os.Create(fmt.Sprintf("testdata/pbblocks/battlefield-block.%d.pb", block.Number))
 			require.NoError(t, err)
 
 			bytes, err := proto.Marshal(pbBlock)
@@ -170,12 +179,12 @@ func TestGeneratePBBlocks(t *testing.T) {
 func consumeBlock(t *testing.T, reader *ConsoleReader) *pbcodec.Block {
 	t.Helper()
 
-	block, err := reader.Read()
-	if block == nil || block.(*pbcodec.Block) == nil {
+	block, err := reader.ReadBlock()
+	if block == nil {
 		require.Fail(t, err.Error())
 	}
 
-	return block.(*pbcodec.Block)
+	return block.ToProtocol().(*pbcodec.Block)
 }
 
 func consumeSingleBlock(t *testing.T, reader *ConsoleReader) *pbcodec.Block {
@@ -188,7 +197,7 @@ func consumeSingleBlock(t *testing.T, reader *ConsoleReader) *pbcodec.Block {
 }
 
 func consumeToEOF(t *testing.T, reader *ConsoleReader) {
-	block, err := reader.Read()
+	block, err := reader.ReadBlock()
 	require.Nil(t, block)
 	require.Equal(t, err, io.EOF)
 
