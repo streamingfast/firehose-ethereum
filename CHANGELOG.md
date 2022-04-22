@@ -8,6 +8,8 @@ for instructions to keep up to date.
 
 #### Changed
 
+* Added check in `console reader` for upcoming breaking deep mind version bump.
+
 * Stop warning about no tracker being defined when calling 'bstream.Tracker.Get(ctx, bstream.NetworkLIBTarget)' in 'mindreader' and 'node'.
 
 * Removed 'blockmeta' mention when 'bstream.Tracker.Get(ctx, bstream.NetworkLIBTarget)' is called as it might not be backed by 'blockmeta' at all.

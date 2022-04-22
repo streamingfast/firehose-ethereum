@@ -260,6 +260,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		case strings.HasPrefix(line, "TRX_DISCARDED"):
 			ctx.stats.inc("TRX_DISCARDED")
 			continue
+
+		case strings.HasPrefix(line, "INIT"):
+			return nil, ctx.readInit(line)
+
 		default:
 			return nil, fmt.Errorf("unsupported log line: %q", line)
 		}
@@ -312,6 +316,21 @@ func (ctx *parseCtx) popCallIndexReturnParent() (int32, uint32, error) {
 		return 0, 0, nil
 	}
 	return ctx.evmCallStackIndexes[l-2], uint32(l) - 1, nil
+}
+
+// Formats
+// DMLOG INIT <DM_VERSION_MAJOR:DM_VERSION_MINOR> <VARIANT> <NODE VERSION>
+func (ctx *parseCtx) readInit(line string) error {
+	chunks, err := SplitInBoundedChunks(line, 4)
+	if err != nil {
+		return fmt.Errorf("split: %s", err)
+	}
+
+	deepMindVersion := chunks[0]
+	variant := chunks[1]
+	nodeVersion := chunks[2]
+
+	return fmt.Errorf("your 'sfeth' binary is incompatible with this instrumented node version %q (variant %s), you must use version v0.11.0+ to decode log lines for deep mind version %s", nodeVersion, variant, deepMindVersion)
 }
 
 // Formats

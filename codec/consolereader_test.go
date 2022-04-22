@@ -45,21 +45,19 @@ type ObjectReader func() (interface{}, error)
 func TestParseFromFile(t *testing.T) {
 	tests := []struct {
 		deepMindFile     string
+		expectedErr      error
 		expectedPanicErr error
 		readTransaction  bool
 	}{
-		{"testdata/deep-mind.dmlog", nil, false},
-		{"testdata/normalize-r-and-s-curve-points.dmlog", nil, false},
-		{"testdata/block_mining_rewards.dmlog", nil, false},
-		{"testdata/block_unknown_balance_change.dmlog", errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},
-		{"testdata/read_transaction.dmlog", nil, true},
-		{"testdata/polygon_calls_after_finalize.dmlog", nil, false},
-		{"testdata/polygon_add_log_0.dmlog", nil, false},
-		{
-			deepMindFile:     "testdata/lachesis.dmlog",
-			expectedPanicErr: nil,
-			readTransaction:  false,
-		},
+		{"testdata/deep-mind.dmlog", nil, nil, false},
+		{"testdata/fail_on_deep_mind_version_2.dmlog", errors.New(`your 'sfeth' binary is incompatible with this instrumented node version "1.10.17-dm-stable (deadbee)" (variant geth), you must use version v0.11.0+ to decode log lines for deep mind version 2.0`), nil, false},
+		{"testdata/normalize-r-and-s-curve-points.dmlog", nil, nil, false},
+		{"testdata/block_mining_rewards.dmlog", nil, nil, false},
+		{"testdata/block_unknown_balance_change.dmlog", nil, errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},
+		{"testdata/read_transaction.dmlog", nil, nil, true},
+		{"testdata/polygon_calls_after_finalize.dmlog", nil, nil, false},
+		{"testdata/polygon_add_log_0.dmlog", nil, nil, false},
+		{"testdata/lachesis.dmlog", nil, nil, false},
 	}
 
 	for _, test := range tests {
@@ -71,26 +69,27 @@ func TestParseFromFile(t *testing.T) {
 			}()
 
 			cr := testFileConsoleReader(t, test.deepMindFile)
+
+			var reader ObjectReader = func() (interface{}, error) {
+				out, err := cr.ReadBlock()
+				if err != nil {
+					return nil, err
+				}
+
+				return out.ToProtocol().(*pbcodec.Block), nil
+			}
+
+			if test.readTransaction {
+				reader = func() (interface{}, error) {
+					return cr.ReadTransaction()
+				}
+			}
+
 			buf := &bytes.Buffer{}
 			buf.Write([]byte("["))
 			first := true
 
 			for {
-				var reader ObjectReader = func() (interface{}, error) {
-					out, err := cr.ReadBlock()
-					if err != nil {
-						return nil, err
-					}
-
-					return out.ToProtocol().(*pbcodec.Block), nil
-				}
-
-				if test.readTransaction {
-					reader = func() (interface{}, error) {
-						return cr.ReadTransaction()
-					}
-				}
-
 				out, err := reader()
 				if v, ok := out.(proto.Message); ok && !isNil(v) {
 					if !first {
@@ -112,7 +111,12 @@ func TestParseFromFile(t *testing.T) {
 					buf.Write([]byte("\n"))
 				}
 
-				require.NoError(t, err)
+				if test.expectedErr == nil {
+					require.NoError(t, err)
+				} else if err != nil {
+					require.Equal(t, test.expectedErr, err)
+					return
+				}
 			}
 			buf.Write([]byte("]"))
 
