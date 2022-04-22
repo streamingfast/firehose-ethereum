@@ -9,8 +9,11 @@
   "r": "9b7b4ad21ac016e1766749e203d4776d351ac9c7d56cdd9b3c2d5b4f940c1f7e",
   "s": "5b08a942dbc15ff47f7f40d4519fe2e20948579b0baebaca66a7b651f6f483ed",
   "gasUsed": "23358",
+  "maxFeePerGas": "",
   "hash": "74b9554595faea99f11f5310c086acaec4686ef94b30466f966d67071b228b65",
   "from": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
+  "beginOrdinal": "1",
+  "endOrdinal": "11",
   "receipt": {
     "cumulativeGasUsed": "23358",
     "logsBloom": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
@@ -32,46 +35,54 @@
           "address": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
           "oldValue": "0118bb1a9c901f98f0",
           "newValue": "ab989816a6c000",
-          "reason": "REASON_GAS_BUY"
+          "reason": "REASON_GAS_BUY",
+          "ordinal": "2"
         },
         {
           "address": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
           "oldValue": "01180f82047978d8f0",
           "newValue": "",
-          "reason": "REASON_TRANSFER"
+          "reason": "REASON_TRANSFER",
+          "ordinal": "6"
         },
         {
           "address": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
           "oldValue": "01180f82047978d8f0",
           "newValue": "a772652e04a800",
-          "reason": "REASON_GAS_REFUND"
+          "reason": "REASON_GAS_REFUND",
+          "ordinal": "9"
         },
         {
           "address": "69e43fdaf4106e88d2d48312ba56a90828ae3728",
           "oldValue": "071aba99f8887bae88fc",
           "newValue": "042632e8a21800",
-          "reason": "REASON_REWARD_TRANSACTION_FEE"
+          "reason": "REASON_REWARD_TRANSACTION_FEE",
+          "ordinal": "10"
         }
       ],
       "nonceChanges": [
         {
           "address": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
           "oldValue": "110",
-          "newValue": "111"
+          "newValue": "111",
+          "ordinal": "4"
         }
       ],
       "gasChanges": [
         {
           "oldValue": "966000",
           "newValue": "943372",
-          "reason": "REASON_INTRINSIC_GAS"
+          "reason": "REASON_INTRINSIC_GAS",
+          "ordinal": "3"
         },
         {
           "oldValue": "942840",
           "newValue": "942819",
-          "reason": "REASON_CALL_DATA_COPY"
+          "reason": "REASON_CALL_DATA_COPY",
+          "ordinal": "7"
         }
-      ]
+      ],
+      "endOrdinal": "8"
     }
   ]
 }

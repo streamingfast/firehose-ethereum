@@ -33,8 +33,8 @@ import (
 	"github.com/streamingfast/logging"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/test-go/testify/assert"
 )
 
 func init() {
@@ -51,7 +51,6 @@ func TestParseFromFile(t *testing.T) {
 		readTransaction  bool
 	}{
 		{"testdata/deep-mind.dmlog", nil, nil, false},
-		{"testdata/fail_on_deep_mind_version_2.dmlog", errors.New(`your 'sfeth' binary is incompatible with this instrumented node version "1.10.17-dm-stable (deadbee)" (variant geth), you must use version v0.11.0+ to decode log lines for deep mind version 2.0`), nil, false},
 		{"testdata/normalize-r-and-s-curve-points.dmlog", nil, nil, false},
 		{"testdata/block_mining_rewards.dmlog", nil, nil, false},
 		{"testdata/block_unknown_balance_change.dmlog", nil, errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},
@@ -129,7 +128,7 @@ func TestParseFromFile(t *testing.T) {
 			cnt, err := ioutil.ReadFile(goldenFile)
 			require.NoError(t, err)
 
-			if !assert.Equal(t, string(cnt), buf.String()) {
+			if !assert.JSONEq(t, string(cnt), buf.String()) {
 				t.Error("previous diff:\n" + unifiedDiff(t, cnt, buf.Bytes()))
 			}
 		})
@@ -239,26 +238,6 @@ func testReaderConsoleReader(t *testing.T, lines chan string, closer func()) *Co
 	}
 
 	return l
-}
-
-func wrapIntoTrxAndBlock(logLines ...string) string {
-	var lines []string
-
-	lines = append(lines,
-		"DMLOG BEGIN_BLOCK 1",
-		"DMLOG BEGIN_APPLY_TRX 00 0000000000000000000000000000000000000002 0 0 0 0 1 1 0 .",
-		"DMLOG TRX_FROM 0000000000000000000000000000000000000001",
-	)
-
-	lines = append(lines, logLines...)
-
-	lines = append(lines,
-		"DMLOG END_APPLY_TRX 0 00 0 00 []",
-		"DMLOG FINALIZE_BLOCK 1",
-		`DMLOG END_BLOCK 1 75 {"header":{"parentHash":"0x516c52b54a987de8c84b75473121289016815af11be0de4c3866782aad5da0de","sha3Uncles":"0x329e27a3918e236ec90f316843571e8a63f7856b0bce3245dcbe29bc24ce8612","miner":"0x0000000000000000000000000000000000000000","stateRoot":"0x859e6de662a49383a9ffca14c34cf9a9ba29ed5bb104dce462096f00dcda3bb7","transactionsRoot":"0x8e37940b3bbbedca3d683a3b98e6521fa98d3339afafaf4adb2bc811c9a351bf","receiptsRoot":"0x505ea764be1086185661f20548c503e9a313b506c53f87d02ebf0a5314e82605","logsBloom":"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000008000000000000","difficulty":"0x0","number":"0x1","gasUsed":"0x0","gasLimit":"0x0","timestamp":"0x5d43a215","extraData":""}}`,
-	)
-
-	return strings.Join(lines, "\n")
 }
 
 func TestValueParsing(t *testing.T) {

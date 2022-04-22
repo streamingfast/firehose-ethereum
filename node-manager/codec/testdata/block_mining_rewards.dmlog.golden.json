@@ -66,19 +66,22 @@
       "address": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
       "oldValue": "1fa95450485cef7730f9",
       "newValue": "1fa95b40a3b6c32930f9",
-      "reason": "REASON_REWARD_MINE_UNCLE"
+      "reason": "REASON_REWARD_MINE_UNCLE",
+      "ordinal": "1"
     },
     {
       "address": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
       "oldValue": "1fa95b40a3b6c32930f9",
       "newValue": "1fa96230ff1096db30f9",
-      "reason": "REASON_REWARD_MINE_UNCLE"
+      "reason": "REASON_REWARD_MINE_UNCLE",
+      "ordinal": "2"
     },
     {
       "address": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
       "oldValue": "1fa96230ff1096db30f9",
       "newValue": "1fa97fae834e5a8fb0f9",
-      "reason": "REASON_REWARD_MINE_BLOCK"
+      "reason": "REASON_REWARD_MINE_BLOCK",
+      "ordinal": "3"
     }
   ]
 }

@@ -56,8 +56,11 @@
       "r": "f708ba85ef44e85fb66925c2c92edf1b2e8dd12052d9ee09fd3dc105f4aa6471",
       "s": "4cc9fd2858c8f47401702a2e80ab80a07e480731206f57d7ae6de4005745b20c",
       "gasUsed": "23300",
+      "maxFeePerGas": "",
       "hash": "b80f4bdda9d2222e5bcb960eed26fa72025835b0eceed370d4def45fd3f2bf72",
       "from": "04a174104351a8630ed69ae433d6c7b092210c56",
+      "beginOrdinal": "1",
+      "endOrdinal": "10",
       "status": "SUCCEEDED",
       "receipt": {
         "cumulativeGasUsed": "23300",
@@ -76,41 +79,48 @@
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "040ef475fb2d4b537000",
               "newValue": "040ef427d24b22447000",
-              "reason": "REASON_GAS_BUY"
+              "reason": "REASON_GAS_BUY",
+              "ordinal": "2"
             },
             {
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "040ef427d24b22447000",
               "newValue": "040ee6471b977ae07000",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "6"
             },
             {
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "040ee6471b977ae07000",
               "newValue": "040ef427d24b22447000",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "7"
             },
             {
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "040ef427d24b22447000",
               "newValue": "040ef44c97904bb15000",
-              "reason": "REASON_GAS_REFUND"
+              "reason": "REASON_GAS_REFUND",
+              "ordinal": "9"
             }
           ],
           "nonceChanges": [
             {
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "2",
-              "newValue": "3"
+              "newValue": "3",
+              "ordinal": "4"
             }
           ],
           "gasChanges": [
             {
               "oldValue": "44000",
               "newValue": "23000",
-              "reason": "REASON_INTRINSIC_GAS"
+              "reason": "REASON_INTRINSIC_GAS",
+              "ordinal": "3"
             }
-          ]
+          ],
+          "endOrdinal": "8"
         }
       ]
     }
@@ -175,8 +185,11 @@
       "r": "35d1d0edf44af952e7759f5b278bc0cb3cbaf897b35267ebb744205dfbbeb60f",
       "s": "06ed1fbf02475e15c17623bb09fe1193f43780a6752394f4c888fedee235bb79",
       "gasUsed": "23287",
+      "maxFeePerGas": "",
       "hash": "d991f73603f8c257cab8dde1797006c389ce52ecb6a4c99ba8d1de94e16b7031",
       "from": "d6a37423be930019b8cfea57be049329f3119a3d",
+      "beginOrdinal": "11",
+      "endOrdinal": "20",
       "status": "SUCCEEDED",
       "receipt": {
         "cumulativeGasUsed": "23287",
@@ -196,41 +209,48 @@
               "address": "d6a37423be930019b8cfea57be049329f3119a3d",
               "oldValue": "047a7f6a9bb2e1f9ac7e8106",
               "newValue": "047a7f6a9b68469628360106",
-              "reason": "REASON_GAS_BUY"
+              "reason": "REASON_GAS_BUY",
+              "ordinal": "12"
             },
             {
               "address": "d6a37423be930019b8cfea57be049329f3119a3d",
               "oldValue": "047a7f6a9b68469628360106",
               "newValue": "047a7f652fa0e868c5260106",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "16"
             },
             {
               "address": "617734fa3995c9af51abaab83771f3a035ca2d9c",
               "oldValue": "06c6f7bcd40fe000",
               "newValue": "05728e55ea371fe000",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "17"
             },
             {
               "address": "d6a37423be930019b8cfea57be049329f3119a3d",
               "oldValue": "047a7f652fa0e868c5260106",
               "newValue": "047a7f652fc22618affd4906",
-              "reason": "REASON_GAS_REFUND"
+              "reason": "REASON_GAS_REFUND",
+              "ordinal": "19"
             }
           ],
           "nonceChanges": [
             {
               "address": "d6a37423be930019b8cfea57be049329f3119a3d",
               "oldValue": "1683",
-              "newValue": "1684"
+              "newValue": "1684",
+              "ordinal": "14"
             }
           ],
           "gasChanges": [
             {
               "oldValue": "42000",
               "newValue": "20792",
-              "reason": "REASON_INTRINSIC_GAS"
+              "reason": "REASON_INTRINSIC_GAS",
+              "ordinal": "13"
             }
-          ]
+          ],
+          "endOrdinal": "18"
         }
       ]
     }
@@ -366,8 +386,11 @@
       "r": "730a74ec20194dded155f46a37592a33c3149bdfb8577751d3d358779e2f45ce",
       "s": "13f8871daf5e894623cca2e8febc87028fcbb8ca4286fb37d27717ab9018ef10",
       "gasUsed": "23300",
+      "maxFeePerGas": "",
       "hash": "bc1b84d069c55f7016fcf3d5f29fe619dffe87ae4ab3f8c31abe03ef709614da",
       "from": "04a174104351a8630ed69ae433d6c7b092210c56",
+      "beginOrdinal": "23",
+      "endOrdinal": "32",
       "status": "SUCCEEDED",
       "receipt": {
         "cumulativeGasUsed": "23300",
@@ -386,41 +409,48 @@
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "040ef44c97904bb15000",
               "newValue": "040ef3fe6eae22a25000",
-              "reason": "REASON_GAS_BUY"
+              "reason": "REASON_GAS_BUY",
+              "ordinal": "24"
             },
             {
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "040ef3fe6eae22a25000",
               "newValue": "040e69374ba998ba5000",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "28"
             },
             {
               "address": "2e58d4ecac1816b2d9cf5829699e5e5f15c80455",
               "oldValue": "a688906bd8b00000",
               "newValue": "01314fb37062980000",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "29"
             },
             {
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "040e69374ba998ba5000",
               "newValue": "040e695c10eec2273000",
-              "reason": "REASON_GAS_REFUND"
+              "reason": "REASON_GAS_REFUND",
+              "ordinal": "31"
             }
           ],
           "nonceChanges": [
             {
               "address": "04a174104351a8630ed69ae433d6c7b092210c56",
               "oldValue": "3",
-              "newValue": "4"
+              "newValue": "4",
+              "ordinal": "26"
             }
           ],
           "gasChanges": [
             {
               "oldValue": "44000",
               "newValue": "23000",
-              "reason": "REASON_INTRINSIC_GAS"
+              "reason": "REASON_INTRINSIC_GAS",
+              "ordinal": "25"
             }
-          ]
+          ],
+          "endOrdinal": "30"
         }
       ]
     }

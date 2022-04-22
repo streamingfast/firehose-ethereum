@@ -32,6 +32,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var BlockVersion = int32(1) //FIXME this should become 2
+
 // ConsoleReader is what reads the `geth` output directly. It builds
 // up some LogEntry objects. See `LogReader to read those entries .
 type ConsoleReader struct {
@@ -114,6 +116,11 @@ type parseCtx struct {
 	blockStoreURL string
 	stats         *parsingStats
 
+	dmVersion   string
+	nodeVersion string
+	nodeVariant string
+	validated   bool
+
 	logger *zap.Logger
 }
 
@@ -154,6 +161,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 
 		// Order conditions based (approximately) on those that appear more often
 		switch {
+		case strings.HasPrefix(line, "INIT"):
+			ctx.stats.inc("INIT")
+			err = ctx.readInit(line)
+
 		case strings.HasPrefix(line, "SUICIDE_CHANGE"):
 			ctx.stats.inc("SUICIDE_CHANGE")
 			err = ctx.readSuicideChange(line)
@@ -329,23 +340,12 @@ func (ctx *parseCtx) popCallIndexReturnParent() (int32, uint32, error) {
 }
 
 // Formats
-// DMLOG INIT <DM_VERSION_MAJOR:DM_VERSION_MINOR> <VARIANT> <NODE VERSION>
-func (ctx *parseCtx) readInit(line string) error {
-	chunks, err := SplitInBoundedChunks(line, 4)
-	if err != nil {
-		return fmt.Errorf("split: %s", err)
-	}
-
-	deepMindVersion := chunks[0]
-	variant := chunks[1]
-	nodeVersion := chunks[2]
-
-	return fmt.Errorf("your 'sfeth' binary is incompatible with this instrumented node version %q (variant %s), you must use version v0.11.0+ to decode log lines for deep mind version %s", nodeVersion, variant, deepMindVersion)
-}
-
-// Formats
 // DMLOG BEGIN_BLOCK <NUM>
 func (ctx *parseCtx) readBeginBlock(line string) error {
+	if err := ctx.validateVersion(); err != nil {
+		return fmt.Errorf("begin block received without valid version: %w", err)
+	}
+
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
@@ -363,22 +363,23 @@ func (ctx *parseCtx) readBeginBlock(line string) error {
 	ctx.stats = newParsingStats(ctx.logger, blockNum)
 	ctx.currentBlock = &pbeth.Block{
 		Number: blockNum,
-		Ver:    1,
+		Ver:    BlockVersion,
 	}
 
 	return nil
 }
 
 // Formats
-// DMLOG BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input>
-// DMLOG BEGIN_APPLY_TRX   deff 0bfa f48b2ed67dfdc54fbdb0e54045f40b260f5dcc51204f391c05709941b08903a8 3aee993d747b3390a92c79ecbe3eae65c515cfa3535d0af3743e60c7b3c27456 93999999 01 33 8ee478da000000000000000000000000a63e668919f50a591f5a23fb77881a347d10c0810000000000000000000000000000000000000000000000000000000000003003
+// DMLOG BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <MAX_FEE> <TRX_TYPE> <BEGIN_ORDINAL>
+
+// DMLOG BEGIN_APPLY_TRX 2becdee3b9ce9dd9a7274b8f6881e8e8d119ab046502ea90688773ef545731c7 929bc44bbd41ca0e621dc50f7c7e3204ce026258 . 0bf9 2b0d6434d98be6858c367710fff02ed69b86c0b1188a737d3ca55507f363928c 691797966e89cbb83dd45c2b6685ca1dc3734ee0c58ae8ffd935c9823b051e9f 300000 0ba43b7400 58 41c0e1b5 . 0 1
 
 func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	if ctx.currentTrace != nil {
 		return fmt.Errorf("received when trx already begun")
 	}
 
-	chunks, err := SplitInChunks(line, 11, 13)
+	chunks, err := SplitInChunks(line, 14)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -397,14 +398,9 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	gasPrice := pbeth.BigIntFromBytes(FromHex(chunks[7], "BEGIN_APPLY_TRX gasPrice"))
 	nonce := FromUint64(chunks[8], "BEGIN_APPLY_TRX nonce")
 	input := FromHex(chunks[9], "BEGIN_APPLY_TRX input")
-
-	// geth london fork only
-	var maxFee *pbeth.BigInt
-	var trxType pbeth.TransactionTrace_Type //default: unknown
-	if len(chunks) == 13 {
-		maxFee = pbeth.BigIntFromBytes(FromHex(chunks[10], "BEGIN_APPLY_TRX maxFee"))
-		trxType = pbeth.TransactionTrace_Type(FromInt32(chunks[11], "BEGIN_APPLY_TRX trxType"))
-	}
+	maxFee := pbeth.BigIntFromBytes(FromHex(chunks[10], "BEGIN_APPLY_TRX maxFee"))
+	trxType := pbeth.TransactionTrace_Type(FromInt32(chunks[11], "BEGIN_APPLY_TRX trxType"))
+	ordinal := FromUint64(chunks[12], "BEGIN_APPLY_TRX ordinal@12")
 
 	ctx.currentTraceLogCount = 0
 	ctx.currentTrace = &pbeth.TransactionTrace{
@@ -420,6 +416,7 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 		Input:        input,
 		Type:         trxType,
 		MaxFeePerGas: maxFee,
+		BeginOrdinal: ordinal,
 	}
 
 	// A contract creation will have the `to` being null. In such case,
@@ -441,13 +438,13 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 }
 
 // Formats
-// DMLOG EVM_RUN_CALL CALL 4
+// DMLOG EVM_RUN_CALL CALL 4 6
 func (ctx *parseCtx) readEVMRunCall(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
 	}
 
-	chunks, err := SplitInChunks(line, 3)
+	chunks, err := SplitInChunks(line, 4)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -459,6 +456,7 @@ func (ctx *parseCtx) readEVMRunCall(line string) error {
 	}
 
 	index := FromInt32(chunks[1], "EVM_RUN_CALL index") //4
+	ordinal := FromUint64(chunks[2], "EVM_RUN_CALL ordinal")
 
 	ctx.pushCallIndex(index)
 
@@ -472,8 +470,9 @@ func (ctx *parseCtx) readEVMRunCall(line string) error {
 	}
 
 	ctx.currentTrace.Calls = append(ctx.currentTrace.Calls, &pbeth.Call{
-		Index:    uint32(index),
-		CallType: callType,
+		Index:        uint32(index),
+		CallType:     callType,
+		BeginOrdinal: ordinal,
 	})
 
 	return nil
@@ -572,9 +571,9 @@ func (ctx *parseCtx) readEVMReverted(line string) error {
 }
 
 // Formats
-// DMLOG EVM_END_CALL <CALL_INDEX> <GAS_LEFT> <RETURN_VALUE>
+// DMLOG EVM_END_CALL <CALL_INDEX> <GAS_LEFT> <RETURN_VALUE> <ORDINAL>
 func (ctx *parseCtx) readEVMEndCall(line string) error {
-	chunks, err := SplitInChunks(line, 4)
+	chunks, err := SplitInChunks(line, 5)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -585,6 +584,7 @@ func (ctx *parseCtx) readEVMEndCall(line string) error {
 	}
 
 	gasLeft := FromUint64(chunks[1], "EVM_END_CALL gasLeft")
+	ordinal := FromUint64(chunks[3], "EVM_END_CALL ordinal")
 
 	parentIndex, depth, err := ctx.popCallIndexReturnParent()
 	if err != nil {
@@ -593,9 +593,10 @@ func (ctx *parseCtx) readEVMEndCall(line string) error {
 
 	// TODO: Add a check to ensure this always results in a valid gas value (i.e. no overflow)
 	evmCall.GasConsumed = evmCall.GasLimit - gasLeft
-	evmCall.ReturnData = FromHex(chunks[2], "EVM_RUN_CALL returnData")
+	evmCall.ReturnData = FromHex(chunks[2], "EVM_END_CALL returnData")
 	evmCall.ParentIndex = uint32(parentIndex)
 	evmCall.Depth = depth
+	evmCall.EndOrdinal = ordinal
 
 	return nil
 }
@@ -617,7 +618,7 @@ func (ctx *parseCtx) readSkippedTrx(line string) error {
 }
 
 // Formats
-// DMLOG END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> { []<deth.Log> }
+// DMLOG END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> { []<deth.Log> }
 func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no matching BEGIN_APPLY_TRX")
@@ -625,7 +626,7 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 
 	trxTrace := ctx.currentTrace
 
-	chunks, err := SplitInBoundedChunks(line, 6)
+	chunks, err := SplitInBoundedChunks(line, 7)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -634,9 +635,10 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	stateRoot := FromHex(chunks[1], "END_APPLY_TRX stateRoot")
 	cumulativeGasUsed := FromUint64(chunks[2], "END_APPLY_TRX cumulativeGasUsed")
 	logsBloom := FromHex(chunks[3], "END_APPLY_TRX logsBloom")
+	ordinal := FromUint64(chunks[4], "END_APPLY_TRX ordinal")
 
 	var logs []*Log
-	if err := json.Unmarshal([]byte(chunks[4]), &logs); err != nil {
+	if err := json.Unmarshal([]byte(chunks[5]), &logs); err != nil {
 		return err
 	}
 
@@ -646,6 +648,8 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 		CumulativeGasUsed: cumulativeGasUsed,
 		LogsBloom:         logsBloom,
 	}
+
+	trxTrace.EndOrdinal = ordinal
 
 	var pbLogs []*pbeth.Log
 	for i, l := range logs {
@@ -735,20 +739,26 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 }
 
 // Formats
-// DMLOG CREATED_ACCOUNT 4 2af4f4790a71313e0c532072207a77f1e4c1baec
+// DMLOG CREATED_ACCOUNT 4 2af4f4790a71313e0c532072207a77f1e4c1baec 7
 func (ctx *parseCtx) readCreateAccount(line string) error {
-	chunks, err := SplitInChunks(line, 3)
+	chunks, err := SplitInChunks(line, 4)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
 
 	callIndex := chunks[0]
 	account := FromHex(chunks[1], "CREATED_#")
+	ordinal := FromUint64(chunks[2], "CREATED_ACCOUNT ordinal")
+
+	accountCreation := &pbeth.AccountCreation{
+		Account: account,
+		Ordinal: ordinal,
+	}
 
 	if callIndex == "0" {
 		if ctx.currentTrace != nil {
 			// We have a trace active, so let's add it to it's root call
-			ctx.currentRootCall.CreatedAccounts = append(ctx.currentRootCall.CreatedAccounts, account)
+			ctx.currentRootCall.AccountCreations = append(ctx.currentRootCall.AccountCreations, accountCreation)
 		}
 
 		return nil
@@ -759,7 +769,48 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
 		return err
 	}
 
-	evmCall.CreatedAccounts = append(evmCall.CreatedAccounts, account)
+	evmCall.AccountCreations = append(evmCall.AccountCreations, accountCreation)
+	return nil
+}
+
+/*
+   DMLOG INIT 2.0 polygon 1.10.17-fh+hotfix (deadbeef) ...
+*/
+func (ctx *parseCtx) readInit(line string) error {
+
+	chunks, err := SplitInBoundedChunks(line, 4)
+	if err != nil {
+		return fmt.Errorf("split: %s", err)
+	}
+	ctx.dmVersion = chunks[0]
+	ctx.nodeVariant = chunks[1]
+	ctx.nodeVersion = chunks[2]
+
+	return nil
+}
+
+func (ctx *parseCtx) validateVersion() error {
+	if ctx.validated {
+		return nil
+	}
+	if ctx.nodeVersion == "" ||
+		ctx.dmVersion == "" ||
+		ctx.nodeVariant == "" {
+		return fmt.Errorf("deepmind did not advertise its version. You need to upgrade your instrumented node")
+	}
+
+	if ctx.nodeVariant != "geth" &&
+		ctx.nodeVariant != "bsc" &&
+		ctx.nodeVariant != "polygon" {
+		return fmt.Errorf("invalid node variant: %s", ctx.nodeVariant)
+	}
+
+	supportedDMVersion := "2.0"
+	if ctx.dmVersion != supportedDMVersion {
+		return fmt.Errorf("deepmind version is unsupported (expected: %s, found %s)", supportedDMVersion, ctx.dmVersion)
+	}
+	ctx.validated = true
+
 	return nil
 }
 
@@ -788,12 +839,12 @@ func (ctx *parseCtx) readSuicideChange(line string) error {
 }
 
 // Format
-// DMLOG CODE_CHANGE 2 cb32e940a34b938f9cebe70313fe7e8ca3d23d36 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 . 89f3219c608c80bcbb274738ff7a325624cd54c9868b9d54bde369e5ab005bc6 6080604052600080fdfea165627a7a723058204a5d828a5772e67b2eaa10bd570ffa7d9607586e73576cc26299c24348dc64450029
+// DMLOG CODE_CHANGE 2 cb32e940a34b938f9cebe70313fe7e8ca3d23d36 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 . 89f3219c608c80bcbb274738ff7a325624cd54c9868b9d54bde369e5ab005bc6 6080604052600080fdfea165627a7a723058204a5d828a5772e67b2eaa10bd570ffa7d9607586e73576cc26299c24348dc64450029 8
 //deepmind.Print("CODE_CHANGE", deepmind.CallIndex(), deepmind.Addr(s.address), deepmind.Hex(s.CodeHash()), deepmind.Hex(prevcode),
-// deepmind.Hash(codeHash), deepmind.Hex(code))
+// deepmind.Hash(codeHash), deepmind.Hex(code), <ORDINAL>)
 func (ctx *parseCtx) readCodeChange(line string) error {
 
-	chunks, err := SplitInChunks(line, 7)
+	chunks, err := SplitInChunks(line, 8)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -806,6 +857,7 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 		OldCode: FromHex(chunks[3], "CODE_CHANGE old_code"),
 		NewHash: FromHex(chunks[4], "CODE_CHANGE new_hash"),
 		NewCode: FromHex(chunks[5], "CODE_CHANGE new_code"),
+		Ordinal: FromUint64(chunks[6], "CODE_CHANGE ordinal"),
 	}
 
 	if callIndex == "0" {
@@ -894,9 +946,9 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbeth.Block, error) {
 }
 
 // Formats
-// DMLOG STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESSS> <KEY> <OLD_VALUE> <NEW_VALUE>
+// DMLOG STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESSS> <KEY> <OLD_VALUE> <NEW_VALUE> <ORDINAL>
 func (ctx *parseCtx) readStorageChange(line string) error {
-	chunks, err := SplitInChunks(line, 6)
+	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -917,15 +969,16 @@ func (ctx *parseCtx) readStorageChange(line string) error {
 		Key:      FromHex(chunks[2], "STORAGE_CHANGE key"),
 		OldValue: FromHex(chunks[3], "STORAGE_CHANGE oldValue"),
 		NewValue: FromHex(chunks[4], "STORAGE_CHANGE newValue"),
+		Ordinal:  FromUint64(chunks[5], "STORAGE_CHANGE ordinal"),
 	})
 
 	return nil
 }
 
 // Formats
-// DMLOG BALANCE_CHANGE <CALL_INDEX> <ADDRESSS> <OLD_VALUE> <NEW_VALUE> <REASON>
+// DMLOG BALANCE_CHANGE <CALL_INDEX> <ADDRESSS> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
 func (ctx *parseCtx) readBalanceChange(line string) error {
-	chunks, err := SplitInChunks(line, 6)
+	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -937,6 +990,7 @@ func (ctx *parseCtx) readBalanceChange(line string) error {
 		OldValue: pbeth.BigIntFromBytes(FromHex(chunks[2], "BALANCE_CHANGE oldValue")),
 		NewValue: pbeth.BigIntFromBytes(FromHex(chunks[3], "BALANCE_CHANGE newValue")),
 		Reason:   pbeth.MustBalanceChangeReasonFromString(chunks[4]),
+		Ordinal:  FromUint64(chunks[5], "BALANCE_CHANGE ordinal"),
 	}
 
 	if ctx.currentTrace == nil && ctx.currentBlock != nil {
@@ -977,9 +1031,9 @@ func (ctx *parseCtx) readBalanceChange(line string) error {
 }
 
 // Formats
-// DMLOG GAS_CHANGE <CALL_INDEX> <OLD_VALUE> <NEW_VALUE> <REASON>
+// DMLOG GAS_CHANGE <CALL_INDEX> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
 func (ctx *parseCtx) readGasChange(line string) error {
-	chunks, err := SplitInChunks(line, 5)
+	chunks, err := SplitInChunks(line, 6)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -990,6 +1044,7 @@ func (ctx *parseCtx) readGasChange(line string) error {
 		OldValue: FromUint64(chunks[1], "GAS_CHANGE OldValue"),
 		NewValue: FromUint64(chunks[2], "GAS_CHANGE NewValue"),
 		Reason:   pbeth.MustGasChangeReasonFromString(chunks[3]),
+		Ordinal:  FromUint64(chunks[4], "GAS_CHANGE ordinal"),
 	}
 
 	if callIndex == "0" {
@@ -1014,9 +1069,9 @@ func (ctx *parseCtx) readGasChange(line string) error {
 }
 
 // Formats
-// DMLOG GAS_EVENT <CALL_INDEX> <LINKED_CALL_INDEX> <ID> <GAS_VALUE>
+// DMLOG GAS_EVENT <CALL_INDEX> <ID> <ORDINAL>
 func (ctx *parseCtx) readGasEvent(line string) error {
-	chunks, err := SplitInChunks(line, 5)
+	chunks, err := SplitInChunks(line, 4)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -1024,9 +1079,8 @@ func (ctx *parseCtx) readGasEvent(line string) error {
 	callIndex := chunks[0]
 
 	gasEvent := &pbeth.GasEvent{
-		Id:              pbeth.MustGasEventIDFromString(chunks[2]),
-		Gas:             FromUint64(chunks[3], "GAS_EVENT NewValue"),
-		LinkedCallIndex: FromUint64(chunks[1], "GAS_EVENT LinkedCallIndex"),
+		Gas:     FromUint64(chunks[1], "GAS_EVENT NewValue"),
+		Ordinal: FromUint64(chunks[2], "GAS_EVENT ordinal"),
 	}
 
 	if callIndex == "0" {
@@ -1051,9 +1105,9 @@ func (ctx *parseCtx) readGasEvent(line string) error {
 }
 
 // Formats
-// DMLOG NONCE_CHANGE <CALL_INDEX> <ADDRESS> <OLD_VALUE> <NEW_VALUE>
+// DMLOG NONCE_CHANGE <CALL_INDEX> <ADDRESS> <OLD_VALUE> <NEW_VALUE> <ORDINAL
 func (ctx *parseCtx) readNonceChange(line string) error {
-	chunks, err := SplitInChunks(line, 5)
+	chunks, err := SplitInChunks(line, 6)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -1063,6 +1117,7 @@ func (ctx *parseCtx) readNonceChange(line string) error {
 		Address:  FromHex(chunks[1], "NONCE_CHANGE address"),
 		OldValue: FromUint64(chunks[2], "NONCE_CHANGE OldValue"),
 		NewValue: FromUint64(chunks[3], "NONCE_CHANGE NewValue"),
+		Ordinal:  FromUint64(chunks[4], "NONCE_CHANGE ordinal"),
 	}
 
 	if callIndex == "0" {
@@ -1154,9 +1209,9 @@ func (ctx *parseCtx) readAccountWithoutCode(line string) error {
 }
 
 // Formats
-// DMLOG ADD_LOG <CALL_INDEX> <BLOCK_INDEX> <CONTRACT_ADDRESS> <TOPICS> <DATA>
+// DMLOG ADD_LOG <CALL_INDEX> <BLOCK_INDEX> <CONTRACT_ADDRESS> <TOPICS> <DATA> <ORDINAL>
 func (ctx *parseCtx) readAddLog(line string) error {
-	chunks, err := SplitInChunks(line, 6)
+	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -1180,6 +1235,8 @@ func (ctx *parseCtx) readAddLog(line string) error {
 	}
 	data := FromHex(chunks[4], "ADD_LOG data")
 
+	ordinal := FromUint64(chunks[5], "ADD_LOG ordinal")
+
 	var evmCall *pbeth.Call
 	if callIndex == "0" {
 		// We have a trace active, so let's add it to it's root call
@@ -1200,6 +1257,7 @@ func (ctx *parseCtx) readAddLog(line string) error {
 		BlockIndex: uint32(blockIndex),
 		Data:       data,
 		Topics:     topics,
+		Ordinal:    ordinal,
 	})
 
 	return nil

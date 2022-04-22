@@ -32,8 +32,11 @@
       "r": "7ea5c6406f306030d054a613eee4d5709ddd35db52ec5e75066d515f82c6d043",
       "s": "398b5d7960cd48ef0cfda44a9482dd784e9f6d264aa13f83f233e2a86b81d34f",
       "gasUsed": "21000",
+      "maxFeePerGas": "",
       "hash": "f6c3feac09aa84558510f74af0c9bf7fd51ff15f902f68d51592e09cad8896b2",
       "from": "5973918275c01f50555d44e92c9d9b353cadad54",
+      "beginOrdinal": "1",
+      "endOrdinal": "13",
       "status": "SUCCEEDED",
       "receipt": {
         "cumulativeGasUsed": "21000",
@@ -75,31 +78,36 @@
               "address": "5973918275c01f50555d44e92c9d9b353cadad54",
               "oldValue": "3635c9adc5dea00000",
               "newValue": "3635c99aac6d15b000",
-              "reason": "REASON_GAS_BUY"
+              "reason": "REASON_GAS_BUY",
+              "ordinal": "2"
             },
             {
               "address": "5973918275c01f50555d44e92c9d9b353cadad54",
               "oldValue": "3635c99aac6d15b000",
               "newValue": "3635c99aac6d15afeb",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "7"
             },
             {
               "address": "c3f60bc338e0af8f46f52650c813fbd3c071e165",
               "oldValue": "",
               "newValue": "15",
-              "reason": "REASON_TRANSFER"
+              "reason": "REASON_TRANSFER",
+              "ordinal": "8"
             },
             {
               "address": "f84c74dea96df0ec22e11e7c33996c73fcc2d822",
               "oldValue": "3635c9adc5dea00000",
               "newValue": "3635c9c0df502a5000",
-              "reason": "REASON_REWARD_TRANSACTION_FEE"
+              "reason": "REASON_REWARD_TRANSACTION_FEE",
+              "ordinal": "11"
             }
           ],
           "nonceChanges": [
             {
               "address": "5973918275c01f50555d44e92c9d9b353cadad54",
-              "newValue": "1"
+              "newValue": "1",
+              "ordinal": "4"
             }
           ],
           "logs": [
@@ -111,7 +119,8 @@
                 "0000000000000000000000005973918275c01f50555d44e92c9d9b353cadad54",
                 "000000000000000000000000c3f60bc338e0af8f46f52650c813fbd3c071e165"
               ],
-              "data": "000000000000000000000000000000000000000000000000000000000000001500000000000000000000000000000000000000000000003635c99aac6d15b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003635c99aac6d15afeb0000000000000000000000000000000000000000000000000000000000000015"
+              "data": "000000000000000000000000000000000000000000000000000000000000001500000000000000000000000000000000000000000000003635c99aac6d15b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003635c99aac6d15afeb0000000000000000000000000000000000000000000000000000000000000015",
+              "ordinal": "9"
             },
             {
               "address": "0000000000000000000000000000000000001010",
@@ -123,16 +132,22 @@
               ],
               "data": "00000000000000000000000000000000000000000000000000001319718a500000000000000000000000000000000000000000000000003635c9adc5dea0000000000000000000000000000000000000000000000000003635c9adc5dea0000000000000000000000000000000000000000000000000003635c99aac6d15b00000000000000000000000000000000000000000000000003635c9c0df502a5000",
               "index": 1,
-              "blockIndex": 1
+              "blockIndex": 1,
+              "ordinal": "12"
             }
-          ],
-          "createdAccounts": [
-            "c3f60bc338e0af8f46f52650c813fbd3c071e165"
           ],
           "gasChanges": [
             {
               "oldValue": "21000",
-              "reason": "REASON_INTRINSIC_GAS"
+              "reason": "REASON_INTRINSIC_GAS",
+              "ordinal": "3"
+            }
+          ],
+          "endOrdinal": "10",
+          "accountCreations": [
+            {
+              "account": "c3f60bc338e0af8f46f52650c813fbd3c071e165",
+              "ordinal": "6"
             }
           ]
         }
