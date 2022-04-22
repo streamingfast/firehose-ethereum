@@ -262,7 +262,9 @@ message Call {
   repeated NonceChange nonce_changes = 24;
   repeated Log logs = 25;
   repeated CodeChange code_changes = 26;
-  repeated bytes created_accounts = 27;
+
+  reserved 27; // Deprecated: repeated bytes created_accounts
+
   repeated GasChange gas_changes = 28;
   repeated GasEvent gas_events = 29;
 
@@ -307,8 +309,11 @@ message Call {
   uint64 begin_ordinal = 31;
   uint64 end_ordinal = 32;
 
+  repeated AccountCreation account_creations = 33;
+
   repeated ERC20BalanceChange erc20_balance_changes = 50;
   repeated ERC20TransferEvent erc20_transfer_events = 51;
+
 
   bool filtering_matched = 60 [deprecated = true];
 }
@@ -382,6 +387,11 @@ message NonceChange {
   uint64 old_value = 2;
   uint64 new_value = 3;
   uint64 ordinal = 4;
+}
+
+message AccountCreation {
+  bytes account = 1;
+  uint64 ordinal = 2;
 }
 
 message CodeChange {
