@@ -15,7 +15,6 @@
 package cli
 
 import (
-	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -28,8 +27,6 @@ import (
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
 	"github.com/streamingfast/sf-ethereum/node-manager/codec"
-	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -90,15 +87,6 @@ func getMindreaderLogPlugin(
 		return codec.NewConsoleReader(appLogger, lines)
 	}
 
-	consoleReaderBlockTransformer := func(obj interface{}) (*bstream.Block, error) {
-		blk, ok := obj.(*pbeth.Block)
-		if !ok {
-			return nil, fmt.Errorf("expected *pbeth.Block, got %T", obj)
-		}
-
-		return types.BlockFromProto(blk)
-	}
-
 	logPlugin, err := mindreader.NewMindReaderPlugin(
 		oneBlockStoreURL,
 		mergedBlockStoreURL,
@@ -106,7 +94,6 @@ func getMindreaderLogPlugin(
 		mergeThresholdBlockAge,
 		workingDir,
 		consoleReaderFactory,
-		consoleReaderBlockTransformer,
 		tracker,
 		batchStartBlockNum,
 		batchStopBlockNum,

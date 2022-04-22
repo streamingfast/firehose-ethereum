@@ -4,7 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## UNRELEASED
+## Unreleased
+
+## v0.10.2
 
 * Removed `firehose-blocks-store-urls` flag (feature for using multiple stores now deprecated -> causes confusion and issues with block-caching), use `common-blocks-sture-url` instead.
 
@@ -56,7 +58,7 @@ for instructions to keep up to date.
 
 ### Changed
 
-* Renamed common `atm` 4 flags to `blocks-cache`: 
+* Renamed common `atm` 4 flags to `blocks-cache`:
   `--common-blocks-cache-{enabled|dir|max-recent-entry-bytes|max-entry-by-age-bytes}`
 
 #### Fixed

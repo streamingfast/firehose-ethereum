@@ -46,21 +46,19 @@ type ObjectReader func() (interface{}, error)
 func TestParseFromFile(t *testing.T) {
 	tests := []struct {
 		deepMindFile     string
+		expectedErr      error
 		expectedPanicErr error
 		readTransaction  bool
 	}{
-		{"testdata/deep-mind.dmlog", nil, false},
-		{"testdata/normalize-r-and-s-curve-points.dmlog", nil, false},
-		{"testdata/block_mining_rewards.dmlog", nil, false},
-		{"testdata/block_unknown_balance_change.dmlog", errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},
-		{"testdata/read_transaction.dmlog", nil, true},
-		{"testdata/polygon_calls_after_finalize.dmlog", nil, false},
-		{"testdata/polygon_add_log_0.dmlog", nil, false},
-		{
-			deepMindFile:     "testdata/lachesis.dmlog",
-			expectedPanicErr: nil,
-			readTransaction:  false,
-		},
+		{"testdata/deep-mind.dmlog", nil, nil, false},
+		{"testdata/fail_on_deep_mind_version_2.dmlog", errors.New(`your 'sfeth' binary is incompatible with this instrumented node version "1.10.17-dm-stable (deadbee)" (variant geth), you must use version v0.11.0+ to decode log lines for deep mind version 2.0`), nil, false},
+		{"testdata/normalize-r-and-s-curve-points.dmlog", nil, nil, false},
+		{"testdata/block_mining_rewards.dmlog", nil, nil, false},
+		{"testdata/block_unknown_balance_change.dmlog", nil, errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},
+		{"testdata/read_transaction.dmlog", nil, nil, true},
+		{"testdata/polygon_calls_after_finalize.dmlog", nil, nil, false},
+		{"testdata/polygon_add_log_0.dmlog", nil, nil, false},
+		{"testdata/lachesis.dmlog", nil, nil, false},
 	}
 
 	for _, test := range tests {
@@ -72,18 +70,27 @@ func TestParseFromFile(t *testing.T) {
 			}()
 
 			cr := testFileConsoleReader(t, test.deepMindFile)
+
+			var reader ObjectReader = func() (interface{}, error) {
+				out, err := cr.ReadBlock()
+				if err != nil {
+					return nil, err
+				}
+
+				return out.ToProtocol().(*pbeth.Block), nil
+			}
+
+			if test.readTransaction {
+				reader = func() (interface{}, error) {
+					return cr.ReadTransaction()
+				}
+			}
+
 			buf := &bytes.Buffer{}
 			buf.Write([]byte("["))
 			first := true
 
 			for {
-				var reader ObjectReader = cr.Read
-				if test.readTransaction {
-					reader = func() (interface{}, error) {
-						return cr.ReadTransaction()
-					}
-				}
-
 				out, err := reader()
 				if v, ok := out.(proto.Message); ok && !isNil(v) {
 					if !first {
@@ -105,7 +112,12 @@ func TestParseFromFile(t *testing.T) {
 					buf.Write([]byte("\n"))
 				}
 
-				require.NoError(t, err)
+				if test.expectedErr == nil {
+					require.NoError(t, err)
+				} else if err != nil {
+					require.Equal(t, test.expectedErr, err)
+					return
+				}
 			}
 			buf.Write([]byte("]"))
 
@@ -139,16 +151,17 @@ func TestGeneratePBBlocks(t *testing.T) {
 	cr := testFileConsoleReader(t, "testdata/deep-mind.dmlog")
 
 	for {
-		out, err := cr.Read()
-		if out != nil && out.(*pbeth.Block) != nil {
-			dethBlock := out.(*pbeth.Block)
-			bstreamBlock, err := types.BlockFromProto(dethBlock)
+		out, err := cr.ReadBlock()
+		if out != nil {
+			block := out.ToProtocol().(*pbeth.Block)
+
+			bstreamBlock, err := types.BlockFromProto(block)
 			require.NoError(t, err)
 
 			pbBlock, err := bstreamBlock.ToProto()
 			require.NoError(t, err)
 
-			outputFile, err := os.Create(fmt.Sprintf("testdata/pbblocks/battlefield-block.%d.pb", dethBlock.Number))
+			outputFile, err := os.Create(fmt.Sprintf("testdata/pbblocks/battlefield-block.%d.pb", block.Number))
 			require.NoError(t, err)
 
 			bytes, err := proto.Marshal(pbBlock)
@@ -171,12 +184,12 @@ func TestGeneratePBBlocks(t *testing.T) {
 func consumeBlock(t *testing.T, reader *ConsoleReader) *pbeth.Block {
 	t.Helper()
 
-	block, err := reader.Read()
-	if block == nil || block.(*pbeth.Block) == nil {
+	block, err := reader.ReadBlock()
+	if block == nil {
 		require.Fail(t, err.Error())
 	}
 
-	return block.(*pbeth.Block)
+	return block.ToProtocol().(*pbeth.Block)
 }
 
 func consumeSingleBlock(t *testing.T, reader *ConsoleReader) *pbeth.Block {
@@ -189,7 +202,7 @@ func consumeSingleBlock(t *testing.T, reader *ConsoleReader) *pbeth.Block {
 }
 
 func consumeToEOF(t *testing.T, reader *ConsoleReader) {
-	block, err := reader.Read()
+	block, err := reader.ReadBlock()
 	require.Nil(t, block)
 	require.Equal(t, err, io.EOF)
 
