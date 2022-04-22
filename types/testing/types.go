@@ -61,7 +61,7 @@ func Block(t testing.T, blkHash string, components ...interface{}) *pbeth.Block 
 	ref := bstream.NewBlockRefFromID(blkHash)
 
 	pbblock := &pbeth.Block{
-		Ver:    1,
+		Ver:    2,
 		Hash:   toBytes(t, ref.ID()),
 		Number: ref.Num(),
 	}

@@ -28,8 +28,8 @@ func BlockDecoder(blk *bstream.Block) (interface{}, error) {
 		return nil, fmt.Errorf("expected kind %s, got %s", pbbstream.Protocol_ETH, blk.Kind())
 	}
 
-	if blk.Version() != 1 {
-		return nil, fmt.Errorf("this decoder only knows about version 1, got %d", blk.Version())
+	if blk.Version() != 2 {
+		return nil, fmt.Errorf("this decoder only knows about version 2, got %d", blk.Version())
 	}
 
 	block := new(pbeth.Block)
