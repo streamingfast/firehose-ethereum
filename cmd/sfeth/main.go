@@ -17,7 +17,9 @@ package main
 import (
 	"time"
 
+	"github.com/streamingfast/node-manager/operator"
 	"github.com/streamingfast/sf-ethereum/cmd/sfeth/cli"
+	"github.com/streamingfast/snapshotter"
 )
 
 // Commit sha1 value, injected via go build `ldflags` at build time
@@ -34,5 +36,11 @@ func init() {
 }
 
 func main() {
-	cli.Main(cli.RegisterCommonFlags, nil, nil)
+	cli.Main(cli.RegisterCommonFlags, nil, map[string]operator.BackupModuleFactory{
+		"gke-pvc-snapshot": gkeSnapshotterFactory,
+	})
+}
+
+func gkeSnapshotterFactory(conf operator.BackupModuleConfig) (operator.BackupModule, error) {
+	return snapshotter.NewGKEPVCSnapshotter(conf)
 }
