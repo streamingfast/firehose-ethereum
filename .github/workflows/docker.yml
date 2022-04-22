@@ -61,7 +61,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=,enable=${{ contains(['refs/heads/develop', 'refs/heads/release/v0.10'], github.ref) }}
+            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' ||  github.ref == 'refs/heads/release/v0.10' }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,enable=${{ github.ref == 'refs/heads/release/release/v0.10' }},value=0.10.x
           flavor: latest=${{ startsWith(github.ref, 'refs/tags/') }}
@@ -112,8 +112,8 @@ jobs:
           tags: |
             type=ref,event=tag,suffix=-${{ env.VERSION }}
             type=ref,event=tag,suffix=-${{ matrix.binary }}
-            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=${{ contains(['refs/heads/develop', 'refs/heads/release/v0.10'], github.ref) }}
-            type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ contains(['refs/heads/develop', 'refs/heads/release/v0.10'], github.ref) }}
+            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' ||  github.ref == 'refs/heads/release/v0.10' }}
+            type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' ||  github.ref == 'refs/heads/release/v0.10' }}
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/release/v0.10' }},value=0.10.x
