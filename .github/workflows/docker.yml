@@ -34,6 +34,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
+
       - uses: actions/cache@v3
         with:
           path: |
@@ -42,14 +43,17 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
       - name: Build
         run: go build -v -ldflags "-X main.Version=${{ github.event.ref }} -X main.Commit=${{ github.sha }}" -o ./sfeth ./cmd/sfeth
+
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate docker tags/labels from github build context
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -57,9 +61,11 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=sha,prefix=,enable=${{ contains(['refs/heads/develop', 'refs/heads/release/v0.10'], github.ref) }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,enable=${{ github.ref == 'refs/heads/release/release/v0.10' }},value=0.10.x
           flavor: latest=${{ startsWith(github.ref, 'refs/tags/') }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
@@ -92,10 +98,12 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest) >> $GITHUB_ENV
-          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -v develop | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev (develop|0.10.x) | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+
       - name: Generate docker tags/labels from github build context
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -104,11 +112,14 @@ jobs:
           tags: |
             type=ref,event=tag,suffix=-${{ env.VERSION }}
             type=ref,event=tag,suffix=-${{ matrix.binary }}
-            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }}
-            type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }}
+            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=${{ contains(['refs/heads/develop', 'refs/heads/release/v0.10'], github.ref) }}
+            type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ contains(['refs/heads/develop', 'refs/heads/release/v0.10'], github.ref) }}
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/release/v0.10' }},value=0.10.x
+            type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/release/v0.10' }},value=0.10.x
           flavor: latest=false
+
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
