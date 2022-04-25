@@ -1,5 +1,6 @@
 ARG CHAIN_VERSION=geth-latest
 ARG SF_VERSION=latest
+
 FROM ghcr.io/streamingfast/go-ethereum:$CHAIN_VERSION as chain
 FROM ghcr.io/streamingfast/sf-ethereum:$SF_VERSION
 
