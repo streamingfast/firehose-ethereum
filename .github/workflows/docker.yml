@@ -107,6 +107,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Branch name
+        id: extract_branch
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "##[set-output name=release_train;]$(echo ${GITHUB_REF#refs/heads/release/})"
+
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest) >> $GITHUB_ENV
