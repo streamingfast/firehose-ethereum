@@ -7,6 +7,7 @@ on:
       - "v*"
     branches:
       - "develop"
+      - "release/v*"
 
 env:
   REGISTRY: ghcr.io
@@ -33,6 +34,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
+
       - uses: actions/cache@v3
         with:
           path: |
@@ -41,6 +43,14 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
+      - name: Branch name
+        id: extract_branch
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "##[set-output name=release_train;]$(echo ${GITHUB_REF#refs/heads/release/})"
+
       - name: Build
         run: go build -v -ldflags "-X main.version=${{ github.event.ref }} -X main.commit=${{ github.sha }} -X main.date=$(date -u +%Y-%m-%dT%H:%MZ)" -o ./sfeth ./cmd/sfeth
 
@@ -50,6 +60,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate docker tags/labels from github build context
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -57,9 +68,12 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/v') }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
-          flavor: latest=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
+          flavor: |
+            latest=${{ startsWith(github.ref, 'refs/tags/') }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
@@ -92,10 +106,12 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest) >> $GITHUB_ENV
-          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -v develop | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.10.x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+
       - name: Generate docker tags/labels from github build context
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -104,11 +120,14 @@ jobs:
           tags: |
             type=ref,event=tag,suffix=-${{ env.VERSION }}
             type=ref,event=tag,suffix=-${{ matrix.binary }}
-            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }}
-            type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }}
+            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/v') }}
+            type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/v') }}
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
+            type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: latest=false
+
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
