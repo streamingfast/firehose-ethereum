@@ -45,9 +45,6 @@ func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.In
 		zap.Uint64("num", ethFullBlock.Num()),
 	)
 
-	// We analyze here to ensure that they are set correctly as they are used when computing the light version
-	ethFullBlock.Analyze()
-
 	// FIXME: The block is actually duplicated elsewhere which means that at this point,
 	//        we work on our own copy of the block. So we can re-write this code to avoid
 	//        all the extra allocation and simply nillify the values that we want to hide
@@ -73,22 +70,20 @@ func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.In
 		trxTrace.Calls = make([]*pbeth.Call, len(fullTrxTrace.Calls))
 		for i, fullCall := range fullTrxTrace.Calls {
 			call := &pbeth.Call{
-				Index:               fullCall.Index,
-				ParentIndex:         fullCall.ParentIndex,
-				Depth:               fullCall.Depth,
-				CallType:            fullCall.CallType,
-				Caller:              fullCall.Caller,
-				Address:             fullCall.Address,
-				Value:               fullCall.Value,
-				GasLimit:            fullCall.GasLimit,
-				GasConsumed:         fullCall.GasConsumed,
-				ReturnData:          fullCall.ReturnData,
-				Input:               fullCall.Input,
-				ExecutedCode:        fullCall.ExecutedCode,
-				Suicide:             fullCall.Suicide,
-				Logs:                fullCall.Logs,
-				Erc20BalanceChanges: fullCall.Erc20BalanceChanges,
-				Erc20TransferEvents: fullCall.Erc20TransferEvents,
+				Index:        fullCall.Index,
+				ParentIndex:  fullCall.ParentIndex,
+				Depth:        fullCall.Depth,
+				CallType:     fullCall.CallType,
+				Caller:       fullCall.Caller,
+				Address:      fullCall.Address,
+				Value:        fullCall.Value,
+				GasLimit:     fullCall.GasLimit,
+				GasConsumed:  fullCall.GasConsumed,
+				ReturnData:   fullCall.ReturnData,
+				Input:        fullCall.Input,
+				ExecutedCode: fullCall.ExecutedCode,
+				Suicide:      fullCall.Suicide,
+				Logs:         fullCall.Logs,
 			}
 
 			trxTrace.Calls[i] = call
