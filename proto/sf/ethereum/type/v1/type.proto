@@ -19,9 +19,9 @@ message Block {
   repeated CodeChange code_changes = 20;
 
 
-  bool filtering_applied = 40 [deprecated = true];
-  string filtering_include_filter_expr = 41 [deprecated = true];
-  string filtering_exclude_filter_expr = 42 [deprecated = true];
+  reserved 40; // bool filtering_applied = 40 [deprecated = true];
+  reserved 41; // string filtering_include_filter_expr = 41 [deprecated = true];
+  reserved 42; // string filtering_exclude_filter_expr = 42 [deprecated = true];
 }
 
 // HeaderOnlyBlock is used to optimally unpack the [Block] structure (note the
@@ -311,23 +311,9 @@ message Call {
 
   repeated AccountCreation account_creations = 33;
 
-  repeated ERC20BalanceChange erc20_balance_changes = 50;
-  repeated ERC20TransferEvent erc20_transfer_events = 51;
-
-
-  bool filtering_matched = 60 [deprecated = true];
-}
-
-message ERC20BalanceChange {
-  bytes holder_address = 1;
-  BigInt old_balance = 2;
-  BigInt new_balance = 3;
-}
-
-message ERC20TransferEvent {
-  bytes from = 1;
-  bytes to = 2;
-  BigInt amount = 3;
+  reserved 50; // repeated ERC20BalanceChange erc20_balance_changes = 50 [deprecated = true];
+  reserved 51; // repeated ERC20TransferEvent erc20_transfer_events = 51 [deprecated = true];
+  reserved 60; // bool filtering_matched = 60 [deprecated = true];
 }
 
 enum CallType {
