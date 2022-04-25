@@ -24,12 +24,12 @@ message Block {
   string filtering_exclude_filter_expr = 42 [deprecated = true];
 }
 
-// HeaderOnlyBlock is a standard [Block] structure where all other fields are
-// removed so that hydrating that object from a [Block] bytes payload will
-// drastically reduced allocated memory required to hold the full block.
-//
-// This can be used to unpack a [Block] when only the [BlockHeader] information
-// is required and greatly reduced required memory.
+// HeaderOnlyBlock is used to optimally unpack the [Block] structure (note the
+// corresponding message number for the `header` field) while consuming less
+// memory, when only the `header` is desired.
+// 
+// WARN: this is a client-side optimization pattern and should be moved in the 
+// consuming code.
 message HeaderOnlyBlock {
   BlockHeader header = 5;
 }
