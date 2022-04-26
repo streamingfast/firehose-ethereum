@@ -117,7 +117,12 @@ func init() {
 			registry.Register(ethtransform.CallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.LightBlockFilterFactory)
-			registry.Register(sstransform.TransformFactory(os.Getenv("SUBSTREAMS_RPC_ENDPOINT"), viper.GetString("firehose-rpc-cache-store-url"), viper.GetString("firehose-state-store-url"), "sf.ethereum.type.v1.Block"))
+			registry.Register(sstransform.TransformFactory(
+				os.Getenv("SUBSTREAMS_RPC_ENDPOINT"),
+				viper.GetString("firehose-rpc-cache-store-url"),
+				viper.GetString("firehose-state-store-url"),
+				"sf.ethereum.type.v1.Block",
+				uint64(10000)))
 
 			var bundleSizes []uint64
 			for _, size := range viper.GetIntSlice("firehose-irreversible-blocks-index-bundle-sizes") {
