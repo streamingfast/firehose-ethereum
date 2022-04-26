@@ -57,6 +57,8 @@ func init() {
 			// block indices
 			cmd.Flags().String("firehose-block-index-url", "", "If non-empty, will use this URL as a store to load index data used by some transforms")
 			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for block indices")
+			cmd.Flags().String("firehose-rpc-cache-store-url", "./rpc-cache", "where rpc cache will be store call responses")
+			cmd.Flags().String("firehose-state-store-url", "./localdata", "where substreams state data are stored")
 			return nil
 		},
 
@@ -115,7 +117,7 @@ func init() {
 			registry.Register(ethtransform.CallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.LightBlockFilterFactory)
-			registry.Register(sstransform.TransformFactory(os.Getenv("SUBSTREAMS_RPC_ENDPOINT"), "./rpc-cache", "./localdata", "sf.ethereum.type.v1.Block"))
+			registry.Register(sstransform.TransformFactory(os.Getenv("SUBSTREAMS_RPC_ENDPOINT"), viper.GetString("firehose-rpc-cache-store-url"), viper.GetString("firehose-state-store-url"), "sf.ethereum.type.v1.Block"))
 
 			var bundleSizes []uint64
 			for _, size := range viper.GetIntSlice("firehose-irreversible-blocks-index-bundle-sizes") {
