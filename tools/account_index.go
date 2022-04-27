@@ -31,7 +31,7 @@ import (
 
 var generateAccIdxCmd = &cobra.Command{
 	// TODO: make irr-index-url optional, maybe ?????
-	Use:   "generate-account-index {acct-index-url} {irr-index-url} {source-blocks-url} {start-block-num} {stop-block-num}",
+	Use:   "generate-account-index {source-blocks-url} {acct-index-url} {irr-index-url} {start-block-num} [stop-block-num]",
 	Short: "Generate index files for eth accounts present in blocks",
 	Args:  cobra.RangeArgs(4, 5),
 	RunE:  generateAccIdxE,
@@ -87,18 +87,18 @@ func generateAccIdxE(cmd *cobra.Command, args []string) error {
 		lookupAccountIdxSizes = append(lookupAccountIdxSizes, uint64(size))
 	}
 
-	accountIndexStoreURL := args[0]
-	irrIndexStoreURL := args[1]
-	blocksStoreURL := args[2]
+	blocksStoreURL := args[0]
+	accountIndexStoreURL := args[1]
+	irrIndexStoreURL := args[2]
 	startBlockNum, err := strconv.ParseUint(args[3], 10, 64)
 	if err != nil {
-		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+		return fmt.Errorf("unable to parse block number %q: %w", args[3], err)
 	}
 	var stopBlockNum uint64
 	if len(args) == 5 {
 		stopBlockNum, err = strconv.ParseUint(args[4], 10, 64)
 		if err != nil {
-			return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+			return fmt.Errorf("unable to parse block number %q: %w", args[4], err)
 		}
 	}
 

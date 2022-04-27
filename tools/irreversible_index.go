@@ -28,7 +28,7 @@ import (
 )
 
 var generateIrrIdxCmd = &cobra.Command{
-	Use:   "generate-irreversible-index {dest-index-url} {source-blocks-url} {start-block-num} {stop-block-num}",
+	Use:   "generate-irreversible-index {source-blocks-url} {dest-index-url} {start-block-num} [stop-block-num]",
 	Short: "Prints a block from a one-block file",
 	Args:  cobra.RangeArgs(3, 4),
 	RunE:  generateIrrIdxE,
@@ -56,17 +56,17 @@ func generateIrrIdxE(cmd *cobra.Command, args []string) error {
 		bundleSizes = append(bundleSizes, uint64(size))
 	}
 
-	indexStoreURL := args[0]
-	blocksStoreURL := args[1]
+	blocksStoreURL := args[0]
+	indexStoreURL := args[1]
 	startBlockNum, err := strconv.ParseInt(args[2], 10, 64)
 	if err != nil {
-		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+		return fmt.Errorf("unable to parse block number %q: %w", args[2], err)
 	}
 	var stopBlockNum uint64
 	if len(args) == 4 {
 		stopBlockNum, err = strconv.ParseUint(args[3], 10, 64)
 		if err != nil {
-			return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+			return fmt.Errorf("unable to parse block number %q: %w", args[3], err)
 		}
 	}
 

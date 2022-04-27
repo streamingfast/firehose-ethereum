@@ -50,9 +50,9 @@ func Main(
 	})
 
 	RootCmd.PersistentFlags().StringP("data-dir", "d", "./sf-data", "Path to data storage for all components of the stack")
-	RootCmd.PersistentFlags().StringP("config-file", "c", "./sf.yaml", "Configuration file to use. No config file loaded if set to an empty string (hence using flags to configure the whole stack).")
+	RootCmd.PersistentFlags().StringP("config-file", "c", "", "Configuration file to use. No config file loaded if set to an empty string (hence using flags to configure the whole stack).")
 	RootCmd.PersistentFlags().String("log-format", "text", "Format for logging to stdout. Either 'text' or 'stackdriver'. When 'text', if the standard output is detected to be interactive, colored text is output, otherwise non-colored text.")
-	RootCmd.PersistentFlags().Bool("log-to-file", true, "Also write logs to {data-dir}/sf.log.json ")
+	RootCmd.PersistentFlags().Bool("log-to-file", false, "Also write logs to {data-dir}/sf.log.json ")
 	RootCmd.PersistentFlags().CountP("verbose", "v", "Enables verbose output (-vvvv for max verbosity)")
 
 	RootCmd.PersistentFlags().String("log-level-switcher-listen-addr", "localhost:1065", "If non-empty, the process will listen on this address for json-formatted requests to change different logger levels (see DEBUG.md for more info)")

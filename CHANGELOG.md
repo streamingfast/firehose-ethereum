@@ -7,11 +7,19 @@ for instructions to keep up to date.
 ## Unreleased
 
 #### BREAKING CHANGES --requires reprocessing all merged block files--
+
 * Requires deepmind node (extractor) with instrumentation version *2.0*
+
 * Produced / consumed block protobuf payload version bumped 1 -> 2
   * Fixed Gas Price on dynamic transactions (post-London-fork on ethereum mainnet)
   * Added "Total Ordering" concept, 'Ordinal' field on all events within a block (trx begin/end, call, log, balance change, etc.)
   * Added TotalDifficulty field to ethereum blocks
+
+* Changed default values for two top-level flags
+
+  * `sfeth --log-to-file` defaulted to `true` and is now `false`. Be explicit if you want to log to a file.
+
+  * `sfeth --config-file` defaulted to `./sf.yaml` and failed if not present, and now defaults to `""` (doesn't fail is nothing is specified)
 
 ## v0.10.2
 
