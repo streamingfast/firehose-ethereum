@@ -32,8 +32,9 @@ import (
 	"github.com/streamingfast/firehose"
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
 	"github.com/streamingfast/logging"
+	ethss "github.com/streamingfast/sf-ethereum/substreams"
 	ethtransform "github.com/streamingfast/sf-ethereum/transform"
-	sstransform "github.com/streamingfast/substreams/transform"
+	substreamsService "github.com/streamingfast/substreams/service"
 	"go.uber.org/zap"
 )
 
@@ -57,6 +58,11 @@ func init() {
 			// block indices
 			cmd.Flags().String("firehose-block-index-url", "", "If non-empty, will use this URL as a store to load index data used by some transforms")
 			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for block indices")
+			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
+			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
+			cmd.Flags().String("substreams-rpc-endpoint", "", "Remote endpoint to contact to satisfy Substreams 'eth_call's")
+			cmd.Flags().String("substreams-rpc-cache-store-url", "./rpc-cache", "where rpc cache will be store call responses")
+			cmd.Flags().String("substreams-state-store-url", "./localdata", "where substreams state data are stored")
 			return nil
 		},
 
@@ -109,13 +115,44 @@ func init() {
 				possibleIndexSizes = append(possibleIndexSizes, uint64(size))
 			}
 
+			var registerServiceExt firehoseApp.RegisterServiceExtensionFunc
+			if viper.GetBool("substreams-enabled") {
+				rpcEngine, err := ethss.NewRPCEngine(
+					viper.GetString("substreams-rpc-cache-store-url"),
+					viper.GetString("substreams-rpc-endpoint"),
+				)
+				if err != nil {
+					return nil, fmt.Errorf("setting up Ethereum rpc engine and cache: %w", err)
+				}
+
+				stateStore, err := dstore.NewStore(viper.GetString("substreams-state-store-url"), "", "", false)
+				if err != nil {
+					return nil, fmt.Errorf("setting up state store for data: %w", err)
+				}
+
+				opts := []substreamsService.Option{
+					substreamsService.WithWASMExtension(rpcEngine),
+					substreamsService.WithPipelineOptions(rpcEngine),
+				}
+
+				if viper.GetBool("substreams-partial-mode-enabled") {
+					opts = append(opts, substreamsService.WithPartialMode())
+				}
+				sss := substreamsService.New(
+					stateStore,
+					"sf.ethereum.type.v1.Block",
+					opts...,
+				)
+
+				registerServiceExt = sss.Register
+			}
+
 			registry := transform.NewRegistry()
 			registry.Register(ethtransform.LogFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.CallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.LightBlockFilterFactory)
-			registry.Register(sstransform.TransformFactory(os.Getenv("SUBSTREAMS_RPC_ENDPOINT"), "./rpc-cache", "./localdata", "sf.ethereum.type.v1.Block"))
 
 			var bundleSizes []uint64
 			for _, size := range viper.GetIntSlice("firehose-irreversible-blocks-index-bundle-sizes") {
@@ -134,11 +171,12 @@ func init() {
 				IrreversibleBlocksIndexStoreURL: viper.GetString("firehose-irreversible-blocks-index-url"),
 				IrreversibleBlocksBundleSizes:   bundleSizes,
 			}, &firehoseApp.Modules{
-				Authenticator:         authenticator,
-				HeadTimeDriftMetric:   headTimeDriftmetric,
-				HeadBlockNumberMetric: headBlockNumMetric,
-				Tracker:               tracker,
-				TransformRegistry:     registry,
+				Authenticator:            authenticator,
+				HeadTimeDriftMetric:      headTimeDriftmetric,
+				HeadBlockNumberMetric:    headBlockNumMetric,
+				Tracker:                  tracker,
+				TransformRegistry:        registry,
+				RegisterServiceExtension: registerServiceExt,
 			}), nil
 		},
 	})
