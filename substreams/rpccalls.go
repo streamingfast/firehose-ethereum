@@ -34,13 +34,13 @@ type RPCEngine struct {
 	rpcClient    *rpc.Client
 }
 
-func NewRPCEngine(rpcCachePath, rpcEndpoint string) (*RPCEngine, error) {
+func NewRPCEngine(rpcCachePath, rpcEndpoint string, secondaryEndpoints []string) (*RPCEngine, error) {
 	rpcCacheStore, err := dstore.NewStore(rpcCachePath, "", "", false)
 	if err != nil {
 		return nil, fmt.Errorf("setting up rpc cache store: %w", err)
 	}
 
-	rpcCache := NewCacheManager(context.Background(), rpcCacheStore, 0)
+	rpcCache := NewCache(context.Background(), rpcCacheStore, 0)
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true, // don't reuse connections
@@ -48,7 +48,15 @@ func NewRPCEngine(rpcCachePath, rpcEndpoint string) (*RPCEngine, error) {
 		Timeout: 3 * time.Second,
 	}
 
-	rpcClient := rpc.NewClient(rpcEndpoint, rpc.WithHttpClient(httpClient), rpc.WithCache(rpcCache))
+	opts := []rpc.Option{
+		rpc.WithHttpClient(httpClient),
+		rpc.WithCache(rpcCache),
+	}
+	if len(secondaryEndpoints) != 0 {
+		opts = append(opts, rpc.WithSecondaryEndpoints(secondaryEndpoints))
+	}
+
+	rpcClient := rpc.NewClient(rpcEndpoint, opts...)
 
 	return &RPCEngine{
 		rpcCachePath: rpcCachePath,
@@ -112,7 +120,7 @@ type RPCResponse struct {
 	CallError     error // always deterministic
 }
 
-func (e RPCEngine) rpcCalls(blockNum uint64, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
+func (e *RPCEngine) rpcCalls(blockNum uint64, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
 	var reqs []*rpc.RPCRequest
 	for _, call := range calls.Calls {
 		req := &rpc.RPCRequest{
@@ -152,6 +160,7 @@ func (e RPCEngine) rpcCalls(blockNum uint64, calls *pbethss.RpcCalls) (out *pbet
 			}
 		}
 		if nonDeterministicResp {
+			e.rpcClient.RollEndpointIndex()
 			continue
 		}
 
