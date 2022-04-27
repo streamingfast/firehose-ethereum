@@ -154,7 +154,7 @@ func (c *Cache) UpdateCache(ctx context.Context, startBlock, endBlock uint64) {
 		if c.currentStartBlock > 0 {
 			saveStartBlock = c.currentStartBlock
 		}
-		c.Save(ctx, saveStartBlock, c.currentEndBlock)
+		c.Save(ctx, int64(saveStartBlock), c.currentEndBlock)
 		initialize = true
 	}
 
@@ -171,7 +171,7 @@ func (c *Cache) load(ctx context.Context) {
 	c.currentCache.load(ctx, c.store, c.currentFilename)
 }
 
-func (c *Cache) Save(ctx context.Context, startBlock uint64, endBlock uint64) {
+func (c *Cache) Save(ctx context.Context, startBlock int64, endBlock uint64) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -180,10 +180,10 @@ func (c *Cache) Save(ctx context.Context, startBlock uint64, endBlock uint64) {
 	}
 
 	saveStartBlock := startBlock
-	if c.currentStartBlock > startBlock {
-		saveStartBlock = c.currentStartBlock
+	if int64(c.currentStartBlock) > startBlock {
+		saveStartBlock = int64(c.currentStartBlock)
 	}
-	c.currentCache.save(ctx, c.store, cacheFileName(saveStartBlock, endBlock))
+	c.currentCache.save(ctx, c.store, cacheFileName(uint64(saveStartBlock), endBlock))
 
 	c.totalHits += c.currentCache.hits
 	c.totalMisses += c.currentCache.misses

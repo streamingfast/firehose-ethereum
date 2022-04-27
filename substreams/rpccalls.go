@@ -2,10 +2,12 @@ package substreams
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/streamingfast/dstore"
@@ -27,11 +29,13 @@ type extension struct {
 }
 
 type RPCEngine struct {
-	rpcCachePath string
-	rpcEndpoint  string
+	rpcCacheStore dstore.Store
+	rpcEndpoint   string
 
-	cacheManager *Cache
-	rpcClient    *rpc.Client
+	rpcClient *rpc.Client
+
+	perRequestCache     map[*pbsubstreams.Request]*Cache
+	perRequestCacheLock sync.RWMutex
 }
 
 func NewRPCEngine(rpcCachePath, rpcEndpoint string, secondaryEndpoints []string) (*RPCEngine, error) {
@@ -40,29 +44,25 @@ func NewRPCEngine(rpcCachePath, rpcEndpoint string, secondaryEndpoints []string)
 		return nil, fmt.Errorf("setting up rpc cache store: %w", err)
 	}
 
-	rpcCache := NewCache(context.Background(), rpcCacheStore, 0)
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true, // don't reuse connections
 		},
 		Timeout: 3 * time.Second,
 	}
-
 	opts := []rpc.Option{
 		rpc.WithHttpClient(httpClient),
-		rpc.WithCache(rpcCache),
 	}
 	if len(secondaryEndpoints) != 0 {
 		opts = append(opts, rpc.WithSecondaryEndpoints(secondaryEndpoints))
 	}
-
 	rpcClient := rpc.NewClient(rpcEndpoint, opts...)
 
 	return &RPCEngine{
-		rpcCachePath: rpcCachePath,
-		rpcEndpoint:  rpcEndpoint,
-		cacheManager: rpcCache,
-		rpcClient:    rpcClient,
+		perRequestCache: map[*pbsubstreams.Request]*Cache{},
+		rpcCacheStore:   rpcCacheStore,
+		rpcEndpoint:     rpcEndpoint,
+		rpcClient:       rpcClient,
 	}, nil
 }
 
@@ -74,28 +74,57 @@ func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 	}
 }
 
-func (e *RPCEngine) PipelineOptions(requestedStartBlockNum uint64, stopBlock uint64) []pipeline.Option {
+func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.Request) []pipeline.Option {
+	pipelineCache := NewCache(ctx, e.rpcCacheStore, request.StartBlockNum)
+	zlog.Info("yuo man setting up pipeline")
+
+	e.registerRequestCache(request, pipelineCache)
+
 	preBlock := func(ctx context.Context, clock *pbsubstreams.Clock) error {
-		e.cacheManager.UpdateCache(ctx, clock.Number, stopBlock)
+		pipelineCache.UpdateCache(ctx, clock.Number, request.StopBlockNum)
 		return nil
 	}
 
 	postJob := func(ctx context.Context, clock *pbsubstreams.Clock) error {
-		e.cacheManager.Save(ctx, requestedStartBlockNum, stopBlock)
+		pipelineCache.Save(ctx, request.StartBlockNum, request.StopBlockNum)
+		e.unregisterRequestCache(request)
 		return nil
 	}
+
 	return []pipeline.Option{
 		pipeline.WithPreBlockHook(preBlock),
 		pipeline.WithPostJobHook(postJob),
 	}
 }
 
-func (e *RPCEngine) ethCall(clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
+func (e *RPCEngine) registerRequestCache(req *pbsubstreams.Request, c *Cache) {
+	e.perRequestCacheLock.Lock()
+	defer e.perRequestCacheLock.Unlock()
+
+	e.perRequestCache[req] = c
+}
+
+func (e *RPCEngine) unregisterRequestCache(req *pbsubstreams.Request) {
+	e.perRequestCacheLock.Lock()
+	defer e.perRequestCacheLock.Unlock()
+
+	delete(e.perRequestCache, req)
+}
+
+func (e *RPCEngine) ethCall(ctx context.Context, request *pbsubstreams.Request, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
 	calls := &pbethss.RpcCalls{}
 	if err := proto.Unmarshal(in, calls); err != nil {
 		return nil, fmt.Errorf("unmarshal RpcCalls proto: %w", err)
 	}
-	res := e.rpcCalls(clock.Number, calls)
+
+	e.perRequestCacheLock.RLock()
+	cache := e.perRequestCache[request]
+	e.perRequestCacheLock.RUnlock()
+	if cache == nil {
+		panic("no cache initialized for this request?!")
+	}
+
+	res := e.rpcCalls(ctx, cache, clock.Number, calls)
 	cnt, err := proto.Marshal(res)
 	if err != nil {
 		return nil, fmt.Errorf("marshal RpcResponses proto: %w", err)
@@ -120,7 +149,20 @@ type RPCResponse struct {
 	CallError     error // always deterministic
 }
 
-func (e *RPCEngine) rpcCalls(blockNum uint64, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
+func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
+	callsBytes, _ := proto.Marshal(calls)
+	cacheKey := fmt.Sprintf("%d:%x", blockNum, sha256.Sum256(callsBytes))
+	if len(callsBytes) != 0 {
+		val, found := cache.Get(ctx, cacheKey)
+		if found {
+			out = &pbethss.RpcResponses{}
+			err := proto.Unmarshal(val, out)
+			if err == nil {
+				return out
+			}
+		}
+	}
+
 	var reqs []*rpc.RPCRequest
 	for _, call := range calls.Calls {
 		req := &rpc.RPCRequest{
@@ -136,7 +178,6 @@ func (e *RPCEngine) rpcCalls(blockNum uint64, calls *pbethss.RpcCalls) (out *pbe
 		reqs = append(reqs, req)
 	}
 
-	ctx := context.Background()
 	var delay time.Duration
 	var attemptNumber int
 	for {
@@ -151,20 +192,27 @@ func (e *RPCEngine) rpcCalls(blockNum uint64, calls *pbethss.RpcCalls) (out *pbe
 			continue
 		}
 
-		var nonDeterministicResp bool
+		deterministicResp := true
 		for _, resp := range out {
 			if !resp.Deterministic() {
 				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.Uint64("at_block", blockNum))
-				nonDeterministicResp = true
+				deterministicResp = false
 				break
 			}
 		}
-		if nonDeterministicResp {
+		if !deterministicResp {
 			e.rpcClient.RollEndpointIndex()
 			continue
 		}
 
 		resp := toProtoResponses(out)
+
+		if deterministicResp {
+			if encodedResp, err := proto.Marshal(resp); err == nil {
+				cache.Set(ctx, cacheKey, encodedResp)
+			}
+		}
+
 		return resp
 	}
 }
