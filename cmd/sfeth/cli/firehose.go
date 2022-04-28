@@ -116,11 +116,13 @@ func init() {
 				possibleIndexSizes = append(possibleIndexSizes, uint64(size))
 			}
 
+			endpoints := viper.GetStringSlice("substreams-rpc-endpoints")
+
 			var registerServiceExt firehoseApp.RegisterServiceExtensionFunc
 			if viper.GetBool("substreams-enabled") {
 				rpcEngine, err := ethss.NewRPCEngine(
 					viper.GetString("substreams-rpc-cache-store-url"),
-					viper.GetStringSlice("substreams-rpc-endpoints"),
+					endpoints,
 				)
 				if err != nil {
 					return nil, fmt.Errorf("setting up Ethereum rpc engine and cache: %w", err)
