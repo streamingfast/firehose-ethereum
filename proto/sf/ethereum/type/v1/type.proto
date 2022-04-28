@@ -59,14 +59,14 @@ message BlockRef {
 message BlockHeader {
   bytes parent_hash = 1;
   // Uncle hash of the block, some refenrece it as `sha3Uncles`, but `sha3`` is badly worded, so we prefer `uncle_hash`
-  bytes uncle_hash = 2; /* geth:  */
+  bytes uncle_hash = 2;
   bytes coinbase = 3;
   bytes state_root = 4;
   bytes transactions_root = 5;
   bytes receipt_root = 6;
   bytes logs_bloom = 7;
   BigInt difficulty = 8;
-  // Sum of all previous blocks difficulty, looked up in DB on rpc call
+  // Sum of all previous blocks difficulty including this block difficulty.
   BigInt total_difficulty = 17;
   uint64 number = 9;
   uint64 gas_limit = 10;
@@ -89,31 +89,78 @@ message TransactionTrace {
   // consensus
   bytes to = 1;
   uint64 nonce = 2;
-  // GasPrice represents the price that has been paid for each gas unit
+  // GasPrice represents the effective price that has been paid for each gas unit of this transaction. Over time, the
+  // Ethereum rules changes regarding GasPrice field here. Before London fork, the GasPrice was always set to the
+  // fixed gas price. After London fork, this value has different meaning depending on the transaction type (see `Type` field).
+  //
+  // In cases where `TransactionTrace.Type == TRX_TYPE_LEGACY || TRX_TYPE_ACCESS_LIST`, then GasPrice has the same meaning
+  // as before the London fork.
+  //
+  // In cases where `TransactionTrace.Type == TRX_TYPE_DYNAMIC_FEE`, then GasPrice is the effective gas price paid
+  // for the transaction which is equals to `BlockHeader.BaseFeePerGas + TransactionTrace.`
   BigInt gas_price = 3;
+
+  // GasLimit is the maximum of gas unit the sender of the transaction is willing to consume when perform the EVM
+  // execution of the whole transaction
   uint64 gas_limit = 4;
+
+  // Value is the amount of Ether transferred as part of this transaction.
   BigInt value = 5;
+
+  // Input data the transaction will receive for execution of EVM.
   bytes input = 6;
+
   // V is the recovery ID value for the signature Y point.
   bytes v = 7;
+
   // R is the signature's X point on the elliptic curve (32 bytes).
   bytes r = 8;
+
   // S is the signature's Y point on the elliptic curve (32 bytes).
   bytes s = 9;
-  uint64 gas_used = 10;
 
-  // MaxFeePerGas is the maximum amount of
-  BigInt max_fee_per_gas = 11;
+  // GasUsed is the total amount of gas unit used for the whole execution of the transaction.
+  uint64 gas_used = 10;
 
   // Type represents the Ethereum transaction type, available only since EIP-2718 & EIP-2930 activation which happened on Berlin fork.
   // The value is always set even for transaction before Berlin fork because those before the fork are still legacy transactions.
   Type type = 12;
 
   enum Type {
+    // All transactions that ever existed prior Berlin fork before EIP-2718 was implemented.
     TRX_TYPE_LEGACY = 0;
+
+    // Transaction that specicy an access list of contract/storage_keys that is going to be used
+    // in this transaction.
+    //
+    // Added in Berlin fork (EIP-2930).
     TRX_TYPE_ACCESS_LIST = 1;
+
+    // Transaction that specifis an access list just like TRX_TYPE_ACCESS_LIST but in addition defines the
+    // max base gas gee and max priority gas fee to pay for this transaction. Transaction's of those type are
+    // executed against EIP-1559 rules which dictates a dynamic gas cost based on the congestion of the network.
     TRX_TYPE_DYNAMIC_FEE = 2;
   }
+
+  // AcccessList represents the storage access this transaction has agreed to do in which case those storage
+  // access cost less gas unit per access.
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_ACCESS_LIST || TRX_TYPE_DYNAMIC_FEE` which
+  // is possible only if Berlin (TRX_TYPE_ACCESS_LIST) nor London (TRX_TYPE_DYNAMIC_FEE) fork are active on the chain.
+  repeated AccessTuple access_list = 14;
+
+  // MaxFeePerGas is the maximum fee per gas the user is willing to pay for the transaction gas used.
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_DYNAMIC_FEE` which is possible only
+  // if Londong fork is active on the chain.
+  BigInt max_fee_per_gas = 11;
+
+  // MaxPriorityFeePerGas is priority fee per gas the user to pay in extra to the miner on top of the block's
+  // base fee.
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_DYNAMIC_FEE` which is possible only
+  // if Londong fork is active on the chain.
+  BigInt max_priority_fee_per_gas = 13;
 
   // meta
   uint32 index = 20;
@@ -127,6 +174,14 @@ message TransactionTrace {
   TransactionTraceStatus status = 30;
   TransactionReceipt receipt = 31;
   repeated Call calls = 32;
+}
+
+
+// AccessTuple represents a list of storage keys for a given contract's address and is used
+// for AccessList construction.
+message AccessTuple {
+  bytes address = 1;
+  repeated bytes storage_keys = 2;
 }
 
 // TransactionTraceWithBlockRef
