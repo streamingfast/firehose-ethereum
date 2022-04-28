@@ -24,21 +24,21 @@ import (
 // interfaces, living in `streamingfast/substreams:extensions.go`
 
 type extension struct {
-	rpcClient    *rpc.Client
+	rpcClients   []*rpc.Client
 	cacheManager *Cache
 }
 
 type RPCEngine struct {
 	rpcCacheStore dstore.Store
-	rpcEndpoint   string
 
-	rpcClient *rpc.Client
+	rpcClients            []*rpc.Client
+	currentRpcClientIndex int
 
 	perRequestCache     map[*pbsubstreams.Request]*Cache
 	perRequestCacheLock sync.RWMutex
 }
 
-func NewRPCEngine(rpcCachePath, rpcEndpoint string, secondaryEndpoints []string) (*RPCEngine, error) {
+func NewRPCEngine(rpcCachePath string, rpcEndpoints []string) (*RPCEngine, error) {
 	rpcCacheStore, err := dstore.NewStore(rpcCachePath, "", "", false)
 	if err != nil {
 		return nil, fmt.Errorf("setting up rpc cache store: %w", err)
@@ -53,17 +53,34 @@ func NewRPCEngine(rpcCachePath, rpcEndpoint string, secondaryEndpoints []string)
 	opts := []rpc.Option{
 		rpc.WithHttpClient(httpClient),
 	}
-	if len(secondaryEndpoints) != 0 {
-		opts = append(opts, rpc.WithSecondaryEndpoints(secondaryEndpoints))
+
+	var rpcClients []*rpc.Client
+	for _, endpoint := range rpcEndpoints {
+		rpcClients = append(rpcClients, rpc.NewClient(endpoint, opts...))
 	}
-	rpcClient := rpc.NewClient(rpcEndpoint, opts...)
 
 	return &RPCEngine{
 		perRequestCache: map[*pbsubstreams.Request]*Cache{},
 		rpcCacheStore:   rpcCacheStore,
-		rpcEndpoint:     rpcEndpoint,
-		rpcClient:       rpcClient,
+		rpcClients:      rpcClients,
 	}, nil
+}
+
+func (e *RPCEngine) rpcClient() *rpc.Client {
+	return e.rpcClients[e.currentRpcClientIndex]
+}
+
+func (e *RPCEngine) rollRpcClient() {
+	if len(e.rpcClients) == 1 {
+		zlog.Warn("not rollin grpc client. only 1 endpoint provided")
+	}
+
+	if e.currentRpcClientIndex == len(e.rpcClients)-1 {
+		e.currentRpcClientIndex = 0
+		return
+	}
+
+	e.currentRpcClientIndex++
 }
 
 func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
@@ -186,8 +203,9 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 		attemptNumber += 1
 		delay = minDuration(time.Duration(attemptNumber*500)*time.Millisecond, 10*time.Second)
 
-		out, err := e.rpcClient.DoRequests(ctx, reqs)
+		out, err := e.rpcClient().DoRequests(ctx, reqs)
 		if err != nil {
+			e.rollRpcClient()
 			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum))
 			continue
 		}
@@ -201,7 +219,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 			}
 		}
 		if !deterministicResp {
-			e.rpcClient.RollEndpointIndex()
+			e.rollRpcClient()
 			continue
 		}
 

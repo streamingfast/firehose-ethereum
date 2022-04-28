@@ -60,8 +60,7 @@ func init() {
 			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for block indices")
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
-			cmd.Flags().String("substreams-rpc-endpoint", "", "Remote endpoint to contact to satisfy Substreams 'eth_call's")
-			cmd.Flags().StringArray("substreams-secondary-rpc-endpoints", nil, "RPC endpoints that will replace the primary in case of errors")
+			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			cmd.Flags().String("substreams-rpc-cache-store-url", "./rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().String("substreams-state-store-url", "./localdata", "where substreams state data are stored")
 			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(10000), "Interval in blocks at which to save store snapshots")
@@ -121,8 +120,7 @@ func init() {
 			if viper.GetBool("substreams-enabled") {
 				rpcEngine, err := ethss.NewRPCEngine(
 					viper.GetString("substreams-rpc-cache-store-url"),
-					viper.GetString("substreams-rpc-endpoint"),
-					viper.GetStringSlice("substreams-secondary-rpc-endpoints"),
+					viper.GetStringSlice("substreams-rpc-endpoints"),
 				)
 				if err != nil {
 					return nil, fmt.Errorf("setting up Ethereum rpc engine and cache: %w", err)
