@@ -145,33 +145,33 @@ func (e Ether) ToBigInt(t testing.T) *big.Int {
 	return out
 }
 
-func Trx(t testing.T, components ...interface{}) *pbeth.Transaction {
-	trx := &pbeth.Transaction{}
-	for _, component := range components {
-		switch v := component.(type) {
-		case hash:
-			trx.Hash = hexString(v).bytes(t)
-		case from:
-			trx.From = hexString(v).bytes(t)
-		case to:
-			trx.To = hexString(v).bytes(t)
-		case InputData:
-			trx.Input = toBytes(t, string(v))
-		case Nonce:
-			trx.Nonce = uint64(v)
-		case GasLimit:
-			trx.GasLimit = uint64(v)
-		case GasPrice:
-			trx.GasPrice = pbeth.BigIntFromNative(v.ToBigInt(t))
-		case Value:
-			trx.Value = pbeth.BigIntFromNative(v.ToBigInt(t))
-		default:
-			failInvalidComponent(t, "trx", component)
-		}
-	}
+// func Trx(t testing.T, components ...interface{}) *pbeth.Transaction {
+// 	trx := &pbeth.Transaction{}
+// 	for _, component := range components {
+// 		switch v := component.(type) {
+// 		case hash:
+// 			trx.Hash = hexString(v).bytes(t)
+// 		case from:
+// 			trx.From = hexString(v).bytes(t)
+// 		case to:
+// 			trx.To = hexString(v).bytes(t)
+// 		case InputData:
+// 			trx.Input = toBytes(t, string(v))
+// 		case Nonce:
+// 			trx.Nonce = uint64(v)
+// 		case GasLimit:
+// 			trx.GasLimit = uint64(v)
+// 		case GasPrice:
+// 			trx.GasPrice = pbeth.BigIntFromNative(v.ToBigInt(t))
+// 		case Value:
+// 			trx.Value = pbeth.BigIntFromNative(v.ToBigInt(t))
+// 		default:
+// 			failInvalidComponent(t, "trx", component)
+// 		}
+// 	}
 
-	return trx
-}
+// 	return trx
+// }
 
 func TrxTrace(t testing.T, components ...interface{}) *pbeth.TransactionTrace {
 	trace := &pbeth.TransactionTrace{

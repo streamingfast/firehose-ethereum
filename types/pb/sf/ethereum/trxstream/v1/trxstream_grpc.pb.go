@@ -8,7 +8,6 @@ package pbtrxstream
 
 import (
 	context "context"
-	v1 "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -50,7 +49,7 @@ func (c *transactionStreamClient) Transactions(ctx context.Context, in *Transact
 }
 
 type TransactionStream_TransactionsClient interface {
-	Recv() (*v1.Transaction, error)
+	Recv() (*Transaction, error)
 	grpc.ClientStream
 }
 
@@ -58,8 +57,8 @@ type transactionStreamTransactionsClient struct {
 	grpc.ClientStream
 }
 
-func (x *transactionStreamTransactionsClient) Recv() (*v1.Transaction, error) {
-	m := new(v1.Transaction)
+func (x *transactionStreamTransactionsClient) Recv() (*Transaction, error) {
+	m := new(Transaction)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -101,7 +100,7 @@ func _TransactionStream_Transactions_Handler(srv interface{}, stream grpc.Server
 }
 
 type TransactionStream_TransactionsServer interface {
-	Send(*v1.Transaction) error
+	Send(*Transaction) error
 	grpc.ServerStream
 }
 
@@ -109,7 +108,7 @@ type transactionStreamTransactionsServer struct {
 	grpc.ServerStream
 }
 
-func (x *transactionStreamTransactionsServer) Send(m *v1.Transaction) error {
+func (x *transactionStreamTransactionsServer) Send(m *Transaction) error {
 	return x.ServerStream.SendMsg(m)
 }
 
