@@ -10,6 +10,6 @@ start:
     firehose-grpc-listen-addr: ":9000*"
     substreams-enabled: true
     substreams-rpc-endpoint: https://summer-bitter-snow.bsc.quiknode.pro/b8359f47150c2079bc571dc5d107506043d191fd/
-    substreams-secondary-rpc-endpoints: https://summer-bitter-snow.bsc.quiknode.pro/b8359f47150c2079bc571dc5d107506043d191fd/
+    substreams-secondary-rpc-endpoints: https://nd-111-873-461.p2pify.com/b3a7bda8db2fbc9e108f1edeaf015ce2
     substreams-rpc-cache-store-url: gs://dfuseio-global-blocks-us/eth-bsc-mainnet/rpc-cache
     substreams-stores-save-interval: 1000

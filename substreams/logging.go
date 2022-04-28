@@ -8,5 +8,5 @@ import (
 var zlog *zap.Logger
 
 func init() {
-	logging.Register("github.com/streamingfast/sf-ethereum/substreams", &zlog)
+	zlog, _ = logging.PackageLogger("substreams", "github.com/sf-ethereum/substreams/pipeline")
 }

@@ -68,7 +68,7 @@ func NewRPCEngine(rpcCachePath, rpcEndpoint string, secondaryEndpoints []string)
 
 func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 	return map[string]map[string]wasm.WASMExtension{
-		"rpc": map[string]wasm.WASMExtension{
+		"rpc": {
 			"eth_call": e.ethCall,
 		},
 	}

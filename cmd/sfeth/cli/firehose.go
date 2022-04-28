@@ -122,7 +122,7 @@ func init() {
 				rpcEngine, err := ethss.NewRPCEngine(
 					viper.GetString("substreams-rpc-cache-store-url"),
 					viper.GetString("substreams-rpc-endpoint"),
-					viper.GetStringSlice("substreams-rpc-secondary-endpoints"),
+					viper.GetStringSlice("substreams-secondary-rpc-endpoints"),
 				)
 				if err != nil {
 					return nil, fmt.Errorf("setting up Ethereum rpc engine and cache: %w", err)
