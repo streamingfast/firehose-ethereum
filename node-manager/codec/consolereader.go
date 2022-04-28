@@ -19,12 +19,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/streamingfast/bstream"
 	"io"
 	"math/big"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/streamingfast/bstream"
 
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/sf-ethereum/types"
@@ -235,10 +236,6 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		case strings.HasPrefix(line, "ADD_LOG"):
 			ctx.stats.inc("ADD_LOG")
 			err = ctx.readAddLog(line)
-
-		case strings.HasPrefix(line, "GAS_EVENT"):
-			ctx.stats.inc("GAS_EVENT")
-			err = ctx.readGasEvent(line)
 
 		case strings.HasPrefix(line, "SKIPPED_TRX"):
 			ctx.stats.inc("SKIPPED_TRX")
@@ -1065,42 +1062,6 @@ func (ctx *parseCtx) readGasChange(line string) error {
 	}
 
 	evmCall.GasChanges = append(evmCall.GasChanges, gasChange)
-
-	return nil
-}
-
-// Formats
-// DMLOG GAS_EVENT <CALL_INDEX> <ID> <ORDINAL>
-func (ctx *parseCtx) readGasEvent(line string) error {
-	chunks, err := SplitInChunks(line, 4)
-	if err != nil {
-		return fmt.Errorf("split: %s", err)
-	}
-
-	callIndex := chunks[0]
-
-	gasEvent := &pbeth.GasEvent{
-		Gas:     FromUint64(chunks[1], "GAS_EVENT NewValue"),
-		Ordinal: FromUint64(chunks[2], "GAS_EVENT ordinal"),
-	}
-
-	if callIndex == "0" {
-		if ctx.currentTrace != nil {
-			// We have a trace active, so let's add it to it's root call
-			ctx.currentRootCall.GasEvents = append(ctx.currentRootCall.GasEvents, gasEvent)
-			return nil
-		}
-
-		// We simply ignore those, does not make sens in the context of gas change to have it on block level
-		return nil
-	}
-
-	evmCall, err := ctx.getCall(callIndex, "GAS_EVENT")
-	if err != nil {
-		return err
-	}
-
-	evmCall.GasEvents = append(evmCall.GasEvents, gasEvent)
 
 	return nil
 }

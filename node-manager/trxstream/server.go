@@ -19,7 +19,6 @@ import (
 
 	"github.com/streamingfast/logging"
 	pbtrxstream "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/trxstream/v1"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/streamingfast/shutter"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -74,7 +73,7 @@ func (s *Server) Ready() bool {
 	return true
 }
 
-func (s *Server) PushTransaction(trx *pbeth.Transaction) {
+func (s *Server) PushTransaction(trx *pbtrxstream.Transaction) {
 	if s.IsTerminating() {
 		return
 	}

@@ -80,7 +80,7 @@ func (p *TrxPoolLogPlugin) LogLine(line string) {
 	p.server.PushTransaction(tx)
 }
 
-func readPoolTrxBegin(chunks []string) *pbeth.Transaction {
+func readPoolTrxBegin(chunks []string) *pbtrxstream.Transaction {
 	hash := codec.FromHex(chunks[0], "TRX_POOL txHash")
 	from := codec.FromHex(chunks[1], "TRX_POOL from")
 	to := codec.FromHex(chunks[2], "TRX_POOL to")
@@ -93,7 +93,7 @@ func readPoolTrxBegin(chunks []string) *pbeth.Transaction {
 	nonce := codec.FromUint64(chunks[9], "TRX_POOL nonce")
 	input := codec.FromHex(chunks[10], "TRX_POOL input")
 
-	return &pbeth.Transaction{
+	return &pbtrxstream.Transaction{
 		To:       to,
 		From:     from,
 		Hash:     hash,

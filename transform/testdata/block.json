@@ -203,14 +203,6 @@
               "newValue": "252812",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "473151"
-            },
-            {
-              "gas": "252837"
-            }
           ]
         },
         {
@@ -291,44 +283,6 @@
               "oldValue": "4539",
               "newValue": "245742",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "457449"
-            },
-            {
-              "gas": "454829"
-            },
-            {
-              "gas": "451065"
-            },
-            {
-              "gas": "444074"
-            },
-            {
-              "gas": "443453"
-            },
-            {
-              "gas": "438462"
-            },
-            {
-              "gas": "435225"
-            },
-            {
-              "gas": "308035"
-            },
-            {
-              "gas": "307724"
-            },
-            {
-              "gas": "293506"
-            },
-            {
-              "gas": "290630"
-            },
-            {
-              "gas": "245742"
             }
           ]
         },
@@ -512,32 +466,6 @@
               "newValue": "301374",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "417443"
-            },
-            {
-              "gas": "401378"
-            },
-            {
-              "gas": "400546"
-            },
-            {
-              "gas": "322921"
-            },
-            {
-              "gas": "322640"
-            },
-            {
-              "gas": "321825"
-            },
-            {
-              "gas": "321495"
-            },
-            {
-              "gas": "320861"
-            }
           ]
         },
         {
@@ -623,14 +551,6 @@
               "newValue": "316693",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "393919"
-            },
-            {
-              "gas": "316712"
-            }
           ]
         },
         {
@@ -675,26 +595,6 @@
               "oldValue": "4920",
               "newValue": "306876",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "381213"
-            },
-            {
-              "gas": "373736"
-            },
-            {
-              "gas": "373289"
-            },
-            {
-              "gas": "315604"
-            },
-            {
-              "gas": "315038"
-            },
-            {
-              "gas": "306876"
             }
           ]
         },
@@ -846,20 +746,6 @@
               "oldValue": "5047",
               "newValue": "310203",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "335648"
-            },
-            {
-              "gas": "326074"
-            },
-            {
-              "gas": "323165"
-            },
-            {
-              "gas": "310203"
             }
           ]
         },
@@ -1111,14 +997,6 @@
               "newValue": "288911",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "291615"
-            },
-            {
-              "gas": "288922"
-            }
           ]
         },
         {
@@ -1249,32 +1127,6 @@
               "oldValue": "3895",
               "newValue": "244274",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "276040"
-            },
-            {
-              "gas": "268418"
-            },
-            {
-              "gas": "267991"
-            },
-            {
-              "gas": "260369"
-            },
-            {
-              "gas": "259945"
-            },
-            {
-              "gas": "252323"
-            },
-            {
-              "gas": "251896"
-            },
-            {
-              "gas": "244274"
             }
           ]
         },
@@ -2403,32 +2255,6 @@
               "newValue": "33650",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "171656"
-            },
-            {
-              "gas": "138382"
-            },
-            {
-              "gas": "138297"
-            },
-            {
-              "gas": "130135"
-            },
-            {
-              "gas": "129959"
-            },
-            {
-              "gas": "124855"
-            },
-            {
-              "gas": "124612"
-            },
-            {
-              "gas": "33650"
-            }
           ]
         },
         {
@@ -2669,26 +2495,6 @@
               "oldValue": "34366",
               "newValue": "31842",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "111761"
-            },
-            {
-              "gas": "54685"
-            },
-            {
-              "gas": "54174"
-            },
-            {
-              "gas": "53540"
-            },
-            {
-              "gas": "53228"
-            },
-            {
-              "gas": "51107"
             }
           ]
         },
@@ -3146,26 +2952,6 @@
               "newValue": "192036",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "272156"
-            },
-            {
-              "gas": "269533"
-            },
-            {
-              "gas": "266609"
-            },
-            {
-              "gas": "248984"
-            },
-            {
-              "gas": "246645"
-            },
-            {
-              "gas": "192036"
-            }
           ]
         },
         {
@@ -3351,26 +3137,6 @@
               "oldValue": "190845",
               "newValue": "188321",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "231809"
-            },
-            {
-              "gas": "210486"
-            },
-            {
-              "gas": "209937"
-            },
-            {
-              "gas": "208781"
-            },
-            {
-              "gas": "208451"
-            },
-            {
-              "gas": "207817"
             }
           ]
         },
@@ -3579,14 +3345,6 @@
               "reason": "REASON_REVERT"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "972170"
-            },
-            {
-              "gas": "969547"
-            }
-          ],
           "statusFailed": true,
           "statusReverted": true,
           "failureReason": "execution reverted",
@@ -3718,14 +3476,6 @@
               "oldValue": "350277",
               "newValue": "350274",
               "reason": "REASON_REVERT"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "354200"
-            },
-            {
-              "gas": "351577"
             }
           ],
           "statusFailed": true,
@@ -4114,44 +3864,6 @@
               "newValue": "351351",
               "reason": "REASON_CALL_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "448033"
-            },
-            {
-              "gas": "444933"
-            },
-            {
-              "gas": "441950"
-            },
-            {
-              "gas": "438850"
-            },
-            {
-              "gas": "435867"
-            },
-            {
-              "gas": "432767"
-            },
-            {
-              "gas": "429783"
-            },
-            {
-              "gas": "426683"
-            },
-            {
-              "gas": "423700"
-            },
-            {
-              "gas": "420600"
-            },
-            {
-              "gas": "417616"
-            },
-            {
-              "gas": "414516"
-            }
           ]
         },
         {
@@ -4409,32 +4121,6 @@
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "145839"
-            },
-            {
-              "gas": "112565"
-            },
-            {
-              "gas": "112480"
-            },
-            {
-              "gas": "104318"
-            },
-            {
-              "gas": "104142"
-            },
-            {
-              "gas": "99025"
-            },
-            {
-              "gas": "98769"
-            },
-            {
-              "gas": "33246"
-            }
-          ],
           "statusFailed": true,
           "statusReverted": true,
           "failureReason": "execution reverted",
@@ -4681,26 +4367,6 @@
               "oldValue": "34366",
               "newValue": "31842",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "86244"
-            },
-            {
-              "gas": "53492"
-            },
-            {
-              "gas": "52943"
-            },
-            {
-              "gas": "52302"
-            },
-            {
-              "gas": "51972"
-            },
-            {
-              "gas": "51338"
             }
           ],
           "stateReverted": true
@@ -5034,44 +4700,6 @@
               "newValue": "46990",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "233472"
-            },
-            {
-              "gas": "230862"
-            },
-            {
-              "gas": "226149"
-            },
-            {
-              "gas": "223539"
-            },
-            {
-              "gas": "219618"
-            },
-            {
-              "gas": "188844"
-            },
-            {
-              "gas": "187750"
-            },
-            {
-              "gas": "179588"
-            },
-            {
-              "gas": "176922"
-            },
-            {
-              "gas": "125967"
-            },
-            {
-              "gas": "124213"
-            },
-            {
-              "gas": "46990"
-            }
           ]
         },
         {
@@ -5327,26 +4955,6 @@
               "newValue": "123342",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "163285"
-            },
-            {
-              "gas": "144982"
-            },
-            {
-              "gas": "144451"
-            },
-            {
-              "gas": "143556"
-            },
-            {
-              "gas": "143244"
-            },
-            {
-              "gas": "142610"
-            }
           ]
         },
         {
@@ -5551,26 +5159,6 @@
               "oldValue": "47712",
               "newValue": "45188",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "111368"
-            },
-            {
-              "gas": "67167"
-            },
-            {
-              "gas": "66777"
-            },
-            {
-              "gas": "65882"
-            },
-            {
-              "gas": "65570"
-            },
-            {
-              "gas": "64439"
             }
           ]
         },
@@ -5930,62 +5518,6 @@
               "newValue": "80108",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "269127"
-            },
-            {
-              "gas": "264010"
-            },
-            {
-              "gas": "263683"
-            },
-            {
-              "gas": "258579"
-            },
-            {
-              "gas": "258286"
-            },
-            {
-              "gas": "253182"
-            },
-            {
-              "gas": "252774"
-            },
-            {
-              "gas": "247640"
-            },
-            {
-              "gas": "247452"
-            },
-            {
-              "gas": "234327"
-            },
-            {
-              "gas": "234042"
-            },
-            {
-              "gas": "185826"
-            },
-            {
-              "gas": "185336"
-            },
-            {
-              "gas": "122713"
-            },
-            {
-              "gas": "122248"
-            },
-            {
-              "gas": "80914"
-            },
-            {
-              "gas": "80742"
-            },
-            {
-              "gas": "80108"
-            }
           ]
         },
         {
@@ -6217,26 +5749,6 @@
               "newValue": "182308",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "219403"
-            },
-            {
-              "gas": "203885"
-            },
-            {
-              "gas": "203336"
-            },
-            {
-              "gas": "202768"
-            },
-            {
-              "gas": "202438"
-            },
-            {
-              "gas": "201804"
-            }
           ]
         },
         {
@@ -6447,26 +5959,6 @@
               "newValue": "119956",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "171536"
-            },
-            {
-              "gas": "142019"
-            },
-            {
-              "gas": "141508"
-            },
-            {
-              "gas": "140940"
-            },
-            {
-              "gas": "140628"
-            },
-            {
-              "gas": "139213"
-            }
           ]
         },
         {
@@ -6507,14 +5999,6 @@
               "oldValue": "139416",
               "newValue": "139410",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "161652"
-            },
-            {
-              "gas": "139424"
             }
           ]
         },
@@ -6622,14 +6106,6 @@
               "oldValue": "137054",
               "newValue": "137048",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "137691"
-            },
-            {
-              "gas": "137062"
             }
           ]
         },
@@ -6762,26 +6238,6 @@
               "newValue": "79143",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "109434"
-            },
-            {
-              "gas": "101272"
-            },
-            {
-              "gas": "100761"
-            },
-            {
-              "gas": "99346"
-            },
-            {
-              "gas": "99034"
-            },
-            {
-              "gas": "98400"
-            }
           ]
         },
         {
@@ -6869,14 +6325,6 @@
               "oldValue": "97810",
               "newValue": "97804",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "98447"
-            },
-            {
-              "gas": "97818"
             }
           ]
         },
@@ -7021,14 +6469,6 @@
               "oldValue": "4287",
               "newValue": "232778",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "276979"
-            },
-            {
-              "gas": "232778"
             }
           ]
         },
@@ -7246,20 +6686,6 @@
               "newValue": "235444",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "270691"
-            },
-            {
-              "gas": "252048"
-            },
-            {
-              "gas": "251747"
-            },
-            {
-              "gas": "235444"
-            }
           ]
         },
         {
@@ -7295,20 +6721,6 @@
               "oldValue": "3956",
               "newValue": "248354",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "260755"
-            },
-            {
-              "gas": "253764"
-            },
-            {
-              "gas": "253345"
-            },
-            {
-              "gas": "248354"
             }
           ]
         },
@@ -7379,20 +6791,6 @@
               "oldValue": "3704",
               "newValue": "232167",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "244568"
-            },
-            {
-              "gas": "237577"
-            },
-            {
-              "gas": "237158"
-            },
-            {
-              "gas": "232167"
             }
           ]
         },
@@ -7531,14 +6929,6 @@
               "oldValue": "34423",
               "newValue": "34417",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "73759"
-            },
-            {
-              "gas": "34431"
             }
           ]
         },
@@ -7797,44 +7187,6 @@
               "newValue": "281096",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "398579"
-            },
-            {
-              "gas": "395956"
-            },
-            {
-              "gas": "392298"
-            },
-            {
-              "gas": "389688"
-            },
-            {
-              "gas": "387831"
-            },
-            {
-              "gas": "372369"
-            },
-            {
-              "gas": "371660"
-            },
-            {
-              "gas": "323294"
-            },
-            {
-              "gas": "322654"
-            },
-            {
-              "gas": "282044"
-            },
-            {
-              "gas": "281730"
-            },
-            {
-              "gas": "281096"
-            }
           ]
         },
         {
@@ -8032,26 +7384,6 @@
               "oldValue": "320150",
               "newValue": "317626",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "354840"
-            },
-            {
-              "gas": "339295"
-            },
-            {
-              "gas": "338766"
-            },
-            {
-              "gas": "338132"
-            },
-            {
-              "gas": "337802"
-            },
-            {
-              "gas": "337111"
             }
           ]
         },
@@ -8252,26 +7584,6 @@
               "oldValue": "279666",
               "newValue": "277142",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "306740"
-            },
-            {
-              "gas": "298578"
-            },
-            {
-              "gas": "298047"
-            },
-            {
-              "gas": "297413"
-            },
-            {
-              "gas": "297101"
-            },
-            {
-              "gas": "296410"
             }
           ]
         },
@@ -8648,62 +7960,6 @@
               "newValue": "80108",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "275492"
-            },
-            {
-              "gas": "270388"
-            },
-            {
-              "gas": "270061"
-            },
-            {
-              "gas": "264957"
-            },
-            {
-              "gas": "264664"
-            },
-            {
-              "gas": "259547"
-            },
-            {
-              "gas": "259139"
-            },
-            {
-              "gas": "254005"
-            },
-            {
-              "gas": "253817"
-            },
-            {
-              "gas": "240692"
-            },
-            {
-              "gas": "240407"
-            },
-            {
-              "gas": "186639"
-            },
-            {
-              "gas": "186149"
-            },
-            {
-              "gas": "123086"
-            },
-            {
-              "gas": "122621"
-            },
-            {
-              "gas": "80914"
-            },
-            {
-              "gas": "80742"
-            },
-            {
-              "gas": "80108"
-            }
           ]
         },
         {
@@ -8935,26 +8191,6 @@
               "newValue": "183022",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "225778"
-            },
-            {
-              "gas": "204775"
-            },
-            {
-              "gas": "204244"
-            },
-            {
-              "gas": "203236"
-            },
-            {
-              "gas": "202924"
-            },
-            {
-              "gas": "202290"
-            }
           ]
         },
         {
@@ -9177,26 +8413,6 @@
               "newValue": "120316",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "172336"
-            },
-            {
-              "gas": "142819"
-            },
-            {
-              "gas": "142308"
-            },
-            {
-              "gas": "141300"
-            },
-            {
-              "gas": "140988"
-            },
-            {
-              "gas": "139573"
-            }
           ]
         },
         {
@@ -9237,14 +8453,6 @@
               "oldValue": "140203",
               "newValue": "140197",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "162439"
-            },
-            {
-              "gas": "140211"
             }
           ]
         },
@@ -9352,14 +8560,6 @@
               "oldValue": "137408",
               "newValue": "137402",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "138045"
-            },
-            {
-              "gas": "137416"
             }
           ]
         },
@@ -9492,26 +8692,6 @@
               "newValue": "79137",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "109692"
-            },
-            {
-              "gas": "101530"
-            },
-            {
-              "gas": "101001"
-            },
-            {
-              "gas": "99586"
-            },
-            {
-              "gas": "99256"
-            },
-            {
-              "gas": "98622"
-            }
           ]
         },
         {
@@ -9599,14 +8779,6 @@
               "oldValue": "98046",
               "newValue": "98040",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "98683"
-            },
-            {
-              "gas": "98054"
             }
           ]
         },
@@ -10013,92 +9185,6 @@
               "newValue": "644225",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "966690"
-            },
-            {
-              "gas": "964077"
-            },
-            {
-              "gas": "963333"
-            },
-            {
-              "gas": "957910"
-            },
-            {
-              "gas": "957785"
-            },
-            {
-              "gas": "955127"
-            },
-            {
-              "gas": "955004"
-            },
-            {
-              "gas": "952320"
-            },
-            {
-              "gas": "952134"
-            },
-            {
-              "gas": "939608"
-            },
-            {
-              "gas": "939466"
-            },
-            {
-              "gas": "936051"
-            },
-            {
-              "gas": "935643"
-            },
-            {
-              "gas": "933026"
-            },
-            {
-              "gas": "932382"
-            },
-            {
-              "gas": "916920"
-            },
-            {
-              "gas": "916653"
-            },
-            {
-              "gas": "851307"
-            },
-            {
-              "gas": "851011"
-            },
-            {
-              "gas": "848067"
-            },
-            {
-              "gas": "847628"
-            },
-            {
-              "gas": "838082"
-            },
-            {
-              "gas": "837688"
-            },
-            {
-              "gas": "687576"
-            },
-            {
-              "gas": "687356"
-            },
-            {
-              "gas": "675639"
-            },
-            {
-              "gas": "675372"
-            },
-            {
-              "gas": "644225"
-            }
           ]
         },
         {
@@ -10206,14 +9292,6 @@
               "newValue": "924802",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "930053"
-            },
-            {
-              "gas": "924816"
-            }
           ]
         },
         {
@@ -10267,14 +9345,6 @@
               "oldValue": "921410",
               "newValue": "921404",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "924047"
-            },
-            {
-              "gas": "921418"
             }
           ]
         },
@@ -10477,26 +9547,6 @@
               "newValue": "837123",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "891457"
-            },
-            {
-              "gas": "858634"
-            },
-            {
-              "gas": "858103"
-            },
-            {
-              "gas": "857337"
-            },
-            {
-              "gas": "857025"
-            },
-            {
-              "gas": "856391"
-            }
           ]
         },
         {
@@ -10658,14 +9708,6 @@
               "oldValue": "826232",
               "newValue": "824851",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "833435"
-            },
-            {
-              "gas": "826329"
             }
           ]
         },
@@ -10848,32 +9890,6 @@
               "newValue": "675672",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "801890"
-            },
-            {
-              "gas": "798790"
-            },
-            {
-              "gas": "761893"
-            },
-            {
-              "gas": "742765"
-            },
-            {
-              "gas": "740848"
-            },
-            {
-              "gas": "698502"
-            },
-            {
-              "gas": "695117"
-            },
-            {
-              "gas": "675672"
-            }
           ]
         },
         {
@@ -10927,14 +9943,6 @@
               "oldValue": "11636",
               "newValue": "730963",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "744837"
-            },
-            {
-              "gas": "730963"
             }
           ]
         },
@@ -11055,14 +10063,6 @@
               "newValue": "686989",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "728581"
-            },
-            {
-              "gas": "686989"
-            }
           ]
         },
         {
@@ -11098,14 +10098,6 @@
               "oldValue": "675643",
               "newValue": "675637",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "716448"
-            },
-            {
-              "gas": "675651"
             }
           ]
         },
@@ -11219,14 +10211,6 @@
               "newValue": "665089",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "672662"
-            },
-            {
-              "gas": "665089"
-            }
           ]
         },
         {
@@ -11279,14 +10263,6 @@
               "oldValue": "664937",
               "newValue": "664931",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "675873"
-            },
-            {
-              "gas": "664945"
             }
           ]
         },
@@ -11444,26 +10420,6 @@
               "newValue": "633811",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "653806"
-            },
-            {
-              "gas": "645644"
-            },
-            {
-              "gas": "645115"
-            },
-            {
-              "gas": "643700"
-            },
-            {
-              "gas": "643370"
-            },
-            {
-              "gas": "642736"
-            }
           ]
         },
         {
@@ -11551,14 +10507,6 @@
               "oldValue": "633658",
               "newValue": "633652",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "634295"
-            },
-            {
-              "gas": "633666"
             }
           ]
         },
@@ -11689,26 +10637,6 @@
               "oldValue": "15061",
               "newValue": "961418",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "969878"
-            },
-            {
-              "gas": "967265"
-            },
-            {
-              "gas": "966936"
-            },
-            {
-              "gas": "964332"
-            },
-            {
-              "gas": "964022"
-            },
-            {
-              "gas": "961418"
             }
           ],
           "statusFailed": true,
@@ -11848,14 +10776,6 @@
               "reason": "REASON_RETURN_DATA_COPY"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "368254"
-            },
-            {
-              "gas": "352147"
-            }
-          ],
           "statusFailed": true,
           "statusReverted": true,
           "failureReason": "execution reverted",
@@ -11910,20 +10830,6 @@
               "oldValue": "5474",
               "newValue": "347883",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "357826"
-            },
-            {
-              "gas": "355216"
-            },
-            {
-              "gas": "350493"
-            },
-            {
-              "gas": "347883"
             }
           ],
           "stateReverted": true
@@ -12431,14 +11337,6 @@
               "newValue": "290979",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "299937"
-            },
-            {
-              "gas": "290979"
-            }
           ]
         },
         {
@@ -12464,14 +11362,6 @@
               "oldValue": "4524",
               "newValue": "287069",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "289686"
-            },
-            {
-              "gas": "287069"
             }
           ]
         },
@@ -12576,14 +11466,6 @@
               "oldValue": "6302",
               "newValue": "360552",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "405959"
-            },
-            {
-              "gas": "360552"
             }
           ]
         },
@@ -12699,56 +11581,6 @@
               "oldValue": "5591",
               "newValue": "355522",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "392354"
-            },
-            {
-              "gas": "389805"
-            },
-            {
-              "gas": "389316"
-            },
-            {
-              "gas": "386693"
-            },
-            {
-              "gas": "380901"
-            },
-            {
-              "gas": "373910"
-            },
-            {
-              "gas": "373448"
-            },
-            {
-              "gas": "370477"
-            },
-            {
-              "gas": "370016"
-            },
-            {
-              "gas": "365025"
-            },
-            {
-              "gas": "364564"
-            },
-            {
-              "gas": "361593"
-            },
-            {
-              "gas": "361210"
-            },
-            {
-              "gas": "358534"
-            },
-            {
-              "gas": "357970"
-            },
-            {
-              "gas": "355522"
             }
           ]
         },
@@ -13015,14 +11847,6 @@
               "newValue": "273156",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "364934"
-            },
-            {
-              "gas": "273260"
-            }
           ]
         },
         {
@@ -13054,14 +11878,6 @@
               "oldValue": "5392",
               "newValue": "268006",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "345248"
-            },
-            {
-              "gas": "268006"
             }
           ]
         },
@@ -13202,32 +12018,6 @@
               "newValue": "262957",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "307081"
-            },
-            {
-              "gas": "291354"
-            },
-            {
-              "gas": "290570"
-            },
-            {
-              "gas": "285436"
-            },
-            {
-              "gas": "284733"
-            },
-            {
-              "gas": "267484"
-            },
-            {
-              "gas": "266942"
-            },
-            {
-              "gas": "266308"
-            }
           ]
         },
         {
@@ -13334,14 +12124,6 @@
               "oldValue": "263262",
               "newValue": "263256",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "276483"
-            },
-            {
-              "gas": "263358"
             }
           ]
         },
@@ -13572,14 +12354,6 @@
               "newValue": "173580",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "285163"
-            },
-            {
-              "gas": "173693"
-            }
           ]
         },
         {
@@ -13670,32 +12444,6 @@
               "oldValue": "3341",
               "newValue": "169879",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "266924"
-            },
-            {
-              "gas": "264301"
-            },
-            {
-              "gas": "260394"
-            },
-            {
-              "gas": "229620"
-            },
-            {
-              "gas": "228532"
-            },
-            {
-              "gas": "220370"
-            },
-            {
-              "gas": "213928"
-            },
-            {
-              "gas": "169879"
             }
           ]
         },
@@ -13925,26 +12673,6 @@
               "oldValue": "169199",
               "newValue": "166675",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "199603"
-            },
-            {
-              "gas": "178280"
-            },
-            {
-              "gas": "177731"
-            },
-            {
-              "gas": "176575"
-            },
-            {
-              "gas": "176245"
-            },
-            {
-              "gas": "175611"
             }
           ]
         },
@@ -14371,14 +13099,6 @@
               "newValue": "395611",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "572268"
-            },
-            {
-              "gas": "395611"
-            }
           ]
         },
         {
@@ -14619,134 +13339,6 @@
               "oldValue": "6067",
               "newValue": "387535",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "560570"
-            },
-            {
-              "gas": "555436"
-            },
-            {
-              "gas": "555281"
-            },
-            {
-              "gas": "549886"
-            },
-            {
-              "gas": "549772"
-            },
-            {
-              "gas": "542596"
-            },
-            {
-              "gas": "542469"
-            },
-            {
-              "gas": "537478"
-            },
-            {
-              "gas": "537349"
-            },
-            {
-              "gas": "532358"
-            },
-            {
-              "gas": "532229"
-            },
-            {
-              "gas": "526873"
-            },
-            {
-              "gas": "526744"
-            },
-            {
-              "gas": "523388"
-            },
-            {
-              "gas": "523036"
-            },
-            {
-              "gas": "520588"
-            },
-            {
-              "gas": "519107"
-            },
-            {
-              "gas": "516659"
-            },
-            {
-              "gas": "515178"
-            },
-            {
-              "gas": "512730"
-            },
-            {
-              "gas": "511223"
-            },
-            {
-              "gas": "508775"
-            },
-            {
-              "gas": "506607"
-            },
-            {
-              "gas": "504159"
-            },
-            {
-              "gas": "501991"
-            },
-            {
-              "gas": "499543"
-            },
-            {
-              "gas": "497379"
-            },
-            {
-              "gas": "494931"
-            },
-            {
-              "gas": "492763"
-            },
-            {
-              "gas": "490315"
-            },
-            {
-              "gas": "488151"
-            },
-            {
-              "gas": "485703"
-            },
-            {
-              "gas": "483539"
-            },
-            {
-              "gas": "481091"
-            },
-            {
-              "gas": "478749"
-            },
-            {
-              "gas": "465624"
-            },
-            {
-              "gas": "465505"
-            },
-            {
-              "gas": "395628"
-            },
-            {
-              "gas": "395528"
-            },
-            {
-              "gas": "388525"
-            },
-            {
-              "gas": "388430"
-            },
-            {
-              "gas": "387535"
             }
           ]
         },
@@ -15161,20 +13753,6 @@
               "oldValue": "6587",
               "newValue": "388787",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "432424"
-            },
-            {
-              "gas": "422099"
-            },
-            {
-              "gas": "421690"
-            },
-            {
-              "gas": "388787"
             }
           ]
         },
@@ -15882,44 +14460,6 @@
               "newValue": "350957",
               "reason": "REASON_CALL_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "447574"
-            },
-            {
-              "gas": "444474"
-            },
-            {
-              "gas": "441491"
-            },
-            {
-              "gas": "438391"
-            },
-            {
-              "gas": "435408"
-            },
-            {
-              "gas": "432308"
-            },
-            {
-              "gas": "429324"
-            },
-            {
-              "gas": "426224"
-            },
-            {
-              "gas": "423241"
-            },
-            {
-              "gas": "420141"
-            },
-            {
-              "gas": "417157"
-            },
-            {
-              "gas": "414057"
-            }
           ]
         },
         {
@@ -16356,32 +14896,6 @@
               "newValue": "372812",
               "reason": "REASON_CALL_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "453893"
-            },
-            {
-              "gas": "450793"
-            },
-            {
-              "gas": "447810"
-            },
-            {
-              "gas": "444710"
-            },
-            {
-              "gas": "441726"
-            },
-            {
-              "gas": "438626"
-            },
-            {
-              "gas": "435643"
-            },
-            {
-              "gas": "432543"
-            }
           ]
         },
         {
@@ -16671,32 +15185,6 @@
               "oldValue": "1773",
               "newValue": "17",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "129632"
-            },
-            {
-              "gas": "126602"
-            },
-            {
-              "gas": "110021"
-            },
-            {
-              "gas": "92677"
-            },
-            {
-              "gas": "92255"
-            },
-            {
-              "gas": "81711"
-            },
-            {
-              "gas": "71911"
-            },
-            {
-              "gas": "45117"
             }
           ]
         },
@@ -17166,14 +15654,6 @@
               "newValue": "284712",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "373140"
-            },
-            {
-              "gas": "284712"
-            }
           ]
         },
         {
@@ -17239,32 +15719,6 @@
               "oldValue": "5117",
               "newValue": "279292",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "364571"
-            },
-            {
-              "gas": "359454"
-            },
-            {
-              "gas": "353067"
-            },
-            {
-              "gas": "347818"
-            },
-            {
-              "gas": "347400"
-            },
-            {
-              "gas": "328178"
-            },
-            {
-              "gas": "327633"
-            },
-            {
-              "gas": "279292"
             }
           ]
         },
@@ -17474,26 +15928,6 @@
               "oldValue": "276836",
               "newValue": "274312",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "311501"
-            },
-            {
-              "gas": "296039"
-            },
-            {
-              "gas": "295510"
-            },
-            {
-              "gas": "294761"
-            },
-            {
-              "gas": "294431"
-            },
-            {
-              "gas": "293797"
             }
           ]
         },
@@ -18576,20 +17010,6 @@
               "newValue": "163159",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "200043"
-            },
-            {
-              "gas": "194926"
-            },
-            {
-              "gas": "194451"
-            },
-            {
-              "gas": "163159"
-            }
           ]
         },
         {
@@ -18690,20 +17110,6 @@
               "oldValue": "2628",
               "newValue": "163232",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "178903"
-            },
-            {
-              "gas": "171281"
-            },
-            {
-              "gas": "170854"
-            },
-            {
-              "gas": "163232"
             }
           ]
         },
@@ -18825,14 +17231,6 @@
               "newValue": "193586",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "198703"
-            },
-            {
-              "gas": "193586"
-            }
           ]
         },
         {
@@ -18937,20 +17335,6 @@
               "newValue": "1129132",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1169375"
-            },
-            {
-              "gas": "1160378"
-            },
-            {
-              "gas": "1156244"
-            },
-            {
-              "gas": "1129132"
-            }
           ]
         },
         {
@@ -18986,20 +17370,6 @@
               "oldValue": "17889",
               "newValue": "1142497",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1147999"
-            },
-            {
-              "gas": "1145376"
-            },
-            {
-              "gas": "1145046"
-            },
-            {
-              "gas": "1142497"
             }
           ]
         },
@@ -19094,38 +17464,6 @@
               "oldValue": "17434",
               "newValue": "1113228",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1135066"
-            },
-            {
-              "gas": "1128075"
-            },
-            {
-              "gas": "1127761"
-            },
-            {
-              "gas": "1124790"
-            },
-            {
-              "gas": "1124476"
-            },
-            {
-              "gas": "1119485"
-            },
-            {
-              "gas": "1119171"
-            },
-            {
-              "gas": "1116200"
-            },
-            {
-              "gas": "1115904"
-            },
-            {
-              "gas": "1113228"
             }
           ]
         },
@@ -19299,20 +17637,6 @@
               "newValue": "1149889",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1169399"
-            },
-            {
-              "gas": "1160392"
-            },
-            {
-              "gas": "1158805"
-            },
-            {
-              "gas": "1149889"
-            }
           ]
         },
         {
@@ -19348,20 +17672,6 @@
               "oldValue": "17890",
               "newValue": "1142520",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1148022"
-            },
-            {
-              "gas": "1145399"
-            },
-            {
-              "gas": "1145069"
-            },
-            {
-              "gas": "1142520"
             }
           ]
         },
@@ -19426,20 +17736,6 @@
               "oldValue": "17727",
               "newValue": "1132173",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1137594"
-            },
-            {
-              "gas": "1134984"
-            },
-            {
-              "gas": "1134654"
-            },
-            {
-              "gas": "1132173"
             }
           ]
         },
@@ -19732,38 +18028,6 @@
               "newValue": "90661",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "214189"
-            },
-            {
-              "gas": "209072"
-            },
-            {
-              "gas": "208745"
-            },
-            {
-              "gas": "203641"
-            },
-            {
-              "gas": "203082"
-            },
-            {
-              "gas": "185457"
-            },
-            {
-              "gas": "185172"
-            },
-            {
-              "gas": "122044"
-            },
-            {
-              "gas": "121579"
-            },
-            {
-              "gas": "90661"
-            }
           ]
         },
         {
@@ -19964,26 +18228,6 @@
               "newValue": "119290",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "171297"
-            },
-            {
-              "gas": "141780"
-            },
-            {
-              "gas": "141231"
-            },
-            {
-              "gas": "139816"
-            },
-            {
-              "gas": "139486"
-            },
-            {
-              "gas": "138852"
-            }
           ]
         },
         {
@@ -20024,14 +18268,6 @@
               "oldValue": "139181",
               "newValue": "139175",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "161417"
-            },
-            {
-              "gas": "139189"
             }
           ]
         },
@@ -20122,14 +18358,6 @@
               "oldValue": "137647",
               "newValue": "137641",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "138284"
-            },
-            {
-              "gas": "137655"
             }
           ]
         },
@@ -20267,26 +18495,6 @@
               "newValue": "88900",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "108775"
-            },
-            {
-              "gas": "100613"
-            },
-            {
-              "gas": "100102"
-            },
-            {
-              "gas": "98687"
-            },
-            {
-              "gas": "98375"
-            },
-            {
-              "gas": "97741"
-            }
           ]
         },
         {
@@ -20374,14 +18582,6 @@
               "oldValue": "97161",
               "newValue": "97155",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "97798"
-            },
-            {
-              "gas": "97169"
             }
           ]
         },
@@ -20583,26 +18783,6 @@
               "newValue": "147082",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "222330"
-            },
-            {
-              "gas": "219720"
-            },
-            {
-              "gas": "216966"
-            },
-            {
-              "gas": "199341"
-            },
-            {
-              "gas": "197212"
-            },
-            {
-              "gas": "147082"
-            }
           ]
         },
         {
@@ -20788,26 +18968,6 @@
               "oldValue": "146664",
               "newValue": "144140",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "183227"
-            },
-            {
-              "gas": "165419"
-            },
-            {
-              "gas": "164908"
-            },
-            {
-              "gas": "164274"
-            },
-            {
-              "gas": "163962"
-            },
-            {
-              "gas": "163397"
             }
           ]
         },
@@ -21206,14 +19366,6 @@
               "oldValue": "56814",
               "newValue": "54034",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "229917"
-            },
-            {
-              "gas": "200093"
             }
           ]
         },
@@ -21933,26 +20085,6 @@
               "newValue": "27699",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "119539"
-            },
-            {
-              "gas": "116929"
-            },
-            {
-              "gas": "114222"
-            },
-            {
-              "gas": "90019"
-            },
-            {
-              "gas": "87890"
-            },
-            {
-              "gas": "27699"
-            }
           ]
         },
         {
@@ -22165,26 +20297,6 @@
               "oldValue": "28989",
               "newValue": "26465",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "75613"
-            },
-            {
-              "gas": "48512"
-            },
-            {
-              "gas": "48122"
-            },
-            {
-              "gas": "47159"
-            },
-            {
-              "gas": "46847"
-            },
-            {
-              "gas": "45716"
             }
           ]
         },
@@ -22492,14 +20604,6 @@
               "newValue": "17499",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "178576"
-            },
-            {
-              "gas": "17519"
-            }
           ]
         },
         {
@@ -22644,20 +20748,6 @@
               "newValue": "10180",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "56939"
-            },
-            {
-              "gas": "45813"
-            },
-            {
-              "gas": "38056"
-            },
-            {
-              "gas": "10180"
-            }
           ]
         },
         {
@@ -22723,14 +20813,6 @@
               "newValue": "9618",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "34615"
-            },
-            {
-              "gas": "9638"
-            }
           ]
         },
         {
@@ -22779,14 +20861,6 @@
             {
               "newValue": "2300",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "9100"
-            },
-            {
-              "gas": "2300"
             }
           ]
         },
@@ -23063,38 +21137,6 @@
               "reason": "REASON_CODE_COPY"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "188893"
-            },
-            {
-              "gas": "123303"
-            },
-            {
-              "gas": "119161"
-            },
-            {
-              "gas": "116551"
-            },
-            {
-              "gas": "116122"
-            },
-            {
-              "gas": "113637"
-            },
-            {
-              "gas": "112167"
-            },
-            {
-              "gas": "45363"
-            },
-            {
-              "gas": "44994"
-            },
-            {
-              "gas": "44360"
-            }
-          ],
           "statusFailed": true,
           "statusReverted": true,
           "failureReason": "execution reverted",
@@ -23357,26 +21399,6 @@
               "oldValue": "46273",
               "newValue": "43749",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "99541"
-            },
-            {
-              "gas": "66979"
-            },
-            {
-              "gas": "66448"
-            },
-            {
-              "gas": "65814"
-            },
-            {
-              "gas": "65502"
-            },
-            {
-              "gas": "63017"
             }
           ],
           "stateReverted": true
@@ -23950,32 +21972,6 @@
               "newValue": "41724",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "199193"
-            },
-            {
-              "gas": "196583"
-            },
-            {
-              "gas": "192662"
-            },
-            {
-              "gas": "161888"
-            },
-            {
-              "gas": "160804"
-            },
-            {
-              "gas": "152642"
-            },
-            {
-              "gas": "150692"
-            },
-            {
-              "gas": "41724"
-            }
           ]
         },
         {
@@ -24216,26 +22212,6 @@
               "oldValue": "42032",
               "newValue": "39508",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "137433"
-            },
-            {
-              "gas": "70709"
-            },
-            {
-              "gas": "70198"
-            },
-            {
-              "gas": "69564"
-            },
-            {
-              "gas": "69252"
-            },
-            {
-              "gas": "58773"
             }
           ]
         },
@@ -24754,14 +22730,6 @@
               "newValue": "398269",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "572256"
-            },
-            {
-              "gas": "398269"
-            }
           ]
         },
         {
@@ -25002,134 +22970,6 @@
               "oldValue": "6109",
               "newValue": "390194",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "560559"
-            },
-            {
-              "gas": "555425"
-            },
-            {
-              "gas": "555270"
-            },
-            {
-              "gas": "549875"
-            },
-            {
-              "gas": "549761"
-            },
-            {
-              "gas": "542585"
-            },
-            {
-              "gas": "542458"
-            },
-            {
-              "gas": "537467"
-            },
-            {
-              "gas": "537338"
-            },
-            {
-              "gas": "532347"
-            },
-            {
-              "gas": "532218"
-            },
-            {
-              "gas": "526862"
-            },
-            {
-              "gas": "526733"
-            },
-            {
-              "gas": "523377"
-            },
-            {
-              "gas": "523025"
-            },
-            {
-              "gas": "520577"
-            },
-            {
-              "gas": "519096"
-            },
-            {
-              "gas": "516648"
-            },
-            {
-              "gas": "515167"
-            },
-            {
-              "gas": "512719"
-            },
-            {
-              "gas": "511238"
-            },
-            {
-              "gas": "508790"
-            },
-            {
-              "gas": "507283"
-            },
-            {
-              "gas": "504835"
-            },
-            {
-              "gas": "502671"
-            },
-            {
-              "gas": "500223"
-            },
-            {
-              "gas": "498716"
-            },
-            {
-              "gas": "496268"
-            },
-            {
-              "gas": "494104"
-            },
-            {
-              "gas": "491656"
-            },
-            {
-              "gas": "490149"
-            },
-            {
-              "gas": "487701"
-            },
-            {
-              "gas": "486194"
-            },
-            {
-              "gas": "483746"
-            },
-            {
-              "gas": "481408"
-            },
-            {
-              "gas": "468283"
-            },
-            {
-              "gas": "468164"
-            },
-            {
-              "gas": "398287"
-            },
-            {
-              "gas": "398187"
-            },
-            {
-              "gas": "391184"
-            },
-            {
-              "gas": "391089"
-            },
-            {
-              "gas": "390194"
             }
           ]
         },
@@ -25545,20 +23385,6 @@
               "newValue": "391404",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "435041"
-            },
-            {
-              "gas": "424716"
-            },
-            {
-              "gas": "424307"
-            },
-            {
-              "gas": "391404"
-            }
           ]
         },
         {
@@ -25873,14 +23699,6 @@
               "newValue": "295284",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "373152"
-            },
-            {
-              "gas": "295284"
-            }
           ]
         },
         {
@@ -25946,32 +23764,6 @@
               "oldValue": "5117",
               "newValue": "289864",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "364583"
-            },
-            {
-              "gas": "359466"
-            },
-            {
-              "gas": "353079"
-            },
-            {
-              "gas": "347830"
-            },
-            {
-              "gas": "347412"
-            },
-            {
-              "gas": "328190"
-            },
-            {
-              "gas": "327645"
-            },
-            {
-              "gas": "289864"
             }
           ]
         },
@@ -26169,26 +23961,6 @@
               "oldValue": "287408",
               "newValue": "284884",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "311513"
-            },
-            {
-              "gas": "296051"
-            },
-            {
-              "gas": "295522"
-            },
-            {
-              "gas": "294773"
-            },
-            {
-              "gas": "294443"
-            },
-            {
-              "gas": "293809"
             }
           ]
         },
@@ -26405,14 +24177,6 @@
               "newValue": "291887",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "373212"
-            },
-            {
-              "gas": "291887"
-            }
           ]
         },
         {
@@ -26478,32 +24242,6 @@
               "oldValue": "5227",
               "newValue": "286466",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "364668"
-            },
-            {
-              "gas": "359564"
-            },
-            {
-              "gas": "353754"
-            },
-            {
-              "gas": "348620"
-            },
-            {
-              "gas": "348359"
-            },
-            {
-              "gas": "335234"
-            },
-            {
-              "gas": "334689"
-            },
-            {
-              "gas": "286466"
             }
           ]
         },
@@ -26707,26 +24445,6 @@
               "oldValue": "283900",
               "newValue": "281376",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "318587"
-            },
-            {
-              "gas": "302860"
-            },
-            {
-              "gas": "302329"
-            },
-            {
-              "gas": "301590"
-            },
-            {
-              "gas": "301278"
-            },
-            {
-              "gas": "300644"
             }
           ]
         },
@@ -26943,14 +24661,6 @@
               "newValue": "302363",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "373212"
-            },
-            {
-              "gas": "302363"
-            }
           ]
         },
         {
@@ -27016,32 +24726,6 @@
               "oldValue": "5228",
               "newValue": "296942",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "364668"
-            },
-            {
-              "gas": "359564"
-            },
-            {
-              "gas": "353814"
-            },
-            {
-              "gas": "348680"
-            },
-            {
-              "gas": "348419"
-            },
-            {
-              "gas": "335294"
-            },
-            {
-              "gas": "334749"
-            },
-            {
-              "gas": "296942"
             }
           ]
         },
@@ -27233,26 +24917,6 @@
               "oldValue": "294375",
               "newValue": "291851",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "318646"
-            },
-            {
-              "gas": "302919"
-            },
-            {
-              "gas": "302388"
-            },
-            {
-              "gas": "301649"
-            },
-            {
-              "gas": "301337"
-            },
-            {
-              "gas": "300703"
             }
           ]
         },
@@ -27560,44 +25224,6 @@
               "oldValue": "1623",
               "newValue": "38010",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "183017"
-            },
-            {
-              "gas": "180353"
-            },
-            {
-              "gas": "176713"
-            },
-            {
-              "gas": "174103"
-            },
-            {
-              "gas": "172088"
-            },
-            {
-              "gas": "146527"
-            },
-            {
-              "gas": "143560"
-            },
-            {
-              "gas": "112786"
-            },
-            {
-              "gas": "112488"
-            },
-            {
-              "gas": "104326"
-            },
-            {
-              "gas": "104000"
-            },
-            {
-              "gas": "38010"
             }
           ]
         },
@@ -27955,26 +25581,6 @@
               "newValue": "36571",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "94452"
-            },
-            {
-              "gas": "93721"
-            },
-            {
-              "gas": "91297"
-            },
-            {
-              "gas": "90663"
-            },
-            {
-              "gas": "88033"
-            },
-            {
-              "gas": "85619"
-            }
           ]
         },
         {
@@ -28249,38 +25855,6 @@
               "newValue": "58814",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "240411"
-            },
-            {
-              "gas": "237801"
-            },
-            {
-              "gas": "233098"
-            },
-            {
-              "gas": "230488"
-            },
-            {
-              "gas": "227781"
-            },
-            {
-              "gas": "192678"
-            },
-            {
-              "gas": "189863"
-            },
-            {
-              "gas": "141115"
-            },
-            {
-              "gas": "139360"
-            },
-            {
-              "gas": "58814"
-            }
           ]
         },
         {
@@ -28349,14 +25923,6 @@
               "oldValue": "189193",
               "newValue": "189187",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "217052"
-            },
-            {
-              "gas": "189201"
             }
           ]
         },
@@ -28563,26 +26129,6 @@
               "newValue": "138287",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "175992"
-            },
-            {
-              "gas": "160530"
-            },
-            {
-              "gas": "160019"
-            },
-            {
-              "gas": "158490"
-            },
-            {
-              "gas": "158178"
-            },
-            {
-              "gas": "157544"
-            }
           ]
         },
         {
@@ -28670,14 +26216,6 @@
               "oldValue": "156025",
               "newValue": "156019",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "156819"
-            },
-            {
-              "gas": "156033"
             }
           ]
         },
@@ -28819,26 +26357,6 @@
               "oldValue": "59300",
               "newValue": "56776",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "126279"
-            },
-            {
-              "gas": "69203"
-            },
-            {
-              "gas": "68692"
-            },
-            {
-              "gas": "68058"
-            },
-            {
-              "gas": "67746"
-            },
-            {
-              "gas": "65625"
             }
           ]
         },
@@ -29254,38 +26772,6 @@
               "newValue": "31822",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "149311"
-            },
-            {
-              "gas": "146701"
-            },
-            {
-              "gas": "143974"
-            },
-            {
-              "gas": "115949"
-            },
-            {
-              "gas": "113791"
-            },
-            {
-              "gas": "48766"
-            },
-            {
-              "gas": "48351"
-            },
-            {
-              "gas": "39028"
-            },
-            {
-              "gas": "38622"
-            },
-            {
-              "gas": "31822"
-            }
           ]
         },
         {
@@ -29504,26 +26990,6 @@
               "newValue": "47127",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "101140"
-            },
-            {
-              "gas": "68578"
-            },
-            {
-              "gas": "68047"
-            },
-            {
-              "gas": "67413"
-            },
-            {
-              "gas": "67101"
-            },
-            {
-              "gas": "66395"
-            }
           ]
         },
         {
@@ -29662,14 +27128,6 @@
               "oldValue": "39667",
               "newValue": "38286",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "46647"
-            },
-            {
-              "gas": "39764"
             }
           ]
         },
@@ -29906,32 +27364,6 @@
               "oldValue": "2696",
               "newValue": "45669",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "221171"
-            },
-            {
-              "gas": "218561"
-            },
-            {
-              "gas": "214640"
-            },
-            {
-              "gas": "183866"
-            },
-            {
-              "gas": "182782"
-            },
-            {
-              "gas": "174620"
-            },
-            {
-              "gas": "172670"
-            },
-            {
-              "gas": "45669"
             }
           ]
         },
@@ -30173,26 +27605,6 @@
               "oldValue": "45634",
               "newValue": "43110",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "159068"
-            },
-            {
-              "gas": "79605"
-            },
-            {
-              "gas": "79094"
-            },
-            {
-              "gas": "78460"
-            },
-            {
-              "gas": "78148"
-            },
-            {
-              "gas": "62375"
             }
           ]
         },
@@ -30813,14 +28225,6 @@
               "newValue": "8649",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "33012"
-            },
-            {
-              "gas": "8660"
-            }
           ]
         },
         {
@@ -30868,20 +28272,6 @@
               "oldValue": "8216",
               "newValue": "8213",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "27214"
-            },
-            {
-              "gas": "24727"
-            },
-            {
-              "gas": "24610"
-            },
-            {
-              "gas": "8227"
             }
           ]
         },
@@ -30937,20 +28327,6 @@
             {
               "newValue": "904",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "14310"
-            },
-            {
-              "gas": "11823"
-            },
-            {
-              "gas": "11600"
-            },
-            {
-              "gas": "904"
             }
           ]
         },
@@ -31672,116 +29048,6 @@
               "newValue": "256863",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1061441"
-            },
-            {
-              "gas": "1037092"
-            },
-            {
-              "gas": "1034320"
-            },
-            {
-              "gas": "1014469"
-            },
-            {
-              "gas": "1009823"
-            },
-            {
-              "gas": "997410"
-            },
-            {
-              "gas": "993394"
-            },
-            {
-              "gas": "977191"
-            },
-            {
-              "gas": "972075"
-            },
-            {
-              "gas": "814113"
-            },
-            {
-              "gas": "813390"
-            },
-            {
-              "gas": "660833"
-            },
-            {
-              "gas": "660334"
-            },
-            {
-              "gas": "659967"
-            },
-            {
-              "gas": "656978"
-            },
-            {
-              "gas": "647214"
-            },
-            {
-              "gas": "646643"
-            },
-            {
-              "gas": "643411"
-            },
-            {
-              "gas": "642910"
-            },
-            {
-              "gas": "639678"
-            },
-            {
-              "gas": "637441"
-            },
-            {
-              "gas": "632446"
-            },
-            {
-              "gas": "631692"
-            },
-            {
-              "gas": "630754"
-            },
-            {
-              "gas": "629640"
-            },
-            {
-              "gas": "606845"
-            },
-            {
-              "gas": "605177"
-            },
-            {
-              "gas": "474010"
-            },
-            {
-              "gas": "470013"
-            },
-            {
-              "gas": "461946"
-            },
-            {
-              "gas": "461192"
-            },
-            {
-              "gas": "459666"
-            },
-            {
-              "gas": "458551"
-            },
-            {
-              "gas": "434684"
-            },
-            {
-              "gas": "433928"
-            },
-            {
-              "gas": "256863"
-            }
           ]
         },
         {
@@ -31822,14 +29088,6 @@
               "oldValue": "1020603",
               "newValue": "1020537",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1042258"
-            },
-            {
-              "gas": "1020611"
             }
           ]
         },
@@ -31883,14 +29141,6 @@
               "oldValue": "998403",
               "newValue": "998337",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1017558"
-            },
-            {
-              "gas": "998411"
             }
           ]
         },
@@ -31950,14 +29200,6 @@
               "newValue": "981661",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "991477"
-            },
-            {
-              "gas": "981675"
-            }
           ]
         },
         {
@@ -31986,14 +29228,6 @@
               "oldValue": "15163",
               "newValue": "966580",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "970581"
-            },
-            {
-              "gas": "966580"
             }
           ]
         },
@@ -32030,14 +29264,6 @@
               "oldValue": "951450",
               "newValue": "951444",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "954848"
-            },
-            {
-              "gas": "951458"
             }
           ]
         },
@@ -32108,20 +29334,6 @@
               "newValue": "963205",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "973194"
-            },
-            {
-              "gas": "970584"
-            },
-            {
-              "gas": "965815"
-            },
-            {
-              "gas": "963205"
-            }
           ]
         },
         {
@@ -32190,14 +29402,6 @@
               "oldValue": "798959",
               "newValue": "798953",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "954309"
-            },
-            {
-              "gas": "798967"
             }
           ]
         },
@@ -32326,20 +29530,6 @@
               "newValue": "784171",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "936233"
-            },
-            {
-              "gas": "933777"
-            },
-            {
-              "gas": "904346"
-            },
-            {
-              "gas": "795733"
-            }
           ]
         },
         {
@@ -32375,14 +29565,6 @@
               "oldValue": "919183",
               "newValue": "919177",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "921036"
-            },
-            {
-              "gas": "919191"
             }
           ]
         },
@@ -32435,14 +29617,6 @@
               "oldValue": "781635",
               "newValue": "781632",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "889621"
-            },
-            {
-              "gas": "781643"
             }
           ]
         },
@@ -32551,44 +29725,6 @@
               "newValue": "767771",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "865366"
-            },
-            {
-              "gas": "862687"
-            },
-            {
-              "gas": "850768"
-            },
-            {
-              "gas": "830536"
-            },
-            {
-              "gas": "829674"
-            },
-            {
-              "gas": "825361"
-            },
-            {
-              "gas": "819166"
-            },
-            {
-              "gas": "798934"
-            },
-            {
-              "gas": "795375"
-            },
-            {
-              "gas": "785350"
-            },
-            {
-              "gas": "784721"
-            },
-            {
-              "gas": "778808"
-            }
           ]
         },
         {
@@ -32635,14 +29771,6 @@
               "newValue": "817426",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "832118"
-            },
-            {
-              "gas": "817426"
-            }
           ]
         },
         {
@@ -32668,14 +29796,6 @@
               "oldValue": "12682",
               "newValue": "804574",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "811770"
-            },
-            {
-              "gas": "804574"
             }
           ]
         },
@@ -32738,14 +29858,6 @@
               "newValue": "812426",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "816142"
-            },
-            {
-              "gas": "812440"
-            }
           ]
         },
         {
@@ -32774,14 +29886,6 @@
               "oldValue": "12540",
               "newValue": "800258",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "802714"
-            },
-            {
-              "gas": "800258"
             }
           ]
         },
@@ -32818,14 +29922,6 @@
               "oldValue": "787751",
               "newValue": "787745",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "789604"
-            },
-            {
-              "gas": "787759"
             }
           ]
         },
@@ -32873,14 +29969,6 @@
               "newValue": "786318",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "801010"
-            },
-            {
-              "gas": "786318"
-            }
           ]
         },
         {
@@ -32906,14 +29994,6 @@
               "oldValue": "12203",
               "newValue": "773952",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "781148"
-            },
-            {
-              "gas": "773952"
             }
           ]
         },
@@ -32981,14 +30061,6 @@
               "newValue": "772951",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "780379"
-            },
-            {
-              "gas": "772965"
-            }
           ]
         },
         {
@@ -33043,14 +30115,6 @@
               "newValue": "766576",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "771892"
-            },
-            {
-              "gas": "766590"
-            }
           ]
         },
         {
@@ -33079,14 +30143,6 @@
               "oldValue": "11856",
               "newValue": "754887",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "758888"
-            },
-            {
-              "gas": "754887"
             }
           ]
         },
@@ -33123,14 +30179,6 @@
               "oldValue": "743064",
               "newValue": "743058",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "746462"
-            },
-            {
-              "gas": "743072"
             }
           ]
         },
@@ -33184,14 +30232,6 @@
               "oldValue": "648159",
               "newValue": "648153",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "800104"
-            },
-            {
-              "gas": "648167"
             }
           ]
         },
@@ -33410,74 +30450,6 @@
               "newValue": "635772",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "786280"
-            },
-            {
-              "gas": "781967"
-            },
-            {
-              "gas": "781170"
-            },
-            {
-              "gas": "780491"
-            },
-            {
-              "gas": "777322"
-            },
-            {
-              "gas": "771567"
-            },
-            {
-              "gas": "768671"
-            },
-            {
-              "gas": "761108"
-            },
-            {
-              "gas": "747309"
-            },
-            {
-              "gas": "732890"
-            },
-            {
-              "gas": "728508"
-            },
-            {
-              "gas": "712952"
-            },
-            {
-              "gas": "712297"
-            },
-            {
-              "gas": "708658"
-            },
-            {
-              "gas": "707929"
-            },
-            {
-              "gas": "706866"
-            },
-            {
-              "gas": "703641"
-            },
-            {
-              "gas": "700886"
-            },
-            {
-              "gas": "697251"
-            },
-            {
-              "gas": "683976"
-            },
-            {
-              "gas": "674474"
-            },
-            {
-              "gas": "638074"
-            }
           ]
         },
         {
@@ -33514,14 +30486,6 @@
               "newValue": "769710",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "773426"
-            },
-            {
-              "gas": "769724"
-            }
           ]
         },
         {
@@ -33550,14 +30514,6 @@
               "oldValue": "11883",
               "newValue": "758209",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "760665"
-            },
-            {
-              "gas": "758209"
             }
           ]
         },
@@ -33594,14 +30550,6 @@
               "oldValue": "746359",
               "newValue": "746353",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "748212"
-            },
-            {
-              "gas": "746367"
             }
           ]
         },
@@ -33665,14 +30613,6 @@
               "newValue": "759753",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "760874"
-            },
-            {
-              "gas": "759753"
-            }
           ]
         },
         {
@@ -33727,14 +30667,6 @@
               "oldValue": "749133",
               "newValue": "749127",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "754096"
-            },
-            {
-              "gas": "749141"
             }
           ]
         },
@@ -33791,14 +30723,6 @@
               "newValue": "721243",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "733058"
-            },
-            {
-              "gas": "721269"
-            }
           ]
         },
         {
@@ -33847,14 +30771,6 @@
               "oldValue": "701601",
               "newValue": "701598",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "716554"
-            },
-            {
-              "gas": "701609"
             }
           ]
         },
@@ -33962,14 +30878,6 @@
               "newValue": "697557",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "700598"
-            },
-            {
-              "gas": "697574"
-            }
           ]
         },
         {
@@ -34019,14 +30927,6 @@
               "oldValue": "695840",
               "newValue": "695834",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "696303"
-            },
-            {
-              "gas": "695848"
             }
           ]
         },
@@ -34094,20 +30994,6 @@
               "oldValue": "10616",
               "newValue": "676971",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "685051"
-            },
-            {
-              "gas": "682392"
-            },
-            {
-              "gas": "679557"
-            },
-            {
-              "gas": "676971"
             }
           ]
         },
@@ -34177,14 +31063,6 @@
               "oldValue": "627567",
               "newValue": "627564",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "663352"
-            },
-            {
-              "gas": "627575"
             }
           ]
         },
@@ -34276,14 +31154,6 @@
               "oldValue": "619243",
               "newValue": "617231",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "650035"
-            },
-            {
-              "gas": "621490"
             }
           ]
         },
@@ -34392,14 +31262,6 @@
               "newValue": "636981",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "641976"
-            },
-            {
-              "gas": "636995"
-            }
           ]
         },
         {
@@ -34443,14 +31305,6 @@
               "newValue": "633490",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "635682"
-            },
-            {
-              "gas": "633490"
-            }
           ]
         },
         {
@@ -34476,14 +31330,6 @@
               "oldValue": "9762",
               "newValue": "623708",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "624904"
-            },
-            {
-              "gas": "623708"
             }
           ]
         },
@@ -34539,14 +31385,6 @@
               "newValue": "629816",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "632008"
-            },
-            {
-              "gas": "629816"
-            }
           ]
         },
         {
@@ -34572,14 +31410,6 @@
               "oldValue": "9706",
               "newValue": "620091",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "621287"
-            },
-            {
-              "gas": "620091"
             }
           ]
         },
@@ -34800,38 +31630,6 @@
               "newValue": "465081",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "593481"
-            },
-            {
-              "gas": "592871"
-            },
-            {
-              "gas": "590602"
-            },
-            {
-              "gas": "589992"
-            },
-            {
-              "gas": "587238"
-            },
-            {
-              "gas": "578038"
-            },
-            {
-              "gas": "575213"
-            },
-            {
-              "gas": "527239"
-            },
-            {
-              "gas": "525454"
-            },
-            {
-              "gas": "465081"
-            }
           ]
         },
         {
@@ -35039,26 +31837,6 @@
               "newValue": "518390",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "555321"
-            },
-            {
-              "gas": "539859"
-            },
-            {
-              "gas": "539348"
-            },
-            {
-              "gas": "538593"
-            },
-            {
-              "gas": "538281"
-            },
-            {
-              "gas": "537647"
-            }
           ]
         },
         {
@@ -35247,26 +32025,6 @@
               "newValue": "457010",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "506371"
-            },
-            {
-              "gas": "468754"
-            },
-            {
-              "gas": "468223"
-            },
-            {
-              "gas": "466808"
-            },
-            {
-              "gas": "466496"
-            },
-            {
-              "gas": "465862"
-            }
           ]
         },
         {
@@ -35302,14 +32060,6 @@
               "oldValue": "460880",
               "newValue": "460874",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "497716"
-            },
-            {
-              "gas": "460888"
             }
           ]
         },
@@ -35401,14 +32151,6 @@
               "newValue": "459524",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "460167"
-            },
-            {
-              "gas": "459538"
-            }
           ]
         },
         {
@@ -35478,14 +32220,6 @@
               "oldValue": "454640",
               "newValue": "454634",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "461926"
-            },
-            {
-              "gas": "454648"
             }
           ]
         },
@@ -35563,14 +32297,6 @@
               "newValue": "452492",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "453243"
-            },
-            {
-              "gas": "452506"
-            }
           ]
         },
         {
@@ -35624,14 +32350,6 @@
               "oldValue": "427557",
               "newValue": "427551",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "450643"
-            },
-            {
-              "gas": "427565"
             }
           ]
         },
@@ -35716,14 +32434,6 @@
               "oldValue": "250118",
               "newValue": "250112",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "426565"
-            },
-            {
-              "gas": "250126"
             }
           ]
         },
@@ -35935,80 +32645,6 @@
               "newValue": "243570",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "418504"
-            },
-            {
-              "gas": "416979"
-            },
-            {
-              "gas": "416417"
-            },
-            {
-              "gas": "410504"
-            },
-            {
-              "gas": "409790"
-            },
-            {
-              "gas": "408537"
-            },
-            {
-              "gas": "408018"
-            },
-            {
-              "gas": "404955"
-            },
-            {
-              "gas": "393650"
-            },
-            {
-              "gas": "383731"
-            },
-            {
-              "gas": "376849"
-            },
-            {
-              "gas": "324160"
-            },
-            {
-              "gas": "323420"
-            },
-            {
-              "gas": "287940"
-            },
-            {
-              "gas": "287206"
-            },
-            {
-              "gas": "283567"
-            },
-            {
-              "gas": "282838"
-            },
-            {
-              "gas": "281775"
-            },
-            {
-              "gas": "281050"
-            },
-            {
-              "gas": "277635"
-            },
-            {
-              "gas": "274000"
-            },
-            {
-              "gas": "265225"
-            },
-            {
-              "gas": "257114"
-            },
-            {
-              "gas": "246222"
-            }
           ]
         },
         {
@@ -36044,14 +32680,6 @@
               "oldValue": "410475",
               "newValue": "410469",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "411397"
-            },
-            {
-              "gas": "410483"
             }
           ]
         },
@@ -36107,14 +32735,6 @@
               "newValue": "404027",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "409343"
-            },
-            {
-              "gas": "404041"
-            }
           ]
         },
         {
@@ -36143,14 +32763,6 @@
               "oldValue": "6279",
               "newValue": "398003",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "402004"
-            },
-            {
-              "gas": "398003"
             }
           ]
         },
@@ -36187,14 +32799,6 @@
               "oldValue": "391757",
               "newValue": "391751",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "395155"
-            },
-            {
-              "gas": "391765"
             }
           ]
         },
@@ -36262,14 +32866,6 @@
               "newValue": "398609",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "401078"
-            },
-            {
-              "gas": "398623"
-            }
           ]
         },
         {
@@ -36319,14 +32915,6 @@
               "oldValue": "377627",
               "newValue": "377609",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "386924"
-            },
-            {
-              "gas": "377635"
             }
           ]
         },
@@ -36381,14 +32969,6 @@
               "oldValue": "318304",
               "newValue": "318301",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "368390"
-            },
-            {
-              "gas": "318312"
             }
           ]
         },
@@ -36470,14 +33050,6 @@
               "newValue": "312611",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "346025"
-            },
-            {
-              "gas": "316251"
-            }
           ]
         },
         {
@@ -36517,14 +33089,6 @@
               "oldValue": "310876",
               "newValue": "310873",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "338041"
-            },
-            {
-              "gas": "310884"
             }
           ]
         },
@@ -36649,14 +33213,6 @@
               "newValue": "282916",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "317790"
-            },
-            {
-              "gas": "282927"
-            }
           ]
         },
         {
@@ -36737,14 +33293,6 @@
               "newValue": "277981",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "304862"
-            },
-            {
-              "gas": "281588"
-            }
           ]
         },
         {
@@ -36779,14 +33327,6 @@
               "oldValue": "276857",
               "newValue": "276854",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "299522"
-            },
-            {
-              "gas": "276865"
             }
           ]
         },
@@ -36912,14 +33452,6 @@
               "newValue": "279109",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "282150"
-            },
-            {
-              "gas": "279126"
-            }
           ]
         },
         {
@@ -36970,14 +33502,6 @@
               "newValue": "277385",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "277854"
-            },
-            {
-              "gas": "277399"
-            }
           ]
         },
         {
@@ -37027,14 +33551,6 @@
               "oldValue": "273282",
               "newValue": "273276",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "275919"
-            },
-            {
-              "gas": "273290"
             }
           ]
         },
@@ -37088,20 +33604,6 @@
               "oldValue": "4176",
               "newValue": "264833",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "268413"
-            },
-            {
-              "gas": "267754"
-            },
-            {
-              "gas": "267419"
-            },
-            {
-              "gas": "264833"
             }
           ]
         },
@@ -37172,14 +33674,6 @@
               "oldValue": "242243",
               "newValue": "242237",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "252348"
-            },
-            {
-              "gas": "242251"
             }
           ]
         },
@@ -37558,14 +34052,6 @@
               "newValue": "395607",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "572268"
-            },
-            {
-              "gas": "395607"
-            }
           ]
         },
         {
@@ -37806,134 +34292,6 @@
               "oldValue": "6067",
               "newValue": "387531",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "560570"
-            },
-            {
-              "gas": "555436"
-            },
-            {
-              "gas": "555281"
-            },
-            {
-              "gas": "549886"
-            },
-            {
-              "gas": "549772"
-            },
-            {
-              "gas": "542596"
-            },
-            {
-              "gas": "542469"
-            },
-            {
-              "gas": "537478"
-            },
-            {
-              "gas": "537349"
-            },
-            {
-              "gas": "532358"
-            },
-            {
-              "gas": "532229"
-            },
-            {
-              "gas": "526873"
-            },
-            {
-              "gas": "526744"
-            },
-            {
-              "gas": "523388"
-            },
-            {
-              "gas": "523036"
-            },
-            {
-              "gas": "520588"
-            },
-            {
-              "gas": "519107"
-            },
-            {
-              "gas": "516659"
-            },
-            {
-              "gas": "515178"
-            },
-            {
-              "gas": "512730"
-            },
-            {
-              "gas": "511223"
-            },
-            {
-              "gas": "508775"
-            },
-            {
-              "gas": "506607"
-            },
-            {
-              "gas": "504159"
-            },
-            {
-              "gas": "501995"
-            },
-            {
-              "gas": "499547"
-            },
-            {
-              "gas": "497379"
-            },
-            {
-              "gas": "494931"
-            },
-            {
-              "gas": "492763"
-            },
-            {
-              "gas": "490315"
-            },
-            {
-              "gas": "488147"
-            },
-            {
-              "gas": "485699"
-            },
-            {
-              "gas": "483535"
-            },
-            {
-              "gas": "481087"
-            },
-            {
-              "gas": "478745"
-            },
-            {
-              "gas": "465620"
-            },
-            {
-              "gas": "465501"
-            },
-            {
-              "gas": "395624"
-            },
-            {
-              "gas": "395524"
-            },
-            {
-              "gas": "388521"
-            },
-            {
-              "gas": "388426"
-            },
-            {
-              "gas": "387531"
             }
           ]
         },
@@ -38349,20 +34707,6 @@
               "newValue": "388783",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "432420"
-            },
-            {
-              "gas": "422095"
-            },
-            {
-              "gas": "421686"
-            },
-            {
-              "gas": "388783"
-            }
           ]
         },
         {
@@ -38701,14 +35045,6 @@
               "newValue": "492674",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "572268"
-            },
-            {
-              "gas": "492674"
-            }
           ]
         },
         {
@@ -38909,110 +35245,6 @@
               "oldValue": "7618",
               "newValue": "485227",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "560570"
-            },
-            {
-              "gas": "555436"
-            },
-            {
-              "gas": "555281"
-            },
-            {
-              "gas": "549886"
-            },
-            {
-              "gas": "549772"
-            },
-            {
-              "gas": "542596"
-            },
-            {
-              "gas": "542469"
-            },
-            {
-              "gas": "537478"
-            },
-            {
-              "gas": "537349"
-            },
-            {
-              "gas": "532358"
-            },
-            {
-              "gas": "532229"
-            },
-            {
-              "gas": "526873"
-            },
-            {
-              "gas": "526744"
-            },
-            {
-              "gas": "523388"
-            },
-            {
-              "gas": "523036"
-            },
-            {
-              "gas": "520588"
-            },
-            {
-              "gas": "519107"
-            },
-            {
-              "gas": "516659"
-            },
-            {
-              "gas": "515178"
-            },
-            {
-              "gas": "512730"
-            },
-            {
-              "gas": "511249"
-            },
-            {
-              "gas": "508801"
-            },
-            {
-              "gas": "507320"
-            },
-            {
-              "gas": "504872"
-            },
-            {
-              "gas": "503391"
-            },
-            {
-              "gas": "500943"
-            },
-            {
-              "gas": "499462"
-            },
-            {
-              "gas": "497014"
-            },
-            {
-              "gas": "495533"
-            },
-            {
-              "gas": "493085"
-            },
-            {
-              "gas": "491604"
-            },
-            {
-              "gas": "489156"
-            },
-            {
-              "gas": "487675"
-            },
-            {
-              "gas": "485227"
             }
           ]
         },
@@ -39360,14 +35592,6 @@
               "newValue": "359221",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "373200"
-            },
-            {
-              "gas": "359221"
-            }
           ]
         },
         {
@@ -39413,20 +35637,6 @@
               "oldValue": "5565",
               "newValue": "353683",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "364656"
-            },
-            {
-              "gas": "359552"
-            },
-            {
-              "gas": "358817"
-            },
-            {
-              "gas": "353683"
             }
           ]
         },
@@ -39637,26 +35847,6 @@
               "newValue": "1138462",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1168404"
-            },
-            {
-              "gas": "1159488"
-            },
-            {
-              "gas": "1157901"
-            },
-            {
-              "gas": "1148975"
-            },
-            {
-              "gas": "1147388"
-            },
-            {
-              "gas": "1138462"
-            }
           ]
         },
         {
@@ -39692,20 +35882,6 @@
               "oldValue": "17875",
               "newValue": "1141622",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1147043"
-            },
-            {
-              "gas": "1144433"
-            },
-            {
-              "gas": "1144103"
-            },
-            {
-              "gas": "1141622"
             }
           ]
         },
@@ -39771,20 +35947,6 @@
               "newValue": "1131283",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1136704"
-            },
-            {
-              "gas": "1134094"
-            },
-            {
-              "gas": "1133764"
-            },
-            {
-              "gas": "1131283"
-            }
           ]
         },
         {
@@ -39848,20 +36010,6 @@
               "oldValue": "17551",
               "newValue": "1120934",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1126355"
-            },
-            {
-              "gas": "1123745"
-            },
-            {
-              "gas": "1123415"
-            },
-            {
-              "gas": "1120934"
             }
           ]
         },
@@ -39981,20 +36129,6 @@
               "newValue": "1149913",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1169423"
-            },
-            {
-              "gas": "1160416"
-            },
-            {
-              "gas": "1158829"
-            },
-            {
-              "gas": "1149913"
-            }
           ]
         },
         {
@@ -40030,20 +36164,6 @@
               "oldValue": "17890",
               "newValue": "1142544",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1148046"
-            },
-            {
-              "gas": "1145423"
-            },
-            {
-              "gas": "1145093"
-            },
-            {
-              "gas": "1142544"
             }
           ]
         },
@@ -40108,20 +36228,6 @@
               "oldValue": "17727",
               "newValue": "1132196",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1137617"
-            },
-            {
-              "gas": "1135007"
-            },
-            {
-              "gas": "1134677"
-            },
-            {
-              "gas": "1132196"
             }
           ]
         },
@@ -40241,20 +36347,6 @@
               "newValue": "1132817",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1169203"
-            },
-            {
-              "gas": "1145823"
-            },
-            {
-              "gas": "1141733"
-            },
-            {
-              "gas": "1132817"
-            }
           ]
         },
         {
@@ -40330,44 +36422,6 @@
               "oldValue": "17775",
               "newValue": "1135077",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1147720"
-            },
-            {
-              "gas": "1147354"
-            },
-            {
-              "gas": "1146834"
-            },
-            {
-              "gas": "1144020"
-            },
-            {
-              "gas": "1143103"
-            },
-            {
-              "gas": "1140575"
-            },
-            {
-              "gas": "1140135"
-            },
-            {
-              "gas": "1139784"
-            },
-            {
-              "gas": "1139379"
-            },
-            {
-              "gas": "1139000"
-            },
-            {
-              "gas": "1137702"
-            },
-            {
-              "gas": "1135077"
             }
           ]
         },
@@ -40491,20 +36545,6 @@
               "oldValue": "17464",
               "newValue": "1115367",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "1120788"
-            },
-            {
-              "gas": "1118178"
-            },
-            {
-              "gas": "1117848"
-            },
-            {
-              "gas": "1115367"
             }
           ]
         },
@@ -40954,14 +36994,6 @@
               "newValue": "237351",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "242468"
-            },
-            {
-              "gas": "237351"
-            }
           ]
         },
         {
@@ -41305,44 +37337,6 @@
               "newValue": "80187",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "362875"
-            },
-            {
-              "gas": "354181"
-            },
-            {
-              "gas": "353880"
-            },
-            {
-              "gas": "335227"
-            },
-            {
-              "gas": "334926"
-            },
-            {
-              "gas": "318783"
-            },
-            {
-              "gas": "318326"
-            },
-            {
-              "gas": "228624"
-            },
-            {
-              "gas": "228349"
-            },
-            {
-              "gas": "153860"
-            },
-            {
-              "gas": "153585"
-            },
-            {
-              "gas": "80187"
-            }
           ]
         },
         {
@@ -41368,14 +37362,6 @@
               "oldValue": "5492",
               "newValue": "349036",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "351640"
-            },
-            {
-              "gas": "349036"
             }
           ]
         },
@@ -41426,20 +37412,6 @@
               "oldValue": "5236",
               "newValue": "330233",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "342634"
-            },
-            {
-              "gas": "335643"
-            },
-            {
-              "gas": "335224"
-            },
-            {
-              "gas": "330233"
             }
           ]
         },
@@ -41510,20 +37482,6 @@
               "oldValue": "4983",
               "newValue": "314046",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "326447"
-            },
-            {
-              "gas": "319456"
-            },
-            {
-              "gas": "319037"
-            },
-            {
-              "gas": "314046"
             }
           ]
         },
@@ -41613,32 +37571,6 @@
               "oldValue": "4475",
               "newValue": "223783",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "312751"
-            },
-            {
-              "gas": "312147"
-            },
-            {
-              "gas": "309286"
-            },
-            {
-              "gas": "295612"
-            },
-            {
-              "gas": "295098"
-            },
-            {
-              "gas": "286936"
-            },
-            {
-              "gas": "286520"
-            },
-            {
-              "gas": "223783"
             }
           ]
         },
@@ -41881,26 +37813,6 @@
               "newValue": "219445",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "271104"
-            },
-            {
-              "gas": "241587"
-            },
-            {
-              "gas": "241038"
-            },
-            {
-              "gas": "239623"
-            },
-            {
-              "gas": "239293"
-            },
-            {
-              "gas": "238659"
-            }
           ]
         },
         {
@@ -41941,14 +37853,6 @@
               "oldValue": "237428",
               "newValue": "237422",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "259664"
-            },
-            {
-              "gas": "237436"
             }
           ]
         },
@@ -42040,14 +37944,6 @@
               "newValue": "235889",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "236532"
-            },
-            {
-              "gas": "235903"
-            }
           ]
         },
         {
@@ -42117,20 +38013,6 @@
               "newValue": "150425",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "224094"
-            },
-            {
-              "gas": "222679"
-            },
-            {
-              "gas": "221694"
-            },
-            {
-              "gas": "150425"
-            }
           ]
         },
         {
@@ -42166,14 +38048,6 @@
               "oldValue": "219216",
               "newValue": "219210",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "219853"
-            },
-            {
-              "gas": "219224"
             }
           ]
         },
@@ -42297,20 +38171,6 @@
               "newValue": "147393",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "181039"
-            },
-            {
-              "gas": "163347"
-            },
-            {
-              "gas": "160438"
-            },
-            {
-              "gas": "147393"
-            }
           ]
         },
         {
@@ -42346,14 +38206,6 @@
               "oldValue": "160556",
               "newValue": "160550",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "177461"
-            },
-            {
-              "gas": "160564"
             }
           ]
         },
@@ -42529,32 +38381,6 @@
               "newValue": "77841",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "150498"
-            },
-            {
-              "gas": "149953"
-            },
-            {
-              "gas": "148968"
-            },
-            {
-              "gas": "88637"
-            },
-            {
-              "gas": "88128"
-            },
-            {
-              "gas": "87494"
-            },
-            {
-              "gas": "87136"
-            },
-            {
-              "gas": "77841"
-            }
           ]
         },
         {
@@ -42676,20 +38502,6 @@
               "oldValue": "1525",
               "newValue": "86741",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "113847"
-            },
-            {
-              "gas": "98112"
-            },
-            {
-              "gas": "97703"
-            },
-            {
-              "gas": "86741"
             }
           ]
         },
@@ -42898,14 +38710,6 @@
               "oldValue": "77874",
               "newValue": "76493",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "84826"
-            },
-            {
-              "gas": "77971"
             }
           ]
         },
@@ -43204,62 +39008,6 @@
               "newValue": "124071",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "310017"
-            },
-            {
-              "gas": "304913"
-            },
-            {
-              "gas": "304586"
-            },
-            {
-              "gas": "299482"
-            },
-            {
-              "gas": "299189"
-            },
-            {
-              "gas": "294085"
-            },
-            {
-              "gas": "293667"
-            },
-            {
-              "gas": "288533"
-            },
-            {
-              "gas": "288345"
-            },
-            {
-              "gas": "275220"
-            },
-            {
-              "gas": "274935"
-            },
-            {
-              "gas": "226812"
-            },
-            {
-              "gas": "226322"
-            },
-            {
-              "gas": "166402"
-            },
-            {
-              "gas": "165927"
-            },
-            {
-              "gas": "124877"
-            },
-            {
-              "gas": "124705"
-            },
-            {
-              "gas": "124071"
-            }
           ]
         },
         {
@@ -43491,26 +39239,6 @@
               "newValue": "222655",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "259766"
-            },
-            {
-              "gas": "244092"
-            },
-            {
-              "gas": "243561"
-            },
-            {
-              "gas": "242869"
-            },
-            {
-              "gas": "242557"
-            },
-            {
-              "gas": "241923"
-            }
           ]
         },
         {
@@ -43710,26 +39438,6 @@
               "oldValue": "165529",
               "newValue": "163005",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "211882"
-            },
-            {
-              "gas": "184781"
-            },
-            {
-              "gas": "184391"
-            },
-            {
-              "gas": "183699"
-            },
-            {
-              "gas": "183387"
-            },
-            {
-              "gas": "182256"
             }
           ]
         },
@@ -43931,26 +39639,6 @@
               "newValue": "122423",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "152461"
-            },
-            {
-              "gas": "144299"
-            },
-            {
-              "gas": "143768"
-            },
-            {
-              "gas": "143134"
-            },
-            {
-              "gas": "142822"
-            },
-            {
-              "gas": "141691"
-            }
           ]
         },
         {
@@ -44150,20 +39838,6 @@
               "oldValue": "3172",
               "newValue": "200540",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "211078"
-            },
-            {
-              "gas": "205961"
-            },
-            {
-              "gas": "205644"
-            },
-            {
-              "gas": "200540"
             }
           ]
         },
@@ -44631,14 +40305,6 @@
               "newValue": "62619",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "115353"
-            },
-            {
-              "gas": "64040"
-            }
           ]
         },
         {
@@ -44679,14 +40345,6 @@
               "oldValue": "62273",
               "newValue": "62267",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "108859"
-            },
-            {
-              "gas": "62281"
             }
           ]
         },
@@ -45282,50 +40940,6 @@
               "newValue": "51652",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "262421"
-            },
-            {
-              "gas": "259810"
-            },
-            {
-              "gas": "255078"
-            },
-            {
-              "gas": "252468"
-            },
-            {
-              "gas": "247755"
-            },
-            {
-              "gas": "245145"
-            },
-            {
-              "gas": "242427"
-            },
-            {
-              "gas": "219436"
-            },
-            {
-              "gas": "216575"
-            },
-            {
-              "gas": "168788"
-            },
-            {
-              "gas": "166323"
-            },
-            {
-              "gas": "114050"
-            },
-            {
-              "gas": "112295"
-            },
-            {
-              "gas": "51652"
-            }
           ]
         },
         {
@@ -45572,26 +41186,6 @@
               "newValue": "165543",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "202318"
-            },
-            {
-              "gas": "186856"
-            },
-            {
-              "gas": "186325"
-            },
-            {
-              "gas": "185691"
-            },
-            {
-              "gas": "185379"
-            },
-            {
-              "gas": "184811"
-            }
           ]
         },
         {
@@ -45785,26 +41379,6 @@
               "newValue": "111590",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "152851"
-            },
-            {
-              "gas": "123334"
-            },
-            {
-              "gas": "122803"
-            },
-            {
-              "gas": "121388"
-            },
-            {
-              "gas": "121076"
-            },
-            {
-              "gas": "120442"
-            }
           ]
         },
         {
@@ -45845,14 +41419,6 @@
               "oldValue": "121023",
               "newValue": "121017",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "143259"
-            },
-            {
-              "gas": "121031"
             }
           ]
         },
@@ -45943,14 +41509,6 @@
               "oldValue": "119507",
               "newValue": "119501",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "120144"
-            },
-            {
-              "gas": "119515"
             }
           ]
         },
@@ -46100,26 +41658,6 @@
               "newValue": "50036",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "99636"
-            },
-            {
-              "gas": "72535"
-            },
-            {
-              "gas": "72145"
-            },
-            {
-              "gas": "70730"
-            },
-            {
-              "gas": "70418"
-            },
-            {
-              "gas": "69287"
-            }
           ]
         },
         {
@@ -46207,14 +41745,6 @@
               "oldValue": "69641",
               "newValue": "69635",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "70278"
-            },
-            {
-              "gas": "69649"
             }
           ]
         },
@@ -46673,44 +42203,6 @@
               "newValue": "351497",
               "reason": "REASON_CALL_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "448114"
-            },
-            {
-              "gas": "445014"
-            },
-            {
-              "gas": "442031"
-            },
-            {
-              "gas": "438931"
-            },
-            {
-              "gas": "435948"
-            },
-            {
-              "gas": "432848"
-            },
-            {
-              "gas": "429864"
-            },
-            {
-              "gas": "426764"
-            },
-            {
-              "gas": "423781"
-            },
-            {
-              "gas": "420681"
-            },
-            {
-              "gas": "417697"
-            },
-            {
-              "gas": "414597"
-            }
           ]
         },
         {
@@ -46940,14 +42432,6 @@
               "oldValue": "134423",
               "newValue": "134417",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "173759"
-            },
-            {
-              "gas": "134431"
             }
           ]
         },
@@ -47199,38 +42683,6 @@
               "newValue": "32442",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "153306"
-            },
-            {
-              "gas": "150696"
-            },
-            {
-              "gas": "146719"
-            },
-            {
-              "gas": "115945"
-            },
-            {
-              "gas": "114851"
-            },
-            {
-              "gas": "106689"
-            },
-            {
-              "gas": "104709"
-            },
-            {
-              "gas": "39812"
-            },
-            {
-              "gas": "39242"
-            },
-            {
-              "gas": "32442"
-            }
           ]
         },
         {
@@ -47471,26 +42923,6 @@
               "oldValue": "40839",
               "newValue": "38315",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "92200"
-            },
-            {
-              "gas": "59626"
-            },
-            {
-              "gas": "59095"
-            },
-            {
-              "gas": "58529"
-            },
-            {
-              "gas": "58217"
-            },
-            {
-              "gas": "57583"
             }
           ]
         },
@@ -47798,26 +43230,6 @@
               "newValue": "150976",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "263859"
-            },
-            {
-              "gas": "260759"
-            },
-            {
-              "gas": "249954"
-            },
-            {
-              "gas": "220650"
-            },
-            {
-              "gas": "217163"
-            },
-            {
-              "gas": "152963"
-            }
           ]
         },
         {
@@ -48117,32 +43529,6 @@
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "487981"
-            },
-            {
-              "gas": "447917"
-            },
-            {
-              "gas": "444151"
-            },
-            {
-              "gas": "441449"
-            },
-            {
-              "gas": "429039"
-            },
-            {
-              "gas": "77154"
-            },
-            {
-              "gas": "76669"
-            },
-            {
-              "gas": "75967"
-            }
-          ],
           "statusFailed": true,
           "statusReverted": true,
           "failureReason": "execution reverted",
@@ -48331,44 +43717,6 @@
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "418537"
-            },
-            {
-              "gas": "324064"
-            },
-            {
-              "gas": "323290"
-            },
-            {
-              "gas": "308800"
-            },
-            {
-              "gas": "308050"
-            },
-            {
-              "gas": "258257"
-            },
-            {
-              "gas": "257336"
-            },
-            {
-              "gas": "105120"
-            },
-            {
-              "gas": "104328"
-            },
-            {
-              "gas": "98666"
-            },
-            {
-              "gas": "97895"
-            },
-            {
-              "gas": "70670"
-            }
-          ],
           "stateReverted": true
         },
         {
@@ -48413,20 +43761,6 @@
               "oldValue": "317642",
               "newValue": "317633",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "410342"
-            },
-            {
-              "gas": "409541"
-            },
-            {
-              "gas": "407841"
-            },
-            {
-              "gas": "317740"
             }
           ],
           "stateReverted": true
@@ -48477,14 +43811,6 @@
               "oldValue": "6208",
               "newValue": "311689",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "397417"
-            },
-            {
-              "gas": "311689"
             }
           ],
           "stateReverted": true
@@ -48622,32 +43948,6 @@
               "reason": "REASON_EVENT_LOG"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "358456"
-            },
-            {
-              "gas": "325894"
-            },
-            {
-              "gas": "325110"
-            },
-            {
-              "gas": "322309"
-            },
-            {
-              "gas": "321631"
-            },
-            {
-              "gas": "310524"
-            },
-            {
-              "gas": "309982"
-            },
-            {
-              "gas": "309181"
-            }
-          ],
           "stateReverted": true
         },
         {
@@ -48748,14 +44048,6 @@
               "oldValue": "305809",
               "newValue": "305803",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "314809"
-            },
-            {
-              "gas": "305905"
             }
           ],
           "stateReverted": true
@@ -48871,20 +44163,6 @@
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "316620"
-            },
-            {
-              "gas": "315819"
-            },
-            {
-              "gas": "314540"
-            },
-            {
-              "gas": "303892"
-            }
-          ],
           "stateReverted": true
         },
         {
@@ -48932,14 +44210,6 @@
               "oldValue": "299281",
               "newValue": "299275",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "308281"
-            },
-            {
-              "gas": "299377"
             }
           ],
           "stateReverted": true
@@ -49040,26 +44310,6 @@
               "oldValue": "4595",
               "newValue": "253500",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "302141"
-            },
-            {
-              "gas": "301340"
-            },
-            {
-              "gas": "298433"
-            },
-            {
-              "gas": "295823"
-            },
-            {
-              "gas": "294220"
-            },
-            {
-              "gas": "253500"
             }
           ],
           "stateReverted": true
@@ -49208,26 +44458,6 @@
               "oldValue": "251566",
               "newValue": "249042",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "278750"
-            },
-            {
-              "gas": "270588"
-            },
-            {
-              "gas": "270057"
-            },
-            {
-              "gas": "269423"
-            },
-            {
-              "gas": "269111"
-            },
-            {
-              "gas": "268310"
             }
           ],
           "stateReverted": true
@@ -49385,26 +44615,6 @@
               "reason": "REASON_RETURN_DATA_COPY"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "250273"
-            },
-            {
-              "gas": "249639"
-            },
-            {
-              "gas": "248230"
-            },
-            {
-              "gas": "221995"
-            },
-            {
-              "gas": "220018"
-            },
-            {
-              "gas": "101363"
-            }
-          ],
           "stateReverted": true
         },
         {
@@ -49452,14 +44662,6 @@
               "oldValue": "218432",
               "newValue": "218426",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "243048"
-            },
-            {
-              "gas": "218528"
             }
           ],
           "stateReverted": true
@@ -49613,26 +44815,6 @@
               "oldValue": "98766",
               "newValue": "98760",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "193503"
-            },
-            {
-              "gas": "148201"
-            },
-            {
-              "gas": "139558"
-            },
-            {
-              "gas": "130510"
-            },
-            {
-              "gas": "129136"
-            },
-            {
-              "gas": "98862"
             }
           ],
           "stateReverted": true
@@ -49840,20 +45022,6 @@
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "101139"
-            },
-            {
-              "gas": "99210"
-            },
-            {
-              "gas": "97948"
-            },
-            {
-              "gas": "97185"
-            }
-          ],
           "stateReverted": true
         },
         {
@@ -49879,14 +45047,6 @@
               "oldValue": "1540",
               "newValue": "97966",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "98668"
-            },
-            {
-              "gas": "97966"
             }
           ],
           "stateReverted": true
@@ -49965,20 +45125,6 @@
               "oldValue": "69255",
               "newValue": "69249",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "94752"
-            },
-            {
-              "gas": "94050"
-            },
-            {
-              "gas": "92827"
-            },
-            {
-              "gas": "69353"
             }
           ],
           "stateReverted": true
@@ -50235,20 +45381,6 @@
               "reason": "REASON_CODE_COPY"
             }
           ],
-          "gasEvents": [
-            {
-              "gas": "183537"
-            },
-            {
-              "gas": "180927"
-            },
-            {
-              "gas": "176204"
-            },
-            {
-              "gas": "173594"
-            }
-          ],
           "statusFailed": true,
           "statusReverted": true,
           "failureReason": "execution reverted",
@@ -50368,20 +45500,6 @@
               "oldValue": "8259",
               "newValue": "526078",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "534811"
-            },
-            {
-              "gas": "532201"
-            },
-            {
-              "gas": "528682"
-            },
-            {
-              "gas": "526078"
             }
           ]
         },
@@ -50627,38 +45745,6 @@
               "newValue": "40025",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "192487"
-            },
-            {
-              "gas": "189877"
-            },
-            {
-              "gas": "185174"
-            },
-            {
-              "gas": "182564"
-            },
-            {
-              "gas": "179857"
-            },
-            {
-              "gas": "159021"
-            },
-            {
-              "gas": "156206"
-            },
-            {
-              "gas": "108326"
-            },
-            {
-              "gas": "106571"
-            },
-            {
-              "gas": "40025"
-            }
           ]
         },
         {
@@ -50865,26 +45951,6 @@
               "newValue": "106024",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "142861"
-            },
-            {
-              "gas": "127399"
-            },
-            {
-              "gas": "126888"
-            },
-            {
-              "gas": "126227"
-            },
-            {
-              "gas": "125915"
-            },
-            {
-              "gas": "125281"
-            }
           ]
         },
         {
@@ -51072,26 +46138,6 @@
               "oldValue": "41023",
               "newValue": "38499",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "94002"
-            },
-            {
-              "gas": "49801"
-            },
-            {
-              "gas": "49411"
-            },
-            {
-              "gas": "48777"
-            },
-            {
-              "gas": "48465"
-            },
-            {
-              "gas": "47334"
             }
           ]
         },
@@ -51410,56 +46456,6 @@
               "newValue": "806831",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "972143"
-            },
-            {
-              "gas": "965152"
-            },
-            {
-              "gas": "965119"
-            },
-            {
-              "gas": "960128"
-            },
-            {
-              "gas": "960095"
-            },
-            {
-              "gas": "951029"
-            },
-            {
-              "gas": "950661"
-            },
-            {
-              "gas": "948044"
-            },
-            {
-              "gas": "947353"
-            },
-            {
-              "gas": "942036"
-            },
-            {
-              "gas": "941847"
-            },
-            {
-              "gas": "856681"
-            },
-            {
-              "gas": "856466"
-            },
-            {
-              "gas": "848092"
-            },
-            {
-              "gas": "847825"
-            },
-            {
-              "gas": "806831"
-            }
           ]
         },
         {
@@ -51643,20 +46639,6 @@
               "oldValue": "13633",
               "newValue": "842397",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "888705"
-            },
-            {
-              "gas": "875580"
-            },
-            {
-              "gas": "872671"
-            },
-            {
-              "gas": "842397"
             }
           ]
         },
@@ -51929,26 +46911,6 @@
               "oldValue": "796247",
               "newValue": "793723",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "823565"
-            },
-            {
-              "gas": "815403"
-            },
-            {
-              "gas": "814874"
-            },
-            {
-              "gas": "814172"
-            },
-            {
-              "gas": "813842"
-            },
-            {
-              "gas": "813208"
             }
           ]
         },
@@ -52272,50 +47234,6 @@
               "newValue": "808284",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "969830"
-            },
-            {
-              "gas": "967217"
-            },
-            {
-              "gas": "966898"
-            },
-            {
-              "gas": "964294"
-            },
-            {
-              "gas": "963974"
-            },
-            {
-              "gas": "961370"
-            },
-            {
-              "gas": "960880"
-            },
-            {
-              "gas": "945418"
-            },
-            {
-              "gas": "945165"
-            },
-            {
-              "gas": "897397"
-            },
-            {
-              "gas": "897165"
-            },
-            {
-              "gas": "849108"
-            },
-            {
-              "gas": "848905"
-            },
-            {
-              "gas": "808284"
-            }
           ]
         },
         {
@@ -52528,26 +47446,6 @@
               "newValue": "882768",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "919493"
-            },
-            {
-              "gas": "904040"
-            },
-            {
-              "gas": "903529"
-            },
-            {
-              "gas": "902895"
-            },
-            {
-              "gas": "902583"
-            },
-            {
-              "gas": "902025"
-            }
           ]
         },
         {
@@ -52753,26 +47651,6 @@
               "newValue": "835229",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "872274"
-            },
-            {
-              "gas": "856600"
-            },
-            {
-              "gas": "856069"
-            },
-            {
-              "gas": "855367"
-            },
-            {
-              "gas": "855055"
-            },
-            {
-              "gas": "854497"
-            }
           ]
         },
         {
@@ -52972,26 +47850,6 @@
               "oldValue": "797683",
               "newValue": "795159",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "824737"
-            },
-            {
-              "gas": "816575"
-            },
-            {
-              "gas": "816064"
-            },
-            {
-              "gas": "815362"
-            },
-            {
-              "gas": "815050"
-            },
-            {
-              "gas": "814416"
             }
           ]
         },
@@ -53336,62 +48194,6 @@
               "newValue": "185987",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "370465"
-            },
-            {
-              "gas": "367855"
-            },
-            {
-              "gas": "364149"
-            },
-            {
-              "gas": "361538"
-            },
-            {
-              "gas": "357842"
-            },
-            {
-              "gas": "355232"
-            },
-            {
-              "gas": "351478"
-            },
-            {
-              "gas": "348844"
-            },
-            {
-              "gas": "347685"
-            },
-            {
-              "gas": "336723"
-            },
-            {
-              "gas": "335829"
-            },
-            {
-              "gas": "280621"
-            },
-            {
-              "gas": "279175"
-            },
-            {
-              "gas": "219240"
-            },
-            {
-              "gas": "217773"
-            },
-            {
-              "gas": "187139"
-            },
-            {
-              "gas": "186621"
-            },
-            {
-              "gas": "185987"
-            }
           ]
         },
         {
@@ -53621,26 +48423,6 @@
               "newValue": "275513",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "319709"
-            },
-            {
-              "gas": "296965"
-            },
-            {
-              "gas": "296434"
-            },
-            {
-              "gas": "295727"
-            },
-            {
-              "gas": "295415"
-            },
-            {
-              "gas": "294781"
-            }
           ]
         },
         {
@@ -53848,26 +48630,6 @@
               "newValue": "215017",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "263909"
-            },
-            {
-              "gas": "236808"
-            },
-            {
-              "gas": "236418"
-            },
-            {
-              "gas": "235711"
-            },
-            {
-              "gas": "235399"
-            },
-            {
-              "gas": "234268"
-            }
           ]
         },
         {
@@ -54055,26 +48817,6 @@
               "oldValue": "186399",
               "newValue": "183875",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "203497"
-            },
-            {
-              "gas": "195335"
-            },
-            {
-              "gas": "194804"
-            },
-            {
-              "gas": "194170"
-            },
-            {
-              "gas": "193858"
-            },
-            {
-              "gas": "192727"
             }
           ]
         },
@@ -54282,14 +49024,6 @@
               "oldValue": "11239",
               "newValue": "11233",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "38582"
-            },
-            {
-              "gas": "11247"
             }
           ]
         },
@@ -54551,32 +49285,6 @@
               "newValue": "223067",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "322488"
-            },
-            {
-              "gas": "314902"
-            },
-            {
-              "gas": "311812"
-            },
-            {
-              "gas": "308712"
-            },
-            {
-              "gas": "276852"
-            },
-            {
-              "gas": "258155"
-            },
-            {
-              "gas": "257520"
-            },
-            {
-              "gas": "224746"
-            }
           ]
         },
         {
@@ -54617,14 +49325,6 @@
               "oldValue": "309899",
               "newValue": "309893",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "315046"
-            },
-            {
-              "gas": "309915"
             }
           ]
         },
@@ -54698,14 +49398,6 @@
               "oldValue": "253996",
               "newValue": "253990",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "271710"
-            },
-            {
-              "gas": "254085"
             }
           ]
         },
@@ -54911,14 +49603,6 @@
               "oldValue": "574",
               "newValue": "568",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "39910"
-            },
-            {
-              "gas": "582"
             }
           ]
         },
@@ -56682,14 +51366,6 @@
               "newValue": "184417",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "223759"
-            },
-            {
-              "gas": "184431"
-            }
           ]
         },
         {
@@ -58032,26 +52708,6 @@
               "newValue": "117723",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "167015"
-            },
-            {
-              "gas": "163915"
-            },
-            {
-              "gas": "160633"
-            },
-            {
-              "gas": "157533"
-            },
-            {
-              "gas": "149878"
-            },
-            {
-              "gas": "117723"
-            }
           ]
         },
         {
@@ -58447,14 +53103,6 @@
               "oldValue": "184411",
               "newValue": "184405",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "223747"
-            },
-            {
-              "gas": "184419"
             }
           ]
         },
@@ -58859,38 +53507,6 @@
               "newValue": "132240",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "357201"
-            },
-            {
-              "gas": "290031"
-            },
-            {
-              "gas": "289591"
-            },
-            {
-              "gas": "286135"
-            },
-            {
-              "gas": "283607"
-            },
-            {
-              "gas": "257379"
-            },
-            {
-              "gas": "254115"
-            },
-            {
-              "gas": "253740"
-            },
-            {
-              "gas": "252539"
-            },
-            {
-              "gas": "132240"
-            }
           ]
         },
         {
@@ -58931,14 +53547,6 @@
               "oldValue": "284485",
               "newValue": "284479",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "346823"
-            },
-            {
-              "gas": "284493"
             }
           ]
         },
@@ -59070,14 +53678,6 @@
               "newValue": "281639",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "284278"
-            },
-            {
-              "gas": "281653"
-            }
           ]
         },
         {
@@ -59131,14 +53731,6 @@
               "oldValue": "252983",
               "newValue": "252977",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "278385"
-            },
-            {
-              "gas": "252991"
             }
           ]
         },
@@ -59299,50 +53891,6 @@
               "newValue": "128408",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "246425"
-            },
-            {
-              "gas": "226055"
-            },
-            {
-              "gas": "221933"
-            },
-            {
-              "gas": "219323"
-            },
-            {
-              "gas": "218904"
-            },
-            {
-              "gas": "215448"
-            },
-            {
-              "gas": "213988"
-            },
-            {
-              "gas": "146213"
-            },
-            {
-              "gas": "145844"
-            },
-            {
-              "gas": "145210"
-            },
-            {
-              "gas": "144879"
-            },
-            {
-              "gas": "135556"
-            },
-            {
-              "gas": "135208"
-            },
-            {
-              "gas": "128408"
-            }
           ]
         },
         {
@@ -59378,14 +53926,6 @@
               "oldValue": "222240",
               "newValue": "222234",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "241778"
-            },
-            {
-              "gas": "222248"
             }
           ]
         },
@@ -59532,14 +54072,6 @@
               "newValue": "212057",
               "reason": "REASON_RETURN_DATA_COPY"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "214696"
-            },
-            {
-              "gas": "212071"
-            }
           ]
         },
         {
@@ -59677,26 +54209,6 @@
               "newValue": "143008",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "199740"
-            },
-            {
-              "gas": "167178"
-            },
-            {
-              "gas": "166667"
-            },
-            {
-              "gas": "163211"
-            },
-            {
-              "gas": "162899"
-            },
-            {
-              "gas": "162265"
-            }
           ]
         },
         {
@@ -59784,14 +54296,6 @@
               "oldValue": "160642",
               "newValue": "160636",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "163275"
-            },
-            {
-              "gas": "160650"
             }
           ]
         },
@@ -59897,14 +54401,6 @@
               "oldValue": "134686",
               "newValue": "133305",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "141666"
-            },
-            {
-              "gas": "134783"
             }
           ]
         },
@@ -60391,62 +54887,6 @@
               "newValue": "65072",
               "reason": "REASON_REFUND_AFTER_EXECUTION"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "363194"
-            },
-            {
-              "gas": "316010"
-            },
-            {
-              "gas": "312946"
-            },
-            {
-              "gas": "250360"
-            },
-            {
-              "gas": "246408"
-            },
-            {
-              "gas": "243798"
-            },
-            {
-              "gas": "243379"
-            },
-            {
-              "gas": "241214"
-            },
-            {
-              "gas": "239069"
-            },
-            {
-              "gas": "189685"
-            },
-            {
-              "gas": "185906"
-            },
-            {
-              "gas": "183296"
-            },
-            {
-              "gas": "182867"
-            },
-            {
-              "gas": "182233"
-            },
-            {
-              "gas": "180767"
-            },
-            {
-              "gas": "84095"
-            },
-            {
-              "gas": "83658"
-            },
-            {
-              "gas": "65072"
-            }
           ]
         },
         {
@@ -60723,26 +55163,6 @@
               "newValue": "186089",
               "reason": "REASON_EVENT_LOG"
             }
-          ],
-          "gasEvents": [
-            {
-              "gas": "224430"
-            },
-            {
-              "gas": "208968"
-            },
-            {
-              "gas": "208457"
-            },
-            {
-              "gas": "206292"
-            },
-            {
-              "gas": "205980"
-            },
-            {
-              "gas": "205346"
-            }
           ]
         },
         {
@@ -60974,26 +55394,6 @@
               "oldValue": "83934",
               "newValue": "81410",
               "reason": "REASON_EVENT_LOG"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "167070"
-            },
-            {
-              "gas": "120738"
-            },
-            {
-              "gas": "120207"
-            },
-            {
-              "gas": "101621"
-            },
-            {
-              "gas": "101309"
-            },
-            {
-              "gas": "100675"
             }
           ]
         },
@@ -63373,14 +57773,6 @@
               "oldValue": "201523",
               "newValue": "201517",
               "reason": "REASON_RETURN_DATA_COPY"
-            }
-          ],
-          "gasEvents": [
-            {
-              "gas": "223759"
-            },
-            {
-              "gas": "201531"
             }
           ]
         },
