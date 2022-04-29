@@ -108,7 +108,13 @@ func BigIntFromNative(in *big.Int) *BigInt {
 	return &BigInt{Bytes: bytes}
 }
 
+// BigIntFromBytes creates a new `pbeth.BigInt` from the received bytes. If the the received
+// bytes is nil or of length 0, then `nil` is returned directly.
 func BigIntFromBytes(in []byte) *BigInt {
+	if len(in) == 0 {
+		return nil
+	}
+
 	return &BigInt{Bytes: in}
 }
 
