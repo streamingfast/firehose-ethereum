@@ -487,7 +487,7 @@ func decodeAccessList(b []byte) (out []*pbeth.AccessTuple, err error) {
 				return nil, fmt.Errorf("access list at index %d: read straoge key: not enough bytes left, expected at least 32 bytes but there is only %d bytes", i, len(b))
 			}
 
-			out[i].StorageKeys[i] = b[0:32]
+			out[i].StorageKeys[j] = b[0:32]
 			b = b[32:]
 		}
 	}

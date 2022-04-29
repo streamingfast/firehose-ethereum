@@ -48,6 +48,8 @@ func TestParseFromFile(t *testing.T) {
 		{"testdata/block_mining_rewards.dmlog", nil, nil, false},
 		{"testdata/block_unknown_balance_change.dmlog", nil, errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},
 		{"testdata/read_transaction.dmlog", nil, nil, true},
+		{"testdata/read_transaction_access_list.dmlog", nil, nil, true},
+		{"testdata/read_transaction_dynamic_fee.dmlog", nil, nil, true},
 		{"testdata/polygon_calls_after_finalize.dmlog", nil, nil, false},
 		{"testdata/polygon_add_log_0.dmlog", nil, nil, false},
 		{"testdata/lachesis.dmlog", nil, nil, false},
