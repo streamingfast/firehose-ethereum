@@ -16,11 +16,11 @@ package codec
 
 import (
 	"bufio"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/big"
 	"strconv"
 	"strings"
 	"time"
@@ -120,7 +120,6 @@ type parseCtx struct {
 	dmVersion   string
 	nodeVersion string
 	nodeVariant string
-	validated   bool
 
 	logger *zap.Logger
 }
@@ -129,6 +128,10 @@ func (c *ConsoleReader) ReadBlock() (out *bstream.Block, err error) {
 	v, err := c.next(readBlock)
 	if err != nil {
 		return nil, err
+	}
+
+	if v == nil {
+		return nil, fmt.Errorf("console reader read a nil *bstream.Block, this is invalid")
 	}
 
 	return v.(*bstream.Block), nil
@@ -160,67 +163,19 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 
 		line = line[6:]
 
-		// Order conditions based (approximately) on those that appear more often
+		// *Important*
+		//
+		// We are trying to order the lines based on the amount of time they occur in average
+		// in a sample of lines.
+		//
+		// Easiest way is to use the battelfield dmlog test file we have in the project:
+		//
+		//     cat node-manager/codec/testdata/deep-mind.dmlog | grep -Eo "DMLOG ([^ ]+)" | sort | uniq -c | sort -nr
+		//
+		// And order the cases here with the order given by the file.
+		//
+		// It's a micro-optimization but's worth it.
 		switch {
-		case strings.HasPrefix(line, "INIT"):
-			ctx.stats.inc("INIT")
-			err = ctx.readInit(line)
-
-		case strings.HasPrefix(line, "SUICIDE_CHANGE"):
-			ctx.stats.inc("SUICIDE_CHANGE")
-			err = ctx.readSuicideChange(line)
-
-		case strings.HasPrefix(line, "CREATED_ACCOUNT"):
-			ctx.stats.inc("CREATED_ACCOUNT")
-			err = ctx.readCreateAccount(line)
-
-		case strings.HasPrefix(line, "CODE_CHANGE"):
-			ctx.stats.inc("CODE_CHANGE")
-			err = ctx.readCodeChange(line)
-
-		case strings.HasPrefix(line, "BEGIN_BLOCK") && readType == readBlock:
-			err = ctx.readBeginBlock(line)
-
-		case strings.HasPrefix(line, "BEGIN_APPLY_TRX"):
-			ctx.stats.inc("BEGIN_APPLY_TRX")
-			err = ctx.readApplyTrxBegin(line)
-
-		case strings.HasPrefix(line, "TRX_FROM"):
-			ctx.stats.inc("TRX_FROM")
-			err = ctx.readTrxFrom(line)
-
-		case strings.HasPrefix(line, "EVM_PARAM"):
-			ctx.stats.inc("EVM_PARAM")
-			err = ctx.readEVMParamCall(line)
-
-		case strings.HasPrefix(line, "EVM_RUN_CALL"):
-			ctx.stats.inc("EVM_RUN_CALL")
-			err = ctx.readEVMRunCall(line)
-
-		case strings.HasPrefix(line, "EVM_CALL_FAILED"):
-			ctx.stats.inc("EVM_CALL_FAILED")
-			err = ctx.readEVMCallFailed(line)
-
-		case strings.HasPrefix(line, "EVM_REVERTED"):
-			ctx.stats.inc("EVM_CALL_FAILED")
-			err = ctx.readEVMReverted(line)
-
-		case strings.HasPrefix(line, "EVM_END_CALL"):
-			ctx.stats.inc("EVM_END_CALL")
-			err = ctx.readEVMEndCall(line)
-
-		case strings.HasPrefix(line, "EVM_KECCAK"):
-			ctx.stats.inc("EVM_KECCAK")
-			err = ctx.readEVMKeccak(line)
-
-		case strings.HasPrefix(line, "ACCOUNT_WITHOUT_CODE"):
-			ctx.stats.inc("ACCOUNT_WITHOUT_CODE")
-			err = ctx.readAccountWithoutCode(line)
-
-		case strings.HasPrefix(line, "STORAGE_CHANGE"):
-			ctx.stats.inc("STORAGE_CHANGE")
-			err = ctx.readStorageChange(line)
-
 		case strings.HasPrefix(line, "GAS_CHANGE"):
 			ctx.stats.inc("GAS_CHANGE")
 			err = ctx.readGasChange(line)
@@ -229,17 +184,44 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 			ctx.stats.inc("BALANCE_CHANGE")
 			err = ctx.readBalanceChange(line)
 
+		case strings.HasPrefix(line, "STORAGE_CHANGE"):
+			ctx.stats.inc("STORAGE_CHANGE")
+			err = ctx.readStorageChange(line)
+
 		case strings.HasPrefix(line, "NONCE_CHANGE"):
 			ctx.stats.inc("NONCE_CHANGE")
 			err = ctx.readNonceChange(line)
+
+		case strings.HasPrefix(line, "EVM_RUN_CALL"):
+			ctx.stats.inc("EVM_RUN_CALL")
+			err = ctx.readEVMRunCall(line)
+
+		case strings.HasPrefix(line, "EVM_PARAM"):
+			ctx.stats.inc("EVM_PARAM")
+			err = ctx.readEVMParamCall(line)
+
+		case strings.HasPrefix(line, "EVM_END_CALL"):
+			ctx.stats.inc("EVM_END_CALL")
+			err = ctx.readEVMEndCall(line)
 
 		case strings.HasPrefix(line, "ADD_LOG"):
 			ctx.stats.inc("ADD_LOG")
 			err = ctx.readAddLog(line)
 
-		case strings.HasPrefix(line, "SKIPPED_TRX"):
-			ctx.stats.inc("SKIPPED_TRX")
-			err = ctx.readSkippedTrx(line)
+		case strings.HasPrefix(line, "TRX_FROM"):
+			ctx.stats.inc("TRX_FROM")
+			err = ctx.readTrxFrom(line)
+
+		case strings.HasPrefix(line, "EVM_KECCAK"):
+			ctx.stats.inc("EVM_KECCAK")
+			err = ctx.readEVMKeccak(line)
+
+		case strings.HasPrefix(line, "BEGIN_BLOCK") && readType == readBlock:
+			err = ctx.readBeginBlock(line)
+
+		case strings.HasPrefix(line, "BEGIN_APPLY_TRX"):
+			ctx.stats.inc("BEGIN_APPLY_TRX")
+			err = ctx.readApplyTrxBegin(line)
 
 		case strings.HasPrefix(line, "END_APPLY_TRX"):
 			ctx.stats.inc("END_APPLY_TRX")
@@ -252,6 +234,37 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 
 				return ctx.transactionTraces[0], err
 			}
+
+		case strings.HasPrefix(line, "CODE_CHANGE"):
+			ctx.stats.inc("CODE_CHANGE")
+			err = ctx.readCodeChange(line)
+
+		case strings.HasPrefix(line, "SUICIDE_CHANGE"):
+			ctx.stats.inc("SUICIDE_CHANGE")
+			err = ctx.readSuicideChange(line)
+
+		case strings.HasPrefix(line, "END_BLOCK") && readType == readBlock:
+			return ctx.readEndBlock(line)
+
+		case strings.HasPrefix(line, "CREATED_ACCOUNT"):
+			ctx.stats.inc("CREATED_ACCOUNT")
+			err = ctx.readCreateAccount(line)
+
+		case strings.HasPrefix(line, "EVM_CALL_FAILED"):
+			ctx.stats.inc("EVM_CALL_FAILED")
+			err = ctx.readEVMCallFailed(line)
+
+		case strings.HasPrefix(line, "EVM_REVERTED"):
+			ctx.stats.inc("EVM_CALL_FAILED")
+			err = ctx.readEVMReverted(line)
+
+		case strings.HasPrefix(line, "ACCOUNT_WITHOUT_CODE"):
+			ctx.stats.inc("ACCOUNT_WITHOUT_CODE")
+			err = ctx.readAccountWithoutCode(line)
+
+		case strings.HasPrefix(line, "SKIPPED_TRX"):
+			ctx.stats.inc("SKIPPED_TRX")
+			err = ctx.readSkippedTrx(line)
 
 		case strings.HasPrefix(line, "FINALIZE_BLOCK") && readType == readBlock:
 			ctx.stats.inc("FINALIZE_BLOCK")
@@ -269,9 +282,6 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 			ctx.stats.inc("FAILED_APPLY_TRX")
 			err = ctx.readFailedApplyTrx(line)
 
-		case strings.HasPrefix(line, "END_BLOCK") && readType == readBlock:
-			return ctx.readEndBlock(line)
-
 		case strings.HasPrefix(line, "TRX_ENTER_POOL"):
 			ctx.stats.inc("TRX_ENTER_POOL")
 			continue
@@ -280,7 +290,9 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 			continue
 
 		case strings.HasPrefix(line, "INIT"):
-			return nil, ctx.readInit(line)
+			if err := ctx.readInit(line); err != nil {
+				return nil, err
+			}
 
 		default:
 			return nil, fmt.Errorf("unsupported log line: %q", line)
@@ -339,10 +351,6 @@ func (ctx *parseCtx) popCallIndexReturnParent() (int32, uint32, error) {
 // Formats
 // DMLOG BEGIN_BLOCK <NUM>
 func (ctx *parseCtx) readBeginBlock(line string) error {
-	if err := ctx.validateVersion(); err != nil {
-		return fmt.Errorf("begin block received without valid version: %w", err)
-	}
-
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
@@ -367,7 +375,7 @@ func (ctx *parseCtx) readBeginBlock(line string) error {
 }
 
 // Formats
-// DMLOG BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <MAX_FEE> <TRX_TYPE> <BEGIN_ORDINAL>
+// DMLOG BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <ACCESS_LIST> <MAX_FEE_PER_GAS> <MAX_PRIORITY_FEE_PER_GAS> <TRX_TYPE> <BEGIN_ORDINAL>
 
 // DMLOG BEGIN_APPLY_TRX 2becdee3b9ce9dd9a7274b8f6881e8e8d119ab046502ea90688773ef545731c7 929bc44bbd41ca0e621dc50f7c7e3204ce026258 . 0bf9 2b0d6434d98be6858c367710fff02ed69b86c0b1188a737d3ca55507f363928c 691797966e89cbb83dd45c2b6685ca1dc3734ee0c58ae8ffd935c9823b051e9f 300000 0ba43b7400 58 41c0e1b5 . 0 1
 
@@ -376,7 +384,7 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 		return fmt.Errorf("received when trx already begun")
 	}
 
-	chunks, err := SplitInChunks(line, 14)
+	chunks, err := SplitInChunks(line, 16)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -385,9 +393,6 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	to := FromHex(chunks[1], "BEGIN_APPLY_TRX to")
 	value := pbeth.BigIntFromBytes(FromHex(chunks[2], "BEGIN_APPLY_TRX value"))
 
-	val := &big.Int{}
-	val.SetBytes(value.Bytes)
-
 	v := FromHex(chunks[3], "BEGIN_APPLY_TRX v")
 	r := FromHex(chunks[4], "BEGIN_APPLY_TRX r")
 	s := FromHex(chunks[5], "BEGIN_APPLY_TRX s")
@@ -395,25 +400,33 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	gasPrice := pbeth.BigIntFromBytes(FromHex(chunks[7], "BEGIN_APPLY_TRX gasPrice"))
 	nonce := FromUint64(chunks[8], "BEGIN_APPLY_TRX nonce")
 	input := FromHex(chunks[9], "BEGIN_APPLY_TRX input")
-	maxFee := pbeth.BigIntFromBytes(FromHex(chunks[10], "BEGIN_APPLY_TRX maxFee"))
-	trxType := pbeth.TransactionTrace_Type(FromInt32(chunks[11], "BEGIN_APPLY_TRX trxType"))
-	ordinal := FromUint64(chunks[12], "BEGIN_APPLY_TRX ordinal@12")
+	accessList, err := decodeAccessList(FromHex(chunks[10], "BEGIN_APPLY_TRX accessList"))
+	if err != nil {
+		return fmt.Errorf("invalid access list value %q: %w", chunks[10], err)
+	}
+
+	maxFeePerGas := pbeth.BigIntFromBytes(FromHex(chunks[11], "BEGIN_APPLY_TRX maxFeePerGas"))
+	maxPriorityGasFee := pbeth.BigIntFromBytes(FromHex(chunks[12], "BEGIN_APPLY_TRX maxPriorityFeePerGas"))
+	trxType := pbeth.TransactionTrace_Type(FromInt32(chunks[13], "BEGIN_APPLY_TRX trxType"))
+	ordinal := FromUint64(chunks[14], "BEGIN_APPLY_TRX ordinal@12")
 
 	ctx.currentTraceLogCount = 0
 	ctx.currentTrace = &pbeth.TransactionTrace{
-		Index:        uint32(len(ctx.transactionTraces)),
-		Hash:         hash,
-		Value:        value,
-		V:            v,
-		R:            types.NormalizeSignaturePoint(r),
-		S:            types.NormalizeSignaturePoint(s),
-		GasLimit:     gas,
-		GasPrice:     gasPrice,
-		Nonce:        nonce,
-		Input:        input,
-		Type:         trxType,
-		MaxFeePerGas: maxFee,
-		BeginOrdinal: ordinal,
+		Index:                uint32(len(ctx.transactionTraces)),
+		Hash:                 hash,
+		Value:                value,
+		V:                    v,
+		R:                    types.NormalizeSignaturePoint(r),
+		S:                    types.NormalizeSignaturePoint(s),
+		GasLimit:             gas,
+		GasPrice:             gasPrice,
+		Nonce:                nonce,
+		Input:                input,
+		AccessList:           accessList,
+		MaxFeePerGas:         maxFeePerGas,
+		MaxPriorityFeePerGas: maxPriorityGasFee,
+		Type:                 trxType,
+		BeginOrdinal:         ordinal,
 	}
 
 	// A contract creation will have the `to` being null. In such case,
@@ -432,6 +445,58 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	ctx.currentTrace.Calls = append(ctx.currentTrace.Calls, ctx.currentRootCall)
 
 	return nil
+}
+
+func decodeAccessList(b []byte) (out []*pbeth.AccessTuple, err error) {
+	elementCount, byteRead := binary.Uvarint(b)
+	if byteRead == 0 {
+		return nil, fmt.Errorf("read access tuple length: not enough bytes left, there is only %d bytes", len(b))
+	}
+
+	if byteRead < 0 {
+		return nil, fmt.Errorf("read access tuple length: value is bigger than 64 bits")
+	}
+
+	b = b[byteRead:]
+
+	out = make([]*pbeth.AccessTuple, elementCount)
+	for i := 0; i < int(elementCount); i++ {
+		out[i] = &pbeth.AccessTuple{}
+
+		if len(b) < 20 {
+			return nil, fmt.Errorf("access list at index %d: read contract address: not enough bytes left, expected at least 20 bytes but there is only %d bytes", i, len(b))
+		}
+
+		out[i].Address = b[0:20]
+		b = b[20:]
+
+		storageKeyCount, byteRead := binary.Uvarint(b)
+		if byteRead == 0 {
+			return nil, fmt.Errorf("access list at index %d: read storage key length: not enough bytes left, got %d", i, len(b))
+		}
+
+		if byteRead < 0 {
+			return nil, fmt.Errorf("access list at index %d: read storage key length: value is bigger than 64 bits", i)
+		}
+
+		out[i].StorageKeys = make([][]byte, storageKeyCount)
+		b = b[byteRead:]
+
+		for j := uint64(0); j < storageKeyCount; j++ {
+			if len(b) < 32 {
+				return nil, fmt.Errorf("access list at index %d: read straoge key: not enough bytes left, expected at least 32 bytes but there is only %d bytes", i, len(b))
+			}
+
+			out[i].StorageKeys[i] = b[0:32]
+			b = b[32:]
+		}
+	}
+
+	if len(b) != 0 {
+		return nil, fmt.Errorf("access list buffer not completely consumed, there is still %d bytes left", len(b))
+	}
+
+	return
 }
 
 // Formats
@@ -774,7 +839,6 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
    DMLOG INIT 2.0 polygon 1.10.17-fh+hotfix (deadbeef) ...
 */
 func (ctx *parseCtx) readInit(line string) error {
-
 	chunks, err := SplitInBoundedChunks(line, 4)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
@@ -783,30 +847,9 @@ func (ctx *parseCtx) readInit(line string) error {
 	ctx.nodeVariant = chunks[1]
 	ctx.nodeVersion = chunks[2]
 
-	return nil
-}
-
-func (ctx *parseCtx) validateVersion() error {
-	if ctx.validated {
-		return nil
+	if !strings.HasPrefix(ctx.dmVersion, "2.") {
+		return fmt.Errorf("deepmind major version is unsupported (expected: 2.x, found %s)", ctx.dmVersion)
 	}
-	if ctx.nodeVersion == "" ||
-		ctx.dmVersion == "" ||
-		ctx.nodeVariant == "" {
-		return fmt.Errorf("deepmind did not advertise its version. You need to upgrade your instrumented node")
-	}
-
-	if ctx.nodeVariant != "geth" &&
-		ctx.nodeVariant != "bsc" &&
-		ctx.nodeVariant != "polygon" {
-		return fmt.Errorf("invalid node variant: %s", ctx.nodeVariant)
-	}
-
-	supportedDMVersion := "2.0"
-	if ctx.dmVersion != supportedDMVersion {
-		return fmt.Errorf("deepmind version is unsupported (expected: %s, found %s)", supportedDMVersion, ctx.dmVersion)
-	}
-	ctx.validated = true
 
 	return nil
 }

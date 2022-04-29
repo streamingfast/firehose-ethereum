@@ -7,3 +7,5 @@ var zlog, _ = logging.PackageLogger("sfeth", "github.com/streamingfast/sf-ethere
 func init() {
 	logging.InstantiateLoggers()
 }
+
+type ObjectReader func() (interface{}, error)

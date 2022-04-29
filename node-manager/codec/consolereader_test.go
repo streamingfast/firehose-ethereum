@@ -30,18 +30,11 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/jsonpb"
-	"github.com/streamingfast/logging"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"github.com/stretchr/testify/require"
 	"github.com/test-go/testify/assert"
 )
-
-func init() {
-	logging.TestingOverride()
-}
-
-type ObjectReader func() (interface{}, error)
 
 func TestParseFromFile(t *testing.T) {
 	tests := []struct {
@@ -64,7 +57,7 @@ func TestParseFromFile(t *testing.T) {
 		t.Run(strings.Replace(test.deepMindFile, "testdata/", "", 1), func(t *testing.T) {
 			defer func() {
 				if r := recover(); r != nil {
-					require.Equal(t, test.expectedPanicErr, r)
+					require.Equal(t, test.expectedPanicErr, r, "Panicked with %s", r)
 				}
 			}()
 
@@ -214,7 +207,7 @@ func testFileConsoleReader(t *testing.T, filename string) *ConsoleReader {
 	fl, err := os.Open(filename)
 	require.NoError(t, err)
 
-	cr := testReaderConsoleReader(t, make(chan string, 10000), func() { fl.Close() })
+	cr := testReaderConsoleReader(t.Helper, make(chan string, 10000), func() { fl.Close() })
 
 	go cr.ProcessData(fl)
 
@@ -227,9 +220,7 @@ func testFileConsoleReader(t *testing.T, filename string) *ConsoleReader {
 //	return testReaderConsoleReader(t, bytes.NewBufferString(data), func() {})
 //}
 
-func testReaderConsoleReader(t *testing.T, lines chan string, closer func()) *ConsoleReader {
-	t.Helper()
-
+func testReaderConsoleReader(helperFunc func(), lines chan string, closer func()) *ConsoleReader {
 	l := &ConsoleReader{
 		lines:  lines,
 		close:  closer,
