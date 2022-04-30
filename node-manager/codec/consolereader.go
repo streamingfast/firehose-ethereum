@@ -436,7 +436,9 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	}
 
 	ctx.currentRootCall = &pbeth.Call{
-		// We don't know yet its real type, so put CALL and it will be resolved to its final value later on
+		// We don't know yet its real type, so put CALL and it will be resolved to its final value later on.
+		// Using CALL is important because genesis block generates a dummy transaction without a call and
+		// it must be of type CALL.
 		CallType: pbeth.CallType_CALL,
 		Index:    1,
 		Address:  to,
@@ -559,7 +561,7 @@ func (ctx *parseCtx) readEVMParamCall(line string) error {
 	}
 	indexStr := chunks[1]
 
-	evmCall, err := ctx.getCall(indexStr, "EVM_PARAM")
+	evmCall, err := ctx.getCall(indexStr, false, "EVM_PARAM")
 	if err != nil {
 		return err
 	}
@@ -596,7 +598,7 @@ func (ctx *parseCtx) readEVMCallFailed(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	evmCall, err := ctx.getCall(chunks[0], "EVM_CALL_FAILED")
+	evmCall, err := ctx.getCall(chunks[0], false, "EVM_CALL_FAILED")
 	if err != nil {
 		return err
 	}
@@ -622,7 +624,7 @@ func (ctx *parseCtx) readEVMReverted(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	evmCall, err := ctx.getCall(chunks[0], "EVM_REVERTED")
+	evmCall, err := ctx.getCall(chunks[0], false, "EVM_REVERTED")
 	if err != nil {
 		return err
 	}
@@ -640,7 +642,7 @@ func (ctx *parseCtx) readEVMEndCall(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	evmCall, err := ctx.getCall(chunks[0], "EVM_END_CALL")
+	evmCall, err := ctx.getCall(chunks[0], false, "EVM_END_CALL")
 	if err != nil {
 		return err
 	}
@@ -826,7 +828,7 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
 		return nil
 	}
 
-	evmCall, err := ctx.getCall(callIndex, "CREATED_ACCOUNT")
+	evmCall, err := ctx.getCall(callIndex, false, "CREATED_ACCOUNT")
 	if err != nil {
 		return err
 	}
@@ -868,7 +870,7 @@ func (ctx *parseCtx) readSuicideChange(line string) error {
 		return fmt.Errorf("SUICIDE_CHANGE is expected to always happen within a call boundary but just seen SUICIDE_CHANGE outside of a call for block #%d", ctx.currentBlock.Number)
 	}
 
-	evmCall, err := ctx.getCall(callIndex, "SUICIDE_CHANGE")
+	evmCall, err := ctx.getCall(callIndex, false, "SUICIDE_CHANGE")
 	if err != nil {
 		return err
 	}
@@ -901,18 +903,24 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 	}
 
 	if callIndex == "0" {
+		// Handle the case where this is no transaction active, which means the CODE_CHANGE happened at the block level,
+		// this happens on some network, for example BSC.
 		if ctx.currentTrace == nil {
-			// This will append on BSC
 			if ctx.currentBlock != nil {
 				ctx.currentBlock.CodeChanges = append(ctx.currentBlock.CodeChanges, codeChange)
 			}
 			return nil
 		}
 
-		return fmt.Errorf("CODE_CHANGE is expected to always happen within a trace boundary but just seen CODE_CHANGE directly in block #%d (no active trace)", ctx.currentBlock.Number)
+		// Genesis block produces a CODE_CHANGE at callIndex "0" which means the transaction root (e.g. outside a Call),
+		// so we must generate an error that CODE_CHANGE was received at an unexpected location only block block that are
+		// not the genesis block (e.g. block.number == 0).
+		if ctx.currentBlock.Number != 0 {
+			return fmt.Errorf("CODE_CHANGE is expected to always happen within a trace boundary but just seen CODE_CHANGE directly in block #%d (no active trace)", ctx.currentBlock.Number)
+		}
 	}
 
-	evmCall, err := ctx.getCall(callIndex, "CODE_CHANGE")
+	evmCall, err := ctx.getCall(callIndex, true, "CODE_CHANGE")
 	if err != nil {
 		return err
 	}
@@ -996,11 +1004,13 @@ func (ctx *parseCtx) readStorageChange(line string) error {
 
 	callIndex := chunks[0]
 	if callIndex == "0" {
-		// FIXME: Fow now, let's just skip them, but maybe we should store them at the block level?
-		return nil
+		if ctx.currentBlock == nil || ctx.currentTrace == nil {
+			// FIXME: Fow now, let's just skip them, but maybe we should store them at the block level?
+			return nil
+		}
 	}
 
-	evmCall, err := ctx.getCall(callIndex, "STORAGE_CHANGE")
+	evmCall, err := ctx.getCall(callIndex, true, "STORAGE_CHANGE")
 	if err != nil {
 		return err
 	}
@@ -1056,7 +1066,7 @@ func (ctx *parseCtx) readBalanceChange(line string) error {
 		return nil
 	}
 
-	evmCall, err := ctx.getCall(callIndex, "BALANCE_CHANGE")
+	evmCall, err := ctx.getCall(callIndex, false, "BALANCE_CHANGE")
 	if err != nil && (balanceChange.Reason == pbeth.BalanceChange_REASON_REWARD_MINE_BLOCK || balanceChange.Reason == pbeth.BalanceChange_REASON_REWARD_MINE_UNCLE) {
 		ctx.logger.Warn("Skipping balance change that we cannot link to a transaction, something is broken but is temporary to overcome the problem")
 		return nil
@@ -1099,7 +1109,7 @@ func (ctx *parseCtx) readGasChange(line string) error {
 		return nil
 	}
 
-	evmCall, err := ctx.getCall(callIndex, "GAS_CHANGE")
+	evmCall, err := ctx.getCall(callIndex, false, "GAS_CHANGE")
 	if err != nil {
 		return err
 	}
@@ -1136,7 +1146,7 @@ func (ctx *parseCtx) readNonceChange(line string) error {
 		return nil
 	}
 
-	evmCall, err := ctx.getCall(callIndex, "NONCE_CHANGE")
+	evmCall, err := ctx.getCall(callIndex, false, "NONCE_CHANGE")
 	if err != nil {
 		return err
 	}
@@ -1154,7 +1164,7 @@ func (ctx *parseCtx) readEVMKeccak(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	evmCall, err := ctx.getCall(chunks[0], "EVM_KECCACK")
+	evmCall, err := ctx.getCall(chunks[0], false, "EVM_KECCACK")
 	if err != nil {
 		return err
 	}
@@ -1204,7 +1214,7 @@ func (ctx *parseCtx) readAccountWithoutCode(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	evmCall, err := ctx.getCall(chunks[0], "ACCOUNT_WITHOUT_CODE")
+	evmCall, err := ctx.getCall(chunks[0], false, "ACCOUNT_WITHOUT_CODE")
 	if err != nil {
 		return err
 	}
@@ -1247,7 +1257,7 @@ func (ctx *parseCtx) readAddLog(line string) error {
 		// We have a trace active, so let's add it to it's root call
 		evmCall = ctx.currentRootCall
 	} else {
-		evmCall, err = ctx.getCall(callIndex, "ADD_LOG")
+		evmCall, err = ctx.getCall(callIndex, false, "ADD_LOG")
 		if err != nil {
 			return err
 		}
@@ -1268,8 +1278,10 @@ func (ctx *parseCtx) readAddLog(line string) error {
 	return nil
 }
 
-// getCall returns the Call from the call stack, by index
-func (ctx *parseCtx) getCall(indexString string, tag string) (*pbeth.Call, error) {
+// getCall returns the Call from the call stack, by index, if the `allowRoot`
+// value is `true` and the `index` is 0, the currentTrace.rootCall is returned otherwise
+// if it's `false`m when index 0 is encountered, an error is returned.
+func (ctx *parseCtx) getCall(indexString string, allowRoot bool, tag string) (*pbeth.Call, error) {
 	if ctx.currentTrace == nil {
 		return nil, fmt.Errorf("no previous transaction context")
 	}
@@ -1280,6 +1292,10 @@ func (ctx *parseCtx) getCall(indexString string, tag string) (*pbeth.Call, error
 	}
 
 	idx := int(index)
+	if allowRoot && index == 0 {
+		return ctx.currentRootCall, nil
+	}
+
 	if idx <= 0 || idx > len(ctx.currentTrace.Calls) {
 		return nil, fmt.Errorf("%s call %s doesn't exist, evm call stack depth is %d", tag, indexString, len(ctx.currentTrace.Calls))
 	}
