@@ -37,10 +37,10 @@ var generateCombinedIdxCmd = &cobra.Command{
 }
 
 func init() {
-	generateAccIdxCmd.Flags().Uint64("combined-indexes-size", 10000, "size of combined index bundles that will be created")
-	generateAccIdxCmd.Flags().IntSlice("lookup-combined-indexes-sizes", []int{1000000, 100000, 10000, 1000}, "combined index bundle sizes that we will look for on start to find first unindexed block (should include combined-indexes-size)")
-	generateAccIdxCmd.Flags().IntSlice("irreversible-indexes-sizes", []int{10000, 1000}, "size of irreversible indexes that will be used")
-	generateAccIdxCmd.Flags().Bool("create-irreversible-indexes", false, "if true, irreversible indexes will also be created")
+	generateCombinedIdxCmd.Flags().Uint64("combined-indexes-size", 10000, "size of combined index bundles that will be created")
+	generateCombinedIdxCmd.Flags().IntSlice("lookup-combined-indexes-sizes", []int{1000000, 100000, 10000, 1000}, "combined index bundle sizes that we will look for on start to find first unindexed block (should include combined-indexes-size)")
+	generateCombinedIdxCmd.Flags().IntSlice("irreversible-indexes-sizes", []int{10000, 1000}, "size of irreversible indexes that will be used")
+	generateCombinedIdxCmd.Flags().Bool("create-irreversible-indexes", false, "if true, irreversible indexes will also be created")
 	Cmd.AddCommand(generateCombinedIdxCmd)
 }
 
