@@ -206,14 +206,14 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 		out, err := e.rpcClient().DoRequests(ctx, reqs)
 		if err != nil {
 			e.rollRpcClient()
-			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum))
+			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum), zap.String("endpoint", e.rpcClients[e.currentRpcClientIndex].String()))
 			continue
 		}
 
 		deterministicResp := true
 		for _, resp := range out {
 			if !resp.Deterministic() {
-				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.Uint64("at_block", blockNum))
+				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.Uint64("at_block", blockNum), zap.String("endpoint", e.rpcClients[e.currentRpcClientIndex].String()))
 				deterministicResp = false
 				break
 			}

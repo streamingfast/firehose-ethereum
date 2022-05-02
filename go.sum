@@ -678,8 +678,8 @@ github.com/streamingfast/dtracing v0.0.0-20210811175635-d55665d3622a/go.mod h1:b
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c h1:wy7a9uNZxSV27AiSsK4TLLSh2Ub3Vd2yumHuUakpDr0=
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c/go.mod h1:Nu6Sb4T/fuETQ2eRcve4x8fygSD3oE5NY5foJ09xeBc=
 github.com/streamingfast/eth-go v0.0.0-20220421042603-ebe2c94fcc92/go.mod h1:GSWB6tldvuaUekmehj7yCv/8o6MIWPb+9Hf+m4uZdDM=
-github.com/streamingfast/eth-go v0.0.0-20220428110329-4a2346ac5c82 h1:tAzA1MaKCdjR0Nw1mh/9IeEkMMRVCC0v2VraJvtQkFM=
-github.com/streamingfast/eth-go v0.0.0-20220428110329-4a2346ac5c82/go.mod h1:70QIkPike7DfzDYdcB/cyQOJyeW2tVMUCaXFCEh4+KE=
+github.com/streamingfast/eth-go v0.0.0-20220502124157-ffd98a20b219 h1:WM8zBXYlUztadr4McDO6yAveY3UCr8BihM1+YtmDNs4=
+github.com/streamingfast/eth-go v0.0.0-20220502124157-ffd98a20b219/go.mod h1:70QIkPike7DfzDYdcB/cyQOJyeW2tVMUCaXFCEh4+KE=
 github.com/streamingfast/firehose v0.1.1-0.20220331194041-2bf2b9689682/go.mod h1:yIxH+h6vGjBiltJPbLK+3O+B1iub1BvVmhG11qrs1uk=
 github.com/streamingfast/firehose v0.1.1-0.20220427051727-9b108461d3a6 h1:jl4UjJ4LhT+lZY1uU+c2AohTLaFeyFMxyrfDN+On3Wk=
 github.com/streamingfast/firehose v0.1.1-0.20220427051727-9b108461d3a6/go.mod h1:yIxH+h6vGjBiltJPbLK+3O+B1iub1BvVmhG11qrs1uk=
@@ -706,8 +706,6 @@ github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff h1:5TLhw8wM95
 github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
 github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde h1:rm0el70hYsJ54yM+YzXPkg6GYtts+GOeYR4RCLyarTE=
 github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde/go.mod h1:m+lL+X6GmWmIzxSgbWNsjj+7afeGHSA5RDGATblP6/Y=
-github.com/streamingfast/sf-ethereum/types v0.0.0-20220429152022-7dc5771ffa35 h1:YTjU1Dwk5kGB5HYBnBwzBz4Wn0SLN5ZWSuwvhY1s27Q=
-github.com/streamingfast/sf-ethereum/types v0.0.0-20220429152022-7dc5771ffa35/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220430030750-d2727588ce99 h1:7Yj6pasvwYWN5MjUXdKImyLAA6uFuwywBwr5lGNKJ0s=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220430030750-d2727588ce99/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5 h1:lSAHWGm3adFOFE9dVtqnUHnqfto3XfdH1ICCt9YPjB0=
