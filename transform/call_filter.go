@@ -32,23 +32,13 @@ func CallToFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *
 			if err != nil {
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
-
-			if len(filter.Addresses) == 0 && len(filter.Signatures) == 0 {
-				return nil, fmt.Errorf("a call filter transform requires at-least one address or one method signature")
-			}
-
 			f := &CallToFilter{
 				indexStore:         indexStore,
 				possibleIndexSizes: possibleIndexSizes,
 			}
-
-			for _, addr := range filter.Addresses {
-				f.Addresses = append(f.Addresses, addr)
+			if err := f.load(filter); err != nil {
+				return nil, err
 			}
-			for _, sig := range filter.Signatures {
-				f.Signatures = append(f.Signatures, sig)
-			}
-
 			return f, nil
 		},
 	}
@@ -60,6 +50,22 @@ type CallToFilter struct {
 
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
+}
+
+func (f *CallToFilter) load(in *pbtransform.CallToFilter) error {
+	if len(in.Addresses) == 0 && len(in.Signatures) == 0 {
+		return fmt.Errorf("a call filter transform requires at-least one address or one method signature")
+	}
+
+	for _, addr := range in.Addresses {
+		f.Addresses = append(f.Addresses, addr)
+	}
+	for _, sig := range in.Signatures {
+		f.Signatures = append(f.Signatures, sig)
+	}
+
+	return nil
+
 }
 
 func (p *CallToFilter) String() string {
@@ -99,18 +105,20 @@ func (p *CallToFilter) matchSignature(src eth.Hash) bool {
 	return false
 }
 
+func (p *CallToFilter) matches(trace *pbeth.TransactionTrace) bool {
+	for _, call := range trace.Calls {
+		if p.matchAddress(call.Address) && p.matchSignature(call.Method()) {
+			return true
+		}
+	}
+	return false
+}
+
 func (p *CallToFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
 	ethBlock := readOnlyBlk.ToProtocol().(*pbeth.Block)
 	traces := []*pbeth.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
-		match := false
-		for _, call := range trace.Calls {
-			if p.matchAddress(call.Address) && p.matchSignature(call.Method()) {
-				match = true
-				break
-			}
-		}
-		if match {
+		if p.matches(trace) {
 			traces = append(traces, trace)
 		}
 	}

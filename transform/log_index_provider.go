@@ -8,6 +8,7 @@ import (
 )
 
 const LogAddrIndexShortName = "logaddrsig"
+const NP = "" // no prefix
 
 // addrSigSingleFilter represents a combination of interesting eth.Address and eth.Hash
 // can be composed into an array for more complex filtering
@@ -37,7 +38,7 @@ func getFilterFunc(filters []*addrSigSingleFilter) func(transform.BitmapGetter) 
 	return func(getFunc transform.BitmapGetter) (matchingBlocks []uint64) {
 		out := roaring64.NewBitmap()
 		for _, f := range filters {
-			fbit := filterBitmap(f, getFunc)
+			fbit := filterBitmap(f, getFunc, NP)
 			out.Or(fbit)
 		}
 		return nilIfEmpty(out.ToArray())
@@ -46,18 +47,18 @@ func getFilterFunc(filters []*addrSigSingleFilter) func(transform.BitmapGetter) 
 
 // filterBitmap is a switchboard method which determines
 // if we're interested in filtering the provided index by eth.Address, eth.Hash, or both
-func filterBitmap(f *addrSigSingleFilter, getFunc transform.BitmapGetter) *roaring64.Bitmap {
+func filterBitmap(f *addrSigSingleFilter, getFunc transform.BitmapGetter, idxPrefix string) *roaring64.Bitmap {
 	wantAddresses := len(f.addrs) != 0
 	wantSigs := len(f.sigs) != 0
 
 	switch {
 	case wantAddresses && !wantSigs:
-		return addressBitmap(f.addrs, getFunc)
+		return addressBitmap(f.addrs, getFunc, idxPrefix)
 	case wantSigs && !wantAddresses:
-		return sigsBitmap(f.sigs, getFunc)
+		return sigsBitmap(f.sigs, getFunc, idxPrefix)
 	case wantAddresses && wantSigs:
-		a := addressBitmap(f.addrs, getFunc)
-		b := sigsBitmap(f.sigs, getFunc)
+		a := addressBitmap(f.addrs, getFunc, idxPrefix)
+		b := sigsBitmap(f.sigs, getFunc, idxPrefix)
 		a.And(b)
 		return a
 	default:
@@ -66,10 +67,10 @@ func filterBitmap(f *addrSigSingleFilter, getFunc transform.BitmapGetter) *roari
 }
 
 // addressBitmap attempts to find the blockNums corresponding to the provided eth.Address
-func addressBitmap(addrs []eth.Address, getFunc transform.BitmapGetter) *roaring64.Bitmap {
+func addressBitmap(addrs []eth.Address, getFunc transform.BitmapGetter, idxPrefix string) *roaring64.Bitmap {
 	out := roaring64.NewBitmap()
 	for _, addr := range addrs {
-		addrString := addr.String()
+		addrString := idxPrefix + addr.String()
 		if bm := getFunc(addrString); bm != nil {
 			out.Or(bm)
 		}
@@ -78,10 +79,10 @@ func addressBitmap(addrs []eth.Address, getFunc transform.BitmapGetter) *roaring
 }
 
 // sigsBitmap attemps to find the blockNums corresponding to the provided eth.Hash
-func sigsBitmap(sigs []eth.Hash, getFunc transform.BitmapGetter) *roaring64.Bitmap {
+func sigsBitmap(sigs []eth.Hash, getFunc transform.BitmapGetter, idxPrefix string) *roaring64.Bitmap {
 	out := roaring64.NewBitmap()
 	for _, sig := range sigs {
-		bm := getFunc(sig.String())
+		bm := getFunc(idxPrefix + sig.String())
 		if bm == nil {
 			continue
 		}

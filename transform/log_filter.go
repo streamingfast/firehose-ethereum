@@ -33,22 +33,13 @@ func LogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *tra
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
 
-			if len(filter.Addresses) == 0 && len(filter.EventSignatures) == 0 {
-				return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
-			}
-
 			f := &LogFilter{
 				indexStore:         indexStore,
 				possibleIndexSizes: possibleIndexSizes,
 			}
-
-			for _, addr := range filter.Addresses {
-				f.Addresses = append(f.Addresses, addr)
+			if err := f.load(filter); err != nil {
+				return nil, err
 			}
-			for _, sig := range filter.EventSignatures {
-				f.EventSignatures = append(f.EventSignatures, sig)
-			}
-
 			return f, nil
 		},
 	}
@@ -60,6 +51,23 @@ type LogFilter struct {
 
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
+}
+
+func (f *LogFilter) load(in *pbtransform.LogFilter) error {
+	if len(in.Addresses) == 0 && len(in.EventSignatures) == 0 {
+		return fmt.Errorf("a log filter transform requires at-least one address or one event signature")
+	}
+	f.Addresses = nil
+	f.EventSignatures = nil
+
+	for _, addr := range in.Addresses {
+		f.Addresses = append(f.Addresses, addr)
+	}
+	for _, sig := range in.EventSignatures {
+		f.EventSignatures = append(f.EventSignatures, sig)
+	}
+
+	return nil
 }
 
 func (p *LogFilter) String() string {
@@ -102,18 +110,20 @@ func (p *LogFilter) matchEventSignature(topics [][]byte) bool {
 	return false
 }
 
+func (p *LogFilter) matches(trace *pbeth.TransactionTrace) bool {
+	for _, log := range trace.Receipt.Logs {
+		if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics) {
+			return true
+		}
+	}
+	return false
+}
+
 func (p *LogFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
 	ethBlock := readOnlyBlk.ToProtocol().(*pbeth.Block)
 	traces := []*pbeth.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
-		match := false
-		for _, log := range trace.Receipt.Logs {
-			if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics) {
-				match = true
-				break
-			}
-		}
-		if match {
+		if p.matches(trace) {
 			traces = append(traces, trace)
 		}
 	}

@@ -8,13 +8,13 @@ import (
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
-type CallIndexer interface {
+type Indexer interface {
 	Add(keys []string, blockNum uint64)
 }
 
 // EthCallIndexer wraps a bstream.transform.BlockIndexer for chain-specific use on Ethereum
 type EthCallIndexer struct {
-	BlockIndexer LogIndexer
+	BlockIndexer Indexer
 }
 
 // NewEthCallIndexer instantiates and returns a new EthCallIndexer
@@ -25,16 +25,23 @@ func NewEthCallIndexer(indexStore dstore.Store, indexSize uint64) *EthCallIndexe
 	}
 }
 
+func callKeys(trace *pbeth.TransactionTrace, prefix string) (out []string) {
+	for _, call := range trace.Calls {
+		out = append(out, hex.EncodeToString(call.Address))
+		if sig := call.Method(); sig != nil {
+			out = append(out, hex.EncodeToString(sig))
+		}
+	}
+
+	return
+}
+
 // ProcessBlock implements chain-specific logic for Ethereum bstream.Block's
 func (i *EthCallIndexer) ProcessBlock(blk *pbeth.Block) {
 	var keys []string
-
 	for _, trace := range blk.TransactionTraces {
-		for _, call := range trace.Calls {
-			keys = append(keys, hex.EncodeToString(call.Address))
-			if sig := call.Method(); sig != nil {
-				keys = append(keys, hex.EncodeToString(sig))
-			}
+		for _, key := range callKeys(trace, NP) {
+			keys = append(keys, key)
 		}
 	}
 
