@@ -63,7 +63,8 @@ func init() {
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			cmd.Flags().String("substreams-rpc-cache-store-url", "./rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().String("substreams-state-store-url", "./localdata", "where substreams state data are stored")
-			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(10000), "Interval in blocks at which to save store snapshots")
+			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(10000), "Interval in blocks at which to save store snapshots") // fixme
+			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(10000), "RPC cache chunk size in block")
 			return nil
 		},
 
@@ -123,6 +124,7 @@ func init() {
 				rpcEngine, err := ethss.NewRPCEngine(
 					viper.GetString("substreams-rpc-cache-store-url"),
 					endpoints,
+					viper.GetUint64("substreams-rpc-cache-chunk-size"),
 				)
 				if err != nil {
 					return nil, fmt.Errorf("setting up Ethereum rpc engine and cache: %w", err)
