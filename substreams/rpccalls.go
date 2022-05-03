@@ -187,6 +187,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 				map[string]interface{}{
 					"to":   eth.Hex(call.ToAddr).Pretty(),
 					"data": eth.Hex(call.MethodSignature).Pretty(),
+					"gas":  50_000_000,
 				},
 				blockNum,
 			},
