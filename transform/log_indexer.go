@@ -29,7 +29,7 @@ func logKeys(trace *pbeth.TransactionTrace, prefix string) (out []string) {
 			evSig = log.Topics[0]
 		}
 
-		out = append(out, hex.EncodeToString(log.Address), hex.EncodeToString(evSig))
+		out = append(out, prefix+hex.EncodeToString(log.Address), prefix+hex.EncodeToString(evSig))
 	}
 
 	return

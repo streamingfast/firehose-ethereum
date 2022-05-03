@@ -27,9 +27,9 @@ func NewEthCallIndexer(indexStore dstore.Store, indexSize uint64) *EthCallIndexe
 
 func callKeys(trace *pbeth.TransactionTrace, prefix string) (out []string) {
 	for _, call := range trace.Calls {
-		out = append(out, hex.EncodeToString(call.Address))
+		out = append(out, prefix+hex.EncodeToString(call.Address))
 		if sig := call.Method(); sig != nil {
-			out = append(out, hex.EncodeToString(sig))
+			out = append(out, prefix+hex.EncodeToString(sig))
 		}
 	}
 

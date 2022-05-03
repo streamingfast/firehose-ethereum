@@ -92,10 +92,10 @@ func NewEthCombinedIndexer(indexStore dstore.Store, indexSize uint64) *EthCombin
 func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) {
 	var keys []string
 	for _, trace := range blk.TransactionTraces {
-		for _, key := range callKeys(trace, NP) {
+		for _, key := range callKeys(trace, CP) {
 			keys = append(keys, key)
 		}
-		for _, key := range logKeys(trace, NP) {
+		for _, key := range logKeys(trace, LP) {
 			keys = append(keys, key)
 		}
 	}
@@ -171,7 +171,7 @@ func (f *CombinedFilter) GetIndexProvider() bstream.BlockIndexProvider {
 
 }
 
-func getcombinedFilterFunc(logFilters []*addrSigSingleFilter, callFilters []*addrSigSingleFilter) func(transform.BitmapGetter) []uint64 {
+func getcombinedFilterFunc(callFilters []*addrSigSingleFilter, logFilters []*addrSigSingleFilter) func(transform.BitmapGetter) []uint64 {
 	return func(getFunc transform.BitmapGetter) (matchingBlocks []uint64) {
 		out := roaring64.NewBitmap()
 		for _, f := range logFilters {
