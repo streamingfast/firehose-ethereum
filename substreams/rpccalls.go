@@ -33,12 +33,13 @@ type RPCEngine struct {
 
 	rpcClients            []*rpc.Client
 	currentRpcClientIndex int
+	cacheChunkSizeInBlock uint64
 
 	perRequestCache     map[*pbsubstreams.Request]*Cache
 	perRequestCacheLock sync.RWMutex
 }
 
-func NewRPCEngine(rpcCachePath string, rpcEndpoints []string) (*RPCEngine, error) {
+func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBlock uint64) (*RPCEngine, error) {
 	rpcCacheStore, err := dstore.NewStore(rpcCachePath, "", "", false)
 	if err != nil {
 		return nil, fmt.Errorf("setting up rpc cache store: %w", err)
@@ -60,9 +61,10 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string) (*RPCEngine, error
 	}
 
 	return &RPCEngine{
-		perRequestCache: map[*pbsubstreams.Request]*Cache{},
-		rpcCacheStore:   rpcCacheStore,
-		rpcClients:      rpcClients,
+		perRequestCache:       map[*pbsubstreams.Request]*Cache{},
+		rpcCacheStore:         rpcCacheStore,
+		rpcClients:            rpcClients,
+		cacheChunkSizeInBlock: cacheChunkSizeInBlock,
 	}, nil
 }
 
@@ -92,18 +94,16 @@ func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 }
 
 func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.Request) []pipeline.Option {
-	pipelineCache := NewCache(ctx, e.rpcCacheStore, request.StartBlockNum)
-	zlog.Info("yuo man setting up pipeline")
-
+	pipelineCache := NewCache(ctx, e.rpcCacheStore, uint64(request.StartBlockNum), e.cacheChunkSizeInBlock)
 	e.registerRequestCache(request, pipelineCache)
 
 	preBlock := func(ctx context.Context, clock *pbsubstreams.Clock) error {
-		pipelineCache.UpdateCache(ctx, clock.Number, request.StopBlockNum)
+		pipelineCache.UpdateCache(ctx, clock.Number)
 		return nil
 	}
 
 	postJob := func(ctx context.Context, clock *pbsubstreams.Clock) error {
-		pipelineCache.Save(ctx, request.StartBlockNum, request.StopBlockNum)
+		pipelineCache.Save(ctx)
 		e.unregisterRequestCache(request)
 		return nil
 	}
@@ -170,7 +170,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 	callsBytes, _ := proto.Marshal(calls)
 	cacheKey := fmt.Sprintf("%d:%x", blockNum, sha256.Sum256(callsBytes))
 	if len(callsBytes) != 0 {
-		val, found := cache.Get(ctx, cacheKey)
+		val, found := cache.Get(cacheKey)
 		if found {
 			out = &pbethss.RpcResponses{}
 			err := proto.Unmarshal(val, out)
@@ -187,6 +187,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 				map[string]interface{}{
 					"to":   eth.Hex(call.ToAddr).Pretty(),
 					"data": eth.Hex(call.MethodSignature).Pretty(),
+					"gas":  50_000_000,
 				},
 				blockNum,
 			},
@@ -227,7 +228,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 
 		if deterministicResp {
 			if encodedResp, err := proto.Marshal(resp); err == nil {
-				cache.Set(ctx, cacheKey, encodedResp)
+				cache.Set(cacheKey, encodedResp)
 			}
 		}
 

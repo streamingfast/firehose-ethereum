@@ -50,7 +50,7 @@ func init() {
 		Title:       "Block Firehose",
 		Description: "Provides on-demand filtered blocks, depends on common-blocks-store-url and common-blockstream-addr",
 		RegisterFlags: func(cmd *cobra.Command) error {
-			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection")
+			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
 			cmd.Flags().Duration("firehose-realtime-tolerance", 2*time.Minute, "Longest delay to consider this service as real-time (ready) on initialization")
 			// irreversible indices
 			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
@@ -63,7 +63,8 @@ func init() {
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			cmd.Flags().String("substreams-rpc-cache-store-url", "./rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().String("substreams-state-store-url", "./localdata", "where substreams state data are stored")
-			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(10000), "Interval in blocks at which to save store snapshots")
+			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(10000), "Interval in blocks at which to save store snapshots") // fixme
+			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(10000), "RPC cache chunk size in block")
 			return nil
 		},
 
@@ -123,6 +124,7 @@ func init() {
 				rpcEngine, err := ethss.NewRPCEngine(
 					viper.GetString("substreams-rpc-cache-store-url"),
 					endpoints,
+					viper.GetUint64("substreams-rpc-cache-chunk-size"),
 				)
 				if err != nil {
 					return nil, fmt.Errorf("setting up Ethereum rpc engine and cache: %w", err)

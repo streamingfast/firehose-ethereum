@@ -23,7 +23,7 @@ func init() {
 }
 
 var DownloadFromFirehoseCmd = &cobra.Command{
-	Use:     "download-from-firehose",
+	Use:     "download-from-firehose <endpoint> <start> <stop> <destination>",
 	Short:   "download blocks from firehose and save them to merged-blocks",
 	Args:    cobra.ExactArgs(4),
 	RunE:    downloadFromFirehoseE,
