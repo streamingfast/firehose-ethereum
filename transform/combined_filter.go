@@ -1,22 +1,29 @@
 package transform
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
+	"github.com/streamingfast/eth-go"
 	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
+const NP = ""  //
 const LP = "L" // log prefix for combined index
 const CP = "C" // call prefix for combined index
 
 const CombinedIndexerShortName = "combined"
+
+type Indexer interface {
+	Add(keys []string, blockNum uint64)
+}
 
 var CombinedFilterMessageName = proto.MessageName(&pbtransform.CombinedFilter{})
 
@@ -39,34 +46,39 @@ func CombinedFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 				return nil, fmt.Errorf("a combined filter transform requires at-least one callto filter or one logfilter")
 			}
 
-			var callToFilters []*CallToFilter
-			for _, in := range filter.CallFilters {
-				f := &CallToFilter{}
-				if err := f.load(in); err != nil {
-					return nil, err
-				}
-				callToFilters = append(callToFilters, f)
-			}
+			return newCombinedFilter(filter.CallFilters, filter.LogFilters, indexStore, possibleIndexSizes)
 
-			var logFilters []*LogFilter
-			for _, in := range filter.LogFilters {
-				f := &LogFilter{}
-				if err := f.load(in); err != nil {
-					return nil, err
-				}
-				logFilters = append(logFilters, f)
-			}
-
-			f := &CombinedFilter{
-				CallToFilters:      callToFilters,
-				LogFilters:         logFilters,
-				indexStore:         indexStore,
-				possibleIndexSizes: possibleIndexSizes,
-			}
-
-			return f, nil
 		},
 	}
+}
+
+func newCombinedFilter(pbCallToFilters []*pbtransform.CallToFilter, pbLogFilters []*pbtransform.LogFilter, indexStore dstore.Store, possibleIndexSizes []uint64) (*CombinedFilter, error) {
+	var callToFilters []*CallToFilter
+	for _, in := range pbCallToFilters {
+		f, err := NewCallToFilter(in)
+		if err != nil {
+			return nil, err
+		}
+		callToFilters = append(callToFilters, f)
+	}
+
+	var logFilters []*LogFilter
+	for _, in := range pbLogFilters {
+		f, err := NewLogFilter(in)
+		if err != nil {
+			return nil, err
+		}
+		logFilters = append(logFilters, f)
+	}
+
+	f := &CombinedFilter{
+		CallToFilters:      callToFilters,
+		LogFilters:         logFilters,
+		indexStore:         indexStore,
+		possibleIndexSizes: possibleIndexSizes,
+	}
+
+	return f, nil
 }
 
 type CombinedFilter struct {
@@ -105,6 +117,16 @@ func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) {
 }
 
 func (f *CombinedFilter) String() string {
+	//	var addresses []string
+	//	var signatures []string
+	//	for _, a := range p.Addresses {
+	//		addresses = append(addresses, a.Pretty())
+	//	}
+	//	for _, s := range p.EventSignatures {
+	//		signatures = append(signatures, s.Pretty())
+	//	}
+	//	return fmt.Sprintf("LogFilter{addrs: %s, evt_sigs: %s}", strings.Join(addresses, ","), strings.Join(signatures, ","))
+	//
 	return "combinedFilter"
 }
 
@@ -144,34 +166,16 @@ func (f *CombinedFilter) GetIndexProvider() bstream.BlockIndexProvider {
 		return nil
 	}
 
-	var callFilters []*addrSigSingleFilter
-	for _, cf := range f.CallToFilters {
-		filter := &addrSigSingleFilter{
-			cf.Addresses,
-			cf.Signatures,
-		}
-		callFilters = append(callFilters, filter)
-	}
-
-	var logFilters []*addrSigSingleFilter
-	for _, lf := range f.LogFilters {
-		filter := &addrSigSingleFilter{
-			lf.Addresses,
-			lf.EventSignatures,
-		}
-		logFilters = append(logFilters, filter)
-	}
-
 	return transform.NewGenericBlockIndexProvider(
 		f.indexStore,
 		CombinedIndexerShortName,
 		f.possibleIndexSizes,
-		getcombinedFilterFunc(callFilters, logFilters),
+		getcombinedFilterFunc(f.CallToFilters, f.LogFilters),
 	)
 
 }
 
-func getcombinedFilterFunc(callFilters []*addrSigSingleFilter, logFilters []*addrSigSingleFilter) func(transform.BitmapGetter) []uint64 {
+func getcombinedFilterFunc(callFilters []*CallToFilter, logFilters []*LogFilter) func(transform.BitmapGetter) []uint64 {
 	return func(getFunc transform.BitmapGetter) (matchingBlocks []uint64) {
 		out := roaring64.NewBitmap()
 		for _, f := range logFilters {
@@ -184,4 +188,87 @@ func getcombinedFilterFunc(callFilters []*addrSigSingleFilter, logFilters []*add
 		}
 		return nilIfEmpty(out.ToArray())
 	}
+}
+
+func logKeys(trace *pbeth.TransactionTrace, prefix string) (out []string) {
+	for _, log := range trace.Receipt.Logs {
+		var evSig []byte
+		if len(log.Topics) != 0 {
+			// @todo(froch, 22022022) parameterize the topics of interest
+			evSig = log.Topics[0]
+		}
+
+		out = append(out, prefix+hex.EncodeToString(log.Address), prefix+hex.EncodeToString(evSig))
+	}
+
+	return
+}
+func callKeys(trace *pbeth.TransactionTrace, prefix string) (out []string) {
+	for _, call := range trace.Calls {
+		out = append(out, prefix+hex.EncodeToString(call.Address))
+		if sig := call.Method(); sig != nil {
+			out = append(out, prefix+hex.EncodeToString(sig))
+		}
+	}
+
+	return
+}
+
+type AddressSignatureFilter interface {
+	Addresses() []eth.Address
+	Signatures() []eth.Hash
+}
+
+// filterBitmap is a switchboard method which determines
+// if we're interested in filtering the provided index by eth.Address, eth.Hash, or both
+func filterBitmap(f AddressSignatureFilter, getFunc transform.BitmapGetter, idxPrefix string) *roaring64.Bitmap {
+	wantAddresses := len(f.Addresses()) != 0
+	wantSigs := len(f.Signatures()) != 0
+
+	switch {
+	case wantAddresses && !wantSigs:
+		return addressBitmap(f.Addresses(), getFunc, idxPrefix)
+	case wantSigs && !wantAddresses:
+		return sigsBitmap(f.Signatures(), getFunc, idxPrefix)
+	case wantAddresses && wantSigs:
+		a := addressBitmap(f.Addresses(), getFunc, idxPrefix)
+		b := sigsBitmap(f.Signatures(), getFunc, idxPrefix)
+		a.And(b)
+		return a
+	default:
+		panic("filterBitmap: unsupported case")
+	}
+}
+
+// addressBitmap attempts to find the blockNums corresponding to the provided eth.Address
+func addressBitmap(addrs []eth.Address, getFunc transform.BitmapGetter, idxPrefix string) *roaring64.Bitmap {
+	out := roaring64.NewBitmap()
+	for _, addr := range addrs {
+		addrString := idxPrefix + addr.String()
+		if bm := getFunc(addrString); bm != nil {
+			out.Or(bm)
+		}
+	}
+	return out
+}
+
+// sigsBitmap attemps to find the blockNums corresponding to the provided eth.Hash
+func sigsBitmap(sigs []eth.Hash, getFunc transform.BitmapGetter, idxPrefix string) *roaring64.Bitmap {
+	out := roaring64.NewBitmap()
+	for _, sig := range sigs {
+		bm := getFunc(idxPrefix + sig.String())
+		if bm == nil {
+			continue
+		}
+		out.Or(bm)
+	}
+	return out
+}
+
+// nilIfEmpty is a convenience method which returns nil if the provided slice is empty
+func nilIfEmpty(in []uint64) []uint64 {
+	if len(in) == 0 {
+		return nil
+	}
+	return in
 }

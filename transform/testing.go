@@ -1,13 +1,10 @@
 package transform
 
 import (
-	"io"
-	"io/ioutil"
 	"os"
 	"testing"
 
 	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
@@ -161,31 +158,31 @@ func testEthBlocks(t *testing.T, size int) []*pbeth.Block {
 	return blocks
 }
 
-// testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
-// this implementation uses an EthLogIndexer to write the index files
-func testMockstoreWithFiles(t *testing.T, blocks []*pbeth.Block, indexSize uint64) *dstore.MockStore {
-	results := make(map[string][]byte)
-
-	// spawn an indexStore which will populate the results
-	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
-		content, err := ioutil.ReadAll(f)
-		require.NoError(t, err)
-		results[base] = content
-		return nil
-	})
-
-	// spawn an indexer with our mock indexStore
-	indexer := NewEthLogIndexer(indexStore, indexSize)
-	for _, blk := range blocks {
-		// feed the indexer
-		indexer.ProcessBlock(blk)
-	}
-
-	// populate a new indexStore with the prior results
-	indexStore = dstore.NewMockStore(nil)
-	for indexName, indexContents := range results {
-		indexStore.SetFile(indexName, indexContents)
-	}
-
-	return indexStore
-}
+//// testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
+//// this implementation uses an EthLogIndexer to write the index files
+//func testMockstoreWithFiles(t *testing.T, blocks []*pbeth.Block, indexSize uint64) *dstore.MockStore {
+//	results := make(map[string][]byte)
+//
+//	// spawn an indexStore which will populate the results
+//	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+//		content, err := ioutil.ReadAll(f)
+//		require.NoError(t, err)
+//		results[base] = content
+//		return nil
+//	})
+//
+//	// spawn an indexer with our mock indexStore
+//	indexer := NewEthLogIndexer(indexStore, indexSize)
+//	for _, blk := range blocks {
+//		// feed the indexer
+//		indexer.ProcessBlock(blk)
+//	}
+//
+//	// populate a new indexStore with the prior results
+//	indexStore = dstore.NewMockStore(nil)
+//	for indexName, indexContents := range results {
+//		indexStore.SetFile(indexName, indexContents)
+//	}
+//
+//	return indexStore
+//}
