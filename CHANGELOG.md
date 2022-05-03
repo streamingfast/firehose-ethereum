@@ -8,9 +8,9 @@ for instructions to keep up to date.
 
 #### BREAKING CHANGES --requires reprocessing all merged block files--
 
-* Requires deepmind node (extractor) with instrumentation version *2.0*
+* Requires Firehose instrumented binary with instrumentation version *2.0* (tagged `fh2`)
 
-* Produced / consumed block protobuf payload version bumped 1 -> 2
+* Produced / consumed block Protobuf payload version bumped 1 -> 2
   * Fixed Gas Price on dynamic transactions (post-London-fork on ethereum mainnet)
   * Added "Total Ordering" concept, 'Ordinal' field on all events within a block (trx begin/end, call, log, balance change, etc.)
   * Added TotalDifficulty field to ethereum blocks
