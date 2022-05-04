@@ -3,6 +3,7 @@ package transform
 import (
 	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/streamingfast/bstream"
@@ -15,9 +16,9 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-const NP = ""  //
-const LP = "L" // log prefix for combined index
-const CP = "C" // call prefix for combined index
+const IdxPrefixEmpty = "" //
+const IdxPrefixLog = "L"  // log prefix for combined index
+const IdxPrefixCall = "C" // call prefix for combined index
 
 const CombinedIndexerShortName = "combined"
 
@@ -33,7 +34,7 @@ func CombinedFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 			mname := message.MessageName()
 			if mname != CombinedFilterMessageName {
-				return nil, fmt.Errorf("expected type url %q, recevied %q ", CombinedFilterMessageName, message.TypeUrl)
+				return nil, fmt.Errorf("expected type url %q, received %q ", CombinedFilterMessageName, message.TypeUrl)
 			}
 
 			filter := &pbtransform.CombinedFilter{}
@@ -54,21 +55,28 @@ func CombinedFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 
 func newCombinedFilter(pbCallToFilters []*pbtransform.CallToFilter, pbLogFilters []*pbtransform.LogFilter, indexStore dstore.Store, possibleIndexSizes []uint64) (*CombinedFilter, error) {
 	var callToFilters []*CallToFilter
-	for _, in := range pbCallToFilters {
-		f, err := NewCallToFilter(in)
-		if err != nil {
-			return nil, err
+	if l := len(pbCallToFilters); l > 0 {
+		callToFilters = make([]*CallToFilter, l)
+		for i, in := range pbCallToFilters {
+			f, err := NewCallToFilter(in)
+			if err != nil {
+				return nil, err
+			}
+			callToFilters[i] = f
 		}
-		callToFilters = append(callToFilters, f)
 	}
 
 	var logFilters []*LogFilter
-	for _, in := range pbLogFilters {
-		f, err := NewLogFilter(in)
-		if err != nil {
-			return nil, err
+
+	if l := len(pbLogFilters); l > 0 {
+		logFilters = make([]*LogFilter, l)
+		for i, in := range pbLogFilters {
+			f, err := NewLogFilter(in)
+			if err != nil {
+				return nil, err
+			}
+			logFilters[i] = f
 		}
-		logFilters = append(logFilters, f)
 	}
 
 	f := &CombinedFilter{
@@ -102,32 +110,48 @@ func NewEthCombinedIndexer(indexStore dstore.Store, indexSize uint64) *EthCombin
 
 // ProcessBlock implements chain-specific logic for Ethereum bstream.Block's
 func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) {
-	var keys []string
+	keys := make(map[string]bool)
 	for _, trace := range blk.TransactionTraces {
-		for _, key := range callKeys(trace, CP) {
-			keys = append(keys, key)
+		for key := range callKeys(trace, IdxPrefixCall) {
+			keys[key] = true
 		}
-		for _, key := range logKeys(trace, LP) {
-			keys = append(keys, key)
+		for key := range logKeys(trace, IdxPrefixLog) {
+			keys[key] = true
 		}
 	}
+	keyArray := make([]string, 0, len(keys))
+	for key := range keys {
+		keyArray = append(keyArray, key)
+	}
 
-	i.BlockIndexer.Add(keys, blk.Number)
+	i.BlockIndexer.Add(keyArray, blk.Number)
 	return
 }
 
+func addSigString(in AddressSignatureFilter) string {
+	var addresses []string
+	var signatures []string
+	for _, a := range in.Addresses() {
+		addresses = append(addresses, a.Pretty())
+	}
+	for _, s := range in.Signatures() {
+		signatures = append(signatures, s.Pretty())
+	}
+	return fmt.Sprintf("{addrs: %s, sigs: %s}", strings.Join(addresses, ","), strings.Join(signatures, ","))
+
+}
+
 func (f *CombinedFilter) String() string {
-	//	var addresses []string
-	//	var signatures []string
-	//	for _, a := range p.Addresses {
-	//		addresses = append(addresses, a.Pretty())
-	//	}
-	//	for _, s := range p.EventSignatures {
-	//		signatures = append(signatures, s.Pretty())
-	//	}
-	//	return fmt.Sprintf("LogFilter{addrs: %s, evt_sigs: %s}", strings.Join(addresses, ","), strings.Join(signatures, ","))
-	//
-	return "combinedFilter"
+	callFilters := make([]string, len(f.CallToFilters))
+	for i, f := range f.CallToFilters {
+		callFilters[i] = addSigString(f)
+	}
+	logFilters := make([]string, len(f.LogFilters))
+	for i, f := range f.LogFilters {
+		logFilters[i] = addSigString(f)
+	}
+
+	return fmt.Sprintf("Combined filter: Calls:[%s], Logs:[%s]", strings.Join(callFilters, ","), strings.Join(logFilters, ","))
 }
 
 func (f *CombinedFilter) matches(trace *pbeth.TransactionTrace) bool {
@@ -179,39 +203,36 @@ func getcombinedFilterFunc(callFilters []*CallToFilter, logFilters []*LogFilter)
 	return func(getFunc transform.BitmapGetter) (matchingBlocks []uint64) {
 		out := roaring64.NewBitmap()
 		for _, f := range logFilters {
-			fbit := filterBitmap(f, getFunc, LP)
+			fbit := filterBitmap(f, getFunc, IdxPrefixLog)
 			out.Or(fbit)
 		}
 		for _, f := range callFilters {
-			fbit := filterBitmap(f, getFunc, CP)
+			fbit := filterBitmap(f, getFunc, IdxPrefixCall)
 			out.Or(fbit)
 		}
 		return nilIfEmpty(out.ToArray())
 	}
 }
 
-func logKeys(trace *pbeth.TransactionTrace, prefix string) (out []string) {
+func logKeys(trace *pbeth.TransactionTrace, prefix string) map[string]bool {
+	out := make(map[string]bool)
 	for _, log := range trace.Receipt.Logs {
-		var evSig []byte
+		out[prefix+hex.EncodeToString(log.Address)] = true
 		if len(log.Topics) != 0 {
-			// @todo(froch, 22022022) parameterize the topics of interest
-			evSig = log.Topics[0]
+			out[prefix+hex.EncodeToString(log.Topics[0])] = true
 		}
-
-		out = append(out, prefix+hex.EncodeToString(log.Address), prefix+hex.EncodeToString(evSig))
 	}
-
-	return
+	return out
 }
-func callKeys(trace *pbeth.TransactionTrace, prefix string) (out []string) {
+func callKeys(trace *pbeth.TransactionTrace, prefix string) map[string]bool {
+	out := make(map[string]bool)
 	for _, call := range trace.Calls {
-		out = append(out, prefix+hex.EncodeToString(call.Address))
+		out[prefix+hex.EncodeToString(call.Address)] = true
 		if sig := call.Method(); sig != nil {
-			out = append(out, prefix+hex.EncodeToString(sig))
+			out[prefix+hex.EncodeToString(sig)] = true
 		}
 	}
-
-	return
+	return out
 }
 
 type AddressSignatureFilter interface {

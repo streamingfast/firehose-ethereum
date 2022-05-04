@@ -33,12 +33,15 @@ func NewLogFilter(in *pbtransform.LogFilter) (*LogFilter, error) {
 		return nil, fmt.Errorf("a log filter transform requires at-least one address or one event signature")
 	}
 
-	f := &LogFilter{}
-	for _, addr := range in.Addresses {
-		f.addresses = append(f.addresses, addr)
+	f := &LogFilter{
+		addresses:       make([]eth.Address, len(in.Addresses)),
+		eventSignatures: make([]eth.Hash, len(in.EventSignatures)),
 	}
-	for _, sig := range in.EventSignatures {
-		f.eventSignatures = append(f.eventSignatures, sig)
+	for i, addr := range in.Addresses {
+		f.addresses[i] = addr
+	}
+	for i, sig := range in.EventSignatures {
+		f.eventSignatures[i] = sig
 	}
 	return f, nil
 }

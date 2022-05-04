@@ -1,10 +1,13 @@
 package transform
 
 import (
+	"io"
+	"io/ioutil"
 	"os"
 	"testing"
 
 	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
@@ -65,6 +68,21 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Bloc
 		})
 	}
 
+	var calls1 []*pbeth.Call
+	for _, addr := range addrs {
+		calls1 = append(calls1, &pbeth.Call{
+			Address: eth.MustNewAddress(addr),
+			Input:   eth.MustNewHash(sigs[0]),
+		})
+	}
+	var calls2 []*pbeth.Call
+	for _, sig := range sigs {
+		calls2 = append(calls2, &pbeth.Call{
+			Address: eth.MustNewAddress(addrs[0]),
+			Input:   eth.MustNewHash(sig),
+		})
+	}
+
 	return &pbeth.Block{
 		Number: blkNum,
 		TransactionTraces: []*pbeth.TransactionTrace{
@@ -74,6 +92,7 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Bloc
 				Receipt: &pbeth.TransactionReceipt{
 					Logs: logs1,
 				},
+				Calls: calls1,
 			},
 			{
 				Hash:   eth.MustNewHash("0xBEEFDEAD"),
@@ -81,6 +100,7 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Bloc
 				Receipt: &pbeth.TransactionReceipt{
 					Logs: logs2,
 				},
+				Calls: calls2,
 			},
 		},
 	}
@@ -158,31 +178,31 @@ func testEthBlocks(t *testing.T, size int) []*pbeth.Block {
 	return blocks
 }
 
-//// testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
-//// this implementation uses an EthLogIndexer to write the index files
-//func testMockstoreWithFiles(t *testing.T, blocks []*pbeth.Block, indexSize uint64) *dstore.MockStore {
-//	results := make(map[string][]byte)
-//
-//	// spawn an indexStore which will populate the results
-//	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
-//		content, err := ioutil.ReadAll(f)
-//		require.NoError(t, err)
-//		results[base] = content
-//		return nil
-//	})
-//
-//	// spawn an indexer with our mock indexStore
-//	indexer := NewEthLogIndexer(indexStore, indexSize)
-//	for _, blk := range blocks {
-//		// feed the indexer
-//		indexer.ProcessBlock(blk)
-//	}
-//
-//	// populate a new indexStore with the prior results
-//	indexStore = dstore.NewMockStore(nil)
-//	for indexName, indexContents := range results {
-//		indexStore.SetFile(indexName, indexContents)
-//	}
-//
-//	return indexStore
-//}
+// testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
+// this implementation uses an EthLogIndexer to write the index files
+func testMockstoreWithFiles(t *testing.T, blocks []*pbeth.Block, indexSize uint64) *dstore.MockStore {
+	results := make(map[string][]byte)
+
+	// spawn an indexStore which will populate the results
+	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
+		content, err := ioutil.ReadAll(f)
+		require.NoError(t, err)
+		results[base] = content
+		return nil
+	})
+
+	// spawn an indexer with our mock indexStore
+	indexer := NewEthCombinedIndexer(indexStore, indexSize)
+	for _, blk := range blocks {
+		// feed the indexer
+		indexer.ProcessBlock(blk)
+	}
+
+	// populate a new indexStore with the prior results
+	indexStore = dstore.NewMockStore(nil)
+	for indexName, indexContents := range results {
+		indexStore.SetFile(indexName, indexContents)
+	}
+
+	return indexStore
+}

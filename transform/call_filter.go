@@ -33,7 +33,10 @@ func NewCallToFilter(in *pbtransform.CallToFilter) (*CallToFilter, error) {
 		return nil, fmt.Errorf("a call filter transform requires at-least one address or one method signature")
 	}
 
-	f := &CallToFilter{}
+	f := &CallToFilter{
+		addresses:  make([]eth.Address, 0, len(in.Addresses)),
+		signatures: make([]eth.Hash, 0, len(in.Signatures)),
+	}
 	for _, addr := range in.Addresses {
 		f.addresses = append(f.addresses, addr)
 	}
