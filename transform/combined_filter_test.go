@@ -2,26 +2,40 @@ package transform
 
 import (
 	"context"
-	"io"
 	"testing"
 
 	"github.com/streamingfast/bstream/transform"
-	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
+	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/test-go/testify/require"
 )
 
-func TestNewEthAckIndexProvider(t *testing.T) {
-	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
-		return nil
-	})
-	indexProvider := NewEthLogIndexProvider(indexStore, nil, nil)
-	require.NotNil(t, indexProvider)
-	require.IsType(t, transform.GenericBlockIndexProvider{}, *indexProvider)
+func TestString(t *testing.T) {
+	c, err := newCombinedFilter(nil, nil, nil, nil)
+	require.NoError(t, err)
+	assert.Equal(t, "Combined filter: Calls:[], Logs:[]", c.String())
+
+	cf := &pbtransform.CallToFilter{
+		Addresses:  [][]byte{eth.MustNewHex("0xdeadbeef")},
+		Signatures: [][]byte{eth.MustNewHex("0xbbbb")},
+	}
+	lf1 := &pbtransform.LogFilter{
+		Addresses:       [][]byte{eth.MustNewHex("0xdeadbeef")},
+		EventSignatures: [][]byte{eth.MustNewHex("0xbbbb")},
+	}
+	lf2 := &pbtransform.LogFilter{
+		Addresses:       [][]byte{eth.MustNewHex("0xcccc2222")},
+		EventSignatures: nil,
+	}
+
+	c, err = newCombinedFilter([]*pbtransform.CallToFilter{cf}, []*pbtransform.LogFilter{lf1, lf2}, nil, nil)
+	require.NoError(t, err)
+	assert.Equal(t, "Combined filter: Calls:[{addrs: 0xdeadbeef, sigs: 0xbbbb}], Logs:[{addrs: 0xdeadbeef, sigs: 0xbbbb},{addrs: 0xcccc2222, sigs: }]", c.String())
 }
 
-func TestEthAckIndexProvider_WithinRange(t *testing.T) {
+func TestEthLogIndexProvider_WithinRange(t *testing.T) {
 	tests := []struct {
 		name          string
 		blocks        []*pbeth.Block
@@ -60,12 +74,18 @@ func TestEthAckIndexProvider_WithinRange(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
 
 			// spawn an indexProvider with the populated dstore
-			indexProvider := NewEthLogIndexProvider(
+			indexProvider := transform.NewGenericBlockIndexProvider(
 				indexStore,
+				CombinedIndexerShortName,
 				[]uint64{test.indexSize},
-				[]*addrSigSingleFilter{
-					{matchAddresses, nil},
-				},
+				getcombinedFilterFunc(
+					nil,
+					[]*LogFilter{
+						{
+							addresses: matchAddresses,
+						},
+					},
+				),
 			)
 			require.NotNil(t, indexProvider)
 
@@ -169,10 +189,20 @@ func TestEthLogIndexProvider_Matches(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
-			filters := []*addrSigSingleFilter{
-				{test.filterAddresses, test.filterEventSigs},
-			}
-			indexProvider := NewEthLogIndexProvider(indexStore, []uint64{test.indexSize}, filters)
+			indexProvider := transform.NewGenericBlockIndexProvider(
+				indexStore,
+				CombinedIndexerShortName,
+				[]uint64{test.indexSize},
+				getcombinedFilterFunc(
+					nil,
+					[]*LogFilter{
+						{
+							addresses:       test.filterAddresses,
+							eventSignatures: test.filterEventSigs,
+						},
+					},
+				),
+			)
 
 			b, err := indexProvider.Matches(context.Background(), test.wantedBlock)
 			require.NoError(t, err)
@@ -243,15 +273,142 @@ func TestEthLogIndexProvider_NextMatching(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
-			filters := []*addrSigSingleFilter{
-				{test.filterAddresses, test.filterEventSigs},
-			}
-			indexProvider := NewEthLogIndexProvider(indexStore, []uint64{test.indexSize}, filters)
+			filters := getcombinedFilterFunc(
+				nil,
+				[]*LogFilter{
+					{
+						addresses:       test.filterAddresses,
+						eventSignatures: test.filterEventSigs,
+					},
+				},
+			)
+
+			indexProvider := transform.NewGenericBlockIndexProvider(
+				indexStore,
+				CombinedIndexerShortName,
+				[]uint64{test.indexSize},
+				filters,
+			)
 
 			nextBlockNum, passedIndexBoundary, err := indexProvider.NextMatching(context.Background(), test.wantedBlock, 0)
 			require.NoError(t, err)
 			require.Equal(t, passedIndexBoundary, test.expectedPassedIndexBoundary)
 			require.Equal(t, test.expectedNextBlockNum, nextBlockNum)
+		})
+	}
+}
+
+func TestEthCallIndexProvider_Matches(t *testing.T) {
+	tests := []struct {
+		name            string
+		blocks          []*pbeth.Block
+		indexSize       uint64
+		wantedBlock     uint64
+		expectMatches   bool
+		filterAddresses []eth.Address
+		filterEventSigs []eth.Hash
+	}{
+		{
+			name:          "matches single address",
+			blocks:        testEthBlocks(t, 5),
+			indexSize:     2,
+			wantedBlock:   11,
+			expectMatches: true,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+			},
+			filterEventSigs: []eth.Hash{},
+		},
+		{
+			name:          "doesn't match single address",
+			blocks:        testEthBlocks(t, 5),
+			indexSize:     2,
+			wantedBlock:   11,
+			expectMatches: false,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("efefefefefefefefefefefefefefefefefefefef"),
+			},
+			filterEventSigs: []eth.Hash{},
+		},
+		{
+			name:            "matches single event sig",
+			blocks:          testEthBlocks(t, 5),
+			indexSize:       2,
+			wantedBlock:     10,
+			expectMatches:   true,
+			filterAddresses: []eth.Address{},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("aaaaaaaa"), // 4 bytes version of log filter
+			},
+		},
+		{
+			name:            "doesn't match single event sig",
+			blocks:          testEthBlocks(t, 5),
+			indexSize:       2,
+			wantedBlock:     10,
+			expectMatches:   false,
+			filterAddresses: []eth.Address{},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("efefefef"),
+			},
+		},
+		{
+			name:          "matches multi address multi sig",
+			blocks:        testEthBlocks(t, 5),
+			indexSize:     2,
+			wantedBlock:   13,
+			expectMatches: true,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+				eth.MustNewAddress("4444444444444444444444444444444444444444"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("33333333"),
+				eth.MustNewHash("44444444"),
+			},
+		},
+		{
+			name:          "doesn't match multi address multi sig",
+			blocks:        testEthBlocks(t, 5),
+			indexSize:     2,
+			wantedBlock:   13,
+			expectMatches: false,
+			filterAddresses: []eth.Address{
+				eth.MustNewAddress("beefbeefbeefbeefbeefbeefbeefbeefbeefbeef"),
+				eth.MustNewAddress("deaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+			},
+			filterEventSigs: []eth.Hash{
+				eth.MustNewHash("efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef"),
+				eth.MustNewHash("abababababababababababababababababababababababababababababababab"),
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			indexStore := testMockstoreWithFiles(t, test.blocks, test.indexSize)
+			indexProvider := transform.NewGenericBlockIndexProvider(
+				indexStore,
+				CombinedIndexerShortName,
+				[]uint64{test.indexSize},
+				getcombinedFilterFunc(
+					[]*CallToFilter{
+						{
+							addresses:  test.filterAddresses,
+							signatures: test.filterEventSigs,
+						},
+					},
+					nil,
+				),
+			)
+
+			b, err := indexProvider.Matches(context.Background(), test.wantedBlock)
+			require.NoError(t, err)
+			if test.expectMatches {
+				require.True(t, b)
+			} else {
+				require.False(t, b)
+			}
 		})
 	}
 }

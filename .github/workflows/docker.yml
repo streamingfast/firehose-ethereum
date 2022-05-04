@@ -6,6 +6,7 @@ on:
     tags:
       - "v*"
     branches:
+      - "dockerbuild"
       - "develop"
       - "release/v*"
 
@@ -68,7 +69,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/v') }}
+            type=sha,prefix=,enable=${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/dockerbuild' || startsWith(github.ref, 'refs/heads/release/v') }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: |

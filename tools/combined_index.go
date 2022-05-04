@@ -29,23 +29,22 @@ import (
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
-var generateCalltoIdxCmd = &cobra.Command{
-	// TODO: make irr-index-url optional, maybe ?????
-	Use:   "generate-callto-index {acct-index-url} {irr-index-url} {source-blocks-url} {start-block-num} {stop-block-num}",
-	Short: "Generate call-to index files for eth accounts and signatures present in blocks",
+var generateCombinedIdxCmd = &cobra.Command{
+	Use:   "generate-combined-index {source-blocks-url} {acct-index-url} {irr-index-url} {start-block-num} [stop-block-num]",
+	Short: "Generate index files for eth accounts + event signatures present in blocks (logs and/or calls)",
 	Args:  cobra.RangeArgs(4, 5),
-	RunE:  generateCalltoIdxE,
+	RunE:  generateCombinedIdxE,
 }
 
 func init() {
-	generateCalltoIdxCmd.Flags().Uint64("callto-indexes-size", 10000, "size of account index bundles that will be created")
-	generateCalltoIdxCmd.Flags().IntSlice("lookup-callto-indexes-sizes", []int{1000000, 100000, 10000, 1000}, "account index bundle sizes that we will look for on start to find first unindexed block (should include callto-indexes-size)")
-	generateCalltoIdxCmd.Flags().IntSlice("irreversible-indexes-sizes", []int{10000, 1000}, "size of irreversible indexes that will be used")
-	generateCalltoIdxCmd.Flags().Bool("create-irreversible-indexes", false, "if true, irreversible indexes will also be created")
-	Cmd.AddCommand(generateCalltoIdxCmd)
+	generateCombinedIdxCmd.Flags().Uint64("combined-indexes-size", 10000, "size of combined index bundles that will be created")
+	generateCombinedIdxCmd.Flags().IntSlice("lookup-combined-indexes-sizes", []int{1000000, 100000, 10000, 1000}, "combined index bundle sizes that we will look for on start to find first unindexed block (should include combined-indexes-size)")
+	generateCombinedIdxCmd.Flags().IntSlice("irreversible-indexes-sizes", []int{10000, 1000}, "size of irreversible indexes that will be used")
+	generateCombinedIdxCmd.Flags().Bool("create-irreversible-indexes", false, "if true, irreversible indexes will also be created")
+	Cmd.AddCommand(generateCombinedIdxCmd)
 }
 
-func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
+func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
 
 	createIrr, err := cmd.Flags().GetBool("create-irreversible-indexes")
 	if err != nil {
@@ -63,34 +62,34 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 		irrIdxSizes = append(irrIdxSizes, uint64(size))
 	}
 
-	acctIdxSize, err := cmd.Flags().GetUint64("callto-indexes-size")
+	idxSize, err := cmd.Flags().GetUint64("combined-indexes-size")
 	if err != nil {
 		return err
 	}
-	lais, err := cmd.Flags().GetIntSlice("lookup-callto-indexes-sizes")
+	lais, err := cmd.Flags().GetIntSlice("lookup-combined-indexes-sizes")
 	if err != nil {
 		return err
 	}
-	var lookupAccountIdxSizes []uint64
+	var lookupIdxSizes []uint64
 	for _, size := range lais {
 		if size < 0 {
 			return fmt.Errorf("invalid negative size for bundle-sizes: %d", size)
 		}
-		lookupAccountIdxSizes = append(lookupAccountIdxSizes, uint64(size))
+		lookupIdxSizes = append(lookupIdxSizes, uint64(size))
 	}
 
-	accountIndexStoreURL := args[0]
-	irrIndexStoreURL := args[1]
-	blocksStoreURL := args[2]
+	blocksStoreURL := args[0]
+	indexStoreURL := args[1]
+	irrIndexStoreURL := args[2]
 	startBlockNum, err := strconv.ParseUint(args[3], 10, 64)
 	if err != nil {
-		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+		return fmt.Errorf("unable to parse block number %q: %w", args[3], err)
 	}
 	var stopBlockNum uint64
 	if len(args) == 5 {
 		stopBlockNum, err = strconv.ParseUint(args[4], 10, 64)
 		if err != nil {
-			return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+			return fmt.Errorf("unable to parse block number %q: %w", args[4], err)
 		}
 	}
 
@@ -105,10 +104,9 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed setting up irreversible blocks index store from url %q: %w", irrIndexStoreURL, err)
 	}
 
-	// we are creating accountIndexStore
-	accountIndexStore, err := dstore.NewStore(accountIndexStoreURL, "", "", false)
+	indexStore, err := dstore.NewStore(indexStoreURL, "", "", false)
 	if err != nil {
-		return fmt.Errorf("failed setting up account index store from url %q: %w", accountIndexStoreURL, err)
+		return fmt.Errorf("failed setting up account index store from url %q: %w", indexStoreURL, err)
 	}
 
 	streamFactory := firehose.NewStreamFactory(
@@ -130,18 +128,16 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 		irrStart = bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), irrIdxSizes, "irr", irrIndexStore)
 		close(done)
 	}()
-	accStart := bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), lookupAccountIdxSizes, transform.CallAddrIndexShortName, accountIndexStore)
+	idxStart := bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), lookupIdxSizes, transform.CombinedIndexerShortName, indexStore)
 	<-done
 
-	fmt.Println("irrStart", irrStart, "accStart", accStart)
-	if irrStart < accStart {
+	if irrStart < idxStart {
 		startBlockNum = irrStart
 	} else {
-		startBlockNum = accStart
+		startBlockNum = idxStart
 	}
 
-	t := transform.NewEthCallIndexer(accountIndexStore, acctIdxSize)
-
+	t := transform.NewEthCombinedIndexer(indexStore, idxSize)
 	var irreversibleIndexer *bstransform.IrreversibleBlocksIndexer
 	if createIrr {
 		irreversibleIndexer = bstransform.NewIrreversibleBlocksIndexer(irrIndexStore, irrIdxSizes, bstransform.IrrWithDefinedStartBlock(startBlockNum))
@@ -171,4 +167,5 @@ func generateCalltoIdxE(cmd *cobra.Command, args []string) error {
 	}
 
 	return stream.Run(ctx)
+
 }

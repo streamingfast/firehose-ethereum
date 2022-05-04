@@ -154,11 +154,10 @@ func init() {
 			}
 
 			registry := transform.NewRegistry()
-			registry.Register(ethtransform.LogFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(ethtransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(ethtransform.CallToFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.LightBlockFilterFactory)
+			registry.Register(ethtransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.CombinedFilterFactory(indexStore, possibleIndexSizes))
 
 			var bundleSizes []uint64
 			for _, size := range viper.GetIntSlice("firehose-irreversible-blocks-index-bundle-sizes") {

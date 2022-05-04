@@ -6,7 +6,12 @@ for instructions to keep up to date.
 
 ## Unreleased
 
-#### BREAKING CHANGES --requires reprocessing all merged block files--
+
+#### Added
+
+* Added firehose client command `sfeth tools firehose-client {firehose:endpoint} {start} [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2` 
+
+#### BREAKING CHANGES --requires reprocessing all merged block files and block indexes--
 
 * Requires Firehose instrumented binary with instrumentation version *2.0* (tagged `fh2`)
 
@@ -18,8 +23,12 @@ for instructions to keep up to date.
 * Changed default values for two top-level flags
 
   * `sfeth --log-to-file` defaulted to `true` and is now `false`. Be explicit if you want to log to a file.
-
   * `sfeth --config-file` defaulted to `./sf.yaml` and failed if not present, and now defaults to `""` (doesn't fail is nothing is specified)
+
+* Deprecated the "Call" and "log" indexes, now replaced by "combined" index
+  * Generate new indices like this: `sfeth tools generate-combined-index --combined-indexes-size=1000 {src-blocks-url} {dest-index-url} {irreversible-index-url} {start-block} [stop-block]`
+  * Delete previous indices named `xxxxxxxxxx.yyy.calladdrsig.idx` and `xxxxxxxxxx.yyy.logaddrsig.idx`
+
 
 ## v0.10.2
 

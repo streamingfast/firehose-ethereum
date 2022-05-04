@@ -12,7 +12,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220419143921-1612cfa6b659
+	github.com/streamingfast/bstream v0.0.2-0.20220504133918-07cf4ee5d2df
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220307162255-f277e08753fa
@@ -27,9 +27,9 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
 	github.com/streamingfast/merger v0.0.3-0.20220413123550-ce6dd50e2ac0
 	github.com/streamingfast/node-manager v0.0.2-0.20220422154052-6a6439016eaf
-	github.com/streamingfast/pbgo v0.0.6-0.20220304191603-f73822f471ff
+	github.com/streamingfast/pbgo v0.0.6-0.20220428192744-f80aee7d4688
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
-	github.com/streamingfast/sf-ethereum/types v0.0.0-20220430030750-d2727588ce99
+	github.com/streamingfast/sf-ethereum/types v0.0.0-20220502152645-fbf26f87dc34
 	github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea

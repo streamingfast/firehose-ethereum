@@ -29,7 +29,7 @@ import (
 
 var generateIrrIdxCmd = &cobra.Command{
 	Use:   "generate-irreversible-index {source-blocks-url} {dest-index-url} {start-block-num} [stop-block-num]",
-	Short: "Prints a block from a one-block file",
+	Short: "generate an index pointing block numbers to their irreversible (canonical) block hash (ID) in a given range",
 	Args:  cobra.RangeArgs(3, 4),
 	RunE:  generateIrrIdxE,
 }

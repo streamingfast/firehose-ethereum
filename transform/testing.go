@@ -68,6 +68,21 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Bloc
 		})
 	}
 
+	var calls1 []*pbeth.Call
+	for _, addr := range addrs {
+		calls1 = append(calls1, &pbeth.Call{
+			Address: eth.MustNewAddress(addr),
+			Input:   eth.MustNewHash(sigs[0]),
+		})
+	}
+	var calls2 []*pbeth.Call
+	for _, sig := range sigs {
+		calls2 = append(calls2, &pbeth.Call{
+			Address: eth.MustNewAddress(addrs[0]),
+			Input:   eth.MustNewHash(sig),
+		})
+	}
+
 	return &pbeth.Block{
 		Number: blkNum,
 		TransactionTraces: []*pbeth.TransactionTrace{
@@ -77,6 +92,7 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Bloc
 				Receipt: &pbeth.TransactionReceipt{
 					Logs: logs1,
 				},
+				Calls: calls1,
 			},
 			{
 				Hash:   eth.MustNewHash("0xBEEFDEAD"),
@@ -84,6 +100,7 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Bloc
 				Receipt: &pbeth.TransactionReceipt{
 					Logs: logs2,
 				},
+				Calls: calls2,
 			},
 		},
 	}
@@ -175,7 +192,7 @@ func testMockstoreWithFiles(t *testing.T, blocks []*pbeth.Block, indexSize uint6
 	})
 
 	// spawn an indexer with our mock indexStore
-	indexer := NewEthLogIndexer(indexStore, indexSize)
+	indexer := NewEthCombinedIndexer(indexStore, indexSize)
 	for _, blk := range blocks {
 		// feed the indexer
 		indexer.ProcessBlock(blk)
