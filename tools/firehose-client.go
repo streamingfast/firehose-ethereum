@@ -132,7 +132,6 @@ func firehoseClientE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("filters are", filters.CallFilters, "and log", filters.LogFilters)
 
 	var transforms []*anypb.Any
 	if filters != nil {
