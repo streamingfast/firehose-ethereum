@@ -33,7 +33,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220401210238-2ed0d760a4c5
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.5-beta.0.20220503153735-a606476bea7b
+	github.com/streamingfast/substreams v0.0.5-beta2.0.20220505161007-8a5e739dfec8
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
@@ -59,6 +59,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.0.2 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
