@@ -645,6 +645,8 @@ github.com/streamingfast/bstream v0.0.2-0.20220307182042-937c5b625f6f/go.mod h1:
 github.com/streamingfast/bstream v0.0.2-0.20220330124346-02408ab3db65/go.mod h1:Cd/32kGRHt2aqJ62PLQZQ9O3azBT/vCPvCrP7vBc2cs=
 github.com/streamingfast/bstream v0.0.2-0.20220504133918-07cf4ee5d2df h1:ofrGhZmpN25aoLZsMQD6j+VmvdlxggpDMVTjANDB0zE=
 github.com/streamingfast/bstream v0.0.2-0.20220504133918-07cf4ee5d2df/go.mod h1:5uiGlDGmqMmjY5rz4uIet74NyAiv/YZRShjFftFJtDE=
+github.com/streamingfast/bstream v0.0.2-0.20220505155906-a0834b9c5258 h1:eQgMxScR/3b5QWSIDbhTA11VRYvlpCiN11DXUjU/f54=
+github.com/streamingfast/bstream v0.0.2-0.20220505155906-a0834b9c5258/go.mod h1:5uiGlDGmqMmjY5rz4uIet74NyAiv/YZRShjFftFJtDE=
 github.com/streamingfast/cli v0.0.3/go.mod h1:0+crhXhsHDBwb1EWceYcFM5Z3zp6gXsxNxkl+rTMZj0=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e h1:RNQiFMOloBPAMA5PCwShiOoMQ1FeKsVJXcwo9Lq0iHI=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e/go.mod h1:0+crhXhsHDBwb1EWceYcFM5Z3zp6gXsxNxkl+rTMZj0=
