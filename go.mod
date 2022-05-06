@@ -25,8 +25,8 @@ require (
 	github.com/streamingfast/firehose v0.1.1-0.20220427051727-9b108461d3a6
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
-	github.com/streamingfast/merger v0.0.3-0.20220413123550-ce6dd50e2ac0
-	github.com/streamingfast/node-manager v0.0.2-0.20220422154052-6a6439016eaf
+	github.com/streamingfast/merger v0.0.3-0.20220506162918-4bcb0632b628
+	github.com/streamingfast/node-manager v0.0.2-0.20220506173344-444895eb9b73
 	github.com/streamingfast/pbgo v0.0.6-0.20220428192744-f80aee7d4688
 	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
 	github.com/streamingfast/sf-ethereum/types v0.0.0-20220502152645-fbf26f87dc34
@@ -115,6 +115,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680 // indirect
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5 // indirect
+	github.com/streamingfast/dhammer v0.0.0-20220301172711-8ed5599dbab1 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect

@@ -37,11 +37,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var nodeLogger, _ = logging.PackageLogger("node", "github.com/streamingfast/sf-ethereum/node")
+var nodeLogger, nodeTracer = logging.PackageLogger("node", "github.com/streamingfast/sf-ethereum/node")
 var nodeGethLogger, _ = logging.PackageLogger("node.geth", "github.com/streamingfast/sf-ethereum/node/geth", DefaultLevelInfo)
 var nodeOpenEthereumLogger, _ = logging.PackageLogger("node.openethereum", "github.com/streamingfast/sf-ethereum/node/open-ethereum", DefaultLevelInfo)
 
-var mindreaderLogger, _ = logging.PackageLogger("mindreader", "github.com/streamingfast/sf-ethereum/mindreader")
+var mindreaderLogger, mindreaderTracer = logging.PackageLogger("mindreader", "github.com/streamingfast/sf-ethereum/mindreader")
 var mindreaderGethLogger, _ = logging.PackageLogger("mindreader.geth", "github.com/streamingfast/sf-ethereum/mindreader/geth", DefaultLevelInfo)
 var mindreaderOpenEthereumLogger, _ = logging.PackageLogger("mindreader.open-ethereum", "github.com/streamingfast/sf-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
 
@@ -60,8 +60,10 @@ func registerNodeApp(backupModuleFactories map[string]operator.BackupModuleFacto
 func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operator.BackupModuleFactory) func(*launcher.Runtime) (launcher.App, error) {
 	return func(runtime *launcher.Runtime) (launcher.App, error) {
 		appLogger := nodeLogger
+		appTracer := nodeTracer
 		if isMindreader {
 			appLogger = mindreaderLogger
+			appTracer = mindreaderTracer
 		}
 
 		sfDataDir := runtime.AbsDataDir
@@ -186,14 +188,9 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			oneBlockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
 			mergedBlockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
 			workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-node-working-dir"))
-			mergeAndStoreDirectly := viper.GetBool("mindreader-node-merge-and-store-directly")
-			mergeThresholdBlockAge := viper.GetDuration("mindreader-node-merge-threshold-block-age")
-			if mergeThresholdBlockAge < 30*time.Second {
-				return nil, fmt.Errorf("invalid value for mindreader-node-merge-threshold-block-age: should be more than 30 seconds. Use --mindreader-node-merge-and-store-directly to merge everything directly")
-			}
+			blockAgeString := viper.GetString("mindreader-node-merge-threshold-block-age")
 			batchStartBlockNum := viper.GetUint64("mindreader-node-start-block-num")
 			batchStopBlockNum := viper.GetUint64("mindreader-node-stop-block-num")
-			failOnNonContiguousBlock := false //FIXME ?
 			waitTimeForUploadOnShutdown := viper.GetDuration("mindreader-node-wait-upload-complete-on-shutdown")
 			oneBlockFileSuffix := viper.GetString("mindreader-node-oneblock-suffix")
 			blocksChanCapacity := viper.GetInt("mindreader-node-blocks-chan-capacity")
@@ -203,19 +200,17 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 				oneBlockStoreURL,
 				mergedBlockStoreURL,
 				workingDir,
-				mergeAndStoreDirectly,
-				mergeThresholdBlockAge,
+				blockAgeString,
 				batchStartBlockNum,
 				batchStopBlockNum,
-				failOnNonContiguousBlock,
 				waitTimeForUploadOnShutdown,
 				oneBlockFileSuffix,
 				blocksChanCapacity,
 				chainOperator.Shutdown,
 				metricsAndReadinessManager,
-				tracker,
 				gs,
 				appLogger,
+				appTracer,
 			)
 			if err != nil {
 				return nil, err
