@@ -20,5 +20,5 @@ import (
 )
 
 func main() {
-	cli.Main()
+	cli.Main("0.0")
 }
