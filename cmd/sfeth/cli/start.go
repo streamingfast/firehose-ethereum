@@ -45,14 +45,12 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	configFile := viper.GetString("global-config-file")
 	zlog.Info(fmt.Sprintf("starting with config file '%s'", configFile))
 
-	err = Start(dataDir, args)
-	if err != nil {
-		return fmt.Errorf("unable to launch: %w", err)
+	if err := Start(dataDir, args); err != nil {
+		return err
 	}
 
-	// If an error occurred, saying Goodbye is not greate
 	zlog.Info("goodbye")
-	return
+	return nil
 }
 
 func Start(dataDir string, args []string) (err error) {
@@ -66,6 +64,7 @@ func Start(dataDir string, args []string) (err error) {
 		return err
 	}
 
+	bstream.GetProtocolFirstStreamableBlock = uint64(viper.GetInt("common-first-streamable-block"))
 	tracker := bstream.NewTracker(50)
 
 	blockmetaAddr := viper.GetString("common-blockmeta-addr")

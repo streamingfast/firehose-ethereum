@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/bstream"
 
 	"github.com/spf13/viper"
 	"github.com/streamingfast/dgrpc"
@@ -33,6 +34,8 @@ func init() {
 
 func setupCmd(cmd *cobra.Command) error {
 	cmd.SilenceUsage = true
+
+	bstream.GetProtocolFirstStreamableBlock = uint64(viper.GetInt("common-first-streamable-block"))
 
 	cmds := extractCmd(cmd)
 	subCommand := cmds[len(cmds)-1]

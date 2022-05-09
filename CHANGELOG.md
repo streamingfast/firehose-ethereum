@@ -10,6 +10,15 @@ for instructions to keep up to date.
 #### Added
 
 * Added firehose client command `sfeth tools firehose-client {firehose:endpoint} {start} [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2` 
+* `--common-first-streamable-block` to allow partial block production
+
+#### Modified
+* merger now exits with an error code if it detects a hole in one-block-file (30 blocks is enough to trigger this behavior) (instead of waiting forever)
+* node-manager now exits with an error code if it should be merging but detects a hole between the previous one-block-files and the first block that it receives (you must manually delete the blocks lying around)
+
+#### Removed
+* removed merger 'state file' (and `merger-state-file` flag) -- merger now finds where it should merge based on `common-first-streamable-block` and existing merged files...
+* removed `merger-next-exclusive-highest-block-limit`, it will now ONLY base its decision based on `common-first-streamable-block`, up to the last found merged block
 
 #### BREAKING CHANGES --requires reprocessing all merged block files and block indexes--
 
