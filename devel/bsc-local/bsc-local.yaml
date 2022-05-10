@@ -11,5 +11,4 @@ start:
     substreams-enabled: true
     # You can also define SFETH_SUBSTREAMS_RPC_ENDPOINTS to override the value
     substreams-rpc-endpoints: "$BSC_SUBSTREAMS_RPC_ENDPOINT"
-    substreams-rpc-cache-store-url: "{sf-data-dir}/rpc-cache"
     substreams-stores-save-interval: 100
