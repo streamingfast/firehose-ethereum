@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -60,6 +61,10 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 		rpcClients = append(rpcClients, rpc.NewClient(endpoint, opts...))
 	}
 
+	if len(rpcClients) == 1 {
+		zlog.Warn("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
+	}
+
 	return &RPCEngine{
 		perRequestCache:       map[*pbsubstreams.Request]*Cache{},
 		rpcCacheStore:         rpcCacheStore,
@@ -73,10 +78,6 @@ func (e *RPCEngine) rpcClient() *rpc.Client {
 }
 
 func (e *RPCEngine) rollRpcClient() {
-	if len(e.rpcClients) == 1 {
-		zlog.Warn("not rollin grpc client. only 1 endpoint provided")
-	}
-
 	if e.currentRpcClientIndex == len(e.rpcClients)-1 {
 		e.currentRpcClientIndex = 0
 		return
@@ -204,17 +205,25 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 		attemptNumber += 1
 		delay = minDuration(time.Duration(attemptNumber*500)*time.Millisecond, 10*time.Second)
 
-		out, err := e.rpcClient().DoRequests(ctx, reqs)
+		// Kept here because later we roll it, but we still want to log the one that generated the error
+		client := e.rpcClient()
+
+		out, err := client.DoRequests(ctx, reqs)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				zlog.Debug("stopping rpc calls here, context is canceled")
+				return nil
+			}
+
 			e.rollRpcClient()
-			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum), zap.String("endpoint", e.rpcClients[e.currentRpcClientIndex].String()))
+			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum), zap.Stringer("endpoint", client))
 			continue
 		}
 
 		deterministicResp := true
 		for _, resp := range out {
 			if !resp.Deterministic() {
-				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.Uint64("at_block", blockNum), zap.String("endpoint", e.rpcClients[e.currentRpcClientIndex].String()))
+				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.Uint64("at_block", blockNum), zap.Stringer("endpoint", client))
 				deterministicResp = false
 				break
 			}
