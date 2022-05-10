@@ -2,9 +2,9 @@ module github.com/streamingfast/sf-ethereum
 
 go 1.17
 
-//replace (
-//	github.com/streamingfast/substreams => /Users/cbillett/devel/sf/substreams
-//)
+replace (
+	github.com/streamingfast/substreams => /Users/cbillett/devel/sf/substreams
+)
 
 require (
 	github.com/RoaringBitmap/roaring v0.9.4

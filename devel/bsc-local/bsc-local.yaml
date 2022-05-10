@@ -11,4 +11,4 @@ start:
     substreams-enabled: true
     substreams-rpc-endpoints: "https://summer-bitter-snow.bsc.quiknode.pro/b8359f47150c2079bc571dc5d107506043d191fd/, https://nd-111-873-461.p2pify.com/b3a7bda8db2fbc9e108f1edeaf015ce2"
     substreams-rpc-cache-store-url: ./rpc-cache
-    substreams-stores-save-interval: 1000
+    substreams-stores-save-interval: 100

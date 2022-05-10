@@ -63,7 +63,6 @@ func init() {
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			cmd.Flags().String("substreams-rpc-cache-store-url", "./rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().String("substreams-state-store-url", "./localdata", "where substreams state data are stored")
-			cmd.Flags().String("substreams-outputs-cache-store-url", "./outputs", "where substreams module outputs cache are stored")
 			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(10000), "Interval in blocks at which to save store snapshots") // fixme
 			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(10000), "RPC cache chunk size in block")
 			return nil
@@ -136,11 +135,6 @@ func init() {
 					return nil, fmt.Errorf("setting up state store for data: %w", err)
 				}
 
-				moduleOutputCacheBaseStore, err := dstore.NewDBinStore(viper.GetString("substreams-outputs-cache-store-url"))
-				if err != nil {
-					return nil, fmt.Errorf("setting up module outputs cache store: %w", err)
-				}
-
 				opts := []substreamsService.Option{
 					substreamsService.WithWASMExtension(rpcEngine),
 					substreamsService.WithPipelineOptions(rpcEngine),
@@ -152,7 +146,6 @@ func init() {
 				}
 				sss := substreamsService.New(
 					stateStore,
-					moduleOutputCacheBaseStore,
 					"sf.ethereum.type.v1.Block",
 					opts...,
 				)
