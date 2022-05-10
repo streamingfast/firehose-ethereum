@@ -4,4 +4,4 @@ start:
   flags:
     common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v5
     common-blockstream-addr: localhost:9001
-    firehose-grpc-listen-addr: :9000*
+    firehose-grpc-listen-addr: :9000
