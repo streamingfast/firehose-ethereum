@@ -5,11 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/streamingfast/dstore"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"sync"
 	"time"
+
+	"github.com/streamingfast/dstore"
+	"go.uber.org/zap"
 )
 
 type CacheKey string
@@ -22,6 +23,8 @@ type Cache struct {
 
 	startBlock uint64
 	endBlock   uint64
+	dirty      bool
+	lastSave   time.Time
 
 	totalHits   int
 	totalMisses int
@@ -36,6 +39,7 @@ func NewCache(ctx context.Context, store dstore.Store, blockNum, cacheSize uint6
 		store:     store,
 		cacheSize: cacheSize,
 	}
+	store.SetOverwrite(true) // cache has overwrite behavior as a requirement..
 
 	startBlock, endBlock := computeStartAndEndBlock(blockNum, cacheSize)
 
@@ -62,23 +66,27 @@ func (c *Cache) Set(key string, value []byte) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	c.dirty = true
 	c.kv[CacheKey(key)] = value
 }
 
 func (c *Cache) Save(ctx context.Context) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	save(ctx, c.store, cacheFileName(c.startBlock, c.endBlock), c.kv)
+	if c.dirty {
+		c.lastSave = time.Now()
+		save(ctx, c.store, cacheFileName(c.startBlock, c.endBlock), c.kv)
+	}
 }
 
 func (c *Cache) UpdateCache(ctx context.Context, blockNum uint64) {
-	if blockNum >= c.startBlock && blockNum < c.endBlock {
+	startBlock, endBlock := computeStartAndEndBlock(blockNum, c.cacheSize)
+	if startBlock != c.startBlock {
+		c.Save(ctx)
+		c.load(ctx, startBlock, endBlock)
+	} else if time.Since(c.lastSave) > time.Minute {
 		c.Save(ctx)
 	}
-
-	startBlock, endBlock := computeStartAndEndBlock(blockNum, c.cacheSize)
-
-	c.load(ctx, startBlock, endBlock)
 }
 
 func (c *Cache) startTracking(ctx context.Context) {
@@ -113,6 +121,7 @@ func (c *Cache) load(ctx context.Context, startBlock, endBlock uint64) {
 	c.kv = kv
 	c.startBlock = startBlock
 	c.endBlock = endBlock
+	c.dirty = false
 }
 
 func load(ctx context.Context, store dstore.Store, filename string) (kv KV) {
