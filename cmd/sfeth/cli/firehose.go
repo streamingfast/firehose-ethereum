@@ -118,11 +118,14 @@ func init() {
 			}
 
 			endpoints := viper.GetStringSlice("substreams-rpc-endpoints")
+			for i, endpoint := range endpoints {
+				endpoints[i] = os.ExpandEnv(endpoint)
+			}
 
 			var registerServiceExt firehoseApp.RegisterServiceExtensionFunc
 			if viper.GetBool("substreams-enabled") {
 				rpcEngine, err := ethss.NewRPCEngine(
-					viper.GetString("substreams-rpc-cache-store-url"),
+					MustReplaceDataDir(sfDataDir, viper.GetString("substreams-rpc-cache-store-url")),
 					endpoints,
 					viper.GetUint64("substreams-rpc-cache-chunk-size"),
 				)

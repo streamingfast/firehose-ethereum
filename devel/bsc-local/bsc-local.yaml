@@ -9,6 +9,7 @@ start:
     firehose-block-index-url: gs://dfuseio-global-blocks-us/eth-bsc-mainnet/idx
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
-    substreams-rpc-endpoints: "https://summer-bitter-snow.bsc.quiknode.pro/b8359f47150c2079bc571dc5d107506043d191fd/, https://nd-111-873-461.p2pify.com/b3a7bda8db2fbc9e108f1edeaf015ce2"
-    substreams-rpc-cache-store-url: ./rpc-cache
+    # You can also define SFETH_SUBSTREAMS_RPC_ENDPOINTS to override the value
+    substreams-rpc-endpoints: "$BSC_SUBSTREAMS_RPC_ENDPOINT"
+    substreams-rpc-cache-store-url: "{sf-data-dir}/rpc-cache"
     substreams-stores-save-interval: 100
