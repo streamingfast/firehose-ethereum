@@ -166,7 +166,7 @@ func save(ctx context.Context, store dstore.Store, filename string, kv KV) {
 }
 
 func cacheFileName(start, end uint64) string {
-	return fmt.Sprintf("cache-%d-%d.cache", start, end)
+	return fmt.Sprintf("cache-%010d-%010d.cache", start, end)
 }
 
 func computeStartAndEndBlock(blockNum, cacheSize uint64) (startBlock, endBlock uint64) {
