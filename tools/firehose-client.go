@@ -1,44 +1,40 @@
 package tools
 
 import (
-	"context"
 	"fmt"
-	"io"
-	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/eth-go"
-	"github.com/streamingfast/firehose/client"
-	"github.com/streamingfast/jsonpb"
-	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v1"
 	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
+	sftools "github.com/streamingfast/sf-tools"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-var retryDelay = time.Second
-
 func init() {
-	Cmd.AddCommand(FirehoseClientCmd)
-	FirehoseClientCmd.Flags().StringP("api-token-env-var", "a", "FIREHOSE_API_TOKEN", "Look for a JWT in this environment variable to authenticate against endpoint")
-	FirehoseClientCmd.Flags().String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
-	FirehoseClientCmd.Flags().String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
-	FirehoseClientCmd.Flags().BoolP("plaintext", "p", false, "Use plaintext connection to firehose")
-	FirehoseClientCmd.Flags().BoolP("insecure", "k", false, "Skip SSL certificate validation when connecting to firehose")
+	firehoseClientCmd := sftools.GetFirehoseClientCmd(zlog, tracer, transformsSetter)
+	firehoseClientCmd.Flags().String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
+	firehoseClientCmd.Flags().String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
+	Cmd.AddCommand(firehoseClientCmd)
 }
 
-var FirehoseClientCmd = &cobra.Command{
-	Use:     "firehose-client",
-	Short:   "print firehose block stream as JSON",
-	Args:    cobra.ExactArgs(3),
-	RunE:    firehoseClientE,
-	Example: "sfeth tools firehose-client api.streamingfast.io 1000 2000",
+var transformsSetter = func(cmd *cobra.Command) (transforms []*anypb.Any, err error) {
+	filters, err := parseFilters(mustGetString(cmd, "call-filters"), mustGetString(cmd, "log-filters"))
+	if err != nil {
+		return nil, err
+	}
+
+	if filters != nil {
+		t, err := anypb.New(filters)
+		if err != nil {
+			return nil, err
+		}
+		transforms = append(transforms, t)
+	}
+	return
 }
 
 func parseFilters(callFilters, logFilters string) (*pbtransform.CombinedFilter, error) {
-
 	mf := &pbtransform.CombinedFilter{}
 
 	if callFilters == "" && logFilters == "" {
@@ -101,77 +97,6 @@ func parseFilters(callFilters, logFilters string) (*pbtransform.CombinedFilter, 
 	}
 
 	return mf, nil
-}
-
-func firehoseClientE(cmd *cobra.Command, args []string) error {
-	ctx := context.Background()
-
-	endpoint := args[0]
-	start, err := strconv.ParseUint(args[1], 10, 64)
-	if err != nil {
-		return fmt.Errorf("parsing start block num: %w", err)
-	}
-	stop, err := strconv.ParseUint(args[2], 10, 64)
-	if err != nil {
-		return fmt.Errorf("parsing stop block num: %w", err)
-	}
-	apiTokenEnvVar := mustGetString(cmd, "api-token-env-var")
-	jwt := os.Getenv(apiTokenEnvVar)
-
-	plaintext := mustGetBool(cmd, "plaintext")
-	insecure := mustGetBool(cmd, "insecure")
-
-	firehoseClient, grpcCallOpts, err := client.NewFirehoseClient(endpoint, jwt, insecure, plaintext)
-	if err != nil {
-		return err
-	}
-
-	forkSteps := []pbfirehose.ForkStep{pbfirehose.ForkStep_STEP_NEW}
-
-	filters, err := parseFilters(mustGetString(cmd, "call-filters"), mustGetString(cmd, "log-filters"))
-	if err != nil {
-		return err
-	}
-
-	var transforms []*anypb.Any
-	if filters != nil {
-		t, err := anypb.New(filters)
-		if err != nil {
-			return err
-		}
-		transforms = append(transforms, t)
-	}
-
-	request := &pbfirehose.Request{
-		StartBlockNum: int64(start),
-		StopBlockNum:  stop,
-		ForkSteps:     forkSteps,
-		Transforms:    transforms,
-	}
-
-	stream, err := firehoseClient.Blocks(ctx, request, grpcCallOpts...)
-	if err != nil {
-		return fmt.Errorf("unable to start blocks stream: %w", err)
-	}
-
-	for {
-		response, err := stream.Recv()
-		if err != nil {
-			if err == io.EOF {
-				return nil
-			}
-
-			return fmt.Errorf("stream error while receiving: %w", err)
-		}
-
-		line, err := jsonpb.MarshalToString(response)
-		if err != nil {
-			return fmt.Errorf("unable to marshal block %s to JSON", response)
-		}
-
-		fmt.Println(line)
-	}
-
 }
 
 func basicCallToFilter(addrs []eth.Address, sigs []eth.Hash) *pbtransform.CallToFilter {

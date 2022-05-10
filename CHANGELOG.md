@@ -11,6 +11,7 @@ for instructions to keep up to date.
 
 * Added firehose client command `sfeth tools firehose-client {firehose:endpoint} {start} [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2` 
 * `--common-first-streamable-block` to allow partial block production
+* Added `tools merge {src-url} {dst-url} {start-block} {end-block} [--delete] [--force]` as an interactive tool to perform ad-hoc merging (can be used to process large chunks of one-block-files in parallel)
 
 #### Modified
 * merger now exits with an error code if it detects a hole in one-block-file (30 blocks is enough to trigger this behavior) (instead of waiting forever)
