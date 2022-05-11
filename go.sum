@@ -697,8 +697,8 @@ github.com/streamingfast/logging v0.0.0-20210908162127-bdc5856d5341/go.mod h1:4G
 github.com/streamingfast/logging v0.0.0-20220222131651-12c3943aac2e/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/logging v0.0.0-20220304183711-ddba33d79e27/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
-github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75 h1:ZqpS7rAhhKD7S7DnrpEdrnW1/gZcv82ytpMviovkli4=
-github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
+github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338 h1:Mn7i0pN8FASFpCDvtnRhV7L1bdlj1MteLkRWsxFVIhE=
+github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
 github.com/streamingfast/merger v0.0.3-0.20220506192522-f8be80e054cb/go.mod h1:nuYb7xVnolRgDCrrjmuaHcdl9GqFKkdJl3Pc1KRTTdc=
 github.com/streamingfast/merger v0.0.3-0.20220510150626-2e0bad630abf h1:m0O/WEukXUkfcxw7czv60oA6VSdq+PseIUgiV13VIzk=
 github.com/streamingfast/merger v0.0.3-0.20220510150626-2e0bad630abf/go.mod h1:nuYb7xVnolRgDCrrjmuaHcdl9GqFKkdJl3Pc1KRTTdc=
@@ -721,8 +721,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.5-beta3.0.20220510161246-87030dba3419 h1:aMhX8pCHJW7qYiDS0gNlpK+fpk/6tZZzsIh6cm029FQ=
-github.com/streamingfast/substreams v0.0.5-beta3.0.20220510161246-87030dba3419/go.mod h1:sft9kNuAi7SWo/dSpzHCv7LMkMLw8NMYe0e/bmzNMss=
+github.com/streamingfast/substreams v0.0.5-beta3.0.20220511163604-552ed058076f h1:5itXQdAgFFfyC0tT1X3Vq0o8RnvDNonZQpziwlJ89zY=
+github.com/streamingfast/substreams v0.0.5-beta3.0.20220511163604-552ed058076f/go.mod h1:uSW4iXzSvnAKjGP7YBgbc/YGCCBPIw598ihJ5DRC8sE=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=

@@ -24,7 +24,7 @@ require (
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
 	github.com/streamingfast/firehose v0.1.1-0.20220427051727-9b108461d3a6
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
-	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75
+	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
 	github.com/streamingfast/merger v0.0.3-0.20220510150626-2e0bad630abf
 	github.com/streamingfast/node-manager v0.0.2-0.20220509155656-552bdf85b78e
 	github.com/streamingfast/pbgo v0.0.6-0.20220428192744-f80aee7d4688
@@ -33,7 +33,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220510152242-8343cb8e91aa
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.5-beta3.0.20220510161246-87030dba3419
+	github.com/streamingfast/substreams v0.0.5-beta3.0.20220511163604-552ed058076f
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
