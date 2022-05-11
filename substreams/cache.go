@@ -23,8 +23,6 @@ type Cache struct {
 
 	startBlock uint64
 	endBlock   uint64
-	dirty      bool
-	lastSave   time.Time
 
 	totalHits   int
 	totalMisses int
@@ -66,27 +64,24 @@ func (c *Cache) Set(key string, value []byte) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.dirty = true
 	c.kv[CacheKey(key)] = value
 }
 
 func (c *Cache) Save(ctx context.Context) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.dirty {
-		c.lastSave = time.Now()
-		save(ctx, c.store, cacheFileName(c.startBlock, c.endBlock), c.kv)
-	}
+	save(ctx, c.store, cacheFileName(c.startBlock, c.endBlock), c.kv)
 }
 
 func (c *Cache) UpdateCache(ctx context.Context, blockNum uint64) {
-	startBlock, endBlock := computeStartAndEndBlock(blockNum, c.cacheSize)
-	if startBlock != c.startBlock {
+	if !c.contains(blockNum) {
 		c.Save(ctx)
-		c.load(ctx, startBlock, endBlock)
-	} else if time.Since(c.lastSave) > time.Minute {
-		c.Save(ctx)
+		c.load(ctx, c.endBlock, c.endBlock+c.cacheSize)
 	}
+}
+
+func (c *Cache) contains(blockNum uint64) bool {
+	return blockNum >= c.startBlock && blockNum < c.endBlock
 }
 
 func (c *Cache) startTracking(ctx context.Context) {
@@ -121,7 +116,6 @@ func (c *Cache) load(ctx context.Context, startBlock, endBlock uint64) {
 	c.kv = kv
 	c.startBlock = startBlock
 	c.endBlock = endBlock
-	c.dirty = false
 }
 
 func load(ctx context.Context, store dstore.Store, filename string) (kv KV) {
