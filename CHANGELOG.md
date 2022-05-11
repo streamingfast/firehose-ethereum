@@ -9,14 +9,15 @@ for instructions to keep up to date.
 
 #### Added
 
-* Added firehose client command `sfeth tools firehose-client {firehose:endpoint} {start} [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2` 
+* Added firehose client command `sfeth tools firehose-client <firehose:endpoint> <start> [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2`
 * `--common-first-streamable-block` to allow partial block production
-* Added `tools merge {src-url} {dst-url} {start-block} {end-block} [--delete] [--force]` as an interactive tool to perform ad-hoc merging (can be used to process large chunks of one-block-files in parallel)
+* Added `tools merge <src-url> <dst-url> <start-block> <end-block> [--delete] [--force]` as an interactive tool to perform ad-hoc merging (can be used to process large chunks of one-block-files in parallel)
 
 #### Modified
 * all logs now output on STDERR instead of stdout like previously
 * merger now exits with an error code if it detects a hole in one-block-file (30 blocks is enough to trigger this behavior) (instead of waiting forever)
 * node-manager now exits with an error code if it should be merging but detects a hole between the previous one-block-files and the first block that it receives (you must manually delete the blocks lying around)
+* Note to other Firehose implementors: we changed all command line flags to fit the required/optional format referred to here: https://en.wikipedia.org/wiki/Usage_message
 
 #### Removed
 * removed merger 'state file' (and `merger-state-file` flag) -- merger now finds where it should merge based on `common-first-streamable-block` and existing merged files...
@@ -37,7 +38,7 @@ for instructions to keep up to date.
   * `sfeth --config-file` defaulted to `./sf.yaml` and failed if not present, and now defaults to `""` (doesn't fail is nothing is specified)
 
 * Deprecated the "Call" and "log" indexes, now replaced by "combined" index
-  * Generate new indices like this: `sfeth tools generate-combined-index --combined-indexes-size=1000 {src-blocks-url} {dest-index-url} {irreversible-index-url} {start-block} [stop-block]`
+  * Generate new indices like this: `sfeth tools generate-combined-index --combined-indexes-size=1000 <src-blocks-url> <dest-index-url> <irreversible-index-url> <start-block> [stop-block]`
   * Delete previous indices named `xxxxxxxxxx.yyy.calladdrsig.idx` and `xxxxxxxxxx.yyy.logaddrsig.idx`
 
 
