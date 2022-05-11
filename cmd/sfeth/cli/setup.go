@@ -84,6 +84,7 @@ func setupCmd(cmd *cobra.Command) error {
 		LogFormat:     viper.GetString("global-log-format"),
 		LogToFile:     isMatchingCommand(cmds, logToFileOn) && viper.GetBool("global-log-to-file"),
 		LogListenAddr: viper.GetString("global-log-level-switcher-listen-addr"),
+		LogToStderr:   true,
 	})
 	launcher.SetupTracing("sf-ethereum")
 	launcher.SetupAnalyticsMetrics(zlog, viper.GetString("global-metrics-listen-addr"), viper.GetString("global-pprof-listen-addr"))

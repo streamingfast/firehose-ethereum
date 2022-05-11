@@ -14,6 +14,7 @@ for instructions to keep up to date.
 * Added `tools merge {src-url} {dst-url} {start-block} {end-block} [--delete] [--force]` as an interactive tool to perform ad-hoc merging (can be used to process large chunks of one-block-files in parallel)
 
 #### Modified
+* all logs now output on STDERR instead of stdout like previously
 * merger now exits with an error code if it detects a hole in one-block-file (30 blocks is enough to trigger this behavior) (instead of waiting forever)
 * node-manager now exits with an error code if it should be merging but detects a hole between the previous one-block-files and the first block that it receives (you must manually delete the blocks lying around)
 
