@@ -30,7 +30,7 @@ import (
 )
 
 var generateCombinedIdxCmd = &cobra.Command{
-	Use:   "generate-combined-index {source-blocks-url} {acct-index-url} {irr-index-url} {start-block-num} [stop-block-num]",
+	Use:   "generate-combined-index <source-blocks-url> <acct-index-url> <irr-index-url> <start-block-num> [stop-block-num]",
 	Short: "Generate index files for eth accounts + event signatures present in blocks (logs and/or calls)",
 	Args:  cobra.RangeArgs(4, 5),
 	RunE:  generateCombinedIdxE,

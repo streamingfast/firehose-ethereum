@@ -35,21 +35,21 @@ var printCmd = &cobra.Command{
 }
 
 var oneBlockCmd = &cobra.Command{
-	Use:   "one-block {block_num}",
+	Use:   "one-block <block_num>",
 	Short: "Prints a block from a one-block file",
 	Args:  cobra.ExactArgs(1),
 	RunE:  printOneBlockE,
 }
 
 var blocksCmd = &cobra.Command{
-	Use:   "blocks {block_num}",
+	Use:   "blocks <block_num>",
 	Short: "Prints the content summary of a merged block file",
 	Args:  cobra.ExactArgs(1),
 	RunE:  printBlocksE,
 }
 
 var blockCmd = &cobra.Command{
-	Use:   "block {block_num}",
+	Use:   "block <block_num>",
 	Short: "Finds and prints one block from a merged block file",
 	Args:  cobra.ExactArgs(1),
 	RunE:  printBlockE,

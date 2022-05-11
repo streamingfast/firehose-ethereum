@@ -29,7 +29,7 @@ import (
 )
 
 var compareBlocksCmd = &cobra.Command{
-	Use:   "compareblocks {blocks_store_a} {blocks_store_b} {prefix}",
+	Use:   "compareblocks <blocks_store_a> <blocks_store_b> <prefix>",
 	Short: "Checks for any differences between merge files of two different stores. (To compare the output of two different instrumentations, for example)",
 	Args:  cobra.ExactArgs(3),
 	RunE:  compareBlocksE,

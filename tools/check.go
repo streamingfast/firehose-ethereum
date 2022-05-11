@@ -30,7 +30,7 @@ var checkMergedBlocksCmd = &cobra.Command{
 	// TODO: Not sure, it's now a required thing, but we could probably use the same logic as `start`
 	//       and avoid altogether passing the args. If this would also load the config and everything else,
 	//       that would be much more seamless!
-	Use:   "merged-blocks {store-url}",
+	Use:   "merged-blocks <store-url>",
 	Short: "Checks for any holes in merged blocks as well as ensuring merged blocks integrity",
 	Args:  cobra.ExactArgs(1),
 	RunE:  checkMergedBlocksE,
