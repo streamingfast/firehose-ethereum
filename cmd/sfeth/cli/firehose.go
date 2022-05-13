@@ -34,8 +34,11 @@ import (
 	"github.com/streamingfast/logging"
 	ethss "github.com/streamingfast/sf-ethereum/substreams"
 	ethtransform "github.com/streamingfast/sf-ethereum/transform"
+	"github.com/streamingfast/substreams/client"
+	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	substreamsService "github.com/streamingfast/substreams/service"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 var metricset = dmetrics.NewSet()
@@ -63,8 +66,14 @@ func init() {
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			cmd.Flags().String("substreams-rpc-cache-store-url", "{sf-data-dir}/rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().String("substreams-state-store-url", "{sf-data-dir}/localdata", "where substreams state data are stored")
-			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(10000), "Interval in blocks at which to save store snapshots") // fixme
-			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(10000), "RPC cache chunk size in block")
+			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(1_000), "Interval in blocks at which to save store snapshots")     // fixme
+			cmd.Flags().Uint64("substreams-output-cache-save-interval", uint64(100), "Interval in blocks at which to save store snapshots") // fixme
+			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
+			cmd.Flags().Int("substreams-parallel-subrequest-limit", 4, "number of parallel subrequests substream can make to synchronize its stores")
+			cmd.Flags().String("substreams-client-endpoint", "", "firehose endpoint for substreams client.  if left empty, will default to this current local firehose.")
+			cmd.Flags().String("substreams-client-jwt", "", "jwt for substreams client authentication")
+			cmd.Flags().Bool("substreams-client-insecure", false, "substreams client in insecure mode")
+			cmd.Flags().Bool("substreams-client-plaintext", true, "substreams client in plaintext mode")
 			return nil
 		},
 
@@ -141,15 +150,33 @@ func init() {
 				opts := []substreamsService.Option{
 					substreamsService.WithWASMExtension(rpcEngine),
 					substreamsService.WithPipelineOptions(rpcEngine),
+					substreamsService.WithParallelBlocksRequestsLimit(viper.GetInt("substreams-parallel-subrequest-limit")),
 					substreamsService.WithStoresSaveInterval(viper.GetUint64("substreams-stores-save-interval")),
+					substreamsService.WithOutCacheSaveInterval(viper.GetUint64("substreams-output-cache-save-interval")),
 				}
 
 				if viper.GetBool("substreams-partial-mode-enabled") {
 					opts = append(opts, substreamsService.WithPartialMode())
 				}
+
+				ssClientFactory := func() (pbsubstreams.StreamClient, []grpc.CallOption, error) {
+					endpoint := viper.GetString("substreams-client-endpoint")
+					if endpoint == "" {
+						endpoint = viper.GetString("firehose-grpc-listen-addr")
+					}
+
+					return client.NewSubstreamsClient(
+						endpoint,
+						os.ExpandEnv(viper.GetString("substreams-client-jwt")),
+						viper.GetBool("substreams-client-insecure"),
+						viper.GetBool("substreams-client-plaintext"),
+					)
+				}
+
 				sss := substreamsService.New(
 					stateStore,
 					"sf.ethereum.type.v1.Block",
+					ssClientFactory,
 					opts...,
 				)
 
