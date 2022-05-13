@@ -6,7 +6,6 @@ start:
     common-blockstream-addr: localhost:9001
     firehose-grpc-listen-addr: :9000
     substreams-enabled: true
-    # You can also define SFETH_SUBSTREAMS_RPC_ENDPOINTS to override the value
-    substreams-rpc-endpoints: "$ETH_MAINNET_SUBSTREAMS_RPC_ENDPOINT"
+    substreams-rpc-endpoints: "$ETH_MAINNET_SUBSTREAMS_RPC_ENDPOINTS"
     substreams-stores-save-interval: 100
 

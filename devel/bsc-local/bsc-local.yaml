@@ -9,6 +9,5 @@ start:
     firehose-block-index-url: gs://dfuseio-global-blocks-us/eth-bsc-mainnet/idx
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
-    # You can also define SFETH_SUBSTREAMS_RPC_ENDPOINTS to override the value
-    substreams-rpc-endpoints: "$BSC_SUBSTREAMS_RPC_ENDPOINT"
+    substreams-rpc-endpoints: "$BSC_SUBSTREAMS_RPC_ENDPOINTS"
     substreams-stores-save-interval: 100
