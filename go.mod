@@ -33,8 +33,8 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220510152242-8343cb8e91aa
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.5-beta3.0.20220513120733-2a83fe54fdf7
-	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
+	github.com/streamingfast/substreams v0.0.6-beta.0.20220518163145-81a642c8f1f9
+	github.com/stretchr/testify v1.7.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/zap v1.21.0
@@ -59,7 +59,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.0.2 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -107,6 +106,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/rakyll/statik v0.1.7 // indirect
 	github.com/sethvargo/go-retry v0.1.0 // indirect
 	github.com/someone1/gcp-jwt-go v2.0.1+incompatible // indirect
 	github.com/spf13/afero v1.6.0 // indirect
@@ -129,6 +129,7 @@ require (
 	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
+	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
