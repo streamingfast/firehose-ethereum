@@ -75,7 +75,7 @@ func init() {
 			cmd.Flags().Bool("substreams-client-insecure", false, "substreams client in insecure mode")
 			cmd.Flags().Bool("substreams-client-plaintext", true, "substreams client in plaintext mode")
 			cmd.Flags().Int("substreams-subrequest-parallel-jobs", 5, "substreams subrequest parallel jobs for the scheduler")
-			cmd.Flags().Int("substreams-subrequest-block-range-size", 100, "substreams subrequest block range size value for the scheduler")
+			cmd.Flags().Int("substreams-subrequest-block-range-size", 1000, "substreams subrequest block range size value for the scheduler")
 			return nil
 		},
 
