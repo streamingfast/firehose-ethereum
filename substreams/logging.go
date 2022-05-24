@@ -8,5 +8,5 @@ import (
 var zlog *zap.Logger
 
 func init() {
-	zlog, _ = logging.PackageLogger("substreams", "github.com/sf-ethereum/substreams/pipeline")
+	zlog, _ = logging.PackageLogger("rpc-cache", "github.com/sf-ethereum/substreams")
 }

@@ -99,7 +99,7 @@ func (c *Cache) startTracking(ctx context.Context) {
 }
 
 func (c *Cache) log() {
-	zlog.Info("cache_performance",
+	zlog.Debug("rpc cache_performance",
 		zap.Int("hits", c.totalHits),
 		zap.Int("misses", c.totalMisses),
 		zap.Float64("hit_rate", float64(c.totalHits)/float64(c.totalHits+c.totalMisses)),
