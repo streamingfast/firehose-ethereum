@@ -10,5 +10,5 @@ start:
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
     substreams-partial-mode-enabled: true
-    substreams-rpc-endpoints: "$BSC_SUBSTREAMS_RPC_ENDPOINTS"
+    substreams-rpc-endpoints: "$BSC_SUBSTREAMS_RPC_ENDPOINT"
     substreams-stores-save-interval: 100

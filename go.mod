@@ -1,6 +1,6 @@
 module github.com/streamingfast/sf-ethereum
 
-go 1.17
+go 1.18
 
 require (
 	github.com/RoaringBitmap/roaring v0.9.4
@@ -33,7 +33,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220510152242-8343cb8e91aa
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.6-beta.0.20220524174909-83ecdc69b980
+	github.com/streamingfast/substreams v0.0.6-beta.0.20220525133352-cd4a4f63f258
 	github.com/stretchr/testify v1.7.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
@@ -129,7 +129,8 @@ require (
 	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
-	golang.org/x/mod v0.5.0 // indirect
+	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
