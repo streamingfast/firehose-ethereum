@@ -144,7 +144,7 @@ func init() {
 					return nil, fmt.Errorf("setting up Ethereum rpc engine and cache: %w", err)
 				}
 
-				stateStore, err := dstore.NewStore(MustReplaceDataDir(sfDataDir, viper.GetString("substreams-state-store-url")), "", "", false)
+				stateStore, err := dstore.NewStore(MustReplaceDataDir(sfDataDir, viper.GetString("substreams-state-store-url")), "", "", true)
 				if err != nil {
 					return nil, fmt.Errorf("setting up state store for data: %w", err)
 				}
