@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: ethereum
-  version: v0.10.2
+  version: v0.10.3
   url: https://github.com/streamingfast/sf-ethereum
   doc: |
     Protobuf definitions for Substreams modules.
