@@ -12,6 +12,5 @@ protobuf:
   files:
     - sf/ethereum/type/v1/type.proto
     - sf/ethereum/substreams/v1/rpc.proto
-    - google/protobuf/timestamp.proto
   importPaths:
     - ../proto
