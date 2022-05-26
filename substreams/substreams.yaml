@@ -1,0 +1,17 @@
+specVersion: v0.1.0
+package:
+  name: ethereum
+  version: v0.10.2+timestamp
+  url: https://github.com/streamingfast/sf-ethereum
+  doc: |
+    Protobuf definitions for Substreams modules.
+
+    This package does not include any modules.
+
+protobuf:
+  files:
+    - sf/ethereum/type/v1/type.proto
+    - sf/ethereum/substreams/v1/rpc.proto
+    - google/protobuf/timestamp.proto
+  importPaths:
+    - ../proto
