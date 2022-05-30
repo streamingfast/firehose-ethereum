@@ -152,7 +152,6 @@ func init() {
 				opts := []substreamsService.Option{
 					substreamsService.WithWASMExtension(rpcEngine),
 					substreamsService.WithPipelineOptions(rpcEngine),
-					substreamsService.WithParallelBlocksRequestsLimit(viper.GetInt("substreams-parallel-subrequest-limit")),
 					substreamsService.WithStoresSaveInterval(viper.GetUint64("substreams-stores-save-interval")),
 					substreamsService.WithOutCacheSaveInterval(viper.GetUint64("substreams-output-cache-save-interval")),
 				}
