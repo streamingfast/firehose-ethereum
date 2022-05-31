@@ -653,6 +653,8 @@ github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
 github.com/streamingfast/substreams v0.0.8-beta.0.20220531130536-6fc452a15e47 h1:n+u5S3ysBlWMzGk3IWdwZ9N6ckCov7GNm978gd7OG90=
 github.com/streamingfast/substreams v0.0.8-beta.0.20220531130536-6fc452a15e47/go.mod h1:K6QZSFr/7t5S0mwxmGI9rXpsejc1723DFpb9Z4izNWk=
+github.com/streamingfast/substreams v0.0.8-beta.0.20220531224946-85690660fbfb h1:1zOih6adrFaOezWdbua5j1XnpnEPsXS4KleLl0HNWoU=
+github.com/streamingfast/substreams v0.0.8-beta.0.20220531224946-85690660fbfb/go.mod h1:K6QZSFr/7t5S0mwxmGI9rXpsejc1723DFpb9Z4izNWk=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543 h1:6VupAkDznB829Xse6I50ZMubDETCPa7u5iMoyUlJRSw=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543/go.mod h1:0gzVdSfg6pysA6QVp6iVRPTagC6Wq9pOE8J86WKb2Fk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
