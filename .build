@@ -1,0 +1,3 @@
+# You can change this file to trigger a build, use `build:all` in your commit
+# message to build all Docker images (e.g. those with `geth` executables).
+1
