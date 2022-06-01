@@ -2,10 +2,15 @@ start:
   args:
     - firehose
   flags:
-    common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v5
+    common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v6
     common-blockstream-addr: localhost:9001
     firehose-grpc-listen-addr: :9000
     substreams-enabled: true
     substreams-rpc-endpoints: "$ETH_MAINNET_SUBSTREAMS_RPC_ENDPOINTS"
-    substreams-stores-save-interval: 100
-
+    substreams-client-endpoint: "localhost:9000"
+    substreams-client-plaintext: true
+    substreams-partial-mode-enabled: true
+    substreams-sub-request-block-range-size: 10000
+    substreams-output-cache-save-interval: 100
+    substreams-stores-save-interval: 1000
+    substreams-sub-request-parallel-jobs: 8
