@@ -10,6 +10,7 @@ on:
       - "develop"
       - "release/v*"
   workflow_dispatch:
+    inputs:
       geth_version:
         description: 'The Geth version to build from, either fh1 or fh2'
         required: true
