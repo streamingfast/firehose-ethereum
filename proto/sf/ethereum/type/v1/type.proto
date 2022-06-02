@@ -58,7 +58,7 @@ message BlockRef {
 
 message BlockHeader {
   bytes parent_hash = 1;
-  // Uncle hash of the block, some refenrece it as `sha3Uncles`, but `sha3`` is badly worded, so we prefer `uncle_hash`
+  // Uncle hash of the block, some reference it as `sha3Uncles`, but `sha3`` is badly worded, so we prefer `uncle_hash`
   bytes uncle_hash = 2;
   bytes coinbase = 3;
   bytes state_root = 4;
