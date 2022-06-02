@@ -661,6 +661,8 @@ github.com/streamingfast/substreams v0.0.9-beta.0.20220602154238-86e1db1328f1 h1
 github.com/streamingfast/substreams v0.0.9-beta.0.20220602154238-86e1db1328f1/go.mod h1:kEnR9+Glho71YMUHTbDCw8X7dkGAIWR4M7vDUYZDC9E=
 github.com/streamingfast/substreams v0.0.9-beta.0.20220602170558-cf516ca6ebf8 h1:eUIbCrVP48RO9CGYwXDKvOd5LS/qjC+udKaYHqqNTlI=
 github.com/streamingfast/substreams v0.0.9-beta.0.20220602170558-cf516ca6ebf8/go.mod h1:kEnR9+Glho71YMUHTbDCw8X7dkGAIWR4M7vDUYZDC9E=
+github.com/streamingfast/substreams v0.0.10-beta.0.20220602212310-936023cf205b h1:kY/0GsVLOoGcTS7T/b5dmd3WkTDGYqB0/lsJIYy+W08=
+github.com/streamingfast/substreams v0.0.10-beta.0.20220602212310-936023cf205b/go.mod h1:kEnR9+Glho71YMUHTbDCw8X7dkGAIWR4M7vDUYZDC9E=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543 h1:6VupAkDznB829Xse6I50ZMubDETCPa7u5iMoyUlJRSw=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543/go.mod h1:0gzVdSfg6pysA6QVp6iVRPTagC6Wq9pOE8J86WKb2Fk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
