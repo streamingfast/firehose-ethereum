@@ -9,6 +9,15 @@ on:
       - "dockerbuild"
       - "develop"
       - "release/v*"
+  workflow_dispatch:
+      geth_version:
+        description: 'The Geth version to build from, either fh1 or fh2'
+        required: true
+        default: 'fh2'
+        type: choice
+        options:
+        - fh1
+        - fh2
 
 env:
   REGISTRY: ghcr.io
@@ -116,9 +125,11 @@ jobs:
           echo "##[set-output name=release_train;]$(echo ${GITHUB_REF#refs/heads/release/})"
 
       - run: |
-          docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest-fh2
-          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest-fh2) >> $GITHUB_ENV
+          docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-latest-${GETH_VERSION:-fh2}
+          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-latest-${GETH_VERSION:-fh2}) >> $GITHUB_ENV
           echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.10.x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+        env:
+          GETH_VERSION: ${{ github.event.inputs.geth_version }}
 
       - name: Generate docker tags/labels from github build context
         id: meta
