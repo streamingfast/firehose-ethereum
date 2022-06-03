@@ -17,4 +17,4 @@ ADD /sfeth /app/sfeth
 COPY tools/sfeth/motd_generic /etc/
 COPY tools/sfeth/99-sfeth-generic.sh /etc/profile.d/
 
-ENTRYPOINT /app/sfeth
+ENTRYPOINT ["/app/sfeth"]
