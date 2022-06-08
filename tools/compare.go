@@ -66,7 +66,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	filePrefix := fmt.Sprintf("%010d", blockNum)
 	collectBlocks := func(store dstore.Store, blockMap map[string]*pbeth.Block) error {
 		var files []string
-		err = storeA.Walk(ctx, filePrefix, "", func(filename string) (err error) {
+		err = storeA.Walk(ctx, filePrefix, func(filename string) (err error) {
 			files = append(files, filename)
 			return nil
 		})
