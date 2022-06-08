@@ -12,5 +12,5 @@ start:
     substreams-partial-mode-enabled: true
     substreams-rpc-endpoints: "$BSC_SUBSTREAMS_RPC_ENDPOINT"
     substreams-stores-save-interval: 100
-    substreams-sub-request-parallel-jobs: 1
+    substreams-sub-request-parallel-jobs: 3
     substreams-sub-request-block-range-size: 100
