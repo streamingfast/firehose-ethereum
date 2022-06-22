@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -160,13 +161,14 @@ func init() {
 					opts = append(opts, substreamsService.WithPartialMode())
 				}
 
-				ssClientFactory := func() (pbsubstreams.StreamClient, []grpc.CallOption, error) {
+				ssClientFactory := func(ctx context.Context) (pbsubstreams.StreamClient, func(), []grpc.CallOption, error) {
 					endpoint := viper.GetString("substreams-client-endpoint")
 					if endpoint == "" {
 						endpoint = viper.GetString("firehose-grpc-listen-addr")
 					}
 
 					return client.NewSubstreamsClient(
+						ctx,
 						endpoint,
 						os.ExpandEnv(viper.GetString("substreams-client-jwt")),
 						viper.GetBool("substreams-client-insecure"),

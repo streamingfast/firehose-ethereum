@@ -2,6 +2,8 @@ module github.com/streamingfast/sf-ethereum
 
 go 1.18
 
+replace github.com/streamingfast/substreams => ../substreams
+
 require (
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
@@ -12,7 +14,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220614134008-8e1d8f2e3fba
+	github.com/streamingfast/bstream v0.0.2-0.20220622120622-82cc2635749d
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
@@ -38,7 +40,7 @@ require (
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/zap v1.21.0
-	google.golang.org/grpc v1.44.0
+	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.27.1
 )
 
