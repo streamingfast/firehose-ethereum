@@ -17,13 +17,13 @@ package cli
 import (
 	"context"
 	"fmt"
+	"github.com/streamingfast/bstream"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
 	dauthAuthenticator "github.com/streamingfast/dauth/authenticator"
 	"github.com/streamingfast/dlauncher/launcher"
@@ -161,14 +161,13 @@ func init() {
 					opts = append(opts, substreamsService.WithPartialMode())
 				}
 
-				ssClientFactory := func(ctx context.Context) (pbsubstreams.StreamClient, func(), []grpc.CallOption, error) {
+				ssClientFactory := func(ctx context.Context) (cli pbsubstreams.StreamClient, closeFunc func() error, callOpts []grpc.CallOption, err error) {
 					endpoint := viper.GetString("substreams-client-endpoint")
 					if endpoint == "" {
 						endpoint = viper.GetString("firehose-grpc-listen-addr")
 					}
 
 					return client.NewSubstreamsClient(
-						ctx,
 						endpoint,
 						os.ExpandEnv(viper.GetString("substreams-client-jwt")),
 						viper.GetBool("substreams-client-insecure"),

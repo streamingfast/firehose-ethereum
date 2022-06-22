@@ -2,8 +2,6 @@ module github.com/streamingfast/sf-ethereum
 
 go 1.18
 
-replace github.com/streamingfast/substreams => ../substreams
-
 require (
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
@@ -35,12 +33,12 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220607203155-f40739ab46fc
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.14-0.20220617152956-67bab9b9f198
+	github.com/streamingfast/substreams v0.0.14-0.20220622132652-3b4c46b3510a
 	github.com/stretchr/testify v1.7.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/zap v1.21.0
-	google.golang.org/grpc v1.47.0
+	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 )
 
