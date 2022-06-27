@@ -131,7 +131,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 				bootstrapper = geth.NewTarballBootstrapper(bootstrapDataURL, nodeDataDir, nodeLogger)
 			case strings.HasSuffix(bootstrapDataURL, "json"):
 				// special bootstrap case
-				bootstrapArgs, err := buildNodeArguments(appLogger, networkID, nodeDataDir, nodeIPCPath, "", nodeType, "bootstrap")
+				bootstrapArgs, err := buildNodeArguments(appLogger, networkID, nodeDataDir, nodeIPCPath, "", nodeType, "bootstrap", "")
 				if err != nil {
 					return nil, fmt.Errorf("cannot build node bootstrap arguments")
 				}
@@ -233,6 +233,10 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 
 		}
 	}
+}
+
+func isGenesisBootstrapper(bootstrapDataURL string) bool {
+	return strings.HasSuffix(bootstrapDataURL, "json")
 }
 
 func getSupervisedProcessLogger(isMindreader bool, nodeType string) *zap.Logger {
@@ -353,12 +357,13 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader 
 		viper.GetString(prefix+"arguments"),
 		nodeType,
 		nodeRole,
+		bootstrapDataURL,
 	)
 
 	return
 }
 
-func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole string) ([]string, error) {
+func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole, bootstrapDataURL string) ([]string, error) {
 	typeRoles, ok := nodeArgsByTypeAndRole[nodeType]
 	if !ok {
 		return nil, fmt.Errorf("invalid node type: %s", nodeType)
@@ -367,6 +372,13 @@ func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPa
 	args, ok := typeRoles[nodeRole]
 	if !ok {
 		return nil, fmt.Errorf("invalid node role: %s for type %s", nodeRole, nodeType)
+	}
+
+	// This sets `--firehose-deep-mind-genesis` if the node role is of type mindreader
+	// (for which case we are sure that Firehose patch is supported) and if the bootstrap data
+	// url is a `genesis.json` file.
+	if nodeRole == "mindreader" && isGenesisBootstrapper(bootstrapDataURL) {
+		args += fmt.Sprintf(" --firehose-deep-mind-genesis=%s", bootstrapDataURL)
 	}
 
 	if providedArgs != "" {

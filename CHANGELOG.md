@@ -9,6 +9,7 @@ for instructions to keep up to date.
 
 #### Added
 
+* Automatically setting the flag `--firehose-deep-mind-genesis` on `mindreader` nodes if their `mindreader-node-bootstrap-data-url` config value is sets to a `genesis.json` file.
 * Added firehose client command `sfeth tools firehose-client <firehose:endpoint> <start> [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2`
 * `--common-first-streamable-block` to allow partial block production
 * Added `tools merge <src-url> <dst-url> <start-block> <end-block> [--delete] [--force]` as an interactive tool to perform ad-hoc merging (can be used to process large chunks of one-block-files in parallel)
