@@ -14,14 +14,17 @@ for instructions to keep up to date.
 * Added `tools merge <src-url> <dst-url> <start-block> <end-block> [--delete] [--force]` as an interactive tool to perform ad-hoc merging (can be used to process large chunks of one-block-files in parallel)
 
 #### Modified
-* all logs now output on STDERR instead of stdout like previously
-* merger now exits with an error code if it detects a hole in one-block-file (30 blocks is enough to trigger this behavior) (instead of waiting forever)
-* node-manager now exits with an error code if it should be merging but detects a hole between the previous one-block-files and the first block that it receives (you must manually delete the blocks lying around)
+
+* Default verbosity is to show all loggers as `INFO` level (previously only loggers whose app's name was `sfeth` were at `INFO` by default). The net effect with previous version is that now `-v` will activate `DEBUG` logs by default (instead of `-vv`).
+* All logs now output on STDERR instead of stdout like previously
+* Merger now exits with an error code if it detects a hole in one-block-file (30 blocks is enough to trigger this behavior) (instead of waiting forever)
+* Node-manager now exits with an error code if it should be merging but detects a hole between the previous one-block-files and the first block that it receives (you must manually delete the blocks lying around)
 * Note to other Firehose implementors: we changed all command line flags to fit the required/optional format referred to here: https://en.wikipedia.org/wiki/Usage_message
 
 #### Removed
-* removed merger 'state file' (and `merger-state-file` flag) -- merger now finds where it should merge based on `common-first-streamable-block` and existing merged files...
-* removed `merger-next-exclusive-highest-block-limit`, it will now ONLY base its decision based on `common-first-streamable-block`, up to the last found merged block
+
+* Removed merger 'state file' (and `merger-state-file` flag) -- merger now finds where it should merge based on `common-first-streamable-block` and existing merged files...
+* Removed `merger-next-exclusive-highest-block-limit`, it will now ONLY base its decision based on `common-first-streamable-block`, up to the last found merged block
 
 #### BREAKING CHANGES --requires reprocessing all merged block files and block indexes--
 
