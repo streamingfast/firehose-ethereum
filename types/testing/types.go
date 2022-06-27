@@ -70,6 +70,8 @@ func Block(t testing.T, blkHash string, components ...interface{}) *pbeth.Block 
 	require.NoError(t, err)
 
 	pbblock.Header = &pbeth.BlockHeader{
+		Hash:       toBytes(t, ref.ID()),
+		Number:     ref.Num(),
 		ParentHash: toBytes(t, fmt.Sprintf("%08x%s", pbblock.Number-1, blkHash[8:])),
 		Timestamp:  timestamppb.New(blockTime),
 	}
