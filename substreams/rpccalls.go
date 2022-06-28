@@ -216,7 +216,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 			}
 
 			e.rollRpcClient()
-			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum), zap.Stringer("endpoint", client))
+			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
 			continue
 		}
 
