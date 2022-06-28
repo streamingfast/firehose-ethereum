@@ -50,7 +50,7 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 		Transport: &http.Transport{
 			DisableKeepAlives: true, // don't reuse connections
 		},
-		Timeout: 10 * time.Second,
+		Timeout: 60 * time.Second,
 	}
 	opts := []rpc.Option{
 		rpc.WithHttpClient(httpClient),
