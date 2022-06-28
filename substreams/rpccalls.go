@@ -223,6 +223,16 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 		deterministicResp := true
 		for _, resp := range out {
 			if !resp.Deterministic() {
+
+				if resp.Err != nil {
+					if rpcErr, ok := resp.Err.(*rpc.ErrResponse); ok {
+						if strings.Contains(rpcErr.Message, "execution aborted (timeout = 5s)") {
+							deterministicResp = true
+							break
+						}
+					}
+				}
+
 				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.Uint64("at_block", blockNum), zap.Stringer("endpoint", client))
 				deterministicResp = false
 				break
