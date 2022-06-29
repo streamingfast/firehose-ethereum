@@ -12,7 +12,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220622120622-82cc2635749d
+	github.com/streamingfast/bstream v0.0.2-0.20220629203020-42f6dd770c50
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
@@ -22,18 +22,18 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
 	github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
-	github.com/streamingfast/firehose v0.1.1-0.20220601134123-59f857d9b75e
+	github.com/streamingfast/firehose v0.1.1-0.20220629203325-f7498b95673d
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
-	github.com/streamingfast/merger v0.0.3-0.20220510150626-2e0bad630abf
-	github.com/streamingfast/node-manager v0.0.2-0.20220607203459-eb51a943d516
-	github.com/streamingfast/pbgo v0.0.6-0.20220428192744-f80aee7d4688
-	github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde
+	github.com/streamingfast/merger v0.0.3-0.20220622194932-7c740e6ad404
+	github.com/streamingfast/node-manager v0.0.2-0.20220623184913-b43822f2d7b5
+	github.com/streamingfast/pbgo v0.0.6-0.20220629184423-cfd0608e0cf4
+	github.com/streamingfast/relayer v0.0.2-0.20220629203514-fd419bf50cb6
 	github.com/streamingfast/sf-ethereum/types v0.0.0-20220519133955-44a16bd4e5bd
-	github.com/streamingfast/sf-tools v0.0.0-20220607203155-f40739ab46fc
+	github.com/streamingfast/sf-tools v0.0.0-20220629203717-d30240374f67
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.14-0.20220628145553-e4ae2eb5a5dc
+	github.com/streamingfast/substreams v0.0.14-0.20220629203835-69c6c7be6a4a
 	github.com/stretchr/testify v1.7.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
@@ -72,7 +72,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
-	github.com/google/renameio v0.1.0 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/googleapis/gnostic v0.4.1 // indirect

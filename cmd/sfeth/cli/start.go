@@ -23,9 +23,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/derr"
-	"github.com/streamingfast/dgrpc"
 	"github.com/streamingfast/dlauncher/launcher"
-	pbblockmeta "github.com/streamingfast/pbgo/sf/blockmeta/v1"
 	_ "github.com/streamingfast/sf-ethereum/types"
 	"go.uber.org/zap"
 )
@@ -65,24 +63,8 @@ func Start(dataDir string, args []string) (err error) {
 	}
 
 	bstream.GetProtocolFirstStreamableBlock = uint64(viper.GetInt("common-first-streamable-block"))
-	tracker := bstream.NewTracker(50)
-
-	blockmetaAddr := viper.GetString("common-blockmeta-addr")
-	if blockmetaAddr != "" {
-		conn, err := dgrpc.NewInternalClient(blockmetaAddr)
-		if err != nil {
-			zlog.Warn("cannot get grpc connection to blockmeta, disabling this startBlockResolver for search indexer", zap.Error(err), zap.String("blockmeta_addr", blockmetaAddr))
-		} else {
-			blockmetaCli := pbblockmeta.NewBlockIDClient(conn)
-			tracker.AddResolver(pbblockmeta.StartBlockResolver(blockmetaCli))
-		}
-	}
-
-	tracker.AddResolver(bstream.OffsetStartBlockResolver(200))
-
 	modules := &launcher.Runtime{
 		AbsDataDir:              dataDirAbs,
-		Tracker:                 tracker,
 		ProtocolSpecificModules: map[string]interface{}{},
 	}
 

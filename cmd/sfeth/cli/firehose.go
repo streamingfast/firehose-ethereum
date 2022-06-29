@@ -17,10 +17,11 @@ package cli
 import (
 	"context"
 	"fmt"
-	"github.com/streamingfast/bstream"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/streamingfast/bstream"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -82,7 +83,8 @@ func init() {
 
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			sfDataDir := runtime.AbsDataDir
-			tracker := runtime.Tracker.Clone()
+			// FIXME blockstream-based-tracker ???
+			tracker := bstream.NewTracker(50)
 			blockstreamAddr := viper.GetString("common-blockstream-addr")
 			if blockstreamAddr != "" {
 				tracker.AddGetter(bstream.BlockStreamLIBTarget, bstream.StreamLIBBlockRefGetter(blockstreamAddr))
@@ -102,7 +104,6 @@ func init() {
 			dmetering.SetDefaultMeter(metering)
 
 			blocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
-			firehoseBlocksStoreURLs := []string{blocksStoreURL}
 
 			if ll := os.Getenv("FIREHOSE_THREADS"); ll != "" {
 				if llint, err := strconv.ParseInt(ll, 10, 32); err == nil {
@@ -202,7 +203,7 @@ func init() {
 			}
 
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
-				BlockStoreURLs:                  firehoseBlocksStoreURLs,
+				BlockStoreURL:                   blocksStoreURL,
 				BlockStreamAddr:                 blockstreamAddr,
 				GRPCListenAddr:                  viper.GetString("firehose-grpc-listen-addr"),
 				GRPCShutdownGracePeriod:         time.Second,

@@ -69,7 +69,6 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 		sfDataDir := runtime.AbsDataDir
 
 		nodePath,
-			blockmetaAddr,
 			networkID,
 			nodeType,
 			nodeDataDir,
@@ -111,13 +110,6 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 		)
 		if err != nil {
 			return nil, err
-		}
-
-		tracker := runtime.Tracker
-
-		if blockmetaAddr != "" {
-			tracker = runtime.Tracker.Clone()
-			tracker.AddGetter(bstream.NetworkLIBTarget, bstream.NetworkLIBBlockRefGetter(blockmetaAddr))
 		}
 
 		var bootstrapper operator.Bootstrapper
@@ -186,24 +178,17 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 		} else {
 			GRPCAddr := viper.GetString("mindreader-node-grpc-listen-addr")
 			oneBlockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
-			mergedBlockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
 			workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-node-working-dir"))
-			blockAgeString := viper.GetString("mindreader-node-merge-threshold-block-age")
-			batchStartBlockNum := viper.GetUint64("mindreader-node-start-block-num")
 			batchStopBlockNum := viper.GetUint64("mindreader-node-stop-block-num")
-			waitTimeForUploadOnShutdown := viper.GetDuration("mindreader-node-wait-upload-complete-on-shutdown")
 			oneBlockFileSuffix := viper.GetString("mindreader-node-oneblock-suffix")
 			blocksChanCapacity := viper.GetInt("mindreader-node-blocks-chan-capacity")
 			gs := dgrpc.NewServer(dgrpc.WithLogger(appLogger))
 
 			mindreaderPlugin, err := getMindreaderLogPlugin(
 				oneBlockStoreURL,
-				mergedBlockStoreURL,
 				workingDir,
-				blockAgeString,
-				batchStartBlockNum,
+				bstream.GetProtocolFirstStreamableBlock,
 				batchStopBlockNum,
-				waitTimeForUploadOnShutdown,
 				oneBlockFileSuffix,
 				blocksChanCapacity,
 				chainOperator.Shutdown,
@@ -309,7 +294,6 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 
 func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader bool) (
 	nodePath string,
-	blockmetaAddr string,
 	networkID string,
 	nodeType string,
 	nodeDataDir string,
@@ -333,7 +317,6 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader 
 	}
 
 	nodePath = viper.GetString(prefix + "path")
-	blockmetaAddr = viper.GetString("common-blockmeta-addr")
 	networkID = fmt.Sprintf("%d", viper.GetUint32("common-network-id"))
 	nodeType = viper.GetString(prefix + "type")
 	nodeDataDir = replaceNodeRole(nodeRole,

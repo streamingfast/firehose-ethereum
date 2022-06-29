@@ -39,7 +39,6 @@ func init() {
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			sfDataDir := runtime.AbsDataDir
 			archiveStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
-			mergeArchiveStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
 
 			consoleReaderFactory := func(lines chan string) (mindreader.ConsolerReader, error) {
 				r, err := codec.NewConsoleReader(appLogger, lines)
@@ -56,17 +55,13 @@ func init() {
 			metricsAndReadinessManager := nodeManager.NewMetricsAndReadinessManager(headBlockTimeDrift, headBlockNumber, viper.GetDuration("mindreader-geth-node-readiness-max-latency"))
 
 			return nodeMindreaderStdinApp.New(&nodeMindreaderStdinApp.Config{
-				GRPCAddr:                     viper.GetString("mindreader-geth-node-grpc-listen-addr"),
-				ArchiveStoreURL:              archiveStoreURL,
-				MergeArchiveStoreURL:         mergeArchiveStoreURL,
-				MergeThresholdBlockAge:       viper.GetString("mindreader-geth-node-merge-threshold-block-age"),
-				MindReadBlocksChanCapacity:   viper.GetInt("mindreader-geth-node-blocks-chan-capacity"),
-				StartBlockNum:                viper.GetUint64("mindreader-geth-node-start-block-num"),
-				StopBlockNum:                 viper.GetUint64("mindreader-geth-node-stop-block-num"),
-				DiscardAfterStopBlock:        viper.GetBool("mindreader-geth-node-discard-after-stop-num"),
-				WorkingDir:                   MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-geth-node-working-dir")),
-				WaitUploadCompleteOnShutdown: viper.GetDuration("mindreader-geth-node-wait-upload-complete-on-shutdown"),
-				OneblockSuffix:               viper.GetString("mindreader-geth-node-oneblock-suffix"),
+				GRPCAddr:                   viper.GetString("mindreader-geth-node-grpc-listen-addr"),
+				ArchiveStoreURL:            archiveStoreURL,
+				MindReadBlocksChanCapacity: viper.GetInt("mindreader-geth-node-blocks-chan-capacity"),
+				StartBlockNum:              viper.GetUint64("mindreader-geth-node-start-block-num"),
+				StopBlockNum:               viper.GetUint64("mindreader-geth-node-stop-block-num"),
+				WorkingDir:                 MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-geth-node-working-dir")),
+				OneblockSuffix:             viper.GetString("mindreader-geth-node-oneblock-suffix"),
 			}, &nodeMindreaderStdinApp.Modules{
 				ConsoleReaderFactory:       consoleReaderFactory,
 				MetricsAndReadinessManager: metricsAndReadinessManager,

@@ -24,13 +24,13 @@ import (
 	bstransform "github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/firehose"
-	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v1"
+	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v2"
 	"github.com/streamingfast/sf-ethereum/transform"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 )
 
 var generateCombinedIdxCmd = &cobra.Command{
-	Use:   "generate-combined-index <source-blocks-url> <acct-index-url> <irr-index-url> <start-block-num> [stop-block-num]",
+	Use:   "generate-combined-index <source-blocks-url> <acct-index-url> <start-block-num> [stop-block-num]",
 	Short: "Generate index files for eth accounts + event signatures present in blocks (logs and/or calls)",
 	Args:  cobra.RangeArgs(4, 5),
 	RunE:  generateCombinedIdxE,
@@ -39,28 +39,10 @@ var generateCombinedIdxCmd = &cobra.Command{
 func init() {
 	generateCombinedIdxCmd.Flags().Uint64("combined-indexes-size", 10000, "size of combined index bundles that will be created")
 	generateCombinedIdxCmd.Flags().IntSlice("lookup-combined-indexes-sizes", []int{1000000, 100000, 10000, 1000}, "combined index bundle sizes that we will look for on start to find first unindexed block (should include combined-indexes-size)")
-	generateCombinedIdxCmd.Flags().IntSlice("irreversible-indexes-sizes", []int{10000, 1000}, "size of irreversible indexes that will be used")
-	generateCombinedIdxCmd.Flags().Bool("create-irreversible-indexes", false, "if true, irreversible indexes will also be created")
 	Cmd.AddCommand(generateCombinedIdxCmd)
 }
 
 func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
-
-	createIrr, err := cmd.Flags().GetBool("create-irreversible-indexes")
-	if err != nil {
-		return err
-	}
-	iis, err := cmd.Flags().GetIntSlice("irreversible-indexes-sizes")
-	if err != nil {
-		return err
-	}
-	var irrIdxSizes []uint64
-	for _, size := range iis {
-		if size < 0 {
-			return fmt.Errorf("invalid negative size for bundle-sizes: %d", size)
-		}
-		irrIdxSizes = append(irrIdxSizes, uint64(size))
-	}
 
 	idxSize, err := cmd.Flags().GetUint64("combined-indexes-size")
 	if err != nil {
@@ -80,7 +62,6 @@ func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
 
 	blocksStoreURL := args[0]
 	indexStoreURL := args[1]
-	irrIndexStoreURL := args[2]
 	startBlockNum, err := strconv.ParseUint(args[3], 10, 64)
 	if err != nil {
 		return fmt.Errorf("unable to parse block number %q: %w", args[3], err)
@@ -98,21 +79,13 @@ func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed setting up block store from url %q: %w", blocksStoreURL, err)
 	}
 
-	// we are optionally reading info from the irrIndexStore
-	irrIndexStore, err := dstore.NewStore(irrIndexStoreURL, "", "", false)
-	if err != nil {
-		return fmt.Errorf("failed setting up irreversible blocks index store from url %q: %w", irrIndexStoreURL, err)
-	}
-
 	indexStore, err := dstore.NewStore(indexStoreURL, "", "", false)
 	if err != nil {
 		return fmt.Errorf("failed setting up account index store from url %q: %w", indexStoreURL, err)
 	}
 
 	streamFactory := firehose.NewStreamFactory(
-		[]dstore.Store{blocksStore},
-		irrIndexStore,
-		irrIdxSizes,
+		blocksStore,
 		nil,
 		nil,
 		nil,
@@ -122,39 +95,19 @@ func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 
-	var irrStart uint64
-	done := make(chan struct{})
-	go func() { // both checks in parallel
-		irrStart = bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), irrIdxSizes, "irr", irrIndexStore)
-		close(done)
-	}()
-	idxStart := bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), lookupIdxSizes, transform.CombinedIndexerShortName, indexStore)
-	<-done
-
-	if irrStart < idxStart {
-		startBlockNum = irrStart
-	} else {
-		startBlockNum = idxStart
-	}
+	startBlockNum = bstransform.FindNextUnindexed(ctx, uint64(startBlockNum), lookupIdxSizes, transform.CombinedIndexerShortName, indexStore)
 
 	t := transform.NewEthCombinedIndexer(indexStore, idxSize)
-	var irreversibleIndexer *bstransform.IrreversibleBlocksIndexer
-	if createIrr {
-		irreversibleIndexer = bstransform.NewIrreversibleBlocksIndexer(irrIndexStore, irrIdxSizes, bstransform.IrrWithDefinedStartBlock(startBlockNum))
-	}
 
 	handler := bstream.HandlerFunc(func(blk *bstream.Block, obj interface{}) error {
-		if createIrr {
-			irreversibleIndexer.Add(blk)
-		}
 		t.ProcessBlock(blk.ToNative().(*pbeth.Block))
 		return nil
 	})
 
 	req := &pbfirehose.Request{
-		StartBlockNum: int64(startBlockNum),
-		StopBlockNum:  stopBlockNum,
-		ForkSteps:     []pbfirehose.ForkStep{pbfirehose.ForkStep_STEP_IRREVERSIBLE},
+		StartBlockNum:     int64(startBlockNum),
+		StopBlockNum:      stopBlockNum,
+		NoReorgNavigation: true,
 	}
 	stream, err := streamFactory.New(
 		ctx,

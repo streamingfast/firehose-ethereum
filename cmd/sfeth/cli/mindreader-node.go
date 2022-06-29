@@ -16,7 +16,6 @@ package cli
 
 import (
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream/blockstream"
@@ -47,26 +46,19 @@ func registerMindreaderNodeFlags(cmd *cobra.Command) error {
 	registerCommonNodeFlags(cmd, true)
 
 	cmd.Flags().String("mindreader-node-grpc-listen-addr", MindreaderGRPCAddr, "Address to listen for incoming gRPC requests")
-	cmd.Flags().Bool("mindreader-node-merge-and-store-directly", false, "[BATCH] When enabled, do not write oneblock files, sidestep the merger and write the merged 100-blocks logs directly to --common-blocks-store-url")
 	cmd.Flags().String("mindreader-node-working-dir", "{sf-data-dir}/mindreader/work", "Path where mindreader will stores its files")
-	cmd.Flags().Uint("mindreader-node-start-block-num", 0, "Blocks that were produced with smaller block number then the given block num are skipped")
 	cmd.Flags().Uint("mindreader-node-stop-block-num", 0, "Shutdown mindreader when we the following 'stop-block-num' has been reached, inclusively.")
 	cmd.Flags().Int("mindreader-node-blocks-chan-capacity", 100, "Capacity of the channel holding blocks read by the mindreader. Process will shutdown superviser/geth if the channel gets over 90% of that capacity to prevent horrible consequences. Raise this number when processing tiny blocks very quickly")
 	cmd.Flags().String("mindreader-node-oneblock-suffix", "default", "Unique identifier for that mindreader, so that it can produce 'oneblock files' in the same store as another instance without competing for writes.")
-	cmd.Flags().Duration("mindreader-node-wait-upload-complete-on-shutdown", 30*time.Second, "When the mindreader is shutting down, it will wait up to that amount of time for the archiver to finish uploading the blocks before leaving anyway")
-	cmd.Flags().String("mindreader-node-merge-threshold-block-age", "24h", "When processing blocks with a blocktime older than this threshold, they will be automatically merged (you can also use \"always\" or \"never\")")
 
 	return nil
 }
 
 func getMindreaderLogPlugin(
 	oneBlockStoreURL string,
-	mergedBlockStoreURL string,
 	workingDir string,
-	mergeThresholdBlockAge string,
 	batchStartBlockNum uint64,
 	batchStopBlockNum uint64,
-	waitTimeForUploadOnShutdown time.Duration,
 	oneBlockFileSuffix string,
 	blocksChanCapacity int,
 	operatorShutdownFunc func(error),
@@ -85,8 +77,6 @@ func getMindreaderLogPlugin(
 
 	logPlugin, err := mindreader.NewMindReaderPlugin(
 		oneBlockStoreURL,
-		mergedBlockStoreURL,
-		mergeThresholdBlockAge,
 		workingDir,
 		consoleReaderFactory,
 		batchStartBlockNum,
@@ -96,7 +86,6 @@ func getMindreaderLogPlugin(
 		func(error) {
 			operatorShutdownFunc(nil)
 		},
-		waitTimeForUploadOnShutdown,
 		oneBlockFileSuffix,
 		blockStreamServer,
 		appLogger,
