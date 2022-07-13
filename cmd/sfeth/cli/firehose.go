@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/streamingfast/bstream"
@@ -31,7 +30,6 @@ import (
 	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/dmetrics"
 	"github.com/streamingfast/dstore"
-	"github.com/streamingfast/firehose"
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
 	"github.com/streamingfast/logging"
 	ethss "github.com/streamingfast/sf-ethereum/substreams"
@@ -39,7 +37,6 @@ import (
 	"github.com/streamingfast/substreams/client"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	substreamsService "github.com/streamingfast/substreams/service"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -56,13 +53,10 @@ func init() {
 		Description: "Provides on-demand filtered blocks, depends on common-blocks-store-url and common-blockstream-addr",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
-			cmd.Flags().Duration("firehose-realtime-tolerance", 2*time.Minute, "Longest delay to consider this service as real-time (ready) on initialization")
-			// irreversible indices
-			cmd.Flags().String("firehose-irreversible-blocks-index-url", "", "If non-empty, will use this URL as a store to read irreversibility data on blocks and optimize replay")
-			cmd.Flags().IntSlice("firehose-irreversible-blocks-index-bundle-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for irreversible block indices")
-			// block indices
+
 			cmd.Flags().String("firehose-block-index-url", "", "If non-empty, will use this URL as a store to load index data used by some transforms")
 			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for block indices")
+
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
@@ -103,14 +97,8 @@ func init() {
 			}
 			dmetering.SetDefaultMeter(metering)
 
-			blocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
-
-			if ll := os.Getenv("FIREHOSE_THREADS"); ll != "" {
-				if llint, err := strconv.ParseInt(ll, 10, 32); err == nil {
-					zlog.Info("setting blockstreamV2 parallel file downloads", zap.Int("ll", int(llint)))
-					firehose.StreamBlocksParallelFiles = int(llint)
-				}
-			}
+			mergedBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
+			oneBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
 
 			indexStoreUrl := viper.GetString("firehose-block-index-url")
 			var indexStore dstore.Store
@@ -194,27 +182,17 @@ func init() {
 			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.CombinedFilterFactory(indexStore, possibleIndexSizes))
 
-			var bundleSizes []uint64
-			for _, size := range viper.GetIntSlice("firehose-irreversible-blocks-index-bundle-sizes") {
-				if size < 0 {
-					return nil, fmt.Errorf("invalid negative size for firehose-irreversible-blocks-index-bundle-sizes: %d", size)
-				}
-				bundleSizes = append(bundleSizes, uint64(size))
-			}
-
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
-				BlockStoreURL:                   blocksStoreURL,
-				BlockStreamAddr:                 blockstreamAddr,
-				GRPCListenAddr:                  viper.GetString("firehose-grpc-listen-addr"),
-				GRPCShutdownGracePeriod:         time.Second,
-				RealtimeTolerance:               viper.GetDuration("firehose-realtime-tolerance"),
-				IrreversibleBlocksIndexStoreURL: viper.GetString("firehose-irreversible-blocks-index-url"),
-				IrreversibleBlocksBundleSizes:   bundleSizes,
+				MergedBlocksStoreURL:    mergedBlocksStoreURL,
+				OneBlocksStoreURL:       oneBlocksStoreURL,
+				KeptFinalBlocks:         100,
+				BlockStreamAddr:         blockstreamAddr,
+				GRPCListenAddr:          viper.GetString("firehose-grpc-listen-addr"),
+				GRPCShutdownGracePeriod: time.Second,
 			}, &firehoseApp.Modules{
 				Authenticator:            authenticator,
 				HeadTimeDriftMetric:      headTimeDriftmetric,
 				HeadBlockNumberMetric:    headBlockNumMetric,
-				Tracker:                  tracker,
 				TransformRegistry:        registry,
 				RegisterServiceExtension: registerServiceExt,
 			}), nil

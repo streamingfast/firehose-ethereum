@@ -89,7 +89,6 @@ func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
 		nil,
 		nil,
 		nil,
-		nil,
 	)
 	cmd.SilenceUsage = true
 
@@ -105,9 +104,9 @@ func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
 	})
 
 	req := &pbfirehose.Request{
-		StartBlockNum:     int64(startBlockNum),
-		StopBlockNum:      stopBlockNum,
-		NoReorgNavigation: true,
+		StartBlockNum:   int64(startBlockNum),
+		StopBlockNum:    stopBlockNum,
+		FinalBlocksOnly: true,
 	}
 	stream, err := streamFactory.New(
 		ctx,
