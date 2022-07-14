@@ -616,8 +616,8 @@ github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c/go.mod h1:N
 github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8 h1:CtdEJC/1Jayc1TzXSZ7c/UHNn4R2yt8qUhvwMCJar7Y=
 github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8/go.mod h1:70QIkPike7DfzDYdcB/cyQOJyeW2tVMUCaXFCEh4+KE=
 github.com/streamingfast/firehose v0.1.1-0.20220629203325-f7498b95673d/go.mod h1:FR5VZzPMTFS7xeIiP2KyZ3DN859UcQljRbskaTmoLpg=
-github.com/streamingfast/firehose v0.1.1-0.20220713210729-1eb1d8b83fd9 h1:BOE3fW1ZFqAWEObIuOSBSVgJasYy+ppREfFRh2yvSnI=
-github.com/streamingfast/firehose v0.1.1-0.20220713210729-1eb1d8b83fd9/go.mod h1:qWu096wGdJOHWKGsFHjQSE89FMYnFCMWBxx1583z1sk=
+github.com/streamingfast/firehose v0.1.1-0.20220714133629-d73d5125aad5 h1:HO9FRXNBgVNQR+CwOIpNafCul0ypKrtnoV58SR4xoz4=
+github.com/streamingfast/firehose v0.1.1-0.20220714133629-d73d5125aad5/go.mod h1:qWu096wGdJOHWKGsFHjQSE89FMYnFCMWBxx1583z1sk=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTNObq2Uofb330y05JbbZZ6RwE6QUXw5iVcHk1Fx3fk=
 github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
@@ -627,8 +627,9 @@ github.com/streamingfast/logging v0.0.0-20220304183711-ddba33d79e27/go.mod h1:4G
 github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
 github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338 h1:Mn7i0pN8FASFpCDvtnRhV7L1bdlj1MteLkRWsxFVIhE=
 github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
-github.com/streamingfast/merger v0.0.3-0.20220622194932-7c740e6ad404 h1:t955B//KsM8bl6DTAphl+vCe5m29HGtndD7qLMSJ+UI=
 github.com/streamingfast/merger v0.0.3-0.20220622194932-7c740e6ad404/go.mod h1:ffbtf39gqUJ3/hIxHm6iJC/XHFXjrbR8SCfSODGjIe4=
+github.com/streamingfast/merger v0.0.3-0.20220714133959-c0c25d088208 h1:43znFHqCGRXj14UCKFAvgQq+EX0uEPj4m7q0tpvODvU=
+github.com/streamingfast/merger v0.0.3-0.20220714133959-c0c25d088208/go.mod h1:ffbtf39gqUJ3/hIxHm6iJC/XHFXjrbR8SCfSODGjIe4=
 github.com/streamingfast/node-manager v0.0.2-0.20220623184913-b43822f2d7b5 h1:dY6mFK57Ja4nGaJaloio9jdUMOedQIL66KAT1sy6NYs=
 github.com/streamingfast/node-manager v0.0.2-0.20220623184913-b43822f2d7b5/go.mod h1:FPxKmByd/Q6cUFv8wyW4FwTxGN4Nt96/ZsUXU6QbMMM=
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 h1:xlWSfi1BoPfsHtPb0VEHGUcAdBF208LUiFCwfaVPfLA=
