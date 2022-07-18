@@ -12,7 +12,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220714195705-e141dd606d6d
+	github.com/streamingfast/bstream v0.0.2-0.20220718122956-ac9279114d50
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
@@ -25,9 +25,10 @@ require (
 	github.com/streamingfast/firehose v0.1.1-0.20220714133629-d73d5125aad5
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
-	github.com/streamingfast/merger v0.0.3-0.20220714133959-c0c25d088208
-	github.com/streamingfast/node-manager v0.0.2-0.20220623184913-b43822f2d7b5
+	github.com/streamingfast/merger v0.0.3-0.20220718123331-db8c4b619d50
+	github.com/streamingfast/node-manager v0.0.2-0.20220718140702-83be8620bf26
 	github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e
+	github.com/streamingfast/relayer v0.0.2-0.20220714203132-f39c33724b53
 	github.com/streamingfast/sf-ethereum/types v0.0.0-20220519133955-44a16bd4e5bd
 	github.com/streamingfast/sf-tools v0.0.0-20220713211449-6b70e19888e2
 	github.com/streamingfast/shutter v1.5.0
@@ -115,7 +116,6 @@ require (
 	github.com/streamingfast/dhammer v0.0.0-20220506192416-3797a7906da2 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
-	github.com/streamingfast/relayer v0.0.2-0.20220714203132-f39c33724b53 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tidwall/match v1.1.1 // indirect
