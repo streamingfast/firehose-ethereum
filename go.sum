@@ -651,14 +651,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.14-0.20220628145553-e4ae2eb5a5dc h1:PLej+nGETxQTVu7F7vLwW/ss2X/UKFs10bQ5HNsOYPg=
-github.com/streamingfast/substreams v0.0.14-0.20220628145553-e4ae2eb5a5dc/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
-github.com/streamingfast/substreams v0.0.14-0.20220705192303-37f4455acb19 h1:GKxGzZP7C+squtqHhio0cg1kfb2Ns2bx8ePTBUFxYes=
-github.com/streamingfast/substreams v0.0.14-0.20220705192303-37f4455acb19/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
-github.com/streamingfast/substreams v0.0.14-0.20220705200520-b359fe051ff9 h1:5fuziPrEs3I7UeujLxHWAmtU5q50z6Q3/S7nAlXioSk=
-github.com/streamingfast/substreams v0.0.14-0.20220705200520-b359fe051ff9/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
-github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543 h1:6VupAkDznB829Xse6I50ZMubDETCPa7u5iMoyUlJRSw=
-github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543/go.mod h1:0gzVdSfg6pysA6QVp6iVRPTagC6Wq9pOE8J86WKb2Fk=
+github.com/streamingfast/substreams v0.0.14-0.20220720143314-67f0119185f5 h1:G5OzMRG7EM63jSncM2koDQTNf4H4ZkCOhSq94p3obls=
+github.com/streamingfast/substreams v0.0.14-0.20220720143314-67f0119185f5/go.mod h1:9kOY2qDTi5z6PoWaj2q0bcWFJj0aIVI+lvT0XdduIwE=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
@@ -676,6 +670,8 @@ github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf h1:Z2X3Os7oRzpdJ7
 github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf/go.mod h1:M8agBzgqHIhgj7wEn9/0hJUZcrvt9VY+Ln+S1I5Mha0=
 github.com/test-go/testify v1.1.4 h1:Tf9lntrKUMHiXQ07qBScBTSA0dhYQlu83hswqelv1iE=
 github.com/test-go/testify v1.1.4/go.mod h1:rH7cfJo/47vWGdi4GPj16x3/t1xGOj2YxzmNQzk2ghU=
+github.com/tetratelabs/wazero v0.0.0-20220717235148-0d76b11d664f h1:6GxI+onOnHH3BYd/1IstiERolvjPbvba0FtomygmAKY=
+github.com/tetratelabs/wazero v0.0.0-20220717235148-0d76b11d664f/go.mod h1:Y4X/zO4sC2dJjZG9GDYNRbJGogfqFYJY/BbyKlOxXGI=
 github.com/tidwall/gjson v1.12.1 h1:ikuZsLdhr8Ws0IdROXUS1Gi4v9Z4pGqpX/CvJkxvfpo=
 github.com/tidwall/gjson v1.12.1/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
