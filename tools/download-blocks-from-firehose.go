@@ -54,39 +54,7 @@ func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {
 	if mustGetBool(cmd, "fix-ordinals") {
 		fixerFunc = func(in *bstream.Block) (*bstream.Block, error) {
 			block := in.ToProtocol().(*pbeth.Block)
-
-			blockIndexToTraceLog := make(map[uint32]*pbeth.Log)
-			for _, trace := range block.TransactionTraces {
-				for _, call := range trace.Calls {
-					for _, log := range call.Logs {
-						if !call.StateReverted {
-							if _, ok := blockIndexToTraceLog[log.BlockIndex]; ok {
-								return nil, fmt.Errorf("duplicate blockIndex in tweak function")
-							}
-							blockIndexToTraceLog[log.BlockIndex] = log
-						}
-					}
-				}
-			}
-
-			var receiptLogCount int
-			for _, trace := range block.TransactionTraces {
-				for _, log := range trace.Receipt.Logs {
-					receiptLogCount++
-					traceLog, ok := blockIndexToTraceLog[log.BlockIndex]
-					if !ok {
-						return nil, fmt.Errorf("missing tracelog at blockIndex in tweak function")
-					}
-					log.Ordinal = traceLog.Ordinal
-					if !proto.Equal(log, traceLog) {
-						return nil, fmt.Errorf("error in tweak function: log proto not equal")
-					}
-				}
-			}
-			if receiptLogCount != len(blockIndexToTraceLog) {
-				return nil, fmt.Errorf("error incorrect number of receipt logs in tweak function: %d, expecting %d", receiptLogCount, len(blockIndexToTraceLog))
-			}
-
+			types.NormalizeBlockInPlace(block)
 			return types.BlockFromProto(block)
 		}
 	}
