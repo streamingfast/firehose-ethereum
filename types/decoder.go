@@ -77,5 +77,7 @@ func NormalizeBlockInPlace(block *pbeth.Block) {
 	// We leverage StateReverted field inside the `PopulateLogBlockIndices`
 	// and as such, it must be invoked after the `PopulateStateReverted` has
 	// been executed.
-	block.PopulateLogBlockIndices()
+	if err := block.PopulateLogBlockIndices(); err != nil {
+		panic(fmt.Errorf("normalizing log block indices: %w", err))
+	}
 }
