@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"sort"
 	"strings"
 	"time"
 
@@ -184,7 +185,9 @@ func MustBlockToBuffer(block *Block) []byte {
 
 // PopulateLogBlockIndices fixes the `TransactionReceipt.Logs[].BlockIndex`
 // that is not properly populated by our deep mind instrumentation.
-func (block *Block) PopulateLogBlockIndices() {
+func (block *Block) PopulateLogBlockIndices() error {
+
+	// numbering receipts logs
 	receiptLogBlockIndex := uint32(0)
 	for _, trace := range block.TransactionTraces {
 		for _, log := range trace.Receipt.Logs {
@@ -193,19 +196,74 @@ func (block *Block) PopulateLogBlockIndices() {
 		}
 	}
 
-	callLogBlockIndex := uint32(0)
+	// numbering call logs
+	if block.Ver < 2 { // version 1 compatibility (outcome is imperfect)
+		callLogBlockIndex := uint32(0)
+		for _, trace := range block.TransactionTraces {
+			for _, call := range trace.Calls {
+				for _, log := range call.Logs {
+					if call.StateReverted {
+						log.BlockIndex = 0
+					} else {
+						log.BlockIndex = callLogBlockIndex
+						callLogBlockIndex++
+					}
+				}
+			}
+		}
+
+		return nil
+	}
+	var callLogsToNumber []*Log
 	for _, trace := range block.TransactionTraces {
 		for _, call := range trace.Calls {
 			for _, log := range call.Logs {
 				if call.StateReverted {
 					log.BlockIndex = 0
 				} else {
-					log.BlockIndex = callLogBlockIndex
-					callLogBlockIndex++
+					callLogsToNumber = append(callLogsToNumber, log)
 				}
 			}
 		}
 	}
+
+	sort.Slice(callLogsToNumber, func(i, j int) bool { return callLogsToNumber[i].Ordinal < callLogsToNumber[j].Ordinal })
+
+	// also make a map of those logs
+	blockIndexToTraceLog := make(map[uint32]*Log)
+
+	for i := 0; i < len(callLogsToNumber); i++ {
+		log := callLogsToNumber[i]
+		log.BlockIndex = uint32(i)
+		if len(log.Topics) == 1 && len(log.Topics[0]) == 0 {
+			log.Topics = nil
+		}
+		if _, ok := blockIndexToTraceLog[log.BlockIndex]; ok {
+			return fmt.Errorf("duplicate blockIndex in tweak function")
+		}
+		blockIndexToTraceLog[log.BlockIndex] = log
+	}
+
+	// append Ordinal and Index to the receipt log
+	var receiptLogCount int
+	for _, trace := range block.TransactionTraces {
+		for _, log := range trace.Receipt.Logs {
+			receiptLogCount++
+			traceLog, ok := blockIndexToTraceLog[log.BlockIndex]
+			if !ok {
+				return fmt.Errorf("missing tracelog at blockIndex in tweak function")
+			}
+			log.Ordinal = traceLog.Ordinal
+			log.Index = traceLog.Index
+			if !proto.Equal(log, traceLog) {
+				return fmt.Errorf("error in tweak function: log proto not equal")
+			}
+		}
+	}
+	if receiptLogCount != len(blockIndexToTraceLog) {
+		return fmt.Errorf("error incorrect number of receipt logs in tweak function: %d, expecting %d", receiptLogCount, len(blockIndexToTraceLog))
+	}
+	return nil
 }
 
 func (trace *TransactionTrace) PopulateTrxStatus() {
