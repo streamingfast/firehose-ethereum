@@ -144,6 +144,8 @@ jobs:
             type=sha,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/v') }}
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
+            type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
             type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: latest=false
