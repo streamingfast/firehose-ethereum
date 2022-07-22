@@ -20,6 +20,7 @@ func init() {
 	DownloadFromFirehoseCmd.Flags().StringP("api-token-env-var", "a", "FIREHOSE_API_TOKEN", "Look for a JWT in this environment variable to authenticate against endpoint")
 	DownloadFromFirehoseCmd.Flags().BoolP("plaintext", "p", false, "Use plaintext connection to firehose")
 	DownloadFromFirehoseCmd.Flags().BoolP("insecure", "k", false, "Skip SSL certificate validation when connecting to firehose")
+	DownloadFromFirehoseCmd.Flags().Bool("fix-ordinals", false, "Decode the eth blocks to fix the ordinals in the receipt logs")
 }
 
 var DownloadFromFirehoseCmd = &cobra.Command{
@@ -49,6 +50,14 @@ func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {
 
 	plaintext := mustGetBool(cmd, "plaintext")
 	insecure := mustGetBool(cmd, "insecure")
+	var fixerFunc func(*bstream.Block) (*bstream.Block, error)
+	if mustGetBool(cmd, "fix-ordinals") {
+		fixerFunc = func(in *bstream.Block) (*bstream.Block, error) {
+			block := in.ToProtocol().(*pbeth.Block)
+			types.NormalizeBlockInPlace(block)
+			return types.BlockFromProto(block)
+		}
+	}
 
 	return sftools.DownloadFirehoseBlocks(
 		ctx,
@@ -60,6 +69,7 @@ func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {
 		stop,
 		destFolder,
 		decodeAnyPB,
+		fixerFunc,
 		zlog,
 	)
 }

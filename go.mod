@@ -29,8 +29,8 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20220718140702-83be8620bf26
 	github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e
 	github.com/streamingfast/relayer v0.0.2-0.20220718181058-0fb6aa6b335d
-	github.com/streamingfast/sf-ethereum/types v0.0.0-20220519133955-44a16bd4e5bd
-	github.com/streamingfast/sf-tools v0.0.0-20220713211449-6b70e19888e2
+	github.com/streamingfast/sf-ethereum/types v0.0.0-20220722140728-d9141505ab98
+	github.com/streamingfast/sf-tools v0.0.0-20220719204131-712c531f00bc
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
 	github.com/streamingfast/substreams v0.0.14-0.20220713195202-9e85526ed088

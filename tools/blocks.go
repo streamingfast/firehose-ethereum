@@ -196,6 +196,8 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 		}
 		ethBlock := block.ToNative().(*pbeth.Block)
 
+		//jsonPayload, _ := jsonpb.MarshalIndentToString(ethBlock, "  ")
+		//fmt.Println(jsonPayload)
 		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
