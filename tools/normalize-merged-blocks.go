@@ -88,7 +88,7 @@ type mergedBlocksWriter struct {
 
 func (w *mergedBlocksWriter) ProcessBlock(blk *bstream.Block, obj interface{}) error {
 
-	if w.lowBlockNum == 0 { // initial block
+	if len(w.blocks) == 0 && w.lowBlockNum == 0 { // initial block
 		if blk.Number%100 == 0 || blk.Number == bstream.GetProtocolFirstStreamableBlock {
 			w.lowBlockNum = lowBoundary(blk.Number)
 			w.blocks = append(w.blocks, blk)
