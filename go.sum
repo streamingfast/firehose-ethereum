@@ -642,8 +642,6 @@ github.com/streamingfast/pbgo v0.0.6-0.20220428192744-f80aee7d4688 h1:TNGT5Khvyo
 github.com/streamingfast/pbgo v0.0.6-0.20220428192744-f80aee7d4688/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
 github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde h1:rm0el70hYsJ54yM+YzXPkg6GYtts+GOeYR4RCLyarTE=
 github.com/streamingfast/relayer v0.0.2-0.20220307182103-5f4178c54fde/go.mod h1:m+lL+X6GmWmIzxSgbWNsjj+7afeGHSA5RDGATblP6/Y=
-github.com/streamingfast/sf-ethereum/types v0.0.0-20220721181516-3945fd2b0b10 h1:9PKLxueoFqh/W1xcpytVm9bj004glbC/7q8qq2jEU5w=
-github.com/streamingfast/sf-ethereum/types v0.0.0-20220721181516-3945fd2b0b10/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220722210119-d12a2fd05565 h1:vRjy0GURhdA/oB88VtOBvqw1FxocAkoD+6YwUmdxT7I=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220722210119-d12a2fd05565/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-tools v0.0.0-20220720195023-f698986904f2 h1:pLrc8glBEjjQtwoF3wrcTyl45XHvwBWUgOS4gl6+bHM=
@@ -652,8 +650,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.14-0.20220705200520-b359fe051ff9 h1:5fuziPrEs3I7UeujLxHWAmtU5q50z6Q3/S7nAlXioSk=
-github.com/streamingfast/substreams v0.0.14-0.20220705200520-b359fe051ff9/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
+github.com/streamingfast/substreams v0.0.14-0.20220725184923-e2af2b45f04a h1:8KcE99GY7eIUdOLjh89VUHu58OLwmvqW4AuLAqw7rOo=
+github.com/streamingfast/substreams v0.0.14-0.20220725184923-e2af2b45f04a/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543 h1:6VupAkDznB829Xse6I50ZMubDETCPa7u5iMoyUlJRSw=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543/go.mod h1:0gzVdSfg6pysA6QVp6iVRPTagC6Wq9pOE8J86WKb2Fk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
