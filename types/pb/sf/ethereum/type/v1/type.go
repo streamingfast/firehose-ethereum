@@ -185,7 +185,7 @@ func MustBlockToBuffer(block *Block) []byte {
 	return buf
 }
 
-var polygonSystemAddress = eth.Address("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
+var polygonSystemAddress = eth.MustNewAddress("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
 
 // PopulateLogBlockIndices fixes the `TransactionReceipt.Logs[].BlockIndex`
 // that is not properly populated by our deep mind instrumentation.
