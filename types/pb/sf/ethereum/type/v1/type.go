@@ -15,6 +15,7 @@
 package pbeth
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"time"
 
 	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
 	"google.golang.org/protobuf/proto"
 )
@@ -183,6 +185,8 @@ func MustBlockToBuffer(block *Block) []byte {
 	return buf
 }
 
+var polygonSystemAddress = eth.Address("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
+
 // PopulateLogBlockIndices fixes the `TransactionReceipt.Logs[].BlockIndex`
 // that is not properly populated by our deep mind instrumentation.
 func (block *Block) PopulateLogBlockIndices() error {
@@ -200,6 +204,9 @@ func (block *Block) PopulateLogBlockIndices() error {
 	if block.Ver < 2 { // version 1 compatibility (outcome is imperfect)
 		callLogBlockIndex := uint32(0)
 		for _, trace := range block.TransactionTraces {
+			if bytes.Equal(polygonSystemAddress, trace.From) { // known "fake" polygon transactions
+				continue
+			}
 			for _, call := range trace.Calls {
 				for _, log := range call.Logs {
 					if call.StateReverted {
@@ -216,6 +223,9 @@ func (block *Block) PopulateLogBlockIndices() error {
 	}
 	var callLogsToNumber []*Log
 	for _, trace := range block.TransactionTraces {
+		if bytes.Equal(polygonSystemAddress, trace.From) { // known "fake" polygon transactions
+			continue
+		}
 		for _, call := range trace.Calls {
 			for _, log := range call.Logs {
 				if call.StateReverted {
