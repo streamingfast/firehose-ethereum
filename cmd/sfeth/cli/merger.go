@@ -33,6 +33,7 @@ func init() {
 			cmd.Flags().Duration("merger-time-between-store-pruning", time.Minute, "delay between source store pruning loops")
 			cmd.Flags().Uint64("merger-prune-forked-blocks-after", 50000, "number of blocks that must pass before we delete old forks (one-block-files lingering)")
 			cmd.Flags().String("merger-grpc-listen-addr", MergerServingAddr, "Address to listen for incoming gRPC requests")
+			cmd.Flags().Uint64("merger-stop-block", 0, "if non-zero, merger will trigger shutdown when blocks have been merged up to this block")
 			return nil
 		},
 		// FIXME: Lots of config value construction is duplicated across InitFunc and FactoryFunc, how to streamline that
@@ -58,6 +59,7 @@ func init() {
 				StorageMergedBlocksFilesPath: MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url")),
 				GRPCListenAddr:               viper.GetString("merger-grpc-listen-addr"),
 				PruneForkedBlocksAfter:       viper.GetUint64("merger-prune-forked-blocks-after"),
+				StopBlock:                    viper.GetUint64("merger-stop-block"),
 				TimeBetweenPruning:           viper.GetDuration("merger-time-between-store-pruning"),
 				TimeBetweenPolling:           viper.GetDuration("merger-time-between-store-lookups"),
 			}), nil
