@@ -56,12 +56,12 @@ func init() {
 
 			return nodeMindreaderStdinApp.New(&nodeMindreaderStdinApp.Config{
 				GRPCAddr:                   viper.GetString("mindreader-geth-node-grpc-listen-addr"),
-				ArchiveStoreURL:            archiveStoreURL,
+				OneBlocksStoreURL:          archiveStoreURL,
 				MindReadBlocksChanCapacity: viper.GetInt("mindreader-geth-node-blocks-chan-capacity"),
 				StartBlockNum:              viper.GetUint64("mindreader-geth-node-start-block-num"),
 				StopBlockNum:               viper.GetUint64("mindreader-geth-node-stop-block-num"),
 				WorkingDir:                 MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-geth-node-working-dir")),
-				OneblockSuffix:             viper.GetString("mindreader-geth-node-oneblock-suffix"),
+				OneBlockSuffix:             viper.GetString("mindreader-geth-node-oneblock-suffix"),
 			}, &nodeMindreaderStdinApp.Modules{
 				ConsoleReaderFactory:       consoleReaderFactory,
 				MetricsAndReadinessManager: metricsAndReadinessManager,

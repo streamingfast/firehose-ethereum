@@ -26,10 +26,11 @@ require (
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
 	github.com/streamingfast/merger v0.0.3-0.20220726181241-b2209d2373a7
-	github.com/streamingfast/node-manager v0.0.2-0.20220718140702-83be8620bf26
+	github.com/streamingfast/node-manager v0.0.2-0.20220726150849-93bd6c899c04
 	github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e
-	github.com/streamingfast/relayer v0.0.2-0.20220718181058-0fb6aa6b335d
-	github.com/streamingfast/sf-ethereum/types v0.0.0-20220722140728-d9141505ab98
+	github.com/streamingfast/relayer v0.0.2-0.20220726150209-4341fcef75ec
+	github.com/streamingfast/sf-ethereum/types v0.0.0-20220726181429-5ed03571ad69
+	github.com/streamingfast/sf-tools v0.0.0-20220719204131-712c531f00bc
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
 	github.com/streamingfast/substreams v0.0.14-0.20220725204221-f75ca1473b10
@@ -115,7 +116,6 @@ require (
 	github.com/streamingfast/dhammer v0.0.0-20220506192416-3797a7906da2 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
-	github.com/streamingfast/sf-tools v0.0.0-20220719204131-712c531f00bc // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tidwall/match v1.1.1 // indirect

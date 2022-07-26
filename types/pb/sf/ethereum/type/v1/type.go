@@ -15,6 +15,7 @@
 package pbeth
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"time"
 
 	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
 	"google.golang.org/protobuf/proto"
 )
@@ -183,6 +185,16 @@ func MustBlockToBuffer(block *Block) []byte {
 	return buf
 }
 
+var polygonSystemAddress = eth.MustNewAddress("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
+
+var polygonNeverRevertedTopic = eth.MustNewBytes("0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63")
+var polygonFeeSystemAddress = eth.MustNewAddress("0x0000000000000000000000000000000000001010")
+
+// polygon has a fee log that will never be skipped even if call failed
+func isPolygonException(log *Log) bool {
+	return bytes.Equal(log.Address, polygonFeeSystemAddress) && len(log.Topics) == 4 && bytes.Equal(log.Topics[0], polygonNeverRevertedTopic)
+}
+
 // PopulateLogBlockIndices fixes the `TransactionReceipt.Logs[].BlockIndex`
 // that is not properly populated by our deep mind instrumentation.
 func (block *Block) PopulateLogBlockIndices() error {
@@ -202,7 +214,7 @@ func (block *Block) PopulateLogBlockIndices() error {
 		for _, trace := range block.TransactionTraces {
 			for _, call := range trace.Calls {
 				for _, log := range call.Logs {
-					if call.StateReverted {
+					if call.StateReverted && !isPolygonException(log) {
 						log.BlockIndex = 0
 					} else {
 						log.BlockIndex = callLogBlockIndex
@@ -216,9 +228,12 @@ func (block *Block) PopulateLogBlockIndices() error {
 	}
 	var callLogsToNumber []*Log
 	for _, trace := range block.TransactionTraces {
+		if bytes.Equal(polygonSystemAddress, trace.From) { // known "fake" polygon transactions
+			continue
+		}
 		for _, call := range trace.Calls {
 			for _, log := range call.Logs {
-				if call.StateReverted {
+				if call.StateReverted && !isPolygonException(log) {
 					log.BlockIndex = 0
 				} else {
 					callLogsToNumber = append(callLogsToNumber, log)

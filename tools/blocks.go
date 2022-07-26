@@ -25,6 +25,7 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
+	"github.com/streamingfast/jsonpb"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
 	"go.uber.org/zap"
 )
@@ -69,6 +70,7 @@ func init() {
 	printCmd.PersistentFlags().Uint64("transactions-for-block", 0, "Include transaction IDs in output")
 	printCmd.PersistentFlags().Bool("transactions", false, "Include transaction IDs in output")
 	printCmd.PersistentFlags().Bool("calls", false, "Include transaction's Call data in output")
+	printCmd.PersistentFlags().Bool("full", false, "print the fullblock instead of just header/ID")
 	printCmd.PersistentFlags().Bool("instructions", false, "Include instruction output")
 	printCmd.PersistentFlags().String("store", "", "block store")
 }
@@ -139,6 +141,7 @@ func printBlocksE(cmd *cobra.Command, args []string) error {
 func printBlockE(cmd *cobra.Command, args []string) error {
 	printTransactions := mustGetBool(cmd, "transactions")
 	printCall := mustGetBool(cmd, "calls")
+	printFull := mustGetBool(cmd, "full")
 	transactionFilter := mustGetString(cmd, "transaction")
 
 	zlog.Info("printing block",
@@ -196,8 +199,12 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 		}
 		ethBlock := block.ToNative().(*pbeth.Block)
 
-		//jsonPayload, _ := jsonpb.MarshalIndentToString(ethBlock, "  ")
-		//fmt.Println(jsonPayload)
+		if printFull {
+			jsonPayload, _ := jsonpb.MarshalIndentToString(ethBlock, "  ")
+			fmt.Println(jsonPayload)
+			continue
+		}
+
 		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
