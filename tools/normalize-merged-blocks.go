@@ -59,7 +59,7 @@ func normalizeMergedBlocksE(cmd *cobra.Command, args []string) error {
 		tweakBlock:    normalize,
 		logger:        zlog,
 	}
-	stream := stream.New(nil, sourceStore, nil, int64(start), writer, stream.WithFinalBlocksOnly(0))
+	stream := stream.New(nil, sourceStore, nil, int64(start), writer, stream.WithFinalBlocksOnly())
 
 	err = stream.Run(context.Background())
 	if errors.Is(err, io.EOF) {
