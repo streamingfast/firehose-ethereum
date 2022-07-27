@@ -29,11 +29,11 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20220727171234-0c5bb6b902dc
 	github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e
 	github.com/streamingfast/relayer v0.0.2-0.20220726150209-4341fcef75ec
-	github.com/streamingfast/sf-ethereum/types v0.0.0-20220726182209-600c01c35e3d
-	github.com/streamingfast/sf-tools v0.0.0-20220719204131-712c531f00bc
+	github.com/streamingfast/sf-ethereum/types v0.0.0-20220727183231-9b3e6df9fb11
+	github.com/streamingfast/sf-tools v0.0.0-20220727183125-3348eaca0e25
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.14-0.20220725204221-f75ca1473b10
+	github.com/streamingfast/substreams v0.0.14-0.20220727183035-9be543baf1f4
 	github.com/stretchr/testify v1.7.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
