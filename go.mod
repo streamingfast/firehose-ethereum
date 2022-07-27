@@ -12,7 +12,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220726185619-d6283d1f1aea
+	github.com/streamingfast/bstream v0.0.2-0.20220727174058-442b957c6250
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
@@ -25,8 +25,8 @@ require (
 	github.com/streamingfast/firehose v0.1.1-0.20220726185058-f74621275d60
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
-	github.com/streamingfast/merger v0.0.3-0.20220726195056-1d03d66c08ae
-	github.com/streamingfast/node-manager v0.0.2-0.20220726150849-93bd6c899c04
+	github.com/streamingfast/merger v0.0.3-0.20220727144910-0e6115a37a7c
+	github.com/streamingfast/node-manager v0.0.2-0.20220727171234-0c5bb6b902dc
 	github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e
 	github.com/streamingfast/relayer v0.0.2-0.20220726150209-4341fcef75ec
 	github.com/streamingfast/sf-ethereum/types v0.0.0-20220726182209-600c01c35e3d
