@@ -32,7 +32,7 @@ import (
 var generateCombinedIdxCmd = &cobra.Command{
 	Use:   "generate-combined-index <source-blocks-url> <acct-index-url> <start-block-num> [stop-block-num]",
 	Short: "Generate index files for eth accounts + event signatures present in blocks (logs and/or calls)",
-	Args:  cobra.RangeArgs(4, 5),
+	Args:  cobra.RangeArgs(3, 4),
 	RunE:  generateCombinedIdxE,
 }
 
@@ -62,13 +62,13 @@ func generateCombinedIdxE(cmd *cobra.Command, args []string) error {
 
 	blocksStoreURL := args[0]
 	indexStoreURL := args[1]
-	startBlockNum, err := strconv.ParseUint(args[3], 10, 64)
+	startBlockNum, err := strconv.ParseUint(args[2], 10, 64)
 	if err != nil {
 		return fmt.Errorf("unable to parse block number %q: %w", args[3], err)
 	}
 	var stopBlockNum uint64
-	if len(args) == 5 {
-		stopBlockNum, err = strconv.ParseUint(args[4], 10, 64)
+	if len(args) == 4 {
+		stopBlockNum, err = strconv.ParseUint(args[3], 10, 64)
 		if err != nil {
 			return fmt.Errorf("unable to parse block number %q: %w", args[4], err)
 		}
