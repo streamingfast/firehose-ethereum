@@ -12,7 +12,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220727174058-442b957c6250
+	github.com/streamingfast/bstream v0.0.2-0.20220729104140-7f836fe1f02f
 	github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
@@ -28,7 +28,7 @@ require (
 	github.com/streamingfast/merger v0.0.3-0.20220728182037-7b5841d3c98f
 	github.com/streamingfast/node-manager v0.0.2-0.20220728184759-72d699d3450f
 	github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e
-	github.com/streamingfast/relayer v0.0.2-0.20220726150209-4341fcef75ec
+	github.com/streamingfast/relayer v0.0.2-0.20220729104233-021c788e2cc1
 	github.com/streamingfast/sf-ethereum/types v0.0.0-20220727183231-9b3e6df9fb11
 	github.com/streamingfast/sf-tools v0.0.0-20220727183125-3348eaca0e25
 	github.com/streamingfast/shutter v1.5.0

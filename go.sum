@@ -586,6 +586,8 @@ github.com/streamingfast/bstream v0.0.2-0.20220726184948-e50a4c390afe/go.mod h1:
 github.com/streamingfast/bstream v0.0.2-0.20220726185619-d6283d1f1aea/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/bstream v0.0.2-0.20220727174058-442b957c6250 h1:H+VKvy783mR1nfycuERhzIGPsM2eQyz1npewPDyyWVM=
 github.com/streamingfast/bstream v0.0.2-0.20220727174058-442b957c6250/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
+github.com/streamingfast/bstream v0.0.2-0.20220729104140-7f836fe1f02f h1:vjNm8wFsFzugPk69nO5RRYw+E1TWdk4qlZE5M863NmA=
+github.com/streamingfast/bstream v0.0.2-0.20220729104140-7f836fe1f02f/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e h1:RNQiFMOloBPAMA5PCwShiOoMQ1FeKsVJXcwo9Lq0iHI=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e/go.mod h1:0+crhXhsHDBwb1EWceYcFM5Z3zp6gXsxNxkl+rTMZj0=
 github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1/go.mod h1:FIYpVqt+ICVuNBoOH3ZIicIctpVoCq3393+RpfXsPEM=
@@ -643,6 +645,8 @@ github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e h1:4fz1VvID5Z
 github.com/streamingfast/pbgo v0.0.6-0.20220630154121-2e8bba36234e/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
 github.com/streamingfast/relayer v0.0.2-0.20220726150209-4341fcef75ec h1:XuesN5BVXGUk1yhYjg+/aS5p0UCDXRz2JZVdYidp2ck=
 github.com/streamingfast/relayer v0.0.2-0.20220726150209-4341fcef75ec/go.mod h1:FpQ5Jif5om2sO6dHpUaHjgAlSQCoNySBk97xj9McBV0=
+github.com/streamingfast/relayer v0.0.2-0.20220729104233-021c788e2cc1 h1:F7ZX4vR+kIGHazzsA4kMuS9934jJhowMNbeAJQuM1S8=
+github.com/streamingfast/relayer v0.0.2-0.20220729104233-021c788e2cc1/go.mod h1:FpQ5Jif5om2sO6dHpUaHjgAlSQCoNySBk97xj9McBV0=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220727183231-9b3e6df9fb11 h1:rJa9k1tjCIh4fRZXxt6CBt4hiX0mZkSb2dzCCbWd5Rw=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220727183231-9b3e6df9fb11/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-tools v0.0.0-20220727183125-3348eaca0e25 h1:HMJclIRfmcsBS4OrJrp90oLfpYmpShhv2sX/W0RJ4S0=
