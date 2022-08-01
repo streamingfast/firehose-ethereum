@@ -650,8 +650,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.14-0.20220801171555-58265e507547 h1:G3jkZCBxP1eMfPQ5FNFwfEcyzfLBLmaRDKczDK5/PI4=
-github.com/streamingfast/substreams v0.0.14-0.20220801171555-58265e507547/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
+github.com/streamingfast/substreams v0.0.14-0.20220801202634-2bbda150c985 h1:m9nPTDekcMMe6LU5CMvm1UIxvS/O0+PgPIOMo2eV0yk=
+github.com/streamingfast/substreams v0.0.14-0.20220801202634-2bbda150c985/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543 h1:6VupAkDznB829Xse6I50ZMubDETCPa7u5iMoyUlJRSw=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543/go.mod h1:0gzVdSfg6pysA6QVp6iVRPTagC6Wq9pOE8J86WKb2Fk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
