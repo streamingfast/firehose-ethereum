@@ -589,6 +589,8 @@ github.com/streamingfast/bstream v0.0.2-0.20220802184829-1af251c95389 h1:OKaNxiZ
 github.com/streamingfast/bstream v0.0.2-0.20220802184829-1af251c95389/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/bstream v0.0.2-0.20220802193619-563b96c53fda h1:yiXNYK2dWZuzMmYM5QmPf9yl9Icksdlbl1/jlssX/GE=
 github.com/streamingfast/bstream v0.0.2-0.20220802193619-563b96c53fda/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
+github.com/streamingfast/bstream v0.0.2-0.20220802205804-9ff445ba0025 h1:41nTuq+mIwsRw0UqJUdq547niCdIMcvdVyTcgamhJUM=
+github.com/streamingfast/bstream v0.0.2-0.20220802205804-9ff445ba0025/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e h1:RNQiFMOloBPAMA5PCwShiOoMQ1FeKsVJXcwo9Lq0iHI=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e/go.mod h1:0+crhXhsHDBwb1EWceYcFM5Z3zp6gXsxNxkl+rTMZj0=
 github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1/go.mod h1:FIYpVqt+ICVuNBoOH3ZIicIctpVoCq3393+RpfXsPEM=
@@ -624,6 +626,8 @@ github.com/streamingfast/firehose v0.1.1-0.20220629203325-f7498b95673d/go.mod h1
 github.com/streamingfast/firehose v0.1.1-0.20220729153327-86179bcf41f2/go.mod h1:2Fj18HY4XROSi6gw6JjzUT6SXbCIaTwsO6xAcajb2Aw=
 github.com/streamingfast/firehose v0.1.1-0.20220802185039-acf1e1c3cd73 h1:VmHkz5W+GLqYyluWSl3GUJXYWSyHFkvi0XrCL83tyuo=
 github.com/streamingfast/firehose v0.1.1-0.20220802185039-acf1e1c3cd73/go.mod h1:OGb8noKOMRrx3kOqZCfSVowr9lVyaUtvovDDH0Rl470=
+github.com/streamingfast/firehose v0.1.1-0.20220802205703-6a0707a59f80 h1:XkxiaDkqyhOsz5Y3F9P73VrrHFAY/ufKghsXSjOMpQQ=
+github.com/streamingfast/firehose v0.1.1-0.20220802205703-6a0707a59f80/go.mod h1:OGb8noKOMRrx3kOqZCfSVowr9lVyaUtvovDDH0Rl470=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTNObq2Uofb330y05JbbZZ6RwE6QUXw5iVcHk1Fx3fk=
 github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
