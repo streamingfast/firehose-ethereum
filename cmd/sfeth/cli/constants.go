@@ -26,6 +26,7 @@ const (
 	DefaultDeploymentID string = "eth-local"
 
 	OneBlockStoreURL     string = "file://{sf-data-dir}/storage/one-blocks"
+	ForkedBlocksStoreURL string = "file://{sf-data-dir}/storage/forked-blocks"
 	MergedBlocksStoreURL string = "file://{sf-data-dir}/storage/merged-blocks"
 	SnapshotsURL         string = "file://{sf-data-dir}/storage/snapshots"
 	StateDBDSN           string = "badger://{sf-data-dir}/storage/statedb"

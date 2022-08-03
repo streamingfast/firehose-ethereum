@@ -99,6 +99,7 @@ func init() {
 
 			mergedBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
 			oneBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
+			forkedBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-forkedblocks-store-url"))
 
 			indexStoreUrl := viper.GetString("firehose-block-index-url")
 			var indexStore dstore.Store
@@ -185,6 +186,7 @@ func init() {
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
 				MergedBlocksStoreURL:    mergedBlocksStoreURL,
 				OneBlocksStoreURL:       oneBlocksStoreURL,
+				ForkedBlocksStoreURL:    forkedBlocksStoreURL,
 				BlockStreamAddr:         blockstreamAddr,
 				GRPCListenAddr:          viper.GetString("firehose-grpc-listen-addr"),
 				GRPCShutdownGracePeriod: time.Second,

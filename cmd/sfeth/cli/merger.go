@@ -57,6 +57,7 @@ func init() {
 			return mergerApp.New(&mergerApp.Config{
 				StorageOneBlockFilesPath:     MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url")),
 				StorageMergedBlocksFilesPath: MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url")),
+				StorageForkedBlocksFilesPath: MustReplaceDataDir(sfDataDir, viper.GetString("common-forkedblocks-store-url")),
 				GRPCListenAddr:               viper.GetString("merger-grpc-listen-addr"),
 				PruneForkedBlocksAfter:       viper.GetUint64("merger-prune-forked-blocks-after"),
 				StopBlock:                    viper.GetUint64("merger-stop-block"),
