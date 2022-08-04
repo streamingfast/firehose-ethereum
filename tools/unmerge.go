@@ -38,13 +38,13 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	start := mustParseUint64(args[1])
-	stop := mustParseUint64(args[2])
-
-	destStore, err := dstore.NewDBinStore(args[3])
+	destStore, err := dstore.NewDBinStore(args[1])
 	if err != nil {
 		return err
 	}
+
+	start := mustParseUint64(args[2])
+	stop := mustParseUint64(args[3])
 
 	err = srcStore.Walk(ctx, "", func(filename string) error {
 		startBlock := mustParseUint64(filename)
