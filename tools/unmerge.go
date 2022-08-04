@@ -2,6 +2,7 @@ package tools
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"strconv"
 
@@ -48,7 +49,7 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 	err = srcStore.Walk(ctx, "", func(filename string) error {
 		startBlock := mustParseUint64(filename)
 		if startBlock > stop {
-			return nil
+			return io.EOF
 		}
 
 		rc, err := srcStore.OpenObject(ctx, filename)
@@ -87,14 +88,21 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			err = destStore.WriteObject(ctx, bstream.BlockFileNameWithSuffix(block, "extracted"), buf)
+			oneblockFilename := bstream.BlockFileNameWithSuffix(block, "extracted")
+			err = destStore.WriteObject(ctx, oneblockFilename, buf)
 			if err != nil {
 				return err
 			}
+
+			zlog.Info(fmt.Sprintf("wrote block %d to %s", block.Number, oneblockFilename))
 		}
 
 		return nil
 	})
+
+	if err == io.EOF {
+		return nil
+	}
 
 	if err != nil {
 		return err
