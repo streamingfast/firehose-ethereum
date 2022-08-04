@@ -15,7 +15,7 @@ import (
 
 var unmergeBlocksCmd = &cobra.Command{
 	Use:   "unmerge <store-url>",
-	Short: "Checks for any holes in merged blocks as well as ensuring merged blocks integrity",
+	Short: "unmerges merged block files into one-block-files",
 	Args:  cobra.ExactArgs(4),
 	RunE:  unmergeBlocksE,
 }
