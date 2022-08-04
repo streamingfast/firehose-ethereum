@@ -586,6 +586,8 @@ github.com/streamingfast/bstream v0.0.2-0.20220802184829-1af251c95389/go.mod h1:
 github.com/streamingfast/bstream v0.0.2-0.20220802193619-563b96c53fda/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/bstream v0.0.2-0.20220804171940-ad958345fc5b h1:+iKt+JdV6ENyB1PrmvDF5rD/dlX0y4lyLF8SHLjqQNQ=
 github.com/streamingfast/bstream v0.0.2-0.20220804171940-ad958345fc5b/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
+github.com/streamingfast/bstream v0.0.2-0.20220804181845-6ba6c82abf00 h1:MEaxSon1TSd2RoDBP7EW9EC+jVZFLKnfc1OegpV8Low=
+github.com/streamingfast/bstream v0.0.2-0.20220804181845-6ba6c82abf00/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e h1:RNQiFMOloBPAMA5PCwShiOoMQ1FeKsVJXcwo9Lq0iHI=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e/go.mod h1:0+crhXhsHDBwb1EWceYcFM5Z3zp6gXsxNxkl+rTMZj0=
 github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1/go.mod h1:FIYpVqt+ICVuNBoOH3ZIicIctpVoCq3393+RpfXsPEM=
@@ -620,6 +622,8 @@ github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8/go.mod h1:70Q
 github.com/streamingfast/firehose v0.1.1-0.20220629203325-f7498b95673d/go.mod h1:FR5VZzPMTFS7xeIiP2KyZ3DN859UcQljRbskaTmoLpg=
 github.com/streamingfast/firehose v0.1.1-0.20220804141236-830f478e267f h1:T/pLSddGIuxVe15/ngyhRnbFprXrQWYNSmAO5pym6X0=
 github.com/streamingfast/firehose v0.1.1-0.20220804141236-830f478e267f/go.mod h1:OGb8noKOMRrx3kOqZCfSVowr9lVyaUtvovDDH0Rl470=
+github.com/streamingfast/firehose v0.1.1-0.20220804182444-4a9610410835 h1:Iqn1JpmvMumf3PSOboxJWfCVKeXwxUAdP6QbtF7a8BY=
+github.com/streamingfast/firehose v0.1.1-0.20220804182444-4a9610410835/go.mod h1:OGb8noKOMRrx3kOqZCfSVowr9lVyaUtvovDDH0Rl470=
 github.com/streamingfast/index-builder v0.0.0-20220803183104-a4e268586503 h1:/8A5s1LoLDXq5Lwf6YeZMMNJZaAhktUp3AuWtMBix1s=
 github.com/streamingfast/index-builder v0.0.0-20220803183104-a4e268586503/go.mod h1:7o8qQwgojm/95YCz6ka49on5revPiMUjvcXltZ3D/zI=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
