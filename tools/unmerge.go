@@ -70,6 +70,7 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("get block reader: %w", err)
 		}
 
+		// iterate through the blocks in the file
 		for {
 			block, err := reader.Read()
 			if err == io.EOF {
@@ -84,8 +85,12 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 				break
 			}
 
+			oneblockFilename := bstream.BlockFileNameWithSuffix(block, "extracted")
+			zlog.Debug("writing block", zap.Uint64("block_num", block.Number), zap.String("filename", oneblockFilename))
+
 			pr, pw := io.Pipe()
 
+			//write block data to pipe
 			go func(block *bstream.Block) {
 				var err error
 				defer func() {
@@ -106,12 +111,13 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 				}
 			}(block)
 
-			oneblockFilename := bstream.BlockFileNameWithSuffix(block, "extracted")
+			//read block data from pipe and write block data to dest store
 			err = destStore.WriteObject(ctx, oneblockFilename, pr)
 			if err != nil {
 				return fmt.Errorf("error writing block %d to %s: %w", block.Number, oneblockFilename, err)
 			}
-			zlog.Info(fmt.Sprintf("wrote block %d to %s", block.Number, oneblockFilename))
+
+			zlog.Info("wrote block", zap.Uint64("block_num", block.Number), zap.String("filename", oneblockFilename))
 		}
 
 		return nil
