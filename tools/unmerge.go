@@ -47,7 +47,8 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 	start := mustParseUint64(args[2])
 	stop := mustParseUint64(args[3])
 
-	err = srcStore.Walk(ctx, "", func(filename string) error {
+	startFrom := fmt.Sprintf("%010d", start-(start%100))
+	err = srcStore.WalkFrom(ctx, "", startFrom, func(filename string) error {
 		zlog.Debug("checking 100-block file", zap.String("filename", filename))
 		startBlock := mustParseUint64(filename)
 		if startBlock > stop {
