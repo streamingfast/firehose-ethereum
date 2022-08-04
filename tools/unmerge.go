@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -84,23 +83,23 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 				break
 			}
 
-			buf := bytes.NewBuffer(nil)
+			pr, pw := io.Pipe()
 
-			writer, err := bstream.GetBlockWriterFactory.New(buf)
-			if err != nil {
-				return err
-			}
-			err = writer.Write(block)
-			if err != nil {
-				return err
-			}
+			go func(block *bstream.Block) {
+				bw, _ := bstream.GetBlockWriterFactory.New(pw)
+				err := bw.Write(block)
+				if err != nil {
+					pw.CloseWithError(err)
+					return
+				}
+				pw.Close()
+			}(block)
 
 			oneblockFilename := bstream.BlockFileNameWithSuffix(block, "extracted")
-			err = destStore.WriteObject(ctx, oneblockFilename, buf)
+			err = destStore.WriteObject(ctx, oneblockFilename, pr)
 			if err != nil {
 				return err
 			}
-
 			zlog.Info(fmt.Sprintf("wrote block %d to %s", block.Number, oneblockFilename))
 		}
 
