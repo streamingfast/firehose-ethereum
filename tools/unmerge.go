@@ -6,6 +6,8 @@ import (
 	"io"
 	"strconv"
 
+	"go.uber.org/zap"
+
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
@@ -47,6 +49,7 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 	stop := mustParseUint64(args[3])
 
 	err = srcStore.Walk(ctx, "", func(filename string) error {
+		zlog.Debug("checking 100-block file", zap.String("filename", filename))
 		startBlock := mustParseUint64(filename)
 		if startBlock > stop {
 			return io.EOF
