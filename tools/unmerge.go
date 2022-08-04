@@ -52,6 +52,10 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 			return io.EOF
 		}
 
+		if startBlock+100 < start {
+			return nil
+		}
+
 		rc, err := srcStore.OpenObject(ctx, filename)
 		if err != nil {
 			return err
