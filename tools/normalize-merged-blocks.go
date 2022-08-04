@@ -37,7 +37,7 @@ func normalizeMergedBlocksE(cmd *cobra.Command, args []string) error {
 	}
 
 	dest := args[1]
-	destStore, err := dstore.NewDBinStore(dest)
+	destStore, err := dstore.NewStore(dest, "dbin.zst", "zstd", true) // overwrites
 	if err != nil {
 		return fmt.Errorf("reading destination store: %w", err)
 	}
