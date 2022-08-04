@@ -1,9 +1,8 @@
 package tools
 
 import (
+	"bytes"
 	"io"
-	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -41,7 +40,10 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 	start := mustParseUint64(args[1])
 	stop := mustParseUint64(args[2])
 
-	destPath := args[3]
+	destStore, err := dstore.NewDBinStore(args[3])
+	if err != nil {
+		return err
+	}
 
 	err = srcStore.Walk(ctx, "", func(filename string) error {
 		startBlock := mustParseUint64(filename)
@@ -74,14 +76,9 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 				break
 			}
 
-			path := filepath.Join(destPath, bstream.BlockFileNameWithSuffix(block, "extracted"))
-			f, err := os.Create(path)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
+			buf := bytes.NewBuffer(nil)
 
-			writer, err := bstream.GetBlockWriterFactory.New(f)
+			writer, err := bstream.GetBlockWriterFactory.New(buf)
 			if err != nil {
 				return err
 			}
@@ -90,6 +87,10 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
+			err = destStore.WriteObject(ctx, bstream.BlockFileNameWithSuffix(block, "extracted"), buf)
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
