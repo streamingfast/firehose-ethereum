@@ -86,20 +86,23 @@ func unmergeBlocksE(cmd *cobra.Command, args []string) error {
 			pr, pw := io.Pipe()
 
 			go func(block *bstream.Block) {
-				bw, err := bstream.GetBlockWriterFactory.New(pw)
+				var err error
+				defer func() {
+					pw.CloseWithError(err)
+				}()
+
+				var bw bstream.BlockWriter
+				bw, err = bstream.GetBlockWriterFactory.New(pw)
 				if err != nil {
 					zlog.Error("error creating block writer", zap.Error(err))
-					pw.CloseWithError(err)
 					return
 				}
 
 				err = bw.Write(block)
 				if err != nil {
 					zlog.Error("error writing block", zap.Error(err))
-					pw.CloseWithError(err)
 					return
 				}
-				pw.Close()
 			}(block)
 
 			oneblockFilename := bstream.BlockFileNameWithSuffix(block, "extracted")
