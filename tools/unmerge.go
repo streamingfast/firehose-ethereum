@@ -13,7 +13,7 @@ import (
 )
 
 var unmergeBlocksCmd = &cobra.Command{
-	Use:   "unmerge <store-url>",
+	Use:   "unmerge <src-store> <dest-store> <start> <stop>",
 	Short: "unmerges merged block files into one-block-files",
 	Args:  cobra.ExactArgs(4),
 	RunE:  unmergeBlocksE,
