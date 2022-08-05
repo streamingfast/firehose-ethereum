@@ -73,6 +73,18 @@ The Bash script runs in dry-mode by default, so you can check first that everyth
 
 Releases are performed using [goreleaser](https://goreleaser.com/).
 
+## Docker Bundle Image Building
+
+New version of Ethereum clients means releasing a new version of the full bundled image of `sf-ethereum` that contains `sfeth` binary as well as node instrumented binary to sync with the chain. Doing this is really simple as we will simply ask GitHub to launch an action that will build for us the bundled image with the current up to date version of the Ethereum client.
+
+First, install the [GitHub CLI](https://github.com/cli/cli#github-cli) and configure it to be connected with your account.
+
+Run the following commands:
+
+- Release trunk `0.10.x` with Firehose V1 Instrumentation (production builds): `gh workflow run docker.yml -f geth_version=fh1 --ref release/v0.10.x`
+- Release trunk `develop` with Firehose V1 Instrumentation (development builds): `gh workflow run docker.yml -f geth_version=fh1 --ref develop`
+- Release trunk `develop` with Firehose V2 Instrumentation (development builds): `gh workflow run docker.yml -f geth_version=fh2 --ref develop`
+
 ## Contributing
 
 **Issues and PR in this repo related strictly to the Ethereum on StreamingFast.**
