@@ -32,7 +32,7 @@ func init() {
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("relayer-grpc-listen-addr", RelayerServingAddr, "Address to listen for incoming gRPC requests")
 			cmd.Flags().StringSlice("relayer-source", []string{MindreaderGRPCAddr}, "List of Blockstream sources (mindreaders) to connect to for live block feeds (repeat flag as needed)")
-			cmd.Flags().Duration("relayer-max-source-latency", 999999*time.Hour, "max latency tolerated to connect to a source. A performance optimization for when you have redundant sources and some may not have caught up")
+			cmd.Flags().Duration("relayer-max-source-latency", 999999*time.Hour, "Max latency tolerated to connect to a source. A performance optimization for when you have redundant sources and some may not have caught up")
 			return nil
 		},
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {

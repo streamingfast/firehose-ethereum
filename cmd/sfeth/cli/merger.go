@@ -29,9 +29,9 @@ func init() {
 		Title:       "Merger",
 		Description: "Produces merged block files from single-block files",
 		RegisterFlags: func(cmd *cobra.Command) error {
-			cmd.Flags().Duration("merger-time-between-store-lookups", 1*time.Second, "delay between source store polling (should be higher for remote storage)")
-			cmd.Flags().Duration("merger-time-between-store-pruning", time.Minute, "delay between source store pruning loops")
-			cmd.Flags().Uint64("merger-prune-forked-blocks-after", 50000, "number of blocks that must pass before we delete old forks (one-block-files lingering)")
+			cmd.Flags().Duration("merger-time-between-store-lookups", 1*time.Second, "Delay between source store polling (should be higher for remote storage)")
+			cmd.Flags().Duration("merger-time-between-store-pruning", time.Minute, "Delay between source store pruning loops")
+			cmd.Flags().Uint64("merger-prune-forked-blocks-after", 50000, "Number of blocks that must pass before we delete old forks (one-block-files lingering)")
 			cmd.Flags().String("merger-grpc-listen-addr", MergerServingAddr, "Address to listen for incoming gRPC requests")
 			cmd.Flags().Uint64("merger-stop-block", 0, "if non-zero, merger will trigger shutdown when blocks have been merged up to this block")
 			return nil

@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/streamingfast/bstream"
-
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
