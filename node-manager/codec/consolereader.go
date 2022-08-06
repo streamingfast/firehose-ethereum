@@ -16,6 +16,7 @@ package codec
 
 import (
 	"bufio"
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
@@ -26,6 +27,7 @@ import (
 	"time"
 
 	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/dmetrics"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
@@ -40,21 +42,28 @@ type ConsoleReader struct {
 	lines chan string
 	close func()
 
-	ctx  *parseCtx
-	done chan interface{}
+	ctx   *parseCtx
+	done  chan interface{}
+	stats *consoleReaderStats
 
 	logger *zap.Logger
 }
 
 func NewConsoleReader(logger *zap.Logger, lines chan string) (*ConsoleReader, error) {
+	globalStats := newConsoleReaderStats()
+	globalStats.StartPeriodicLogToZap(context.Background(), logger, 5*time.Second)
+
 	l := &ConsoleReader{
 		lines: lines,
 		close: func() {},
-		ctx:   &parseCtx{logger: logger},
+
+		ctx:   &parseCtx{logger: logger, globalStats: globalStats},
 		done:  make(chan interface{}),
+		stats: globalStats,
 
 		logger: logger,
 	}
+
 	return l, nil
 }
 
@@ -64,7 +73,57 @@ func (l *ConsoleReader) Done() <-chan interface{} {
 }
 
 func (c *ConsoleReader) Close() {
+	c.stats.StopPeriodicLogToZap()
 	c.close()
+}
+
+type consoleReaderStats struct {
+	lastBlock             bstream.BlockRef
+	blockRate             *dmetrics.LocalCounter
+	blockAverageParseTime *dmetrics.LocalCounter
+	transactionRate       *dmetrics.LocalCounter
+
+	cancelPeriodicLogger context.CancelFunc
+}
+
+func newConsoleReaderStats() *consoleReaderStats {
+	return &consoleReaderStats{
+		lastBlock:             bstream.BlockRefEmpty,
+		blockRate:             dmetrics.NewPerMinuteLocalRateCounter("blocks"),
+		blockAverageParseTime: dmetrics.NewAvgPerSecondLocalRateCounter("ms/block"),
+		transactionRate:       dmetrics.NewPerMinuteLocalRateCounter("trxs"),
+	}
+}
+
+func (s *consoleReaderStats) StartPeriodicLogToZap(ctx context.Context, logger *zap.Logger, logEach time.Duration) {
+	ctx, s.cancelPeriodicLogger = context.WithCancel(ctx)
+
+	go func() {
+		ticker := time.NewTicker(logEach)
+		for {
+			select {
+			case <-ticker.C:
+				logger.Info("mindreader read statistics", s.ZapFields()...)
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+}
+
+func (s *consoleReaderStats) StopPeriodicLogToZap() {
+	if s.cancelPeriodicLogger != nil {
+		s.cancelPeriodicLogger()
+	}
+}
+
+func (s *consoleReaderStats) ZapFields() []zap.Field {
+	return []zap.Field{
+		zap.String("block_rate", s.blockRate.String()),
+		zap.String("trx_rate", s.transactionRate.String()),
+		zap.String("last_block", s.lastBlock.String()),
+		zap.String("block_average_parse_time", s.blockAverageParseTime.String()),
+	}
 }
 
 type parsingStats struct {
@@ -84,7 +143,7 @@ func newParsingStats(logger *zap.Logger, block uint64) *parsingStats {
 }
 
 func (s *parsingStats) log() {
-	s.logger.Info("mindreader block stats",
+	s.logger.Debug("mindreader block stats",
 		zap.Uint64("block_num", s.blockNum),
 		zap.Int64("duration", int64(time.Since(s.startAt))),
 		zap.Reflect("stats", s.data),
@@ -114,11 +173,9 @@ type parseCtx struct {
 	evmCallStackIndexes []int32
 
 	blockStoreURL string
-	stats         *parsingStats
 
-	dmVersion   string
-	nodeVersion string
-	nodeVariant string
+	stats       *parsingStats
+	globalStats *consoleReaderStats
 
 	logger *zap.Logger
 }
@@ -844,13 +901,20 @@ func (ctx *parseCtx) readInit(line string) error {
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
-	ctx.dmVersion = chunks[0]
-	ctx.nodeVariant = chunks[1]
-	ctx.nodeVersion = chunks[2]
 
-	if !strings.HasPrefix(ctx.dmVersion, "2.") {
-		return fmt.Errorf("deepmind major version is unsupported (expected: 2.x, found %s)", ctx.dmVersion)
+	dmVersion := chunks[0]
+	nodeVariant := chunks[1]
+	nodeVersion := chunks[2]
+
+	if !strings.HasPrefix(dmVersion, "2.") {
+		return fmt.Errorf("deepmind major version is unsupported (expected: 2.x, found %s)", dmVersion)
 	}
+
+	ctx.logger.Info("read firehose instrumentation init line",
+		zap.String("dm_version", dmVersion),
+		zap.String("node_variant", nodeVariant),
+		zap.String("node_version", nodeVersion),
+	)
 
 	return nil
 }
@@ -984,12 +1048,19 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 
 	ctx.currentBlock.TransactionTraces = ctx.transactionTraces
 
+	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
+	ctx.globalStats.blockRate.Inc()
+	ctx.globalStats.blockAverageParseTime.IncByElapsedTime(ctx.stats.startAt)
+	ctx.globalStats.transactionRate.IncBy(int64(len(ctx.transactionTraces)))
+
 	block := ctx.currentBlock
 	ctx.transactionTraces = nil
 	ctx.currentBlock = nil
 	ctx.finalizing = false
 	ctx.stats.log()
+
 	types.NormalizeBlockInPlace(block)
+
 	return types.BlockFromProto(block)
 }
 

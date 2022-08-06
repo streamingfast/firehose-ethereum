@@ -1,5 +1,6 @@
 start:
   args:
+  - merger
   - mindreader-node
   flags:
     common-chain-id: 5
@@ -9,7 +10,4 @@ start:
     mindreader-node-arguments: +--goerli --http.port=9545 --ws.port=9546 --port=40303
     mindreader-node-grpc-listen-addr: :23010
     mindreader-node-manager-api-addr: :23009
-    mindreader-node-merge-and-store-directly: true
-    mindreader-node-merge-threshold-block-age: 60m
     relayer-grpc-listen-addr: :23011
-    relayer-merger-addr: :23012

@@ -10,6 +10,7 @@ require (
 	github.com/lithammer/dedent v1.1.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/manifoldco/promptui v0.8.0
+	github.com/paulbellamy/ratecounter v0.2.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
 	github.com/streamingfast/bstream v0.0.2-0.20220807143416-6b46ab6f418b
@@ -19,7 +20,7 @@ require (
 	github.com/streamingfast/dgrpc v0.0.0-20220806151929-3689cbb5ef6f
 	github.com/streamingfast/dlauncher v0.0.0-20220307153121-5674e1b64d40
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
-	github.com/streamingfast/dmetrics v0.0.0-20220307162521-2389094ab4a1
+	github.com/streamingfast/dmetrics v0.0.0-20220806045225-e942ac0de928
 	github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
 	github.com/streamingfast/firehose v0.1.1-0.20220804184723-a790c529fe15

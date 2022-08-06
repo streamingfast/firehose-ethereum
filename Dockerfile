@@ -17,4 +17,8 @@ ADD /sfeth /app/sfeth
 COPY tools/sfeth/motd_generic /etc/
 COPY tools/sfeth/99-sfeth-generic.sh /etc/profile.d/
 
+# On SSH connection, /root/.bashrc is invoked which invokes '/root/.bash_aliases' if existing,
+# so we hijack the file "execute" our specialed bash script
+RUN echo ". /etc/profile.d/99-sfeth-generic.sh" >> /root/.bash_aliases
+
 ENTRYPOINT ["/app/sfeth"]
