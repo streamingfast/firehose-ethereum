@@ -65,6 +65,7 @@ func init() {
 			cmd.Flags().Uint64("substreams-stores-save-interval", uint64(1_000), "Interval in blocks at which to save store snapshots")     // fixme
 			cmd.Flags().Uint64("substreams-output-cache-save-interval", uint64(100), "Interval in blocks at which to save store snapshots") // fixme
 			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
+			cmd.Flags().Bool("substreams-cache-disabled", false, "Disable cached output values for substreams")
 			cmd.Flags().Int("substreams-parallel-subrequest-limit", 4, "number of parallel subrequests substream can make to synchronize its stores")
 			cmd.Flags().String("substreams-client-endpoint", "", "firehose endpoint for substreams client.  if left empty, will default to this current local firehose.")
 			cmd.Flags().String("substreams-client-jwt", "", "jwt for substreams client authentication")
@@ -145,6 +146,7 @@ func init() {
 					substreamsService.WithPipelineOptions(rpcEngine),
 					substreamsService.WithStoresSaveInterval(viper.GetUint64("substreams-stores-save-interval")),
 					substreamsService.WithOutCacheSaveInterval(viper.GetUint64("substreams-output-cache-save-interval")),
+					substreamsService.WithCacheEnabled(!viper.GetBool("substreams-cache-disabled")),
 				}
 
 				if viper.GetBool("substreams-partial-mode-enabled") {

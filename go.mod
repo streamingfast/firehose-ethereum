@@ -34,7 +34,6 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220808190933-7bf947e2cc81
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.14
 	github.com/stretchr/testify v1.7.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
@@ -117,6 +116,7 @@ require (
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
+	github.com/streamingfast/substreams v0.0.18-0.20220808200927-bb33a0180c49 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tidwall/match v1.1.1 // indirect

@@ -14,3 +14,4 @@ start:
     substreams-stores-save-interval: 100
     substreams-sub-request-parallel-jobs: 5
     substreams-sub-request-block-range-size: 1000
+    substreams-cache-disabled: true
