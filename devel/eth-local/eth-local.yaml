@@ -5,7 +5,6 @@ start:
     log-to-file: false
     common-blockstream-addr:
     common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v6
-    firehose-irreversible-blocks-index-url: gs://dfuseio-global-blocks-us/eth-mainnet/irr
     firehose-block-index-url: gs://dfuseio-global-blocks-us/eth-mainnet/idx
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
