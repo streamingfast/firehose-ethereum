@@ -50,6 +50,10 @@ func init() {
 				return
 			}
 
+			if err = mkdirStorePathIfLocal(MustReplaceDataDir(sfDataDir, viper.GetString("common-forkedblocks-store-url"))); err != nil {
+				return
+			}
+
 			return nil
 		},
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
