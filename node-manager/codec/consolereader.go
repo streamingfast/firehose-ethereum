@@ -119,10 +119,10 @@ func (s *consoleReaderStats) StopPeriodicLogToZap() {
 
 func (s *consoleReaderStats) ZapFields() []zap.Field {
 	return []zap.Field{
-		zap.String("block_rate", s.blockRate.String()),
-		zap.String("trx_rate", s.transactionRate.String()),
-		zap.String("last_block", s.lastBlock.String()),
-		zap.String("block_average_parse_time", s.blockAverageParseTime.String()),
+		zap.Stringer("block_rate", s.blockRate),
+		zap.Stringer("trx_rate", s.transactionRate),
+		zap.Stringer("last_block", s.lastBlock),
+		zap.Stringer("block_average_parse_time", s.blockAverageParseTime),
 	}
 }
 
