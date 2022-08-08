@@ -4,7 +4,7 @@ start:
   flags:
     log-to-file: false
     common-blockstream-addr:
-    common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v6
+    common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v2
     firehose-block-index-url: gs://dfuseio-global-blocks-us/eth-mainnet/idx
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
