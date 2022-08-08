@@ -1,6 +1,7 @@
 package transform
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/streamingfast/eth-go"
@@ -18,6 +19,10 @@ func TestString(t *testing.T) {
 		Addresses:  [][]byte{eth.MustNewHex("0xdeadbeef")},
 		Signatures: [][]byte{eth.MustNewHex("0xbbbb")},
 	}
+	cf2 := &pbtransform.CallToFilter{
+		Addresses:  [][]byte{eth.MustNewHex("0x" + strings.Repeat("9", 100))},
+		Signatures: [][]byte{eth.MustNewHex("0xbbbb")},
+	}
 	lf1 := &pbtransform.LogFilter{
 		Addresses:       [][]byte{eth.MustNewHex("0xdeadbeef")},
 		EventSignatures: [][]byte{eth.MustNewHex("0xbbbb")},
@@ -26,10 +31,14 @@ func TestString(t *testing.T) {
 		Addresses:       [][]byte{eth.MustNewHex("0xcccc2222")},
 		EventSignatures: nil,
 	}
+	lf3 := &pbtransform.LogFilter{
+		Addresses:       [][]byte{eth.MustNewHex("0x" + strings.Repeat("9", 100))},
+		EventSignatures: nil,
+	}
 
-	c, err = newCombinedFilter([]*pbtransform.CallToFilter{cf}, []*pbtransform.LogFilter{lf1, lf2}, nil, nil)
+	c, err = newCombinedFilter([]*pbtransform.CallToFilter{cf, cf2}, []*pbtransform.LogFilter{lf1, lf2, lf3}, nil, nil)
 	require.NoError(t, err)
-	assert.Equal(t, "Combined filter: Calls:[{addrs: 0xdeadbeef, sigs: 0xbbbb}], Logs:[{addrs: 0xdeadbeef, sigs: 0xbbbb},{addrs: 0xcccc2222, sigs: }]", c.String())
+	assert.Equal(t, "Combined filter: Calls:[{addrs: 0xdeadbeef, sigs: 0xbbbb},{addrs: 0x9999999999999999999999999999999999999999999999...}], Logs:[{addrs: 0xdeadbeef, sigs: 0xbbbb},{addrs: 0xcccc2222, sigs: },{addrs: 0x999999999999999999...}]", c.String())
 }
 
 //func TestEthLogIndexProvider_WithinRange(t *testing.T) {

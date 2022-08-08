@@ -141,6 +141,13 @@ func addSigString(in AddressSignatureFilter) string {
 
 }
 
+func truncate(in string, size int, suffix string) string {
+	if len(in) < size {
+		return in
+	}
+	return in[0:size] + suffix
+}
+
 func (f *CombinedFilter) String() string {
 	callFilters := make([]string, len(f.CallToFilters))
 	for i, f := range f.CallToFilters {
@@ -151,7 +158,7 @@ func (f *CombinedFilter) String() string {
 		logFilters[i] = addSigString(f)
 	}
 
-	return fmt.Sprintf("Combined filter: Calls:[%s], Logs:[%s]", strings.Join(callFilters, ","), strings.Join(logFilters, ","))
+	return fmt.Sprintf("Combined filter: Calls:[%s], Logs:[%s]", truncate(strings.Join(callFilters, ","), 90, "...}"), truncate(strings.Join(logFilters, ","), 90, "...}"))
 }
 
 func (f *CombinedFilter) matches(trace *pbeth.TransactionTrace) bool {
