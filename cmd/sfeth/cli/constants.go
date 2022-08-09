@@ -39,6 +39,7 @@ const (
 	EVMExecutorGRPCServingAddr   string = ":13036"
 	FirehoseGRPCServingAddr      string = ":13042"
 	MergerServingAddr            string = ":13012"
+	IndexBuilderServiceAddr      string = ":13043"
 	MindreaderNodeManagerAPIAddr string = ":13009"
 	MindreaderGRPCAddr           string = ":13010"
 	NodeManagerAPIAddr           string = ":13041"

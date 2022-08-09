@@ -23,7 +23,7 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
 	github.com/streamingfast/firehose v0.1.1-0.20220804184723-a790c529fe15
-	github.com/streamingfast/index-builder v0.0.0-20220803183104-a4e268586503
+	github.com/streamingfast/index-builder v0.0.0-20220809172405-a5eae6839e08
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
 	github.com/streamingfast/merger v0.0.3-0.20220803202246-1277c51d3487
@@ -34,6 +34,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220808190933-7bf947e2cc81
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
+	github.com/streamingfast/substreams v0.0.18-0.20220808202002-69dbbd933903
 	github.com/stretchr/testify v1.7.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
@@ -116,7 +117,6 @@ require (
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
-	github.com/streamingfast/substreams v0.0.18-0.20220808202002-69dbbd933903 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tidwall/match v1.1.1 // indirect

@@ -26,6 +26,7 @@ func init() {
 			cmd.Flags().String("combined-index-builder-index-store-url", "", "url of the index store")
 			cmd.Flags().Uint64("combined-index-builder-start-block", 0, "block number to start indexing")
 			cmd.Flags().Uint64("combined-index-builder-stop-block", 0, "block number to stop indexing")
+			cmd.Flags().String("combined-index-grpc-listen-addr", IndexBuilderServiceAddr, "Address to listen for incoming gRPC requests")
 			return nil
 		},
 		InitFunc: func(runtime *launcher.Runtime) error {
@@ -81,6 +82,7 @@ func init() {
 				StartBlockResolver: startBlockResolver,
 				EndBlock:           stopBlockNum,
 				BlockStorePath:     blockStoreURL,
+				GRPCListenAddr:     viper.GetString("combined-index-grpc-listen-addr"),
 			})
 
 			return app, nil

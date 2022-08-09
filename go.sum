@@ -585,10 +585,7 @@ github.com/streamingfast/bstream v0.0.2-0.20220718122956-ac9279114d50/go.mod h1:
 github.com/streamingfast/bstream v0.0.2-0.20220726185619-d6283d1f1aea/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/bstream v0.0.2-0.20220802184829-1af251c95389/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/bstream v0.0.2-0.20220802193619-563b96c53fda/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
-github.com/streamingfast/bstream v0.0.2-0.20220807143416-6b46ab6f418b h1:lnuUJRzN/dweOdLY2kRRXYCoBYjTrmaIyk3ofmF3WtI=
 github.com/streamingfast/bstream v0.0.2-0.20220807143416-6b46ab6f418b/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
-github.com/streamingfast/bstream v0.0.2-0.20220809133537-31a97b218d79 h1:z7n9fNlbpSjQp/azCQ1Yjs4TZQSteNeLU3+YosotJsM=
-github.com/streamingfast/bstream v0.0.2-0.20220809133537-31a97b218d79/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/bstream v0.0.2-0.20220809161028-014a633a8d8e h1:BUOWE69OllDTPF90H1Pmtf0PAAqoPLuTbedHj1B2WCU=
 github.com/streamingfast/bstream v0.0.2-0.20220809161028-014a633a8d8e/go.mod h1:dMhUgTdaY+3F+weWsiLo5bNkoUxZbAhdwtCauYDLjEQ=
 github.com/streamingfast/cli v0.0.4-0.20220113202443-f7bcefa38f7e h1:RNQiFMOloBPAMA5PCwShiOoMQ1FeKsVJXcwo9Lq0iHI=
@@ -625,8 +622,8 @@ github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8/go.mod h1:70Q
 github.com/streamingfast/firehose v0.1.1-0.20220629203325-f7498b95673d/go.mod h1:FR5VZzPMTFS7xeIiP2KyZ3DN859UcQljRbskaTmoLpg=
 github.com/streamingfast/firehose v0.1.1-0.20220804184723-a790c529fe15 h1:j/AELjGx05XH2JOrvDOm0AWH0joLXvwVRXwX7hUufjk=
 github.com/streamingfast/firehose v0.1.1-0.20220804184723-a790c529fe15/go.mod h1:OGb8noKOMRrx3kOqZCfSVowr9lVyaUtvovDDH0Rl470=
-github.com/streamingfast/index-builder v0.0.0-20220803183104-a4e268586503 h1:/8A5s1LoLDXq5Lwf6YeZMMNJZaAhktUp3AuWtMBix1s=
-github.com/streamingfast/index-builder v0.0.0-20220803183104-a4e268586503/go.mod h1:7o8qQwgojm/95YCz6ka49on5revPiMUjvcXltZ3D/zI=
+github.com/streamingfast/index-builder v0.0.0-20220809172405-a5eae6839e08 h1:rmjscV1rRp0V+plnQXEpy2kCo6X4avOzMRTdV5kHWg0=
+github.com/streamingfast/index-builder v0.0.0-20220809172405-a5eae6839e08/go.mod h1:7o8qQwgojm/95YCz6ka49on5revPiMUjvcXltZ3D/zI=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTNObq2Uofb330y05JbbZZ6RwE6QUXw5iVcHk1Fx3fk=
 github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
@@ -659,12 +656,6 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.14-0.20220805173232-d21299f70a64 h1:eFKQYpnwZJ/hvoZyDzrwyCu8yhwKG5KFI/VFG0Yf0tM=
-github.com/streamingfast/substreams v0.0.14-0.20220805173232-d21299f70a64/go.mod h1:ntdGx86QptEWpuepbNinBeBHeBZP6YmM2Ivy+amFcyo=
-github.com/streamingfast/substreams v0.0.14 h1:xrKULwWDe3QWU6D1ZPPQhuA6wycT5DSKzrBPTjU32Lw=
-github.com/streamingfast/substreams v0.0.14/go.mod h1:Gz8irvG/lDo1dPlhUPA0l5iVsZoPOU6Zm6KxmGrdNjc=
-github.com/streamingfast/substreams v0.0.18-0.20220808200927-bb33a0180c49 h1:pO8wW6pmgOxTROT/fjQabzJu+l1xrJ9o+pz5VSmkgU0=
-github.com/streamingfast/substreams v0.0.18-0.20220808200927-bb33a0180c49/go.mod h1:ECIdvjuj+7T48+zDx3Rnh4lADtt+Dfh6FELovaqDCHM=
 github.com/streamingfast/substreams v0.0.18-0.20220808202002-69dbbd933903 h1:5wsIaz10BZeQodFqDRYEMoX2MtXWVxEim/+Ep7RSIf8=
 github.com/streamingfast/substreams v0.0.18-0.20220808202002-69dbbd933903/go.mod h1:ECIdvjuj+7T48+zDx3Rnh4lADtt+Dfh6FELovaqDCHM=
 github.com/streamingfast/wasmer-go v1.0.5-0.20220512181019-cd8b01df1543 h1:6VupAkDznB829Xse6I50ZMubDETCPa7u5iMoyUlJRSw=
