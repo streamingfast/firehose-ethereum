@@ -23,7 +23,6 @@ func init() {
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().Uint64("combined-index-builder-index-size", 10000, "size of combined index bundles that will be created")
 			cmd.Flags().IntSlice("combined-index-builder-lookup-index-sizes", []int{1000000, 100000, 10000, 1000}, "index bundle sizes that we will look for on start to find first unindexed block")
-			cmd.Flags().String("combined-index-builder-index-store-url", "", "url of the index store")
 			cmd.Flags().Uint64("combined-index-builder-start-block", 0, "block number to start indexing")
 			cmd.Flags().Uint64("combined-index-builder-stop-block", 0, "block number to stop indexing")
 			cmd.Flags().String("combined-index-builder-grpc-listen-addr", IndexBuilderServiceAddr, "Address to listen for incoming gRPC requests")
@@ -35,7 +34,7 @@ func init() {
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			sfDataDir := runtime.AbsDataDir
 
-			indexStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("combined-index-builder-index-store-url"))
+			indexStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-index-store-url"))
 			blockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
 
 			indexStore, err := dstore.NewStore(indexStoreURL, "", "", false)

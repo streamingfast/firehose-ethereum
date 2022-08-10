@@ -28,6 +28,7 @@ const (
 	OneBlockStoreURL     string = "file://{sf-data-dir}/storage/one-blocks"
 	ForkedBlocksStoreURL string = "file://{sf-data-dir}/storage/forked-blocks"
 	MergedBlocksStoreURL string = "file://{sf-data-dir}/storage/merged-blocks"
+	IndexStoreURL        string = "file://{sf-data-dir}/storage/index"
 	SnapshotsURL         string = "file://{sf-data-dir}/storage/snapshots"
 	StateDBDSN           string = "badger://{sf-data-dir}/storage/statedb"
 

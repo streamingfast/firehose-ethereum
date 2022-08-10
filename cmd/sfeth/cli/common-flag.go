@@ -32,6 +32,7 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().String("common-blocks-store-url", MergedBlocksStoreURL, "[COMMON] Store URL (with prefix) where to read/write merged blocks.")
 	cmd.Flags().String("common-oneblock-store-url", OneBlockStoreURL, "[COMMON] Store URL (with prefix) to read/write one-block files.")
 	cmd.Flags().String("common-forkedblocks-store-url", ForkedBlocksStoreURL, "[COMMON] Store URL (with prefix) to read/write forked block files that we want to keep")
+	cmd.Flags().String("common-index-store-url", IndexStoreURL, "[COMMON] Store URL (with prefix) to read/write index files.")
 	cmd.Flags().String("common-blockstream-addr", RelayerServingAddr, "[COMMON] gRPC endpoint to get real-time blocks.")
 
 	cmd.Flags().Bool("common-blocks-cache-enabled", false, FlagDescription(`

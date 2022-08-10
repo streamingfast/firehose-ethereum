@@ -5,6 +5,7 @@ start:
   - mindreader-node
   - node
   - relayer
+  - combined-index-builder
   flags:
     node-role: dev-miner
     node-bootstrap-data-url: ./miner/bootstrap.tar.zst
