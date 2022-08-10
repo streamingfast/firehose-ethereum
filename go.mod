@@ -26,7 +26,7 @@ require (
 	github.com/streamingfast/index-builder v0.0.0-20220810183227-6de1a5d962c7
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
-	github.com/streamingfast/merger v0.0.3-0.20220803202246-1277c51d3487
+	github.com/streamingfast/merger v0.0.3-0.20220810200312-347dc7cc5e9a
 	github.com/streamingfast/node-manager v0.0.2-0.20220728184759-72d699d3450f
 	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
 	github.com/streamingfast/relayer v0.0.2-0.20220802193804-8c63614023a9
