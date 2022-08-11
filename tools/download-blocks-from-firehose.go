@@ -54,7 +54,7 @@ func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {
 	if mustGetBool(cmd, "fix-ordinals") {
 		fixerFunc = func(in *bstream.Block) (*bstream.Block, error) {
 			block := in.ToProtocol().(*pbeth.Block)
-			types.NormalizeBlockInPlace(block)
+			block.NormalizeInPlace()
 			return types.BlockFromProto(block)
 		}
 	}

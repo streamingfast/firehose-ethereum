@@ -472,8 +472,8 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 		Hash:                 hash,
 		Value:                value,
 		V:                    v,
-		R:                    types.NormalizeSignaturePoint(r),
-		S:                    types.NormalizeSignaturePoint(s),
+		R:                    pbeth.NormalizeSignaturePoint(r),
+		S:                    pbeth.NormalizeSignaturePoint(s),
 		GasLimit:             gas,
 		GasPrice:             gasPrice,
 		Nonce:                nonce,
@@ -1059,7 +1059,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	ctx.finalizing = false
 	ctx.stats.log()
 
-	types.NormalizeBlockInPlace(block)
+	block.NormalizeInPlace()
 
 	return types.BlockFromProto(block)
 }
