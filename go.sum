@@ -655,6 +655,8 @@ github.com/streamingfast/sf-ethereum/types v0.0.0-20220811162230-38585d7d8f40 h1
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220811162230-38585d7d8f40/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-tools v0.0.0-20220808190933-7bf947e2cc81 h1:KJPEDRZYlizSgpzkw+4PHzlCYWGYwPW6xmurm8/iimE=
 github.com/streamingfast/sf-tools v0.0.0-20220808190933-7bf947e2cc81/go.mod h1:IK3diyADf5yhBl0JecFZRdOVbXKleVzAhje3Eag8+2w=
+github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46 h1:up80oljMQVr+uspMmmxGNcMaUShf6MObJ6Zjfvx9ick=
+github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46/go.mod h1:IK3diyADf5yhBl0JecFZRdOVbXKleVzAhje3Eag8+2w=
 github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAtyaTOgs=
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
