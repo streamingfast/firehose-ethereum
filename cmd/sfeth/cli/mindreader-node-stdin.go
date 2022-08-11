@@ -52,7 +52,8 @@ func init() {
 			metricID := "mindreader-geth-node-stdin"
 			headBlockTimeDrift := metrics.NewHeadBlockTimeDrift(metricID)
 			headBlockNumber := metrics.NewHeadBlockNumber(metricID)
-			metricsAndReadinessManager := nodeManager.NewMetricsAndReadinessManager(headBlockTimeDrift, headBlockNumber, viper.GetDuration("mindreader-geth-node-readiness-max-latency"))
+			appReadiness := metrics.NewAppReadiness(metricID)
+			metricsAndReadinessManager := nodeManager.NewMetricsAndReadinessManager(headBlockTimeDrift, headBlockNumber, appReadiness, viper.GetDuration("mindreader-geth-node-readiness-max-latency"))
 
 			return nodeMindreaderStdinApp.New(&nodeMindreaderStdinApp.Config{
 				GRPCAddr:                   viper.GetString("mindreader-geth-node-grpc-listen-addr"),

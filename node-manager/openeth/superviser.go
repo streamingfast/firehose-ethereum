@@ -34,7 +34,6 @@ import (
 	"github.com/ShinyTrinkets/overseer"
 	nodeManager "github.com/streamingfast/node-manager"
 	logplugin "github.com/streamingfast/node-manager/log_plugin"
-	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/superviser"
 	nodemanager "github.com/streamingfast/sf-ethereum/node-manager"
 	"github.com/tidwall/gjson"
@@ -128,18 +127,6 @@ func (s *Superviser) GetCommand() string {
 func (s *Superviser) HasData() bool {
 	_, err := os.Stat(s.chaindataDir)
 	return err == nil
-}
-
-func (s *Superviser) IsRunning() bool {
-	isRunning := s.Superviser.IsRunning()
-	isRunningMetricsValue := float64(0)
-	if isRunning {
-		isRunningMetricsValue = float64(1)
-	}
-
-	metrics.NodeosCurrentStatus.SetFloat64(isRunningMetricsValue)
-
-	return isRunning
 }
 
 func (s *Superviser) LastSeenBlockNum() uint64 {

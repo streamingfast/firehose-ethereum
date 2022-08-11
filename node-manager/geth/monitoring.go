@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/streamingfast/bstream"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )
@@ -74,7 +75,11 @@ func (s *Superviser) Monitor() {
 			timestamp := time.Unix(hex2int(gjson.Get(resp, "result.timestamp").String()), 0)
 			hash := hex2string(gjson.Get(resp, "result.hash").String())
 
-			s.headBlockUpdateFunc(uint64(lastBlockNum), hash, timestamp)
+			s.headBlockUpdateFunc(&bstream.Block{
+				Id:        hash,
+				Number:    uint64(lastBlockNum),
+				Timestamp: timestamp,
+			})
 		}
 
 	}
