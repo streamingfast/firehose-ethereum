@@ -17,6 +17,7 @@ for instructions to keep up to date.
 
 * Because of the changes in the ethereum block protocol, an existing deployment cannot be migrated in-place.
 * sf-ethereum v1.0.0 must be deployed to a new environment from block 0, under a new URL (or behind a GRPC load-balancer that routes `/sf.firehose.v2.Stream/*` and `/sf.firehose.v1.Stream/*` to your different versions.
+* a compatibility layer has been added so that `sf.firehose.v1.Stream` is also exposed, but only for specific values for 'ForkSteps' (either 'irreversible' or 'new+undo')
 
 ### DETAILED CHANGES
 
@@ -45,10 +46,10 @@ for instructions to keep up to date.
 * Default verbosity is to show all loggers as `INFO` level (previously only loggers whose app's name was `sfeth` were at `INFO` by default). `-v` will now activate `DEBUG` logs.
 * All logs now output on *stderr* instead of *stdout* like previously
 
-#### "Combined" call+log indexes
+#### "Combined" call+log indexes as new app 'combined-index-builder'
 
 * Deprecated the "Call" and "log" indexes, now replaced by "combined" index
-  * Generate new indices like this: `sfeth tools generate-combined-index --combined-indexes-size=1000 <src-blocks-url> <dest-index-url> <irreversible-index-url> <start-block> [stop-block]`
+  * Generate new indices like this: `sfeth start generate-combined-index --common-blocks-store-url=/path/to/blocks --common-index-store-url=/path/to/index --combined-index-builder-index-size=10000 --combined-index-builder-start-block=0 [--combined-index-builder-stop-block=10000] --combined-index-builder-grpc-listen-addr=:9000`
   * Delete previous indices named `xxxxxxxxxx.yyy.calladdrsig.idx` and `xxxxxxxxxx.yyy.logaddrsig.idx`
 * There is no more need for an irreversible index, because the merged-blocks only contain final blocks now.
 
@@ -67,6 +68,7 @@ for instructions to keep up to date.
 * Note to other Firehose implementors: we changed all command line flags to fit the required/optional format referred to here: https://en.wikipedia.org/wiki/Usage_message
 * Removed merger 'state file' (and `merger-state-file` flag) -- merger now finds where it should merge based on `common-first-streamable-block` and existing merged files...
 * Removed `merger-next-exclusive-highest-block-limit`, it will now ONLY base its decision based on `common-first-streamable-block`, up to the last found merged block
+* Added prometheus boolean metric to all apps called 'ready' with label 'app' (firehose, merger, mindreader-node, node, relayer, combined-index-builder)
 
 ## v0.10.2
 

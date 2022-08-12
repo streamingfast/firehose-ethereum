@@ -52,9 +52,6 @@ func init() {
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
 
-			cmd.Flags().String("firehose-block-index-url", "", "If non-empty, will use this URL as a store to load index data used by some transforms")
-			cmd.Flags().IntSlice("firehose-block-index-sizes", []int{100000, 10000, 1000, 100}, "list of sizes for block indices")
-
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
@@ -75,7 +72,6 @@ func init() {
 		},
 
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
-			sfDataDir := runtime.AbsDataDir
 			blockstreamAddr := viper.GetString("common-blockstream-addr")
 
 			// FIXME: That should be a shared dependencies across `Ethereum on StreamingFast`
@@ -91,26 +87,13 @@ func init() {
 			}
 			dmetering.SetDefaultMeter(metering)
 
-			mergedBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
-			oneBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
-			forkedBlocksStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-forkedblocks-store-url"))
-
-			indexStoreUrl := viper.GetString("firehose-block-index-url")
-			var indexStore dstore.Store
-			if indexStoreUrl != "" {
-				s, err := dstore.NewStore(indexStoreUrl, "", "", false)
-				if err != nil {
-					return nil, fmt.Errorf("couldn't create indexStore: %w", err)
-				}
-				indexStore = s
+			mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL, err := GetCommonStoresURLs(runtime.AbsDataDir)
+			if err != nil {
+				return nil, err
 			}
-
-			var possibleIndexSizes []uint64
-			for _, size := range viper.GetIntSlice("firehose-block-index-sizes") {
-				if size < 0 {
-					return nil, fmt.Errorf("invalid negative size for firehose-block-index-sizes: %d", size)
-				}
-				possibleIndexSizes = append(possibleIndexSizes, uint64(size))
+			indexStore, possibleIndexSizes, err := GetIndexStore(runtime.AbsDataDir)
+			if err != nil {
+				return nil, fmt.Errorf("unable to initialize indexes: %w", err)
 			}
 
 			endpoints := viper.GetStringSlice("substreams-rpc-endpoints")
@@ -118,6 +101,7 @@ func init() {
 				endpoints[i] = os.ExpandEnv(endpoint)
 			}
 
+			sfDataDir := runtime.AbsDataDir
 			var registerServiceExt firehoseApp.RegisterServiceExtensionFunc
 			if viper.GetBool("substreams-enabled") {
 				rpcEngine, err := ethss.NewRPCEngine(

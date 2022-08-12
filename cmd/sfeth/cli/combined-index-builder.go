@@ -2,14 +2,12 @@ package cli
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
 	bstransform "github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dlauncher/launcher"
-	"github.com/streamingfast/dstore"
 	indexerApp "github.com/streamingfast/index-builder/app/index-builder"
 	"github.com/streamingfast/sf-ethereum/transform"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
@@ -22,33 +20,24 @@ func init() {
 		Description: "Produces a combined index for a given set of blocks",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().Uint64("combined-index-builder-index-size", 10000, "size of combined index bundles that will be created")
-			cmd.Flags().IntSlice("combined-index-builder-lookup-index-sizes", []int{1000000, 100000, 10000, 1000}, "index bundle sizes that we will look for on start to find first unindexed block")
 			cmd.Flags().Uint64("combined-index-builder-start-block", 0, "block number to start indexing")
 			cmd.Flags().Uint64("combined-index-builder-stop-block", 0, "block number to stop indexing")
-			cmd.Flags().String("combined-index-builder-grpc-listen-addr", IndexBuilderServiceAddr, "Address to listen for incoming gRPC requests")
+			cmd.Flags().String("combined-index-builder-grpc-listen-addr", IndexBuilderServiceAddr, "Address to listen for grpc-based healthz check")
 			return nil
 		},
 		InitFunc: func(runtime *launcher.Runtime) error {
 			return nil
 		},
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
-			sfDataDir := runtime.AbsDataDir
 
-			indexStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-index-store-url"))
-			blockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))
-
-			indexStore, err := dstore.NewStore(indexStoreURL, "", "", false)
+			mergedBlocksStoreURL, _, _, err := GetCommonStoresURLs(runtime.AbsDataDir)
 			if err != nil {
 				return nil, err
 			}
 
-			var lookupIdxSizes []uint64
-			lookupIndexSizes := viper.GetIntSlice("combined-index-builder-lookup-index-sizes")
-			for _, size := range lookupIndexSizes {
-				if size < 0 {
-					return nil, fmt.Errorf("invalid negative size for bundle-sizes: %d", size)
-				}
-				lookupIdxSizes = append(lookupIdxSizes, uint64(size))
+			indexStore, lookupIdxSizes, err := GetIndexStore(runtime.AbsDataDir)
+			if err != nil {
+				return nil, err
 			}
 
 			startBlockResolver := func(ctx context.Context) (uint64, error) {
@@ -80,7 +69,7 @@ func init() {
 				BlockHandler:       handler,
 				StartBlockResolver: startBlockResolver,
 				EndBlock:           stopBlockNum,
-				BlockStorePath:     blockStoreURL,
+				BlockStorePath:     mergedBlocksStoreURL,
 				GRPCListenAddr:     viper.GetString("combined-index-builder-grpc-listen-addr"),
 			})
 

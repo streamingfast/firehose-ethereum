@@ -35,6 +35,7 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().String("common-index-store-url", IndexStoreURL, "[COMMON] Store URL (with prefix) to read/write index files.")
 	cmd.Flags().String("common-blockstream-addr", RelayerServingAddr, "[COMMON] gRPC endpoint to get real-time blocks.")
 
+	cmd.Flags().IntSlice("common-block-index-sizes", []int{100000, 100000, 10000, 1000}, "index bundle sizes that that are considered valid when looking for block indexes")
 	cmd.Flags().Bool("common-blocks-cache-enabled", false, FlagDescription(`
 				[COMMON] Use a disk cache to store the blocks data to disk and instead of keeping it in RAM. By enabling this, block's Protobuf content, in bytes,
 				is kept on file system instead of RAM. This is done as soon the block is downloaded from storage. This is a tradeoff between RAM and Disk, if you

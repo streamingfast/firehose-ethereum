@@ -177,7 +177,10 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			}, appLogger), nil
 		} else {
 			GRPCAddr := viper.GetString("mindreader-node-grpc-listen-addr")
-			oneBlockStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
+			_, oneBlocksStoreURL, _, err := GetCommonStoresURLs(runtime.AbsDataDir)
+			if err != nil {
+				return nil, err
+			}
 			workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-node-working-dir"))
 			batchStopBlockNum := viper.GetUint64("mindreader-node-stop-block-num")
 			oneBlockFileSuffix := viper.GetString("mindreader-node-oneblock-suffix")
@@ -185,7 +188,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			gs := dgrpc.NewServer(dgrpc.WithLogger(appLogger))
 
 			mindreaderPlugin, err := getMindreaderLogPlugin(
-				oneBlockStoreURL,
+				oneBlocksStoreURL,
 				workingDir,
 				bstream.GetProtocolFirstStreamableBlock,
 				batchStopBlockNum,

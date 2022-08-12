@@ -36,32 +36,18 @@ func init() {
 			cmd.Flags().Uint64("merger-stop-block", 0, "if non-zero, merger will trigger shutdown when blocks have been merged up to this block")
 			return nil
 		},
-		// FIXME: Lots of config value construction is duplicated across InitFunc and FactoryFunc, how to streamline that
-		//        and avoid the duplication? Note that this duplicate happens in many other apps, we might need to re-think our
-		//        init flow and call init after the factory and giving it the instantiated app...
 		InitFunc: func(runtime *launcher.Runtime) (err error) {
-			sfDataDir := runtime.AbsDataDir
-
-			if err = mkdirStorePathIfLocal(MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url"))); err != nil {
-				return
-			}
-
-			if err = mkdirStorePathIfLocal(MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))); err != nil {
-				return
-			}
-
-			if err = mkdirStorePathIfLocal(MustReplaceDataDir(sfDataDir, viper.GetString("common-forkedblocks-store-url"))); err != nil {
-				return
-			}
-
 			return nil
 		},
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
-			sfDataDir := runtime.AbsDataDir
+			mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL, err := GetCommonStoresURLs(runtime.AbsDataDir)
+			if err != nil {
+				return nil, err
+			}
 			return mergerApp.New(&mergerApp.Config{
-				StorageOneBlockFilesPath:     MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url")),
-				StorageMergedBlocksFilesPath: MustReplaceDataDir(sfDataDir, viper.GetString("common-blocks-store-url")),
-				StorageForkedBlocksFilesPath: MustReplaceDataDir(sfDataDir, viper.GetString("common-forkedblocks-store-url")),
+				StorageOneBlockFilesPath:     oneBlocksStoreURL,
+				StorageMergedBlocksFilesPath: mergedBlocksStoreURL,
+				StorageForkedBlocksFilesPath: forkedBlocksStoreURL,
 				GRPCListenAddr:               viper.GetString("merger-grpc-listen-addr"),
 				PruneForkedBlocksAfter:       viper.GetUint64("merger-prune-forked-blocks-after"),
 				StopBlock:                    viper.GetUint64("merger-stop-block"),
