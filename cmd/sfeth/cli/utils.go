@@ -67,7 +67,7 @@ func GetCommonStoresURLs(dataDir string) (mergedBlocksStoreURL, oneBlocksStoreUR
 }
 
 func GetIndexStore(dataDir string) (indexStore dstore.Store, possibleIndexSizes []uint64, err error) {
-	indexStoreURL := viper.GetString("common-index-store-url")
+	indexStoreURL := MustReplaceDataDir(dataDir, viper.GetString("common-index-store-url"))
 
 	if indexStoreURL != "" {
 		s, err := dstore.NewStore(indexStoreURL, "", "", false)

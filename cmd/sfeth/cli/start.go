@@ -93,10 +93,16 @@ func Start(dataDir string, args []string) (err error) {
 
 	launch := launcher.NewLauncher(zlog, modules)
 	zlog.Debug("launcher created")
-	runByDefault := func(app string) bool { return true }
+	runByDefault := func(app string) bool {
+		switch app {
+		case "mindreader-node-stdin":
+			return false
+		}
+		return true
+	}
 
 	apps := launcher.ParseAppsFromArgs(args, runByDefault)
-	if len(args) == 0 {
+	if len(args) == 0 && launcher.Config["start"] != nil {
 		apps = launcher.ParseAppsFromArgs(launcher.Config["start"].Args, runByDefault)
 	}
 	zlog.Info(fmt.Sprintf("launching applications: %s", strings.Join(apps, ",")))
