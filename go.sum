@@ -653,6 +653,8 @@ github.com/streamingfast/relayer v0.0.2-0.20220811185139-02ee222c9277 h1:9Nfgg45
 github.com/streamingfast/relayer v0.0.2-0.20220811185139-02ee222c9277/go.mod h1:0cDXJdtPkm2fuMmbj5bdUz59dexgJZKKKxooO4EgF5o=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220811162230-38585d7d8f40 h1:1j2LffZ5ZqWnK/+y+uq4mqh7zgixDGBjsWjNPUhRD6w=
 github.com/streamingfast/sf-ethereum/types v0.0.0-20220811162230-38585d7d8f40/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
+github.com/streamingfast/sf-ethereum/types v0.0.0-20220816033344-65b085b633bc h1:xcwk/YB9LbnnxgmDk/yXyYjUV8QuC5jh0SI/KM/Z3nE=
+github.com/streamingfast/sf-ethereum/types v0.0.0-20220816033344-65b085b633bc/go.mod h1:/rhbE8VBSZc1zvajcSXTHZ4w0uuiHkDc68HMowNS8T8=
 github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46 h1:up80oljMQVr+uspMmmxGNcMaUShf6MObJ6Zjfvx9ick=
 github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46/go.mod h1:IK3diyADf5yhBl0JecFZRdOVbXKleVzAhje3Eag8+2w=
 github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAtyaTOgs=
