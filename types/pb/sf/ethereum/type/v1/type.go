@@ -91,6 +91,13 @@ func (b *Block) LIBNum() uint64 {
 		return bstream.GetProtocolFirstStreamableBlock
 	}
 
+	// If network transitionned to Proof of Stake, then this value will be set
+	// to a valid value and it means final blocks is now a thing and we can rely
+	// on the `FinalizedBlockNumber` field.
+	if len(b.FinalizedBlockHash) > 0 {
+		return b.FinalizedBlockNumber
+	}
+
 	return b.Number - 200
 }
 
