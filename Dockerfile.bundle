@@ -6,6 +6,5 @@ FROM ghcr.io/streamingfast/sf-ethereum:$SF_VERSION
 
 COPY --from=chain /app/geth /app/geth
 
-COPY tools/sfeth/motd_node_manager /etc/
-COPY tools/sfeth/99-sfeth-node-manager.sh /etc/profile.d/
+COPY tools/sfeth/motd_node_manager /etc/motd
 COPY tools/sfeth/scripts/. /usr/local/bin/

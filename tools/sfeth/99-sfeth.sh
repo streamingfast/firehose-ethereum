@@ -4,4 +4,4 @@
 # connect on the box.
 export PATH=$PATH:/app
 
-cat /etc/motd_node_manager
+cat /etc/motd

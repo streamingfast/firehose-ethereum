@@ -14,11 +14,13 @@ RUN mkdir /tmp/wasmer-install && cd /tmp/wasmer-install && \
 
 ADD /sfeth /app/sfeth
 
-COPY tools/sfeth/motd_generic /etc/
-COPY tools/sfeth/99-sfeth-generic.sh /etc/profile.d/
+COPY tools/sfeth/motd_generic /etc/motd
+COPY tools/sfeth/99-sfeth.sh /etc/profile.d/
 
 # On SSH connection, /root/.bashrc is invoked which invokes '/root/.bash_aliases' if existing,
-# so we hijack the file "execute" our specialed bash script
-RUN echo ". /etc/profile.d/99-sfeth-generic.sh" >> /root/.bash_aliases
+# so we hijack the file to "execute" our specialized bash script
+RUN echo ". /etc/profile.d/99-sfeth.sh" > /root/.bash_aliases
+
+ENV PATH "$PATH:/app"
 
 ENTRYPOINT ["/app/sfeth"]
