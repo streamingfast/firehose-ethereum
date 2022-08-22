@@ -27,20 +27,6 @@ message Block {
   reserved 40; // bool filtering_applied = 40 [deprecated = true];
   reserved 41; // string filtering_include_filter_expr = 41 [deprecated = true];
   reserved 42; // string filtering_exclude_filter_expr = 42 [deprecated = true];
-
-  // FinalizedBlockNumber represents the most recent finalized block number that was
-  // present when this block was created.
-  //
-  // This field is populated only if the Ethereum network this block was produced
-  // on has transitioned to Proof of Stake consensus algorithm.
-  uint64 finalized_block_number = 43;
-
-  // FinalizedBlockHash represents the most recent finalized block hash that was
-  // present when this block was created.
-  //
-  // This field is populated only if the Ethereum network this block was produced
-  // on has transitioned to Proof of Stake consensus algorithm.
-  bytes finalized_block_hash = 44;
 }
 
 // HeaderOnlyBlock is used to optimally unpack the [Block] structure (note the
