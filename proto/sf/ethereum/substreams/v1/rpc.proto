@@ -10,7 +10,7 @@ message RpcCalls {
 
 message RpcCall {
   bytes to_addr = 1;
-  bytes method_signature = 2;
+  bytes data = 2;
 }
 
 message RpcResponses {
