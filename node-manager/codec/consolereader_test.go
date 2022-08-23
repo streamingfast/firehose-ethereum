@@ -31,7 +31,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/test-go/testify/assert"
 )

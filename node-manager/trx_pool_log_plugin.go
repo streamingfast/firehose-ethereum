@@ -22,7 +22,7 @@ import (
 	"github.com/streamingfast/sf-ethereum/node-manager/codec"
 	"github.com/streamingfast/sf-ethereum/node-manager/trxstream"
 	pbtrxstream "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/trxstream/v1"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/shutter"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

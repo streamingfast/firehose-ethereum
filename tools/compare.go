@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 )
 
 var compareBlocksCmd = &cobra.Command{

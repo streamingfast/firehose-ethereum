@@ -30,7 +30,7 @@ import (
 	"github.com/streamingfast/dmetrics"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
 )
 

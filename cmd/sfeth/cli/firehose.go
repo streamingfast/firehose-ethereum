@@ -146,7 +146,7 @@ func init() {
 
 				sss := substreamsService.New(
 					stateStore,
-					"sf.ethereum.type.v1.Block",
+					"sf.ethereum.type.v2.Block",
 					ssClientFactory,
 					viper.GetInt("substreams-sub-request-parallel-jobs"),
 					viper.GetInt("substreams-sub-request-block-range-size"),

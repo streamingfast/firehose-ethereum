@@ -19,7 +19,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 	sftools "github.com/streamingfast/sf-tools"
 )
 

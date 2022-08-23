@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

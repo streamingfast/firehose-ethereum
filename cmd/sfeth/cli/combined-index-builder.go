@@ -10,7 +10,7 @@ import (
 	"github.com/streamingfast/dlauncher/launcher"
 	indexerApp "github.com/streamingfast/index-builder/app/index-builder"
 	"github.com/streamingfast/sf-ethereum/transform"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1"
+	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 )
 
 func init() {
