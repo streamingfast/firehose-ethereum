@@ -1,3 +1,3 @@
-generate.sh - Mon Aug 22 13:09:18 EDT 2022 - maoueh
+generate.sh - Tue Aug 23 11:39:04 EDT 2022 - maoueh
 streamingfast/proto revision: 45b710949c29447279a2ad27b1c17e2546a70f6b
-streamingfast/sf-ethereum/proto revision: 3c7446c
+streamingfast/sf-ethereum/proto revision: 45f5c96

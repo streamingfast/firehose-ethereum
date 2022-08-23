@@ -6,8 +6,12 @@ for instructions to keep up to date.
 
 ## v1.0.0-UNRELEASED
 
-### BREAKING CHANGES 
+### BREAKING CHANGES
 
+* Protobuf Block model is now tagged `sf.ethereum.type.v2`
+  * If you depend on the proto file, update `import "sf/ethereum/type/v1/type.proto"` to `import "sf/ethereum/type/v2/type.proto"`
+  * If you depend on the proto file, update all occurrences of `sf.ethereum.type.v1.<Something>` to `sf.ethereum.type.v2.<Something>`
+  * If you depend on `sf-ethereum/types` as a library, update all occurrences of `github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1` to `github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2`.
 * Requires Firehose instrumented binary with instrumentation version *2.0* (tagged `fh2`)
 * Requires reprocessing *all merged block files* and *block indexes (combined: call/logs)* (no more irreversible-index are needed)
 * The Firehose Blocks protocol is now under `sf.firehose.v2` (bumped from `sf.firehose.v1`). Firehose clients must be adapted.

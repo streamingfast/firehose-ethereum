@@ -5,7 +5,7 @@ package sf.ethereum.trxstream.v1;
 option go_package = "github.com/streamingfast/sf-ethereum-priv/types/pb/sf/ethereum/trxstream/v1;pbtrxstream";
 
 import "google/protobuf/timestamp.proto";
-import "sf/ethereum/type/v1/type.proto";
+import "sf/ethereum/type/v2/type.proto";
 
 service TransactionStream {
   rpc Transactions(TransactionRequest) returns (stream Transaction);
@@ -21,10 +21,10 @@ message TransactionState {
 
   bytes hash = 11;
   Transaction trx = 3;
-  sf.ethereum.type.v1.BlockHeader block_header = 4;
-  sf.ethereum.type.v1.TransactionTrace transaction_traces = 5;
+  sf.ethereum.type.v2.BlockHeader block_header = 4;
+  sf.ethereum.type.v2.TransactionTrace transaction_traces = 5;
   uint64 confirmation = 6;
-  sf.ethereum.type.v1.BlockHeader head_block_header = 7;
+  sf.ethereum.type.v2.BlockHeader head_block_header = 7;
   bytes replaced_by_hash = 8;
 
   google.protobuf.Timestamp pending_first_seen = 12;
@@ -53,9 +53,9 @@ message Transaction {
   // consensus
   bytes to = 1;
   uint64 nonce = 2;
-  sf.ethereum.type.v1.BigInt gas_price = 3;
+  sf.ethereum.type.v2.BigInt gas_price = 3;
   uint64 gas_limit = 4;
-  sf.ethereum.type.v1.BigInt value = 5; /* amount of ETH transfered, in addition to used_gas * gas_price, sometimes referred to as `Amount` */
+  sf.ethereum.type.v2.BigInt value = 5; /* amount of ETH transfered, in addition to used_gas * gas_price, sometimes referred to as `Amount` */
   bytes input = 6;
   bytes v = 7; /* signature values */
   bytes r = 8;
