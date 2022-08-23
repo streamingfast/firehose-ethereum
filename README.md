@@ -61,7 +61,7 @@ go install ./cmd/sfeth
 
 * Wait around a minute leaving enough time for the `Geth` process to start the syncing process. You should then have some merged blocks under `./sf-data/storage/merged-blocks`. You should also be able to test that Firehose is able to stream some blocks to you.
 
-  `grpcurl -plaintext -import-path ../proto -import-path ./proto -proto sf/ethereum/type/v1/type.proto -proto sf/firehose/v1/firehose.proto -d '{"start_block_num": -1}' localhost:13042 sf.firehose.v1.Stream.Blocks"
+  `grpcurl -plaintext -import-path ../proto -import-path ./proto -proto sf/ethereum/type/v2/type.proto -proto sf/firehose/v1/firehose.proto -d '{"start_block_num": -1}' localhost:13042 sf.firehose.v1.Stream.Blocks"
 
   **Note** You will need to have [grpcurl](https://github.com/fullstorydev/grpcurl) and a clone of https://github.com/streamingfast/proto, we assume they are sibling of the folder you are currently in, adjust `-import-path ...` flags in the command above to where the files are located.
 
