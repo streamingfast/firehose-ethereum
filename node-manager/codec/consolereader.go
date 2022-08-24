@@ -1057,7 +1057,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 
 	var libNum uint64
 	if len(endBlockData.FinalizedBlockHash) > 0 {
-		libNum = uint64(endBlockData.FinalizedBlockNum)
+		libNum = computeProofOfStakeLIBNum(blockNum, uint64(endBlockData.FinalizedBlockNum), bstream.GetProtocolFirstStreamableBlock)
 	} else {
 		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
 	}
