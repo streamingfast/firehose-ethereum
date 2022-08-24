@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/streamingfast/dstore"
-	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
 	pbethss "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/substreams/v1"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
@@ -26,7 +25,7 @@ import (
 
 type extension struct {
 	rpcClients   []*rpc.Client
-	cacheManager *Cache
+	cacheManager *StoreBackedCache
 }
 
 type RPCEngine struct {
@@ -36,7 +35,7 @@ type RPCEngine struct {
 	currentRpcClientIndex int
 	cacheChunkSizeInBlock uint64
 
-	perRequestCache     map[*pbsubstreams.Request]*Cache
+	perRequestCache     map[*pbsubstreams.Request]Cache
 	perRequestCacheLock sync.RWMutex
 }
 
@@ -66,7 +65,7 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 	}
 
 	return &RPCEngine{
-		perRequestCache:       map[*pbsubstreams.Request]*Cache{},
+		perRequestCache:       map[*pbsubstreams.Request]Cache{},
 		rpcCacheStore:         rpcCacheStore,
 		rpcClients:            rpcClients,
 		cacheChunkSizeInBlock: cacheChunkSizeInBlock,
@@ -95,7 +94,7 @@ func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 }
 
 func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.Request) []pipeline.Option {
-	pipelineCache := NewCache(ctx, e.rpcCacheStore, uint64(request.StartBlockNum), e.cacheChunkSizeInBlock)
+	pipelineCache := NewStoreBackedCache(ctx, e.rpcCacheStore, uint64(request.StartBlockNum), e.cacheChunkSizeInBlock)
 	e.registerRequestCache(request, pipelineCache)
 
 	preBlock := func(ctx context.Context, clock *pbsubstreams.Clock) error {
@@ -115,7 +114,7 @@ func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.R
 	}
 }
 
-func (e *RPCEngine) registerRequestCache(req *pbsubstreams.Request, c *Cache) {
+func (e *RPCEngine) registerRequestCache(req *pbsubstreams.Request, c Cache) {
 	e.perRequestCacheLock.Lock()
 	defer e.perRequestCacheLock.Unlock()
 
@@ -152,12 +151,12 @@ func (e *RPCEngine) ethCall(ctx context.Context, request *pbsubstreams.Request, 
 }
 
 type RPCCall struct {
-	ToAddr          string
-	MethodSignature string // ex: "name() (string)"
+	ToAddr string
+	Data   string // ex: "name() (string)"
 }
 
 func (c *RPCCall) ToString() string {
-	return fmt.Sprintf("%s:%s", c.ToAddr, c.MethodSignature)
+	return fmt.Sprintf("%s:%s", c.ToAddr, c.Data)
 }
 
 type RPCResponse struct {
@@ -167,7 +166,7 @@ type RPCResponse struct {
 	CallError     error // always deterministic
 }
 
-func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
+func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockNum uint64, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
 	callsBytes, _ := proto.Marshal(calls)
 	cacheKey := fmt.Sprintf("%d:%x", blockNum, sha256.Sum256(callsBytes))
 	if len(callsBytes) != 0 {
@@ -181,20 +180,19 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 		}
 	}
 
-	var reqs []*rpc.RPCRequest
-	for _, call := range calls.Calls {
-		req := &rpc.RPCRequest{
+	reqs := make([]*rpc.RPCRequest, len(calls.Calls))
+	for i, call := range calls.Calls {
+		reqs[i] = &rpc.RPCRequest{
+			Method: "eth_call",
 			Params: []interface{}{
 				map[string]interface{}{
-					"to":   eth.Hex(call.ToAddr).Pretty(),
-					"data": eth.Hex(call.MethodSignature).Pretty(),
+					"to":   call.ToAddr,
+					"data": call.Data,
 					"gas":  50_000_000,
 				},
 				blockNum,
 			},
-			Method: "eth_call",
 		}
-		reqs = append(reqs, req)
 	}
 
 	var delay time.Duration
@@ -255,19 +253,6 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache *Cache, blockNum uint64,
 	}
 }
 
-// ToProtoCalls is a wrapper for previous format
-func ToProtoCalls(in []*RPCCall) (out *pbethss.RpcCalls) {
-	for _, call := range in {
-		methodSig := eth.MustNewMethodDef(call.MethodSignature).MethodID()
-		toAddr := eth.MustNewAddress(call.ToAddr)
-		out.Calls = append(out.Calls, &pbethss.RpcCall{
-			ToAddr:          toAddr,
-			MethodSignature: methodSig,
-		})
-	}
-	return
-}
-
 func toProtoResponses(in []*rpc.RPCResponse) (out *pbethss.RpcResponses) {
 	out = &pbethss.RpcResponses{}
 	for _, resp := range in {
@@ -292,7 +277,7 @@ func toProtoResponses(in []*rpc.RPCResponse) (out *pbethss.RpcResponses) {
 }
 
 func callToString(c *pbethss.RpcCall) string {
-	return fmt.Sprintf("%x:%x", c.ToAddr, c.MethodSignature)
+	return fmt.Sprintf("%x:%x", c.ToAddr, c.Data)
 }
 
 func toRPCResponse(in []*rpc.RPCResponse) (out []*RPCResponse) {

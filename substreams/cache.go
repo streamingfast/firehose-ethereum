@@ -13,10 +13,17 @@ import (
 	"go.uber.org/zap"
 )
 
+type Cache interface {
+	Get(key string) ([]byte, bool)
+	Set(key string, value []byte)
+	Save(ctx context.Context)
+	UpdateCache(ctx context.Context, blockNum uint64)
+}
+
 type CacheKey string
 type KV map[CacheKey][]byte
 
-type Cache struct {
+type StoreBackedCache struct {
 	store dstore.Store
 
 	kv KV
@@ -32,8 +39,8 @@ type Cache struct {
 	mu sync.RWMutex
 }
 
-func NewCache(ctx context.Context, store dstore.Store, blockNum, cacheSize uint64) *Cache {
-	c := &Cache{
+func NewStoreBackedCache(ctx context.Context, store dstore.Store, blockNum, cacheSize uint64) *StoreBackedCache {
+	c := &StoreBackedCache{
 		store:     store,
 		cacheSize: cacheSize,
 	}
@@ -47,7 +54,7 @@ func NewCache(ctx context.Context, store dstore.Store, blockNum, cacheSize uint6
 	return c
 }
 
-func (c *Cache) Get(key string) ([]byte, bool) {
+func (c *StoreBackedCache) Get(key string) ([]byte, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -60,31 +67,31 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 	return nil, false
 }
 
-func (c *Cache) Set(key string, value []byte) {
+func (c *StoreBackedCache) Set(key string, value []byte) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	c.kv[CacheKey(key)] = value
 }
 
-func (c *Cache) Save(ctx context.Context) {
+func (c *StoreBackedCache) Save(ctx context.Context) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	save(ctx, c.store, cacheFileName(c.startBlock, c.endBlock), c.kv)
 }
 
-func (c *Cache) UpdateCache(ctx context.Context, blockNum uint64) {
+func (c *StoreBackedCache) UpdateCache(ctx context.Context, blockNum uint64) {
 	if !c.contains(blockNum) {
 		c.Save(ctx)
 		c.load(ctx, c.endBlock, c.endBlock+c.cacheSize)
 	}
 }
 
-func (c *Cache) contains(blockNum uint64) bool {
+func (c *StoreBackedCache) contains(blockNum uint64) bool {
 	return blockNum >= c.startBlock && blockNum < c.endBlock
 }
 
-func (c *Cache) startTracking(ctx context.Context) {
+func (c *StoreBackedCache) startTracking(ctx context.Context) {
 	go func() {
 		for {
 			select {
@@ -98,7 +105,7 @@ func (c *Cache) startTracking(ctx context.Context) {
 	}()
 }
 
-func (c *Cache) log() {
+func (c *StoreBackedCache) log() {
 	zlog.Debug("rpc cache_performance",
 		zap.Int("hits", c.totalHits),
 		zap.Int("misses", c.totalMisses),
@@ -106,7 +113,7 @@ func (c *Cache) log() {
 	)
 }
 
-func (c *Cache) load(ctx context.Context, startBlock, endBlock uint64) {
+func (c *StoreBackedCache) load(ctx context.Context, startBlock, endBlock uint64) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -177,3 +184,11 @@ func computeStartAndEndBlock(blockNum, cacheSize uint64) (startBlock, endBlock u
 	endBlock = startBlock + cacheSize
 	return
 }
+
+type NoOpCache struct {
+}
+
+func (NoOpCache) Get(key string) ([]byte, bool)                    { return nil, false }
+func (NoOpCache) Set(key string, value []byte)                     {}
+func (NoOpCache) Save(ctx context.Context)                         {}
+func (NoOpCache) UpdateCache(ctx context.Context, blockNum uint64) {}
