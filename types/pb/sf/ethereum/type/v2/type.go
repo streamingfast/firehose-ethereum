@@ -83,10 +83,6 @@ func (b *Block) PreviousID() string {
 // FIXME: This logic at some point is hard-coded and will need to be re-visited in regard
 //        of the fork logic.
 func (b *Block) LIBNum() uint64 {
-	if b.Number == bstream.GetProtocolFirstStreamableBlock {
-		return bstream.GetProtocolFirstStreamableBlock
-	}
-
 	if b.Number <= bstream.GetProtocolFirstStreamableBlock+200 {
 		return bstream.GetProtocolFirstStreamableBlock
 	}

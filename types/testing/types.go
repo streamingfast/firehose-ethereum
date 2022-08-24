@@ -343,23 +343,23 @@ func ToTimestamp(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
-func ToBstreamBlock(t testing.T, block *pbeth.Block) *bstream.Block {
-	blk, err := types.BlockFromProto(block)
+func ToBstreamBlock(t testing.T, block *pbeth.Block, libNum uint64) *bstream.Block {
+	blk, err := types.BlockFromProto(block, libNum)
 	require.NoError(t, err)
 
 	return blk
 }
 
-func ToBstreamBlocks(t testing.T, blocks []*pbeth.Block) (out []*bstream.Block) {
+func ToBstreamBlocks(t testing.T, blocks []*pbeth.Block, libNum uint64) (out []*bstream.Block) {
 	out = make([]*bstream.Block, len(blocks))
 	for i, block := range blocks {
-		out[i] = ToBstreamBlock(t, block)
+		out[i] = ToBstreamBlock(t, block, libNum)
 	}
 	return
 }
 
-func ToPbbstreamBlock(t testing.T, block *pbeth.Block) *pbbstream.Block {
-	blk, err := ToBstreamBlock(t, block).ToProto()
+func ToPbbstreamBlock(t testing.T, block *pbeth.Block, libNum uint64) *pbbstream.Block {
+	blk, err := ToBstreamBlock(t, block, libNum).ToProto()
 	require.NoError(t, err)
 
 	return blk
