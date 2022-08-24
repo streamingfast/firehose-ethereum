@@ -28,7 +28,6 @@ import (
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dmetrics"
-	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
@@ -1022,27 +1021,22 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 		return nil, fmt.Errorf("failed to parse size: %s", err)
 	}
 
-	var endBlockInfo struct {
-		Header          *BlockHeader   `json:"header"`
-		Uncles          []*BlockHeader `json:"uncles"`
-		TotalDifficulty eth.Hex        `json:"totalDifficulty"`
-	}
-
-	if err := json.Unmarshal([]byte(chunks[2]), &endBlockInfo); err != nil {
+	var endBlockData endBlockInfo
+	if err := json.Unmarshal([]byte(chunks[2]), &endBlockData); err != nil {
 		return nil, err
 	}
 
-	header := FromHeader(endBlockInfo.Header)
+	header := FromHeader(endBlockData.Header)
 	if header.Number != ctx.currentBlock.Number {
 		return nil, fmt.Errorf("header end block does not match active block num, got block num %d but current is block num %d", header.Number, ctx.currentBlock.Number)
 	}
-	header.TotalDifficulty = pbeth.BigIntFromBytes(endBlockInfo.TotalDifficulty)
+	header.TotalDifficulty = pbeth.BigIntFromBytes(endBlockData.TotalDifficulty)
 
 	ctx.currentBlock.Size = size
 	ctx.currentBlock.Hash = header.Hash
 
 	ctx.currentBlock.Header = header
-	for _, uncle := range endBlockInfo.Uncles {
+	for _, uncle := range endBlockData.Uncles {
 		ctx.currentBlock.Uncles = append(ctx.currentBlock.Uncles, FromHeader(uncle))
 	}
 
@@ -1061,7 +1055,40 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 
 	block.NormalizeInPlace()
 
-	return types.BlockFromProto(block)
+	var libNum uint64
+	if len(endBlockData.FinalizedBlockHash) > 0 {
+		libNum = uint64(endBlockData.FinalizedBlockNum)
+	} else {
+		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
+	}
+
+	return types.BlockFromProto(block, libNum)
+}
+
+func computeProofOfWorkLIBNum(blockNum uint64, firstStreamableBlockNum uint64) uint64 {
+	if blockNum <= firstStreamableBlockNum+200 {
+		return firstStreamableBlockNum
+	}
+
+	return blockNum - 200
+}
+
+func computeProofOfStakeLIBNum(blockNum uint64, finalizedBlockNum uint64, firstStreamableBlockNum uint64) uint64 {
+	if blockNum <= firstStreamableBlockNum {
+		return firstStreamableBlockNum
+	}
+
+	// In normal circumstances, we would received something like Block #2500 (Finalized #2400) (e.g. finalized
+	// is before/< than block). When doing big reprocessing from an already synced beacon node, you might receive
+	// actually Block #2500 (Finalized #5400) (e.g. finalized is after/> than block).
+	//
+	// When reprocessing and finalized block is after block, we assume block itself is now the LIB num
+	if finalizedBlockNum >= blockNum {
+		return blockNum
+	}
+
+	// Otherwise, finalized block is before block so it's the lib num
+	return finalizedBlockNum
 }
 
 // Formats

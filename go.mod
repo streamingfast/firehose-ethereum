@@ -7,6 +7,7 @@ require (
 	github.com/ShinyTrinkets/overseer v0.3.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.8
+	github.com/klauspost/compress v1.10.2
 	github.com/lithammer/dedent v1.1.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/manifoldco/promptui v0.8.0
@@ -30,7 +31,7 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20220811195019-694930bda9cb
 	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
 	github.com/streamingfast/relayer v0.0.2-0.20220811185139-02ee222c9277
-	github.com/streamingfast/sf-ethereum/types v0.0.0-20220823191321-1fbaf3707f52
+	github.com/streamingfast/sf-ethereum/types v0.0.0-20220824204045-0bd46011420d
 	github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
@@ -86,7 +87,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a // indirect
-	github.com/klauspost/compress v1.10.2 // indirect
 	github.com/lunixbochs/vtclean v0.0.0-20180621232353-2d01aacdc34a // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect

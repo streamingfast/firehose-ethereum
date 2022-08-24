@@ -32,8 +32,8 @@ import (
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/sf-ethereum/types"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/test-go/testify/assert"
 )
 
 func TestParseFromFile(t *testing.T) {
@@ -149,7 +149,7 @@ func TestGeneratePBBlocks(t *testing.T) {
 		if out != nil {
 			block := out.ToProtocol().(*pbeth.Block)
 
-			bstreamBlock, err := types.BlockFromProto(block)
+			bstreamBlock, err := types.BlockFromProto(block, out.LibNum)
 			require.NoError(t, err)
 
 			pbBlock, err := bstreamBlock.ToProto()
@@ -265,4 +265,63 @@ func unifiedDiff(t *testing.T, cnt1, cnt2 []byte) string {
 	out, _ := cmd.Output()
 
 	return string(out)
+}
+
+func Test_computeProofOfWorkLIBNum(t *testing.T) {
+	type args struct {
+		blockNum                uint64
+		firstStreamableBlockNum uint64
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want uint64
+	}{
+		{"block is before first streamable block", args{0, 200}, 200},
+		{"block is equal to first streamable block", args{200, 200}, 200},
+		{"block is after first streamable block", args{201, 200}, 200},
+		{"block is direct +200 blocks from first streamable block", args{400, 200}, 200},
+		{"block is direct +201 blocks from first streamable block", args{401, 200}, 201},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, computeProofOfWorkLIBNum(tt.args.blockNum, tt.args.firstStreamableBlockNum))
+		})
+	}
+}
+
+func Test_computeProofOfStakeLIBNum(t *testing.T) {
+	type args struct {
+		current         uint64
+		finalized       uint64
+		firstStreamable uint64
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want uint64
+	}{
+		{"current is below first streamable, finalized block below current", args{current: 10, finalized: 0, firstStreamable: 200}, 200},
+		{"current is equal to first streamable, finalized block below current", args{current: 200, finalized: 0, firstStreamable: 200}, 200},
+
+		{"current is below first streamable, finalized block above current", args{current: 10, finalized: 400, firstStreamable: 200}, 200},
+		{"current is equal to first streamable, finalized block above current", args{current: 200, finalized: 400, firstStreamable: 200}, 200},
+
+		{"current is below first streamable, finalized block below first streamable", args{current: 10, finalized: 100, firstStreamable: 200}, 200},
+		{"current is equal to first streamable, finalized block below first streamable", args{current: 200, finalized: 100, firstStreamable: 200}, 200},
+
+		{"current is below first streamable, finalized block above first streamable", args{current: 10, finalized: 400, firstStreamable: 200}, 200},
+		{"current is equal to first streamable, finalized block above first streamable", args{current: 200, finalized: 400, firstStreamable: 200}, 200},
+
+		{"current is below finalized, above first streamable", args{current: 10, finalized: 400}, 10},
+		{"current is equal to finalized, above first streamable", args{current: 400, finalized: 400}, 400},
+		{"current is above finalized, above first streamable", args{current: 410, finalized: 400}, 400},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, computeProofOfStakeLIBNum(tt.args.current, tt.args.finalized, tt.args.firstStreamable))
+		})
+	}
 }
