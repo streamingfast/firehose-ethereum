@@ -154,11 +154,11 @@ func printBlocks(inputIdentifier string, reader io.Reader, printTransactions boo
 		//payloadSize, err := len(block.Payload.Get()) //disabled after rework
 		ethBlock := block.ToNative().(*pbeth.Block)
 
-		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
+		fmt.Printf("Block #%d (%s) (prev: %s, lib: %d): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
 			block.PreviousID()[0:7],
-			//			payloadSize,
+			block.LibNum,
 			len(ethBlock.TransactionTraces),
 			len(ethBlock.BalanceChanges),
 		)
@@ -239,10 +239,11 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
+		fmt.Printf("Block #%d (%s) (prev: %s, lib: %d): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
 			block.PreviousID()[0:7],
+			block.LibNum,
 			len(ethBlock.TransactionTraces),
 			len(ethBlock.BalanceChanges),
 		)
