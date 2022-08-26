@@ -20,7 +20,7 @@ require (
 	github.com/streamingfast/dgrpc v0.0.0-20220806151929-3689cbb5ef6f
 	github.com/streamingfast/dlauncher v0.0.0-20220307153121-5674e1b64d40
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
-	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
+	github.com/streamingfast/dmetrics v0.0.0-20220826133059-c823ba31ea79
 	github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
 	github.com/streamingfast/firehose v0.1.1-0.20220815155549-5a2ef49c5db3

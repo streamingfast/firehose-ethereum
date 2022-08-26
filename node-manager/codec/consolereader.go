@@ -1044,7 +1044,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 
 	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
 	ctx.globalStats.blockRate.Inc()
-	ctx.globalStats.blockAverageParseTime.IncByElapsedTime(ctx.stats.startAt)
+	ctx.globalStats.blockAverageParseTime.IncByElapsedTime(ctx.stats.startAt, time.Millisecond)
 	ctx.globalStats.transactionRate.IncBy(int64(len(ctx.transactionTraces)))
 
 	block := ctx.currentBlock

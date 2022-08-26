@@ -613,6 +613,10 @@ github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9/go.mod h1:
 github.com/streamingfast/dmetrics v0.0.0-20210811180524-8494aeb34447/go.mod h1:VLdQY/FwczmC/flqWkcsBbqXO4BhU4zQDSK7GMrpcjY=
 github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c h1:ln4WzAU3kewbxeK2ygZXVx1cyHa9VdCPagasmu8hD1s=
 github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c/go.mod h1:fWoyaD76fE7mXZfkfcAfNeU/Hv/y6yJ/RgEcInQLwSw=
+github.com/streamingfast/dmetrics v0.0.0-20220815204823-5e8917225dab h1:j8CUR3RnM7QJZFtP+X4bd5rIN1HLwu3KLB4cOMNslso=
+github.com/streamingfast/dmetrics v0.0.0-20220815204823-5e8917225dab/go.mod h1:fWoyaD76fE7mXZfkfcAfNeU/Hv/y6yJ/RgEcInQLwSw=
+github.com/streamingfast/dmetrics v0.0.0-20220826133059-c823ba31ea79 h1:C8Pa3SqatOZJaRozbgohTv8CBiiQLcWWysWmAvxkYms=
+github.com/streamingfast/dmetrics v0.0.0-20220826133059-c823ba31ea79/go.mod h1:fWoyaD76fE7mXZfkfcAfNeU/Hv/y6yJ/RgEcInQLwSw=
 github.com/streamingfast/dstore v0.1.1-0.20211012134319-16e840827e38/go.mod h1:Jcr8TZ2XOAAFB7/7UeN6Zr8LM+Qv3cg36CsXpVDoAuU=
 github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648 h1:xpy3HNXeUHaZexf42duj7NeOmXcGfDMJXlZaj3CX18Y=
 github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648/go.mod h1:SHSEIPowGeE1TfNNmGeAUUnlO3dwevmX5kFOSazU60M=
