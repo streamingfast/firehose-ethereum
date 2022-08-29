@@ -16,9 +16,6 @@ package cli
 
 import (
 	"fmt"
-	"os"
-	"time"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream/transform"
@@ -33,6 +30,9 @@ import (
 	ethtransform "github.com/streamingfast/sf-ethereum/transform"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
+	"google.golang.org/grpc"
+	"os"
+	"time"
 )
 
 var metricset = dmetrics.NewSet()

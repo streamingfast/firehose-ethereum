@@ -103,6 +103,9 @@ func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.R
 	}
 
 	postJob := func(ctx context.Context, clock *pbsubstreams.Clock) error {
+		if clock.Number < request.StopBlockNum {
+			return nil
+		}
 		pipelineCache.Save(ctx)
 		e.unregisterRequestCache(request)
 		return nil
@@ -117,7 +120,6 @@ func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.R
 func (e *RPCEngine) registerRequestCache(req *pbsubstreams.Request, c Cache) {
 	e.perRequestCacheLock.Lock()
 	defer e.perRequestCacheLock.Unlock()
-
 	e.perRequestCache[req] = c
 }
 
@@ -135,8 +137,13 @@ func (e *RPCEngine) ethCall(ctx context.Context, request *pbsubstreams.Request, 
 	}
 
 	e.perRequestCacheLock.RLock()
-	cache := e.perRequestCache[request]
+	cache, found := e.perRequestCache[request]
 	e.perRequestCacheLock.RUnlock()
+
+	if !found {
+		panic("cache not found")
+	}
+
 	if cache == nil {
 		panic("no cache initialized for this request?!")
 	}
