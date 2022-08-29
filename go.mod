@@ -22,7 +22,7 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
 	github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
-	github.com/streamingfast/firehose v0.1.1-0.20220815155549-5a2ef49c5db3
+	github.com/streamingfast/firehose v0.1.1-0.20220829153956-0055fa9fcf84
 	github.com/streamingfast/index-builder v0.0.0-20220812125759-4ea1e5a3aa91
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
@@ -35,7 +35,7 @@ require (
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
 	github.com/streamingfast/substreams v0.0.21-0.20220825161231-4397d4ef84f2
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
 	go.uber.org/zap v1.21.0
@@ -54,6 +54,9 @@ require (
 	contrib.go.opencensus.io/exporter/zipkin v0.1.1 // indirect
 	github.com/Azure/azure-pipeline-go v0.2.3 // indirect
 	github.com/Azure/azure-storage-blob-go v0.14.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.3 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.6 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.6 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/ShinyTrinkets/meta-logger v0.2.0 // indirect
@@ -64,6 +67,7 @@ require (
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.1.3 // indirect
 	github.com/bytecodealliance/wasmtime-go v0.39.0 // indirect
+	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
@@ -74,6 +78,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
+	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
@@ -88,6 +93,7 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jhump/protoreflect v1.12.0 // indirect
@@ -129,12 +135,25 @@ require (
 	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
+	github.com/streamingfast/sf-tracing v0.0.0-20220829120927-5a5d2e0fe525 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869 // indirect
 	go.opencensus.io v0.23.0 // indirect
+	go.opentelemetry.io/contrib/detectors/gcp v1.9.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.34.0 // indirect
+	go.opentelemetry.io/otel v1.9.0 // indirect
+	go.opentelemetry.io/otel/exporters/jaeger v1.9.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.9.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.9.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.9.0 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.9.0 // indirect
+	go.opentelemetry.io/otel/exporters/zipkin v1.9.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.9.0 // indirect
+	go.opentelemetry.io/otel/trace v1.9.0 // indirect
+	go.opentelemetry.io/proto/otlp v0.18.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
