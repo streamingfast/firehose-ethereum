@@ -30,7 +30,6 @@ import (
 	ethtransform "github.com/streamingfast/sf-ethereum/transform"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
-	"google.golang.org/grpc"
 	"os"
 	"time"
 )
