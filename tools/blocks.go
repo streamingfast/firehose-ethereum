@@ -17,12 +17,17 @@ package tools
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"os"
+	"regexp"
 	"strconv"
 
+	"github.com/klauspost/compress/zstd"
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/cli"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
@@ -36,7 +41,7 @@ var printCmd = &cobra.Command{
 }
 
 var oneBlockCmd = &cobra.Command{
-	Use:   "one-block <block_num>",
+	Use:   "one-block <block_num|block_file>",
 	Short: "Prints a block from a one-block file",
 	Args:  cobra.ExactArgs(1),
 	RunE:  printOneBlockE,
@@ -71,36 +76,65 @@ func init() {
 	printCmd.PersistentFlags().Bool("transactions", false, "Include transaction IDs in output")
 	printCmd.PersistentFlags().Bool("calls", false, "Include transaction's Call data in output")
 	printCmd.PersistentFlags().Bool("full", false, "print the fullblock instead of just header/ID")
-	printCmd.PersistentFlags().Bool("instructions", false, "Include instruction output")
 	printCmd.PersistentFlags().String("store", "", "block store")
 }
 
+var integerRegex = regexp.MustCompile("^[0-9]+$")
+
 func printBlocksE(cmd *cobra.Command, args []string) error {
-	printTransactions := mustGetBool(cmd, "transactions")
+	var identifier string
+	var reader io.Reader
+	var closer func() error
 
-	blockNum, err := strconv.ParseUint(args[0], 10, 64)
-	if err != nil {
-		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+	if integerRegex.MatchString(args[0]) {
+		blockNum, err := strconv.ParseUint(args[0], 10, 64)
+		if err != nil {
+			return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+		}
+
+		str := mustGetString(cmd, "store")
+
+		store, err := dstore.NewDBinStore(str)
+		if err != nil {
+			return fmt.Errorf("unable to create store at path %q: %w", store, err)
+		}
+
+		identifier = fmt.Sprintf("%010d", blockNum)
+		gsReader, err := store.OpenObject(context.Background(), identifier)
+		if err != nil {
+			fmt.Printf("❌ Unable to read blocks filename %q: %s\n", identifier, err)
+			return err
+		}
+
+		reader = gsReader
+		closer = gsReader.Close
+	} else {
+		identifier = args[0]
+
+		// Check if it's a file and if it exists
+		if !cli.FileExists(identifier) {
+			fmt.Printf("❌ File %q does not exist\n", identifier)
+			return os.ErrNotExist
+		}
+
+		file, err := os.Open(identifier)
+		if err != nil {
+			fmt.Printf("❌ Unable to read blocks filename %q: %s\n", identifier, err)
+			return err
+		}
+		reader = file
+		closer = file.Close
 	}
 
-	str := mustGetString(cmd, "store")
+	defer closer()
 
-	store, err := dstore.NewDBinStore(str)
-	if err != nil {
-		return fmt.Errorf("unable to create store at path %q: %w", store, err)
-	}
+	return printBlocks(identifier, reader, mustGetBool(cmd, "transactions"))
+}
 
-	filename := fmt.Sprintf("%010d", blockNum)
-	reader, err := store.OpenObject(context.Background(), filename)
-	if err != nil {
-		fmt.Printf("❌ Unable to read blocks filename %s: %s\n", filename, err)
-		return err
-	}
-	defer reader.Close()
-
+func printBlocks(inputIdentifier string, reader io.Reader, printTransactions bool) error {
 	readerFactory, err := bstream.GetBlockReaderFactory.New(reader)
 	if err != nil {
-		fmt.Printf("❌ Unable to read blocks filename %s: %s\n", filename, err)
+		fmt.Printf("❌ Unable to read blocks %s: %s\n", inputIdentifier, err)
 		return err
 	}
 
@@ -120,11 +154,11 @@ func printBlocksE(cmd *cobra.Command, args []string) error {
 		//payloadSize, err := len(block.Payload.Get()) //disabled after rework
 		ethBlock := block.ToNative().(*pbeth.Block)
 
-		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
+		fmt.Printf("Block #%d (%s) (prev: %s, lib: %d): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
 			block.PreviousID()[0:7],
-			//			payloadSize,
+			block.LibNum,
 			len(ethBlock.TransactionTraces),
 			len(ethBlock.BalanceChanges),
 		)
@@ -205,10 +239,11 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		fmt.Printf("Block #%d (%s) (prev: %s): %d transactions, %d balance changes\n",
+		fmt.Printf("Block #%d (%s) (prev: %s, lib: %d): %d transactions, %d balance changes\n",
 			block.Num(),
 			block.ID()[0:7],
 			block.PreviousID()[0:7],
+			block.LibNum,
 			len(ethBlock.TransactionTraces),
 			len(ethBlock.BalanceChanges),
 		)
@@ -231,16 +266,50 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 }
 
 func printOneBlockE(cmd *cobra.Command, args []string) error {
-	ctx := cmd.Context()
+	if integerRegex.MatchString(args[0]) {
+		blockNum, err := strconv.ParseUint(args[0], 10, 64)
+		if err != nil {
+			return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+		}
 
-	blockNum, err := strconv.ParseUint(args[0], 10, 64)
-	if err != nil {
-		return fmt.Errorf("unable to parse block number %q: %w", args[0], err)
+		return printOneBlockFromStore(cmd.Context(), blockNum, mustGetString(cmd, "store"), mustGetBool(cmd, "transactions"))
 	}
 
-	str := mustGetString(cmd, "store")
+	path := args[0]
 
-	store, err := dstore.NewDBinStore(str)
+	// Check if it's a file and if it exists
+	if !cli.FileExists(path) {
+		fmt.Printf("❌ File %q does not exist\n", path)
+		return os.ErrNotExist
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Printf("❌ Unable to open file %q: %s\n", path, err)
+		return err
+	}
+
+	uncompressedReader, err := zstd.NewReader(file)
+	if err != nil {
+		return fmt.Errorf("new zstd reader: %w", err)
+	}
+	defer uncompressedReader.Close()
+
+	if err := printBlockFromReader(path, uncompressedReader); err != nil {
+		if errors.Is(err, io.EOF) {
+			fmt.Printf("❌ One block file is empty %q: %s\n", path, err)
+			return err
+		}
+
+		fmt.Printf("❌ Unable to print one-block file %s: %s\n", path, err)
+		return err
+	}
+
+	return nil
+}
+
+func printOneBlockFromStore(ctx context.Context, blockNum uint64, storeDSN string, printTransactions bool) error {
+	store, err := dstore.NewDBinStore(storeDSN)
 	if err != nil {
 		return fmt.Errorf("unable to create store at path %q: %w", store, err)
 	}
@@ -258,33 +327,34 @@ func printOneBlockE(cmd *cobra.Command, args []string) error {
 	for _, filepath := range files {
 		reader, err := store.OpenObject(ctx, filepath)
 		if err != nil {
-			fmt.Printf("❌ Unable to read block filename %s: %s\n", filepath, err)
+			fmt.Printf("❌ Unable to open one-block file %s: %s\n", filepath, err)
 			return err
 		}
 		defer reader.Close()
 
-		readerFactory, err := bstream.GetBlockReaderFactory.New(reader)
-		if err != nil {
-			fmt.Printf("❌ Unable to read blocks filename %s: %s\n", filepath, err)
-			return err
-		}
-
-		//fmt.Printf("One Block File: %s\n", store.ObjectURL(filepath))
-
-		block, err := readerFactory.Read()
-		if err != nil {
-			if err == io.EOF {
+		if err := printBlockFromReader(filepath, reader); err != nil {
+			if errors.Is(err, io.EOF) {
 				break
 			}
-			return fmt.Errorf("reading block: %w", err)
-		}
 
-		if err = printBlock(block); err != nil {
 			return err
 		}
-
 	}
 	return nil
+}
+
+func printBlockFromReader(identifier string, reader io.Reader) error {
+	readerFactory, err := bstream.GetBlockReaderFactory.New(reader)
+	if err != nil {
+		return fmt.Errorf("new block reader: %w", err)
+	}
+
+	block, err := readerFactory.Read()
+	if err != nil {
+		return fmt.Errorf("reading block: %w", err)
+	}
+
+	return printBlock(block)
 }
 
 func printBlock(block *bstream.Block) error {

@@ -43,3 +43,11 @@ type Log struct {
 	Topics  []eth.Hash  `json:"topics"`
 	Data    eth.Hex     `json:"data"`
 }
+
+type endBlockInfo struct {
+	Header             *BlockHeader   `json:"header"`
+	Uncles             []*BlockHeader `json:"uncles"`
+	TotalDifficulty    eth.Hex        `json:"totalDifficulty"`
+	FinalizedBlockNum  eth.Uint64     `json:"finalizedBlockNum"`
+	FinalizedBlockHash eth.Hash       `json:"finalizedBlockHash"`
+}

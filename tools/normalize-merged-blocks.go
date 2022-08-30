@@ -16,5 +16,5 @@ var NormalizeMergedBlocksCmd = sftools.GetMergedBlocksNormalizer(zlog, tracer, n
 func normalize(in *bstream.Block) (*bstream.Block, error) {
 	block := in.ToProtocol().(*pbeth.Block)
 	block.NormalizeInPlace()
-	return types.BlockFromProto(block)
+	return types.BlockFromProto(block, in.LibNum)
 }
