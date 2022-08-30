@@ -50,7 +50,7 @@ func setupCmd(cmd *cobra.Command) error {
 		}
 
 		if !exists && isMatchingCommand(cmds, forceConfigOn) {
-			return fmt.Errorf("Config file %q not found. Did you 'sfeth init'?", configFile)
+			return fmt.Errorf("Config file %q not found. Did you 'fireeth init'?", configFile)
 		}
 
 		if exists {

@@ -45,9 +45,9 @@ var commonStoresCreated bool
 var indexStoreCreated bool
 
 func GetCommonStoresURLs(dataDir string) (mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL string, err error) {
-	mergedBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-blocks-store-url"))
-	oneBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-oneblock-store-url"))
-	forkedBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-forkedblocks-store-url"))
+	mergedBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-merged-blocks-store-url"))
+	oneBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-one-block-store-url"))
+	forkedBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-forked-blocks-store-url"))
 
 	if commonStoresCreated {
 		return

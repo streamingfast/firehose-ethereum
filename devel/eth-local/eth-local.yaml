@@ -3,8 +3,8 @@ start:
     - firehose
   flags:
     log-to-file: false
-    common-blockstream-addr:
-    common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v2
+    common-live-blocks-addr:
+    common-merged-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v2
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
     substreams-partial-mode-enabled: true

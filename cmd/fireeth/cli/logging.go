@@ -18,4 +18,4 @@ import (
 	"github.com/streamingfast/logging"
 )
 
-var zlog, _ = logging.RootLogger("sfeth", "github.com/streamingfast/sf-ethereum/cmd/sfeth")
+var zlog, _ = logging.RootLogger("fireeth", "github.com/streamingfast/sf-ethereum/cmd/fireeth")

@@ -5,7 +5,7 @@
 *.spkg
 /sf-data
 /sf.yaml
-/sfeth
+/fireeth
 /dist
 /rpc-cache
 /localdata

@@ -8,6 +8,14 @@ for instructions to keep up to date.
 
 ### BREAKING CHANGES
 
+* The binary name has changed from `sfeth` to `fireeth`
+* The repo name has changed from `sf-ethereum` to `firehose-ethereum`
+* The `common-blocks-store-url` flag is now `common-merged-blocks-store-url`
+* The `common-oneblock-store-url` flag is now `common-one-block-store-url`
+* The `common-forkedblocks-store-url` flag is now `common-forked-blocks-store-url`
+* The `common-blockstream-addr` flag is now `common-live-blocks-addr`
+* The `minfreader` application has been renamed to `reader` application
+* All the `mindreader-node-*` flags have been renamed to `reader-node-*`
 * Protobuf Block model is now tagged `sf.ethereum.type.v2`
   * If you depend on the proto file, update `import "sf/ethereum/type/v1/type.proto"` to `import "sf/ethereum/type/v2/type.proto"`
   * If you depend on the proto file, update all occurrences of `sf.ethereum.type.v1.<Something>` to `sf.ethereum.type.v2.<Something>`
@@ -16,6 +24,7 @@ for instructions to keep up to date.
 * Requires reprocessing *all merged block files* and *block indexes (combined: call/logs)* (no more irreversible-index are needed)
 * The Firehose Blocks protocol is now under `sf.firehose.v2` (bumped from `sf.firehose.v1`). Firehose clients must be adapted.
 * The ethereum block protocol is now under `sf.ethereum.type.v2` (bumped from `sf.ethereum.type.v1`). Firehose clients must be adapted.
+
 
 ### MIGRATION
 

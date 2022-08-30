@@ -16,7 +16,7 @@ package main
 
 import (
 	"github.com/streamingfast/node-manager/operator"
-	"github.com/streamingfast/sf-ethereum/cmd/sfeth/cli"
+	"github.com/streamingfast/sf-ethereum/cmd/fireeth/cli"
 	"github.com/streamingfast/snapshotter"
 )
 

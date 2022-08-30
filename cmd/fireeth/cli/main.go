@@ -35,7 +35,7 @@ import (
 	"github.com/streamingfast/dlauncher/launcher"
 )
 
-var RootCmd = &cobra.Command{Use: "sfeth", Short: "Ethereum on StreamingFast"}
+var RootCmd = &cobra.Command{Use: "fireeth", Short: "Ethereum on StreamingFast"}
 
 var allFlags = make(map[string]bool) // used as global because of async access to cobra init functions
 var registerCommonModulesCallback func(runtime *launcher.Runtime) error
@@ -109,7 +109,7 @@ func Version(version, commit, date string) string {
 	return fmt.Sprintf("%s (%s)", version, strings.Join(labels, ", "))
 }
 
-var startCmdExample = `sfeth start relayer merger --merger-grpc-serving-addr=localhost:12345 --relayer-merger-addr=localhost:12345`
+var startCmdExample = `fireeth start relayer merger --merger-grpc-serving-addr=localhost:12345 --relayer-merger-addr=localhost:12345`
 var startCmdHelpTemplate = `Usage:{{if .Runnable}}
   {{.UseLine}}{{end}} [all|command1 [command2...]]{{if gt (len .Aliases) 0}}
 

@@ -5,9 +5,9 @@ start:
   flags:
     common-chain-id: 5
     common-network-id: 5
-    common-blockstream-addr: :23011
+    common-live-blocks-addr: :23011
     merger-grpc-listen-addr: :23012
-    mindreader-node-arguments: +--goerli --http.port=9545 --ws.port=9546 --port=40303
-    mindreader-node-grpc-listen-addr: :23010
-    mindreader-node-manager-api-addr: :23009
+    reader-node-arguments: +--goerli --http.port=9545 --ws.port=9546 --port=40303
+    reader-node-grpc-listen-addr: :23010
+    reader-node-manager-api-addr: :23009
     relayer-grpc-listen-addr: :23011
