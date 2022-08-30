@@ -89,7 +89,7 @@ func newConsoleReaderStats() *consoleReaderStats {
 	return &consoleReaderStats{
 		lastBlock:             bstream.BlockRefEmpty,
 		blockRate:             dmetrics.NewPerMinuteLocalRateCounter("blocks"),
-		blockAverageParseTime: dmetrics.NewAvgPerSecondLocalRateCounter("ms/block"),
+		blockAverageParseTime: dmetrics.NewAvgPerMinuteLocalRateCounter("ms/block"),
 		transactionRate:       dmetrics.NewPerMinuteLocalRateCounter("trxs"),
 	}
 }
