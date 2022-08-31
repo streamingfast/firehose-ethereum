@@ -1,8 +1,8 @@
 # Change log
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this
-project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](https://opensource.guide/best-practices/)
-for instructions to keep up to date.
+project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [Best Practices for document maintainers](https://opensource.guide/best-practices/)
+for instructions related to updating this documentation.
 
 ## v1.0.0-UNRELEASED
 
