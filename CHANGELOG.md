@@ -41,7 +41,7 @@ for instructions to keep up to date.
 
 * Removed the Irreversible indices completely (because the merged-blocks only contain final blocks now)
 * Deprecated the "Call" and "log" indices (`xxxxxxxxxx.yyy.calladdrsig.idx` and `xxxxxxxxxx.yyy.logaddrsig.idx`), now replaced by "combined" index
-* Moved out the `sfeth tools generate-...` command to a new app that can be launched with `sfeth start generate-combined-index[,...]`
+* Moved the `sfeth tools generate-...` command into to a new app that can be launched with `sfeth start generate-combined-index[,...]`
 
 #### Flags and environment variables
 
