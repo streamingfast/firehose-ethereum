@@ -9,6 +9,7 @@ on:
       - "dockerbuild"
       - "develop"
       - "release/v*"
+      - "feature/*"
   workflow_dispatch:
     inputs:
       geth_version:
