@@ -24,16 +24,15 @@ import (
 )
 
 func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
-
 	// this one belong everywhere
 	RootCmd.PersistentFlags().Int("common-first-streamable-block", 0, "[COMMON] first streamable block number")
 
 	//Common stores configuration flags
-	cmd.Flags().String("common-blocks-store-url", MergedBlocksStoreURL, "[COMMON] Store URL (with prefix) where to read/write merged blocks.")
-	cmd.Flags().String("common-oneblock-store-url", OneBlockStoreURL, "[COMMON] Store URL (with prefix) to read/write one-block files.")
-	cmd.Flags().String("common-forkedblocks-store-url", ForkedBlocksStoreURL, "[COMMON] Store URL (with prefix) to read/write forked block files that we want to keep")
+	cmd.Flags().String("common-merged-blocks-store-url", MergedBlocksStoreURL, "[COMMON] Store URL (with prefix) where to read/write merged blocks.")
+	cmd.Flags().String("common-one-block-store-url", OneBlockStoreURL, "[COMMON] Store URL (with prefix) to read/write one-block files.")
+	cmd.Flags().String("common-forked-blocks-store-url", ForkedBlocksStoreURL, "[COMMON] Store URL (with prefix) to read/write forked block files that we want to keep")
 	cmd.Flags().String("common-index-store-url", IndexStoreURL, "[COMMON] Store URL (with prefix) to read/write index files.")
-	cmd.Flags().String("common-blockstream-addr", RelayerServingAddr, "[COMMON] gRPC endpoint to get real-time blocks.")
+	cmd.Flags().String("common-live-blocks-addr", RelayerServingAddr, "[COMMON] gRPC endpoint to get real-time blocks.")
 
 	cmd.Flags().IntSlice("common-block-index-sizes", []int{100000, 100000, 10000, 1000}, "index bundle sizes that that are considered valid when looking for block indexes")
 	cmd.Flags().Bool("common-blocks-cache-enabled", false, FlagDescription(`

@@ -29,16 +29,16 @@ import (
 )
 
 func init() {
-	appLogger, appTracer := logging.PackageLogger("mindreader-node-stdin", "github.com/streamingfast/sf-ethereum/mindreader-node-stdin")
+	appLogger, appTracer := logging.PackageLogger("reader-node-stdin", "github.com/streamingfast/sf-ethereum/reader-node-stdin")
 
 	launcher.RegisterApp(zlog, &launcher.AppDef{
-		ID:            "mindreader-node-stdin",
+		ID:            "reader-node-stdin",
 		Title:         "Mindreader Node (stdin)",
 		Description:   "Blocks reading node, unmanaged, reads deep mind from standard input",
 		RegisterFlags: func(cmd *cobra.Command) error { return nil },
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			sfDataDir := runtime.AbsDataDir
-			archiveStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-oneblock-store-url"))
+			archiveStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-one-block-store-url"))
 
 			consoleReaderFactory := func(lines chan string) (mindreader.ConsolerReader, error) {
 				r, err := codec.NewConsoleReader(appLogger, lines)

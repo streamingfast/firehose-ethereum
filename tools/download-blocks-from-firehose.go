@@ -28,7 +28,7 @@ var DownloadFromFirehoseCmd = &cobra.Command{
 	Short:   "download blocks from firehose and save them to merged-blocks",
 	Args:    cobra.ExactArgs(4),
 	RunE:    downloadFromFirehoseE,
-	Example: "sfeth tools download-from-firehose api.streamingfast.io 1000 2000 ./outputdir",
+	Example: "fireeth tools download-from-firehose api.streamingfast.io 1000 2000 ./outputdir",
 }
 
 func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {

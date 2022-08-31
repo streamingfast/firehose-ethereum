@@ -176,15 +176,15 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 				MetricsAndReadinessManager: metricsAndReadinessManager,
 			}, appLogger), nil
 		} else {
-			GRPCAddr := viper.GetString("mindreader-node-grpc-listen-addr")
+			GRPCAddr := viper.GetString("reader-node-grpc-listen-addr")
 			_, oneBlocksStoreURL, _, err := GetCommonStoresURLs(runtime.AbsDataDir)
 			if err != nil {
 				return nil, err
 			}
-			workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-node-working-dir"))
-			batchStopBlockNum := viper.GetUint64("mindreader-node-stop-block-num")
-			oneBlockFileSuffix := viper.GetString("mindreader-node-oneblock-suffix")
-			blocksChanCapacity := viper.GetInt("mindreader-node-blocks-chan-capacity")
+			workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("reader-node-working-dir"))
+			batchStopBlockNum := viper.GetUint64("reader-node-stop-block-num")
+			oneBlockFileSuffix := viper.GetString("reader-node-oneblock-suffix")
+			blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
 			gs := dgrpc.NewServer(dgrpc.WithLogger(appLogger))
 
 			mindreaderPlugin, err := getMindreaderLogPlugin(
@@ -264,7 +264,7 @@ var nodeArgsByTypeAndRole = map[string]nodeArgsByRole{
 
 func registerEthereumNodeFlags(cmd *cobra.Command) error {
 	registerCommonNodeFlags(cmd, false)
-	cmd.Flags().String("node-role", "peering", "Sets default node arguments. accepted values: peering, dev-miner. See `sfeth help nodes` for more info")
+	cmd.Flags().String("node-role", "peering", "Sets default node arguments. accepted values: peering, dev-miner. See `fireeth help nodes` for more info")
 	return nil
 }
 
@@ -273,7 +273,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	prefix := "node-"
 	managerAPIAddr := NodeManagerAPIAddr
 	if isMindreader {
-		prefix = "mindreader-node-"
+		prefix = "reader-node-"
 		managerAPIAddr = MindreaderNodeManagerAPIAddr
 	}
 
@@ -315,7 +315,7 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader 
 	prefix := "node-"
 	nodeRole := viper.GetString("node-role")
 	if isMindreader {
-		prefix = "mindreader-node-"
+		prefix = "reader-node-"
 		nodeRole = "mindreader"
 	}
 

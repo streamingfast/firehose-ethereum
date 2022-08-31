@@ -38,7 +38,7 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	cmd.SilenceUsage = true
 
 	dataDir := viper.GetString("global-data-dir")
-	zlog.Debug("sfeth binary started", zap.String("data_dir", dataDir))
+	zlog.Debug("fireeth binary started", zap.String("data_dir", dataDir))
 
 	configFile := viper.GetString("global-config-file")
 	zlog.Info(fmt.Sprintf("starting with config file '%s'", configFile))
@@ -73,7 +73,7 @@ func Start(dataDir string, args []string) (err error) {
 		bstream.GetBlockPayloadSetter = bstream.ATMCachedPayloadSetter
 
 		cacheDir := MustReplaceDataDir(modules.AbsDataDir, viper.GetString("common-blocks-cache-dir"))
-		storeUrl := MustReplaceDataDir(modules.AbsDataDir, viper.GetString("common-blocks-store-url"))
+		storeUrl := MustReplaceDataDir(modules.AbsDataDir, viper.GetString("common-merged-blocks-store-url"))
 		maxRecentEntryBytes := viper.GetInt("common-blocks-cache-max-recent-entry-bytes")
 		maxEntryByAgeBytes := viper.GetInt("common-blocks-cache-max-entry-by-age-bytes")
 		bstream.InitCache(storeUrl, cacheDir, maxRecentEntryBytes, maxEntryByAgeBytes)
@@ -95,7 +95,7 @@ func Start(dataDir string, args []string) (err error) {
 	zlog.Debug("launcher created")
 	runByDefault := func(app string) bool {
 		switch app {
-		case "mindreader-node-stdin":
+		case "reader-node-stdin":
 			return false
 		}
 		return true

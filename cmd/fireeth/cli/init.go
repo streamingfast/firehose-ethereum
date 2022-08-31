@@ -120,7 +120,7 @@ func sfInitE(cmd *cobra.Command, args []string) (err error) {
 	//`
 	//		msg += `To start your environment, run:
 	//
-	//  sfeth start
+	//  fireeth start
 	//`
 	//	} else {
 	//		msg += fmt.Sprintf(`To start your environment,
@@ -132,7 +132,7 @@ func sfInitE(cmd *cobra.Command, args []string) (err error) {
 	//		}
 	//		msg += `* Run:
 	//
-	//  sfeth start
+	//  fireeth start
 	//`
 	//	}
 	//
@@ -149,7 +149,7 @@ var knownNetworks = map[string]bool{
 }
 
 //func Init(runMiner bool, networkID string, enodesList string, secondsBetweenBlocks uint32, configFile string, paths *bootstrap.Paths) (err error) {
-//	toRun := []string{"all", "-peering-node", "-mindreader-node-stdin", "-tokenmeta", "-evm-executor"}
+//	toRun := []string{"all", "-peering-node", "-reader-node-stdin", "-tokenmeta", "-evm-executor"}
 //	if !runMiner {
 //		toRun = append(toRun, "-miner-node")
 //	}
@@ -163,7 +163,7 @@ var knownNetworks = map[string]bool{
 //		Flags: map[string]string{
 //			"common-network-id":                      networkID,
 //			"miner-node-extra-arguments":             "--mine --nodiscover --allow-insecure-unlock --unlock=0x62d9ad344366c268c3062764bbf67d318ec2c8fd --password=/dev/null",
-//			"mindreader-node-bootstrap-static-nodes": enodesList,
+//			"reader-node-bootstrap-static-nodes": enodesList,
 //			"peering-node-extra-arguments":           "--mind=false --miner.threads=0",
 //		},
 //	}

@@ -44,7 +44,7 @@ func init() {
 	launcher.RegisterApp(zlog, &launcher.AppDef{
 		ID:          "firehose",
 		Title:       "Block Firehose",
-		Description: "Provides on-demand filtered blocks, depends on common-blocks-store-url and common-blockstream-addr",
+		Description: "Provides on-demand filtered blocks, depends on common-merged-blocks-store-url and common-live-blocks-addr",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
 
@@ -68,7 +68,7 @@ func init() {
 		},
 
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
-			blockstreamAddr := viper.GetString("common-blockstream-addr")
+			blockstreamAddr := viper.GetString("common-live-blocks-addr")
 
 			// FIXME: That should be a shared dependencies across `Ethereum on StreamingFast`
 			authenticator, err := dauthAuthenticator.New(viper.GetString("common-auth-plugin"))

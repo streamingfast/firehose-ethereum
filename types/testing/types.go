@@ -37,7 +37,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var zlog, _ = logging.PackageLogger("sfeth", "github.com/streamingfast/sf-ethereum/types/testing")
+var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/sf-ethereum/types/testing")
 
 type from hexString
 
