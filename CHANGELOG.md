@@ -51,7 +51,7 @@ for instructions to keep up to date.
 * Renamed `common-blocks-store-url` to `common-merged-blocks-store-url`
 * Renamed `common-oneblock-store-url` to `common-one-block-store-url` *now used by firehose and relayer apps*
 * Renamed `common-blockstream-addr` to `common-live-blocks-addr`
-* Renamed the `minfreader` application to `reader`
+* Renamed the `mindreader` application to `reader`
 * Renamed all the `mindreader-node-*` flags to `reader-node-*`
 * Added `common-forked-blocks-store-url` flag *used by merger and firehose*
 * Changed `--log-to-file` default from `true` to `false`
