@@ -20,7 +20,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream/transform"
 	dauthAuthenticator "github.com/streamingfast/dauth/authenticator"
-	dgrpcxds "github.com/streamingfast/dgrpc/xds"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/dmetrics"
@@ -31,7 +30,6 @@ import (
 	ethtransform "github.com/streamingfast/sf-ethereum/transform"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
-	"go.uber.org/zap"
 	"os"
 	"time"
 )
@@ -158,16 +156,16 @@ func init() {
 			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.CombinedFilterFactory(indexStore, possibleIndexSizes))
 
-			bootStrapFilename := os.Getenv("GRPC_XDS_BOOTSTRAP")
-			zlog.Info("looked for GRPC_XDS_BOOTSTRAP", zap.String("filename", bootStrapFilename))
-
-			if bootStrapFilename != "" {
-				zlog.Info("generating bootstrap file", zap.String("filename", bootStrapFilename))
-				err := dgrpcxds.GenerateBootstrapFile("trafficdirector.googleapis.com:443", bootStrapFilename)
-				if err != nil {
-					panic(fmt.Sprintf("failed to generate bootstrap file: %v", err))
-				}
-			}
+			//bootStrapFilename := os.Getenv("GRPC_XDS_BOOTSTRAP")
+			//zlog.Info("looked for GRPC_XDS_BOOTSTRAP", zap.String("filename", bootStrapFilename))
+			//
+			//if bootStrapFilename != "" {
+			//	zlog.Info("generating bootstrap file", zap.String("filename", bootStrapFilename))
+			//	err := dgrpcxds.GenerateBootstrapFile("trafficdirector.googleapis.com:443", bootStrapFilename)
+			//	if err != nil {
+			//		panic(fmt.Sprintf("failed to generate bootstrap file: %v", err))
+			//	}
+			//}
 
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
 				MergedBlocksStoreURL:    mergedBlocksStoreURL,
