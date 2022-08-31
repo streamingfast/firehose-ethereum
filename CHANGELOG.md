@@ -1,7 +1,7 @@
 # Change log
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this
-project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
+project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](https://opensource.guide/best-practices/)
 for instructions to keep up to date.
 
 ## v1.0.0-UNRELEASED
@@ -52,14 +52,14 @@ for instructions to keep up to date.
 * Renamed `common-oneblock-store-url` to `common-one-block-store-url` *now used by firehose and relayer apps*
 * Renamed `common-blockstream-addr` to `common-live-blocks-addr`
 * Renamed the `mindreader` application to `reader`
-* Renamed all the `mindreader-node-*` flags to `reader-node-*`
+* Renamed all the `reader-node-*` flags to `reader-node-*`
 * Added `common-forked-blocks-store-url` flag *used by merger and firehose*
 * Changed `--log-to-file` default from `true` to `false`
 * Changed default verbosity level: now all loggers are `INFO` (instead of having most of them to `WARN`). `-v` will now activate all `DEBUG` logs
 * Removed `common-block-index-sizes`, `common-index-store-url`
 * Removed `merger-state-file`, `merger-next-exclusive-highest-block-limit`, `merger-max-one-block-operations-batch-size`, `merger-one-block-deletion-threads`, `merger-writers-leeway`
 * Added `merger-stop-block`, `merger-prune-forked-blocks-after`, `merger-time-between-store-pruning`
-* Removed `mindreader-node-start-block-num`, `mindreader-node-wait-upload-complete-on-shutdown`, `mindreader-node-merge-and-store-directly`, `mindreader-node-merge-threshold-block-age`
+* Removed `reader-node-start-block-num`, `reader-node-wait-upload-complete-on-shutdown`, `reader-node-merge-and-store-directly`, `reader-node-merge-threshold-block-age`
 * Removed `firehose-block-index-sizes`,`firehose-block-index-sizes`, `firehose-irreversible-blocks-index-bundle-sizes`, `firehose-irreversible-blocks-index-url`, `firehose-realtime-tolerance`
 * Removed `relayer-buffer-size`, `relayer-merger-addr`, `relayer-min-start-offset`
 
@@ -119,7 +119,7 @@ for instructions to keep up to date.
 * The merger does not expose `PreMergedBlocks` endpoint over GRPC anymore, only HealthCheck. (relayer does not need to talk to it)
 * Automatically setting the flag `--firehose-deep-mind-genesis` on `reader` nodes if their `reader-node-bootstrap-data-url` config value is sets to a `genesis.json` file.
 * Note to other Firehose implementors: we changed all command line flags to fit the required/optional format referred to here: https://en.wikipedia.org/wiki/Usage_message
-* Added prometheus boolean metric to all apps called 'ready' with label 'app' (firehose, merger, mindreader-node, node, relayer, combined-index-builder)
+* Added prometheus boolean metric to all apps called 'ready' with label 'app' (firehose, merger, reader-node, node, relayer, combined-index-builder)
 
 ## v0.10.2
 
@@ -190,7 +190,7 @@ for instructions to keep up to date.
 ### Changed
 
 * The default text `encoder` use to encode log entries now emits the level when coloring is disabled.
-* Default value for flag `--mindreader-node-enforce-peers` is now `""`, this has been changed because the default value was useful only in development when running a local `node-manager` as either the miner or a peering node.
+* Default value for flag `--reader-node-enforce-peers` is now `""`, this has been changed because the default value was useful only in development when running a local `node-manager` as either the miner or a peering node.
 
 ## v0.10.0-rc.1
 
