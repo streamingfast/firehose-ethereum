@@ -25,7 +25,7 @@ import (
 	nodeMindreaderStdinApp "github.com/streamingfast/node-manager/app/node_mindreader_stdin"
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/mindreader"
-	"github.com/streamingfast/sf-ethereum/node-manager/codec"
+	"github.com/streamingfast/sf-ethereum/codec"
 )
 
 func init() {

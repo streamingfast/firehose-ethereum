@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/streamingfast/eth-go"
-	"github.com/streamingfast/sf-ethereum/node-manager/codec"
+	"github.com/streamingfast/sf-ethereum/codec"
 	"github.com/streamingfast/sf-ethereum/node-manager/trxstream"
 	pbtrxstream "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/trxstream/v1"
 	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
