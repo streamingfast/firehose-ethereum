@@ -46,7 +46,7 @@ func Main(
 	backupModuleFactories map[string]operator.BackupModuleFactory,
 ) {
 	cobra.OnInitialize(func() {
-		allFlags = flags.AutoBind(RootCmd, "SFETH")
+		allFlags = flags.AutoBind(RootCmd, "FIREETH")
 	})
 
 	RootCmd.PersistentFlags().StringP("data-dir", "d", "./sf-data", "Path to data storage for all components of the stack")
