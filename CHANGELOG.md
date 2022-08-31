@@ -115,6 +115,7 @@ for instructions to keep up to date.
 
 #### Various
 
+* The firehose GRPC endpoint now supports requests that are compressed using `gzip` or `zstd`
 * The merger does not expose `PreMergedBlocks` endpoint over GRPC anymore, only HealthCheck. (relayer does not need to talk to it)
 * Automatically setting the flag `--firehose-deep-mind-genesis` on `reader` nodes if their `reader-node-bootstrap-data-url` config value is sets to a `genesis.json` file.
 * Note to other Firehose implementors: we changed all command line flags to fit the required/optional format referred to here: https://en.wikipedia.org/wiki/Usage_message
