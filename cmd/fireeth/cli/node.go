@@ -187,7 +187,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
 			gs := dgrpc.NewServer(dgrpc.WithLogger(appLogger))
 
-			mindreaderPlugin, err := getMindreaderLogPlugin(
+			mindreaderPlugin, err := getReaderLogPlugin(
 				oneBlocksStoreURL,
 				workingDir,
 				bstream.GetProtocolFirstStreamableBlock,
@@ -274,7 +274,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	managerAPIAddr := NodeManagerAPIAddr
 	if isMindreader {
 		prefix = "reader-node-"
-		managerAPIAddr = MindreaderNodeManagerAPIAddr
+		managerAPIAddr = ReaderNodeManagerAPIAddr
 	}
 
 	cmd.Flags().String(prefix+"path", "geth", "command that will be launched by the node manager")

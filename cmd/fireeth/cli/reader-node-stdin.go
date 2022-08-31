@@ -33,7 +33,7 @@ func init() {
 
 	launcher.RegisterApp(zlog, &launcher.AppDef{
 		ID:            "reader-node-stdin",
-		Title:         "Mindreader Node (stdin)",
+		Title:         "Reader Node (stdin)",
 		Description:   "Blocks reading node, unmanaged, reads deep mind from standard input",
 		RegisterFlags: func(cmd *cobra.Command) error { return nil },
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {

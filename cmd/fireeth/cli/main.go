@@ -62,7 +62,7 @@ func Main(
 
 	// Those must come before `launcher.RegisterFlags` call because they register themselves some flags that are checked by `launcher.RegisterFlags`
 	registerNodeApp(backupModuleFactories)
-	registerMindreaderNodeApp(backupModuleFactories)
+	registerReaderNodeApp(backupModuleFactories)
 
 	// FIXME Should actually be a dependency on `launcher.RegisterFlags` directly!
 	launcher.RegisterCommonFlags = registerCommonFlags
