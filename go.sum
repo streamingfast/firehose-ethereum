@@ -757,8 +757,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.21-0.20220831134202-9d6e2abf866d h1:WJ+Z6V13Lk6XZhgKDcg8JzG6r9ipmMhy6O+ZvaHB5WA=
-github.com/streamingfast/substreams v0.0.21-0.20220831134202-9d6e2abf866d/go.mod h1:5hbzP/5k6pahpumN3BPvefCB748fPxzsV1hUaap81qs=
+github.com/streamingfast/substreams v0.0.21-0.20220831155021-82ea7e43a1ab h1:fEV9qZ/Dk7wHNyzoKrJ9UB8HZL/ubB0NAxBEFCDhoFU=
+github.com/streamingfast/substreams v0.0.21-0.20220831155021-82ea7e43a1ab/go.mod h1:5hbzP/5k6pahpumN3BPvefCB748fPxzsV1hUaap81qs=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
