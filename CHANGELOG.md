@@ -21,7 +21,7 @@ for instructions to keep up to date.
   * Added "Total Ordering" concept, 'Ordinal' field on all events within a block (trx begin/end, call, log, balance change, etc.)
   * Added TotalDifficulty field to ethereum blocks
   * Fixed wrong transaction status for contract deployments that fail due to out of gas on pre-Homestead transactions (aligned with status reported by chain: SUCCESS -- even if no contract code is set)
-  * Added more instrumentation around AccessList and DynamicFee transaction, removed some elements that were useless or not could be derived from other elements in the structure, ex: gasEvents
+  * Added more instrumentation around AccessList and DynamicFee transaction, removed some elements that were useless or could not be derived from other elements in the structure, ex: gasEvents
   * Added support for finalized block numbers (moved outside the proto-ethereum block, to firehose bstream v2 block)
 * There are *no more "forked blocks"* in the merged-blocks bundles: 
   * The merged-blocks are therefore produced only after finality passed (before The Merge, this means after 200 confirmations).
