@@ -47,6 +47,7 @@ func init() {
 		Description: "Provides on-demand filtered blocks, depends on common-blocks-store-url and common-blockstream-addr",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
+			cmd.Flags().String("firehose-grpc-health-listen-addr", FirehoseGRPCHealthServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
 
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
@@ -162,6 +163,7 @@ func init() {
 				ForkedBlocksStoreURL:    forkedBlocksStoreURL,
 				BlockStreamAddr:         blockstreamAddr,
 				GRPCListenAddr:          viper.GetString("firehose-grpc-listen-addr"),
+				GRPCHealtListenAddr:     viper.GetString("firehose-grpc-health-listen-addr"),
 				GRPCShutdownGracePeriod: time.Second,
 			}, &firehoseApp.Modules{
 				Authenticator:            authenticator,
