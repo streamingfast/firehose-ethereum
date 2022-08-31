@@ -1,0 +1,105 @@
+Usage:
+  fireeth start [flags] [all|command1 [command2...]]
+
+Examples:
+  fireeth start relayer merger --merger-grpc-serving-addr=localhost:12345 --relayer-merger-addr=localhost:12345
+
+Available Commands:
+  mindreader-node
+  combined-index-builder
+  firehose
+  merger
+  reader-node-stdin
+  relayer
+  node
+
+Flags:
+      --combined-index-builder-grpc-listen-addr string   Address to listen for grpc-based healthz check (default ":13043")
+      --combined-index-builder-index-size uint           size of combined index bundles that will be created (default 10000)
+      --combined-index-builder-start-block uint          block number to start indexing
+      --combined-index-builder-stop-block uint           block number to stop indexing
+      --common-auth-plugin string                        [COMMON] Auth plugin URI, see streamingfast/dauth repository (default "null://")
+      --common-block-index-sizes ints                    index bundle sizes that that are considered valid when looking for block indexes (default [100000,100000,10000,1000])
+      --common-blocks-cache-dir string                   [COMMON] Blocks cache directory where all the block's bytes will be cached to disk instead of being kept in RAM. This should be a disk that persists across restarts of the Firehose component to reduce the the strain on the disk when restarting and streams reconnects. The size of disk must at least big (with a 10%!b(MISSING)uffer) in bytes as the sum of flags' value for  'common-blocks-cache-max-recent-entry-bytes' and 'common-blocks-cache-max-entry-by-age-bytes'. (default "{sf-data-dir}/blocks-cache")
+      --common-blocks-cache-enabled                      [COMMON] Use a disk cache to store the blocks data to disk and instead of keeping it in RAM. By enabling this, block's Protobuf content, in bytes, is kept on file system instead of RAM. This is done as soon the block is downloaded from storage. This is a tradeoff between RAM and Disk, if you are going to serve only a handful of concurrent requests, it's suggested to keep is disabled, if you encounter heavy RAM consumption issue, specially by the firehose component, it's definitely a good idea to enable it and configure it properly through the other 'common-blocks-cache-...' flags. The cache is split in two portions, one keeping N total bytes of blocks of the most recently used blocks and the other one keeping the N earliest blocks as requested by the various consumers of the cache.
+      --common-blocks-cache-max-entry-by-age-bytes int   [COMMON] Blocks cache max size in bytes of the earliest used blocks, after the limit is reached, blocks are evicted from the cache. (default 20483)
+      --common-blocks-cache-max-recent-entry-bytes int   [COMMON] Blocks cache max size in bytes of the most recently used blocks, after the limit is reached, blocks are evicted from the cache. (default 20483)
+      --common-chain-id uint32                           [COMMON] ETH chain ID (from EIP-155) as returned from JSON-RPC 'eth_chainId' call Used by: dgraphql (default 123)
+      --common-deployment-id string                      [COMMON] Deployment ID, used for some billing functions by dgraphql (default "eth-local")
+      --common-forked-blocks-store-url string            [COMMON] Store URL (with prefix) to read/write forked block files that we want to keep (default "file://{sf-data-dir}/storage/forked-blocks")
+      --common-index-store-url string                    [COMMON] Store URL (with prefix) to read/write index files. (default "file://{sf-data-dir}/storage/index")
+      --common-live-blocks-addr string                   [COMMON] gRPC endpoint to get real-time blocks. (default ":13011")
+      --common-merged-blocks-store-url string            [COMMON] Store URL (with prefix) where to read/write merged blocks. (default "file://{sf-data-dir}/storage/merged-blocks")
+      --common-metering-plugin string                    [COMMON] Metering plugin URI, see streamingfast/dmetering repository (default "null://")
+      --common-network-id uint32                         [COMMON] ETH network ID as returned from JSON-RPC 'net_version' call. Used by: miner-geth-node, mindreader-geth-node, mindreader-openeth-node, peering-geth-node, peering-openeth-node (default 123)
+      --common-one-block-store-url string                [COMMON] Store URL (with prefix) to read/write one-block files. (default "file://{sf-data-dir}/storage/one-blocks")
+      --common-ratelimiter-plugin string                 [COMMON] Rate Limiter plugin URI, see streamingfast/dauth repository (default "null://")
+      --common-system-shutdown-signal-delay duration     [COMMON] Add a delay between receiving SIGTERM signal and shutting down apps. Apps will respond negatively to /healthz during this period
+      --firehose-grpc-listen-addr string                 Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode. (default ":13042")
+  -h, --help                                             help for start
+      --merger-grpc-listen-addr string                   Address to listen for incoming gRPC requests (default ":13012")
+      --merger-prune-forked-blocks-after uint            Number of blocks that must pass before we delete old forks (one-block-files lingering) (default 50000)
+      --merger-stop-block uint                           if non-zero, merger will trigger shutdown when blocks have been merged up to this block
+      --merger-time-between-store-lookups duration       Delay between source store polling (should be higher for remote storage) (default 1s)
+      --merger-time-between-store-pruning duration       Delay between source store pruning loops (default 1m0s)
+      --node-arguments string                            If not empty, overrides the list of default node arguments (computed from node type and role). Start with '+' to append to default args instead of replacing. You can use the {public-ip} token, that will be matched against space-separated hostname:IP pairs in PUBLIC_IPS env var, taking hostname from HOSTNAME env var.
+      --node-backups strings                             Repeatable, space-separated key=values definitions for backups. Example: 'type=gke-pvc-snapshot prefix= tag=v1 freq-blocks=1000 freq-time= project=myproj'
+      --node-bootstrap-data-url string                   URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)
+      --node-data-dir string                             Directory for node data ({node-role} is either mindreader, peering or dev-miner) (default "{sf-data-dir}/{node-role}/data")
+      --node-debug-deep-mind                             [DEV] Prints deep mind instrumentation logs to standard output, should be use for debugging purposes only
+      --node-enforce-peers string                        Comma-separated list of operator nodes that will be queried for an 'enode' value and added as a peer
+      --node-ipc-path string                             IPC path cannot be more than 64chars on geth (default "{sf-data-dir}/{node-role}/ipc")
+      --node-log-to-zap                                  Enable all node logs to transit into node's logger directly, when false, prints node logs directly to stdout (default true)
+      --node-manager-api-addr string                     Ethereum node manager API address (default ":13041")
+      --node-path string                                 command that will be launched by the node manager (default "geth")
+      --node-readiness-max-latency duration              Determine the maximum head block latency at which the instance will be determined healthy. Some chains have more regular block production than others. (default 30s)
+      --node-role fireeth help nodes                     Sets default node arguments. accepted values: peering, dev-miner. See fireeth help nodes for more info (default "peering")
+      --node-type string                                 one of: ['geth','openethereum'] (default "geth")
+      --reader-node-arguments string                     If not empty, overrides the list of default node arguments (computed from node type and role). Start with '+' to append to default args instead of replacing. You can use the {public-ip} token, that will be matched against space-separated hostname:IP pairs in PUBLIC_IPS env var, taking hostname from HOSTNAME env var.
+      --reader-node-backups strings                      Repeatable, space-separated key=values definitions for backups. Example: 'type=gke-pvc-snapshot prefix= tag=v1 freq-blocks=1000 freq-time= project=myproj'
+      --reader-node-blocks-chan-capacity int             Capacity of the channel holding blocks read by the mindreader. Process will shutdown superviser/geth if the channel gets over 90% of that capacity to prevent horrible consequences. Raise this number when processing tiny blocks very quickly (default 100)
+      --reader-node-bootstrap-data-url string            URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)
+      --reader-node-data-dir string                      Directory for node data ({node-role} is either mindreader, peering or dev-miner) (default "{sf-data-dir}/{node-role}/data")
+      --reader-node-debug-deep-mind                      [DEV] Prints deep mind instrumentation logs to standard output, should be use for debugging purposes only
+      --reader-node-enforce-peers string                 Comma-separated list of operator nodes that will be queried for an 'enode' value and added as a peer
+      --reader-node-grpc-listen-addr string              Address to listen for incoming gRPC requests (default ":13010")
+      --reader-node-ipc-path string                      IPC path cannot be more than 64chars on geth (default "{sf-data-dir}/{node-role}/ipc")
+      --reader-node-log-to-zap                           Enable all node logs to transit into node's logger directly, when false, prints node logs directly to stdout (default true)
+      --reader-node-manager-api-addr string              Ethereum node manager API address (default ":13009")
+      --reader-node-oneblock-suffix string               Unique identifier for that mindreader, so that it can produce 'oneblock files' in the same store as another instance without competing for writes. (default "default")
+      --reader-node-path string                          command that will be launched by the node manager (default "geth")
+      --reader-node-readiness-max-latency duration       Determine the maximum head block latency at which the instance will be determined healthy. Some chains have more regular block production than others. (default 30s)
+      --reader-node-stop-block-num uint                  Shutdown mindreader when we the following 'stop-block-num' has been reached, inclusively.
+      --reader-node-type string                          one of: ['geth','openethereum'] (default "geth")
+      --reader-node-working-dir string                   Path where mindreader will stores its files (default "{sf-data-dir}/mindreader/work")
+      --relayer-grpc-listen-addr string                  Address to listen for incoming gRPC requests (default ":13011")
+      --relayer-max-source-latency duration              Max latency tolerated to connect to a source. A performance optimization for when you have redundant sources and some may not have caught up (default 999999h0m0s)
+      --relayer-source strings                           List of Blockstream sources (mindreaders) to connect to for live block feeds (repeat flag as needed) (default [:13010])
+      --substreams-cache-disabled                        Disable cached output values for substreams
+      --substreams-client-endpoint string                firehose endpoint for substreams client.  if left empty, will default to this current local firehose.
+      --substreams-client-insecure                       substreams client in insecure mode
+      --substreams-client-jwt string                     jwt for substreams client authentication
+      --substreams-client-plaintext                      substreams client in plaintext mode (default true)
+      --substreams-enabled                               Whether to enable substreams
+      --substreams-output-cache-save-interval uint       Interval in blocks at which to save store snapshots (default 100)
+      --substreams-parallel-subrequest-limit int         number of parallel subrequests substream can make to synchronize its stores (default 4)
+      --substreams-partial-mode-enabled                  Whether to enable partial stores generation support on this instance (usually for internal deployments only)
+      --substreams-rpc-cache-chunk-size uint             RPC cache chunk size in block (default 1000)
+      --substreams-rpc-cache-store-url string            where rpc cache will be store call responses (default "{sf-data-dir}/rpc-cache")
+      --substreams-rpc-endpoints stringArray             Remote endpoints to contact to satisfy Substreams 'eth_call's
+      --substreams-state-store-url string                where substreams state data are stored (default "{sf-data-dir}/localdata")
+      --substreams-stores-save-interval uint             Interval in blocks at which to save store snapshots (default 1000)
+      --substreams-sub-request-block-range-size int      substreams subrequest block range size value for the scheduler (default 1000)
+      --substreams-sub-request-parallel-jobs int         substreams subrequest parallel jobs for the scheduler (default 5)
+
+Global Flags:
+      --common-first-streamable-block int       [COMMON] first streamable block number
+  -c, --config-file string                      Configuration file to use. No config file loaded if set to an empty string (hence using flags to configure the whole stack).
+  -d, --data-dir string                         Path to data storage for all components of the stack (default "./sf-data")
+      --log-format string                       Format for logging to stdout. Either 'text' or 'stackdriver'. When 'text', if the standard output is detected to be interactive, colored text is output, otherwise non-colored text. (default "text")
+      --log-level-switcher-listen-addr string   If non-empty, the process will listen on this address for json-formatted requests to change different logger levels (see DEBUG.md for more info) (default "localhost:1065")
+      --log-to-file                             Also write logs to {data-dir}/sf.log.json 
+      --metrics-listen-addr string              If non-empty, the process will listen on this address to server Prometheus metrics (default ":9102")
+      --pprof-listen-addr string                If non-empty, the process will listen on this address for pprof analysis (see https://golang.org/pkg/net/http/pprof/) (default "localhost:6060")
+      --startup-delay duration                  [DEV] Delay before launching actual application(s), useful to leave some time to perform maintenance operations, on persisten disks for example.
+  -v, --verbose count                           Enables verbose output (-vvvv for max verbosity)

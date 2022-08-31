@@ -56,8 +56,12 @@ for instructions to keep up to date.
 * Added `common-forked-blocks-store-url` flag *used by merger and firehose*
 * Changed `--log-to-file` default from `true` to `false`
 * Changed default verbosity level: now all loggers are `INFO` (instead of having most of them to `WARN`). `-v` will now activate all `DEBUG` logs
-* Removed `merger-state-file`: no more state file is used
-* Removed `merger-next-exclusive-highest-block-limit`
+* Removed `common-block-index-sizes`, `common-index-store-url`
+* Removed `merger-state-file`, `merger-next-exclusive-highest-block-limit`, `merger-max-one-block-operations-batch-size`, `merger-one-block-deletion-threads`, `merger-writers-leeway`
+* Added `merger-stop-block`, `merger-prune-forked-blocks-after`, `merger-time-between-store-pruning`
+* Removed `mindreader-node-start-block-num`, `mindreader-node-wait-upload-complete-on-shutdown`, `mindreader-node-merge-and-store-directly`, `mindreader-node-merge-threshold-block-age`
+* Removed `firehose-block-index-sizes`,`firehose-block-index-sizes`, `firehose-irreversible-blocks-index-bundle-sizes`, `firehose-irreversible-blocks-index-url`, `firehose-realtime-tolerance`
+* Removed `relayer-buffer-size`, `relayer-merger-addr`, `relayer-min-start-offset`
 
 ### MIGRATION
 
@@ -103,9 +107,11 @@ for instructions to keep up to date.
 
 ### Other (non-breaking) changes
 
-#### Added tools
+#### Added tools and apps
 
-* Added firehose client command `sfeth tools firehose-client [--plaintext] [-a NONE] <firehose:endpoint> <start> [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2`
+* Added `tools firehose-client` command with filter/index options
+* Added `tools normalize-merged-blocks` command to remove forked blocks from merged-blocks files (cannot transform ethereum blocks V1 into V2 because some fields are missing in V1)
+* Added substreams server support in firehose app (*alpha*) through `--substreams-enabled` flag
 
 #### Various
 
