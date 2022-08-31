@@ -75,7 +75,7 @@ for instructions to keep up to date.
 
 #### Deployment
 
-* The `reader` requires Firehose-instrumented geth binary with instrumentation version *2.x* (tagged `fh2`)
+* The `reader` requires Firehose-instrumented Geth binary with instrumentation version *2.x* (tagged `fh2`)
 * Because of the changes in the ethereum block protocol, an existing deployment cannot be migrated in-place.
 * You must deploy sf-ethereum v1.0.0 on a new environment (without any prior block or index data)
 * You can put this new deployment behind a GRPC load-balancer that routes `/sf.firehose.v2.Stream/*` and `/sf.firehose.v1.Stream/*` to your different versions.
@@ -91,15 +91,15 @@ for instructions to keep up to date.
 
 #### Producing merged-blocks in batch
 
-* The `reader` requires Firehose-instrumented geth binary with instrumentation version *2.x* (tagged `fh2`)
+* The `reader` requires Firehose-instrumented Geth binary with instrumentation version *2.x* (tagged `fh2`)
 * The `reader` *does NOT merge block files directly anymore*: you need to run it alongside a `merger`:
-  * determine a `start` and `stop` block for your reprocessing job, aligned on a 100-blocks boundary right after your geth data snapshot
+  * determine a `start` and `stop` block for your reprocessing job, aligned on a 100-blocks boundary right after your Geth data snapshot
   * set `--common-first-streamable-block` to your start-block
   * set `--merger-stop-block` to your stop-block
   * set `--common-one-block-store-url` to a local folder accessible to both `merger` and `mindreader` apps
   * set `--common-merged-blocks-store-url` to the final (ex: remote) folder where you will store your merged-blocks
   * run both apps like this `fireeth start reader,merger --...`
-* You can run as many batch jobs like this as you like in parallel to produce the merged-blocks, as long as you have data snapshots for geth that start at this point
+* You can run as many batch jobs like this as you like in parallel to produce the merged-blocks, as long as you have data snapshots for Geth that start at this point
 
 #### Producing combined block indices in batch
 
