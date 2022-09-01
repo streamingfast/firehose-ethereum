@@ -63,12 +63,15 @@ func (p *TrxPoolLogPlugin) RegisterServices(gs *grpc.Server) {
 }
 
 func (p *TrxPoolLogPlugin) LogLine(line string) {
-	if !strings.HasPrefix(line, "DMLOG TRX_ENTER_POOL") {
+	switch {
+	case strings.HasPrefix(line, "DMLOG TRX_ENTER_POOL"):
+		line = line[6:]
+	case strings.HasPrefix(line, "FIRE TRX_ENTER_POOL"):
+		line = line[5:]
+	default:
 		return
 	}
 
-	// The actual line without `DMLOG ` in front
-	line = line[6:]
 	p.logger.Debug("detected trx enter pool event detected")
 	chunks, err := codec.SplitInChunks(line, 12)
 	if err != nil {

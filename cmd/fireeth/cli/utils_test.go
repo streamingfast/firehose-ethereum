@@ -55,31 +55,3 @@ func Test_getDirsToMake(t *testing.T) {
 	}
 
 }
-
-//func TestGethVersion_NewFromString(t *testing.T) {
-//	tests := []struct {
-//		name        string
-//		inVersion   string
-//		inHelp      string
-//		expected    gethVersion
-//		expectedErr error
-//	}{
-//		{"standard no suffix", "Version: 2.0.5", "", gethVersion{"2.0.5", 2, 0, 5, "", false}, nil},
-//		{"standard with suffix then dash", "Version: 2.0.5-beta-1", "", gethVersion{"2.0.5-beta-1", 2, 0, 5, "beta-1", false}, nil},
-//		{"standard with suffix then dot", "Version: 2.0.5-rc.1", "", gethVersion{"2.0.5-rc.1", 2, 0, 5, "rc.1", false}, nil},
-//		{"standard with suffix with number", "Version: 2.0.5-rc1", "", gethVersion{"2.0.5-rc1", 2, 0, 5, "rc1", false}, nil},
-//		{"standard with dm suffix, dash", "Version: 2.0.5-dm-12.0", "Geth Help\n\n--firehose-deep-mind  Other", gethVersion{"2.0.5-dm-12.0", 2, 0, 5, "dm-12.0", true}, nil},
-//		{"standard with dm suffix, dot", "Version: 2.0.5-dm.12.0", "Geth Help\n\n--firehose-deep-mind  Other", gethVersion{"2.0.5-dm.12.0", 2, 0, 5, "dm.12.0", true}, nil},
-//	}
-//
-//	for _, test := range tests {
-//		t.Run(test.name, func(t *testing.T) {
-//			actual, err := newGethVersionFromString(test.inVersion, test.inHelp)
-//			if test.expectedErr == nil {
-//				assert.Equal(t, test.expected, actual)
-//			} else {
-//				assert.Equal(t, test.expectedErr, err)
-//			}
-//		})
-//	}
-//}

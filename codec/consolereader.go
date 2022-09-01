@@ -212,11 +212,14 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 	c.logger.Debug("next", zap.Int("read_type", readType))
 
 	for line := range c.lines {
-		if !strings.HasPrefix(line, "DMLOG ") {
+		switch {
+		case strings.HasPrefix(line, "DMLOG "):
+			line = line[6:]
+		case strings.HasPrefix(line, "FIRE "):
+			line = line[5:]
+		default:
 			continue
 		}
-
-		line = line[6:]
 
 		// *Important*
 		//
@@ -225,7 +228,7 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		//
 		// Easiest way is to use the battelfield dmlog test file we have in the project:
 		//
-		//     cat codec/testdata/deep-mind.dmlog | grep -Eo "DMLOG ([^ ]+)" | sort | uniq -c | sort -nr
+		//     cat codec/testdata/deep-mind.dmlog | grep -Eo "(DMLOG|FIRE) ([^ ]+)" | sort | uniq -c | sort -nr
 		//
 		// And order the cases here with the order given by the file.
 		//
@@ -404,7 +407,7 @@ func (ctx *parseCtx) popCallIndexReturnParent() (int32, uint32, error) {
 }
 
 // Formats
-// DMLOG BEGIN_BLOCK <NUM>
+// FIRE BEGIN_BLOCK <NUM>
 func (ctx *parseCtx) readBeginBlock(line string) error {
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -430,9 +433,9 @@ func (ctx *parseCtx) readBeginBlock(line string) error {
 }
 
 // Formats
-// DMLOG BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <ACCESS_LIST> <MAX_FEE_PER_GAS> <MAX_PRIORITY_FEE_PER_GAS> <TRX_TYPE> <BEGIN_ORDINAL>
+// FIRE BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <ACCESS_LIST> <MAX_FEE_PER_GAS> <MAX_PRIORITY_FEE_PER_GAS> <TRX_TYPE> <BEGIN_ORDINAL>
 
-// DMLOG BEGIN_APPLY_TRX 2becdee3b9ce9dd9a7274b8f6881e8e8d119ab046502ea90688773ef545731c7 929bc44bbd41ca0e621dc50f7c7e3204ce026258 . 0bf9 2b0d6434d98be6858c367710fff02ed69b86c0b1188a737d3ca55507f363928c 691797966e89cbb83dd45c2b6685ca1dc3734ee0c58ae8ffd935c9823b051e9f 300000 0ba43b7400 58 41c0e1b5 . 0 1
+// FIRE BEGIN_APPLY_TRX 2becdee3b9ce9dd9a7274b8f6881e8e8d119ab046502ea90688773ef545731c7 929bc44bbd41ca0e621dc50f7c7e3204ce026258 . 0bf9 2b0d6434d98be6858c367710fff02ed69b86c0b1188a737d3ca55507f363928c 691797966e89cbb83dd45c2b6685ca1dc3734ee0c58ae8ffd935c9823b051e9f 300000 0ba43b7400 58 41c0e1b5 . 0 1
 
 func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	if ctx.currentTrace != nil {
@@ -557,7 +560,7 @@ func decodeAccessList(b []byte) (out []*pbeth.AccessTuple, err error) {
 }
 
 // Formats
-// DMLOG EVM_RUN_CALL CALL 4 6
+// FIRE EVM_RUN_CALL CALL 4 6
 func (ctx *parseCtx) readEVMRunCall(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
@@ -598,7 +601,7 @@ func (ctx *parseCtx) readEVMRunCall(line string) error {
 }
 
 // Formats
-// DMLOG EVM_PARAM CALL 4 a63e668919f50a591f5a23fb77881a347d10c081 0000000000000000000000000000000000003003 defd 2300 .
+// FIRE EVM_PARAM CALL 4 a63e668919f50a591f5a23fb77881a347d10c081 0000000000000000000000000000000000003003 defd 2300 .
 func (ctx *parseCtx) readEVMParamCall(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
@@ -642,7 +645,7 @@ func (ctx *parseCtx) readEVMParamCall(line string) error {
 }
 
 // Formats
-// DMLOG EVM_CALL_FAILED <CALL_INDEX> <GAS_LEFT> <REASON>
+// FIRE EVM_CALL_FAILED <CALL_INDEX> <GAS_LEFT> <REASON>
 func (ctx *parseCtx) readEVMCallFailed(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
@@ -672,7 +675,7 @@ func (ctx *parseCtx) readEVMCallFailed(line string) error {
 }
 
 // Formats
-// DMLOG EVM_REVERTED <CALL_INDEX>
+// FIRE EVM_REVERTED <CALL_INDEX>
 func (ctx *parseCtx) readEVMReverted(line string) error {
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -690,7 +693,7 @@ func (ctx *parseCtx) readEVMReverted(line string) error {
 }
 
 // Formats
-// DMLOG EVM_END_CALL <CALL_INDEX> <GAS_LEFT> <RETURN_VALUE> <ORDINAL>
+// FIRE EVM_END_CALL <CALL_INDEX> <GAS_LEFT> <RETURN_VALUE> <ORDINAL>
 func (ctx *parseCtx) readEVMEndCall(line string) error {
 	chunks, err := SplitInChunks(line, 5)
 	if err != nil {
@@ -721,7 +724,7 @@ func (ctx *parseCtx) readEVMEndCall(line string) error {
 }
 
 // Formats
-// DMLOG SKIPPED_TRX <REASON>
+// FIRE SKIPPED_TRX <REASON>
 func (ctx *parseCtx) readSkippedTrx(line string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
@@ -737,7 +740,7 @@ func (ctx *parseCtx) readSkippedTrx(line string) error {
 }
 
 // Formats
-// DMLOG END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> { []<deth.Log> }
+// FIRE END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> { []<deth.Log> }
 func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no matching BEGIN_APPLY_TRX")
@@ -807,7 +810,7 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 }
 
 // Formats
-// DMLOG FINALIZE_BLOCK <NUM>
+// FIRE FINALIZE_BLOCK <NUM>
 func (ctx *parseCtx) readFinalizeBlock(line string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
@@ -832,7 +835,7 @@ func (ctx *parseCtx) readFinalizeBlock(line string) error {
 }
 
 // Formats
-// DMLOG FAILED_APPLY_TRX transaction failure error message...
+// FIRE FAILED_APPLY_TRX transaction failure error message...
 func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
@@ -858,7 +861,7 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 }
 
 // Formats
-// DMLOG CREATED_ACCOUNT 4 2af4f4790a71313e0c532072207a77f1e4c1baec 7
+// FIRE CREATED_ACCOUNT 4 2af4f4790a71313e0c532072207a77f1e4c1baec 7
 func (ctx *parseCtx) readCreateAccount(line string) error {
 	chunks, err := SplitInChunks(line, 4)
 	if err != nil {
@@ -893,7 +896,7 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
 }
 
 /*
-   DMLOG INIT 2.0 polygon 1.10.17-fh+hotfix (deadbeef) ...
+   FIRE INIT 2.0 polygon 1.10.17-fh+hotfix (deadbeef) ...
 */
 func (ctx *parseCtx) readInit(line string) error {
 	chunks, err := SplitInBoundedChunks(line, 4)
@@ -919,7 +922,7 @@ func (ctx *parseCtx) readInit(line string) error {
 }
 
 // Format
-// DMLOG SUICIDE_CHANGE 1 c356a543cec92de8bf1e43a88d09e568e9d3aca3 false .
+// FIRE SUICIDE_CHANGE 1 c356a543cec92de8bf1e43a88d09e568e9d3aca3 false .
 func (ctx *parseCtx) readSuicideChange(line string) error {
 	chunks, err := SplitInChunks(line, 5)
 	if err != nil {
@@ -943,7 +946,7 @@ func (ctx *parseCtx) readSuicideChange(line string) error {
 }
 
 // Format
-// DMLOG CODE_CHANGE 2 cb32e940a34b938f9cebe70313fe7e8ca3d23d36 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 . 89f3219c608c80bcbb274738ff7a325624cd54c9868b9d54bde369e5ab005bc6 6080604052600080fdfea165627a7a723058204a5d828a5772e67b2eaa10bd570ffa7d9607586e73576cc26299c24348dc64450029 8
+// FIRE CODE_CHANGE 2 cb32e940a34b938f9cebe70313fe7e8ca3d23d36 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 . 89f3219c608c80bcbb274738ff7a325624cd54c9868b9d54bde369e5ab005bc6 6080604052600080fdfea165627a7a723058204a5d828a5772e67b2eaa10bd570ffa7d9607586e73576cc26299c24348dc64450029 8
 //deepmind.Print("CODE_CHANGE", deepmind.CallIndex(), deepmind.Addr(s.address), deepmind.Hex(s.CodeHash()), deepmind.Hex(prevcode),
 // deepmind.Hash(codeHash), deepmind.Hex(code), <ORDINAL>)
 func (ctx *parseCtx) readCodeChange(line string) error {
@@ -993,7 +996,7 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 }
 
 // Formats
-// DMLOG END_BLOCK <NUM> <SIZE> { header: <BlockHeader>, uncles: []<BlockHeader> }
+// FIRE END_BLOCK <NUM> <SIZE> { header: <BlockHeader>, uncles: []<BlockHeader> }
 func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	if ctx.currentBlock == nil {
 		return nil, fmt.Errorf("no block started")
@@ -1092,7 +1095,7 @@ func computeProofOfStakeLIBNum(blockNum uint64, finalizedBlockNum uint64, firstS
 }
 
 // Formats
-// DMLOG STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESSS> <KEY> <OLD_VALUE> <NEW_VALUE> <ORDINAL>
+// FIRE STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESSS> <KEY> <OLD_VALUE> <NEW_VALUE> <ORDINAL>
 func (ctx *parseCtx) readStorageChange(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
@@ -1124,7 +1127,7 @@ func (ctx *parseCtx) readStorageChange(line string) error {
 }
 
 // Formats
-// DMLOG BALANCE_CHANGE <CALL_INDEX> <ADDRESSS> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
+// FIRE BALANCE_CHANGE <CALL_INDEX> <ADDRESSS> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
 func (ctx *parseCtx) readBalanceChange(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
@@ -1179,7 +1182,7 @@ func (ctx *parseCtx) readBalanceChange(line string) error {
 }
 
 // Formats
-// DMLOG GAS_CHANGE <CALL_INDEX> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
+// FIRE GAS_CHANGE <CALL_INDEX> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
 func (ctx *parseCtx) readGasChange(line string) error {
 	chunks, err := SplitInChunks(line, 6)
 	if err != nil {
@@ -1217,7 +1220,7 @@ func (ctx *parseCtx) readGasChange(line string) error {
 }
 
 // Formats
-// DMLOG NONCE_CHANGE <CALL_INDEX> <ADDRESS> <OLD_VALUE> <NEW_VALUE> <ORDINAL
+// FIRE NONCE_CHANGE <CALL_INDEX> <ADDRESS> <OLD_VALUE> <NEW_VALUE> <ORDINAL
 func (ctx *parseCtx) readNonceChange(line string) error {
 	chunks, err := SplitInChunks(line, 6)
 	if err != nil {
@@ -1254,7 +1257,7 @@ func (ctx *parseCtx) readNonceChange(line string) error {
 }
 
 // Formats
-// DMLOG EVM_KECCAK <CALL_INDEX> <HASH_RESULT> <HASH_INPUT>
+// FIRE EVM_KECCAK <CALL_INDEX> <HASH_RESULT> <HASH_INPUT>
 func (ctx *parseCtx) readEVMKeccak(line string) error {
 	chunks, err := SplitInChunks(line, 4)
 	if err != nil {
@@ -1284,7 +1287,7 @@ func (ctx *parseCtx) readEVMKeccak(line string) error {
 }
 
 // Formats
-// DMLOG TRX_FROM <ADDRESS>
+// FIRE TRX_FROM <ADDRESS>
 func (ctx *parseCtx) readTrxFrom(line string) error {
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -1304,7 +1307,7 @@ func (ctx *parseCtx) readTrxFrom(line string) error {
 }
 
 // Formats
-// DMLOG ACCOUNT_WITHOUT_CODE <CALL_INDEX>
+// FIRE ACCOUNT_WITHOUT_CODE <CALL_INDEX>
 func (ctx *parseCtx) readAccountWithoutCode(line string) error {
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -1321,7 +1324,7 @@ func (ctx *parseCtx) readAccountWithoutCode(line string) error {
 }
 
 // Formats
-// DMLOG ADD_LOG <CALL_INDEX> <BLOCK_INDEX> <CONTRACT_ADDRESS> <TOPICS> <DATA> <ORDINAL>
+// FIRE ADD_LOG <CALL_INDEX> <BLOCK_INDEX> <CONTRACT_ADDRESS> <TOPICS> <DATA> <ORDINAL>
 func (ctx *parseCtx) readAddLog(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {

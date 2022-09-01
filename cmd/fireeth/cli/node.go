@@ -251,14 +251,14 @@ type nodeArgsByRole map[string]string
 var nodeArgsByTypeAndRole = map[string]nodeArgsByRole{
 	"geth": {
 		"dev-miner":  "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --http --http.api=eth,net,web3,personal --http.port=" + NodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
-		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --http --http.api=eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --firehose-deep-mind-block-progress",
-		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --http --http.api=eth,net,web3 --http.port=" + MindreaderNodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --firehose-deep-mind",
+		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --http --http.api=eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --firehose-block-progress",
+		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --http --http.api=eth,net,web3 --http.port=" + MindreaderNodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --firehose-enabled",
 		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
 	},
 	"openethereum": {
-		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind-block-progress",
+		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-block-progress",
 		//"dev-miner": ...
-		"mindreader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + MindreaderNodeP2PPort + " --jsonrpc-port=" + MindreaderNodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-deep-mind --no-warp",
+		"mindreader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + MindreaderNodeP2PPort + " --jsonrpc-port=" + MindreaderNodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-enabled --no-warp",
 	},
 }
 
@@ -360,11 +360,11 @@ func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPa
 		return nil, fmt.Errorf("invalid node role: %s for type %s", nodeRole, nodeType)
 	}
 
-	// This sets `--firehose-deep-mind-genesis` if the node role is of type mindreader
+	// This sets `--firehose-genesis-file` if the node role is of type mindreader
 	// (for which case we are sure that Firehose patch is supported) and if the bootstrap data
 	// url is a `genesis.json` file.
 	if nodeRole == "mindreader" && isGenesisBootstrapper(bootstrapDataURL) {
-		args += fmt.Sprintf(" --firehose-deep-mind-genesis=%s", bootstrapDataURL)
+		args += fmt.Sprintf(" --firehose-genesis-file=%s", bootstrapDataURL)
 	}
 
 	if providedArgs != "" {
