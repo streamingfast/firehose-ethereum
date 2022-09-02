@@ -16,7 +16,7 @@ Node manager commands (eth-... <tab> to show all):
  - Attach to Geth instance            geth attach /sf-data/*/ipc (See https://github.com/ethereum/go-ethereum/wiki/Management-APIs#list-of-management-apis)
 
  - Take a volume snapshot             eth-volume-snapshot
- - Debug Deep Mind logs for 30s       eth-debug-deep-mind-30s
+ - Debug Deep Mind logs for 30s       eth-debug-firehose-logs-30s
  - Stop instance                      eth-maintenance
  - Start or restart instance          eth-resume
 

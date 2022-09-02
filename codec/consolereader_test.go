@@ -29,9 +29,9 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/jsonpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -43,7 +43,7 @@ func TestParseFromFile(t *testing.T) {
 		expectedPanicErr error
 		readTransaction  bool
 	}{
-		{"testdata/deep-mind.dmlog", nil, nil, false},
+		{"testdata/firehose-logs.dmlog", nil, nil, false},
 		{"testdata/normalize-r-and-s-curve-points.dmlog", nil, nil, false},
 		{"testdata/block_mining_rewards.dmlog", nil, nil, false},
 		{"testdata/block_unknown_balance_change.dmlog", nil, errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},
@@ -140,9 +140,9 @@ func isNil(v interface{}) bool {
 }
 
 func TestGeneratePBBlocks(t *testing.T) {
-	t.Skip("generate only when deep-mind.dmlog changes")
+	t.Skip("generate only when firehose-logs.dmlog changes")
 
-	cr := testFileConsoleReader(t, "testdata/deep-mind.dmlog")
+	cr := testFileConsoleReader(t, "testdata/firehose-logs.dmlog")
 
 	for {
 		out, err := cr.ReadBlock()

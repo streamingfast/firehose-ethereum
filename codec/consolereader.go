@@ -228,7 +228,7 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		//
 		// Easiest way is to use the battelfield dmlog test file we have in the project:
 		//
-		//     cat codec/testdata/deep-mind.dmlog | grep -Eo "(DMLOG|FIRE) ([^ ]+)" | sort | uniq -c | sort -nr
+		//     cat codec/testdata/firehose-logs.dmlog | grep -Eo "(DMLOG|FIRE) ([^ ]+)" | sort | uniq -c | sort -nr
 		//
 		// And order the cases here with the order given by the file.
 		//

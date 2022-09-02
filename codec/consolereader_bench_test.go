@@ -24,7 +24,7 @@ import (
 
 func BenchmarkConsoleReader(b *testing.B) {
 	expectedBlockCount := 33
-	data, err := os.ReadFile("testdata/deep-mind.dmlog")
+	data, err := os.ReadFile("testdata/firehose-logs.dmlog")
 	if err != nil {
 		b.Fatal(err)
 	}

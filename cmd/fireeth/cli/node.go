@@ -25,15 +25,15 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dgrpc"
 	"github.com/streamingfast/dlauncher/launcher"
+	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
+	"github.com/streamingfast/firehose-ethereum/node-manager/geth"
+	"github.com/streamingfast/firehose-ethereum/node-manager/openeth"
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
 	nodeManagerApp "github.com/streamingfast/node-manager/app/node_manager"
 	nodeMindReaderApp "github.com/streamingfast/node-manager/app/node_mindreader"
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/operator"
-	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
-	"github.com/streamingfast/firehose-ethereum/node-manager/geth"
-	"github.com/streamingfast/firehose-ethereum/node-manager/openeth"
 	"go.uber.org/zap"
 )
 
@@ -292,7 +292,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	cmd.Flags().StringSlice(prefix+"backups", []string{}, "Repeatable, space-separated key=values definitions for backups. Example: 'type=gke-pvc-snapshot prefix= tag=v1 freq-blocks=1000 freq-time= project=myproj'")
 
 	cmd.Flags().Bool(prefix+"log-to-zap", true, "Enable all node logs to transit into node's logger directly, when false, prints node logs directly to stdout")
-	cmd.Flags().Bool(prefix+"debug-deep-mind", false, "[DEV] Prints deep mind instrumentation logs to standard output, should be use for debugging purposes only")
+	cmd.Flags().Bool(prefix+"debug-firehose-logs", false, "[DEV] Prints firehose instrumentation logs to standard output, should be use for debugging purposes only")
 }
 
 func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader bool) (
@@ -326,7 +326,7 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader 
 		MustReplaceDataDir(sfDataDir, viper.GetString(prefix+"data-dir")))
 	nodeIPCPath = replaceNodeRole(nodeRole,
 		MustReplaceDataDir(sfDataDir, viper.GetString(prefix+"ipc-path")))
-	debugDeepMind = viper.GetBool(prefix + "debug-deep-mind")
+	debugDeepMind = viper.GetBool(prefix + "debug-firehose-logs")
 	logToZap = viper.GetBool(prefix + "log-to-zap")
 	managerAPIAddress = viper.GetString(prefix + "manager-api-addr")
 	readinessMaxLatency = viper.GetDuration(prefix + "readiness-max-latency")
