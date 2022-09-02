@@ -87,7 +87,7 @@ func setupCmd(cmd *cobra.Command) error {
 		LogListenAddr: viper.GetString("global-log-level-switcher-listen-addr"),
 		LogToStderr:   true,
 	})
-	launcher.SetupTracing("sf-ethereum")
+	launcher.SetupTracing("firehose-ethereum")
 	launcher.SetupAnalyticsMetrics(zlog, viper.GetString("global-metrics-listen-addr"), viper.GetString("global-pprof-listen-addr"))
 
 	return nil

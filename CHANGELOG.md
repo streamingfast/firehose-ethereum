@@ -77,7 +77,7 @@ for instructions to keep up to date.
 
 * The `reader` requires Firehose-instrumented Geth binary with instrumentation version *2.x* (tagged `fh2`)
 * Because of the changes in the ethereum block protocol, an existing deployment cannot be migrated in-place.
-* You must deploy sf-ethereum v1.0.0 on a new environment (without any prior block or index data)
+* You must deploy firehose-ethereum v1.0.0 on a new environment (without any prior block or index data)
 * You can put this new deployment behind a GRPC load-balancer that routes `/sf.firehose.v2.Stream/*` and `/sf.firehose.v1.Stream/*` to your different versions.
 * Go through the list of changed "Flags and environment variables" and adjust your deployment accordingly. 
   * Determine a (shared) location for your `forked-blocks`.
@@ -103,7 +103,7 @@ for instructions to keep up to date.
 
 #### Producing combined block indices in batch
 
-* Run batch jobs like this: `sfeth start generate-combined-index --common-blocks-store-url=/path/to/blocks --common-index-store-url=/path/to/index --combined-index-builder-index-size=10000 --combined-index-builder-start-block=0 [--combined-index-builder-stop-block=10000] --combined-index-builder-grpc-listen-addr=:9000`
+* Run batch jobs like this: `fireeth start generate-combined-index --common-blocks-store-url=/path/to/blocks --common-index-store-url=/path/to/index --combined-index-builder-index-size=10000 --combined-index-builder-start-block=0 [--combined-index-builder-stop-block=10000] --combined-index-builder-grpc-listen-addr=:9000`
 
 ### Other (non-breaking) changes
 

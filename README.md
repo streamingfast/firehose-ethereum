@@ -17,8 +17,8 @@ go install ./cmd/bootnode
 ### Install fireeth
 
 ```
-git clone git@github.com:streamingfast/sf-ethereum.git
-cd sf-ethereum
+git clone git@github.com:streamingfast/firehose-ethereum.git
+cd firehose-ethereum
 go install ./cmd/fireeth
 ```
 
@@ -75,7 +75,7 @@ Releases are performed using [goreleaser](https://goreleaser.com/).
 
 ## Docker Bundle Image Building
 
-New version of Ethereum clients means releasing a new version of the full bundled image of `sf-ethereum` that contains `fireeth` binary as well as node instrumented binary to sync with the chain. Doing this is really simple as we will simply ask GitHub to launch an action that will build for us the bundled image with the current up to date version of the Ethereum client.
+New version of Ethereum clients means releasing a new version of the full bundled image of `firehose-ethereum` that contains `fireeth` binary as well as node instrumented binary to sync with the chain. Doing this is really simple as we will simply ask GitHub to launch an action that will build for us the bundled image with the current up to date version of the Ethereum client.
 
 First, install the [GitHub CLI](https://github.com/cli/cli#github-cli) and configure it to be connected with your account.
 
