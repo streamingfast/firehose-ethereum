@@ -32,6 +32,7 @@ import (
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
 	"go.uber.org/zap"
+	_ "google.golang.org/grpc/xds"
 	"os"
 	"time"
 )
