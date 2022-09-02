@@ -66,7 +66,7 @@ func NewConsoleReader(logger *zap.Logger, lines chan string) (*ConsoleReader, er
 	return l, nil
 }
 
-//todo: WTF?
+// todo: WTF?
 func (l *ConsoleReader) Done() <-chan interface{} {
 	return l.done
 }
@@ -896,7 +896,7 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
 }
 
 /*
-   FIRE INIT 2.0 polygon 1.10.17-fh+hotfix (deadbeef) ...
+FIRE INIT 2.0 polygon 1.10.17-fh+hotfix (deadbeef) ...
 */
 func (ctx *parseCtx) readInit(line string) error {
 	chunks, err := SplitInBoundedChunks(line, 4)
@@ -947,7 +947,7 @@ func (ctx *parseCtx) readSuicideChange(line string) error {
 
 // Format
 // FIRE CODE_CHANGE 2 cb32e940a34b938f9cebe70313fe7e8ca3d23d36 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 . 89f3219c608c80bcbb274738ff7a325624cd54c9868b9d54bde369e5ab005bc6 6080604052600080fdfea165627a7a723058204a5d828a5772e67b2eaa10bd570ffa7d9607586e73576cc26299c24348dc64450029 8
-//deepmind.Print("CODE_CHANGE", deepmind.CallIndex(), deepmind.Addr(s.address), deepmind.Hex(s.CodeHash()), deepmind.Hex(prevcode),
+// deepmind.Print("CODE_CHANGE", deepmind.CallIndex(), deepmind.Addr(s.address), deepmind.Hex(s.CodeHash()), deepmind.Hex(prevcode),
 // deepmind.Hash(codeHash), deepmind.Hex(code), <ORDINAL>)
 func (ctx *parseCtx) readCodeChange(line string) error {
 
@@ -1047,7 +1047,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 
 	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
 	ctx.globalStats.blockRate.Inc()
-	ctx.globalStats.blockAverageParseTime.IncByElapsedTime(ctx.stats.startAt, time.Millisecond)
+	ctx.globalStats.blockAverageParseTime.IncByElapsedTime(ctx.stats.startAt)
 	ctx.globalStats.transactionRate.IncBy(int64(len(ctx.transactionTraces)))
 
 	block := ctx.currentBlock

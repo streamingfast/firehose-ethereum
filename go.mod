@@ -1,4 +1,4 @@
-module github.com/streamingfast/sf-ethereum
+module github.com/streamingfast/firehose-ethereum
 
 go 1.18
 
@@ -7,6 +7,7 @@ require (
 	github.com/ShinyTrinkets/overseer v0.3.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.8
+	github.com/klauspost/compress v1.13.6
 	github.com/lithammer/dedent v1.1.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/manifoldco/promptui v0.8.0
@@ -16,13 +17,14 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20220419231930-a555cea243fc
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
-	github.com/streamingfast/dgrpc v0.0.0-20220901200108-74e412fc6042
+	github.com/streamingfast/dgrpc v0.0.0-20220902130119-9c7cde6abea5
 	github.com/streamingfast/dlauncher v0.0.0-20220307153121-5674e1b64d40
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
 	github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
 	github.com/streamingfast/firehose v0.1.1-0.20220901200305-b62a22fe0bff
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20220902130254-0b6bace8f5c6
 	github.com/streamingfast/index-builder v0.0.0-20220812125759-4ea1e5a3aa91
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
@@ -30,11 +32,10 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20220811195019-694930bda9cb
 	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
 	github.com/streamingfast/relayer v0.0.2-0.20220811185139-02ee222c9277
-	github.com/streamingfast/sf-ethereum/types v0.0.0-20220823191321-1fbaf3707f52
 	github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.21-0.20220902120505-2e5f03ffa78e
+	github.com/streamingfast/substreams v0.0.21-0.20220902130508-ceb869d695d2
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
@@ -105,7 +106,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a // indirect
-	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/lunixbochs/vtclean v0.0.0-20180621232353-2d01aacdc34a // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
