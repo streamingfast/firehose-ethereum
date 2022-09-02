@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sf.ethereum.substreams.v1;
 
-option go_package = "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/substreams/v1;pbethss";
+option go_package = "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1;pbethss";
 
 message RpcCalls {
   repeated RpcCall calls = 1;

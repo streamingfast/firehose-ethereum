@@ -7,7 +7,7 @@
 package pbtrxstream
 
 import (
-	v2 "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	v2 "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"

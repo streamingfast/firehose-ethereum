@@ -225,7 +225,7 @@ func dfuseAbsoluteDataDir() (string, error) {
 //			- It's installed but execution of "geth version" or "geth --help" failed
 //
 //			Make sure you have a Firehose instrumented 'geth' binary, follow instructions
-//			at https://github.com/streamingfast/sf-ethereum/blob/develop/DEPENDENCIES.md#firehose-instrumented-ethereum-prebuilt-binaries
+//			at https://github.com/streamingfast/firehose-ethereum/blob/develop/DEPENDENCIES.md#firehose-instrumented-ethereum-prebuilt-binaries
 //			to find how to install it.
 //
 //			If you have your Firehose instrumented 'geth' binary outside your PATH, use --geth-path=<location>
@@ -243,7 +243,7 @@ func dfuseAbsoluteDataDir() (string, error) {
 //			PATH environment variable?
 //
 //			Make sure you have a Firehose instrumented 'geth' binary, follow instructions
-//			at https://github.com/streamingfast/sf-ethereum/blob/develop/DEPENDENCIES.md#firehose-instrumented-ethereum-prebuilt-binaries
+//			at https://github.com/streamingfast/firehose-ethereum/blob/develop/DEPENDENCIES.md#firehose-instrumented-ethereum-prebuilt-binaries
 //			to find how to install it.
 //
 //			If you have your Firehose instrumented 'geth' binary outside your PATH, use --geth-path=<location>

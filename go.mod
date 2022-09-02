@@ -1,4 +1,4 @@
-module github.com/streamingfast/sf-ethereum
+module github.com/streamingfast/firehose-ethereum
 
 go 1.18
 
@@ -31,7 +31,7 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20220811195019-694930bda9cb
 	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
 	github.com/streamingfast/relayer v0.0.2-0.20220811185139-02ee222c9277
-	github.com/streamingfast/sf-ethereum/types v0.0.0-20220830190827-56841de9b369
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20220830190827-56841de9b369
 	github.com/streamingfast/sf-tools v0.0.0-20220830151952-184d6e9a6bb9
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea

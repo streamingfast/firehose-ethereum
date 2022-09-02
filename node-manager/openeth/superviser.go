@@ -35,7 +35,7 @@ import (
 	nodeManager "github.com/streamingfast/node-manager"
 	logplugin "github.com/streamingfast/node-manager/log_plugin"
 	"github.com/streamingfast/node-manager/superviser"
-	nodemanager "github.com/streamingfast/sf-ethereum/node-manager"
+	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )

@@ -17,7 +17,7 @@ package trxstream
 import (
 	"sync"
 
-	pbtrxstream "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/trxstream/v1"
+	pbtrxstream "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/trxstream/v1"
 	"go.uber.org/zap"
 )
 

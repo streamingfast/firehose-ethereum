@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sf.ethereum.type.v2;
 
-option go_package = "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2;pbeth";
+option go_package = "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2;pbeth";
 
 import "google/protobuf/timestamp.proto";
 

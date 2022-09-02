@@ -28,8 +28,8 @@ import (
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dmetrics"
-	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
 )
 

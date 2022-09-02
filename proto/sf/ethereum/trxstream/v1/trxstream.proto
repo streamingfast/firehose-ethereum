@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package sf.ethereum.trxstream.v1;
 
-option go_package = "github.com/streamingfast/sf-ethereum-priv/types/pb/sf/ethereum/trxstream/v1;pbtrxstream";
+option go_package = "github.com/streamingfast/firehose-ethereum-priv/types/pb/sf/ethereum/trxstream/v1;pbtrxstream";
 
 import "google/protobuf/timestamp.proto";
 import "sf/ethereum/type/v2/type.proto";

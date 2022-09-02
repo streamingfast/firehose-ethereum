@@ -100,6 +100,6 @@ brews:
     commit_author:
       name: goreleaserbot
       email: goreleaser@streamingfast.io
-    homepage: "https://github.com/streamingfast/sf-ethereum"
+    homepage: "https://github.com/streamingfast/firehose-ethereum"
     description: "Firehose on Ethereum stack"
     license: "Apache-2.0"

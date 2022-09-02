@@ -6,8 +6,8 @@ import (
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
-	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/transform/v1"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"

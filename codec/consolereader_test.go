@@ -30,8 +30,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/streamingfast/jsonpb"
-	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -30,14 +30,14 @@ import (
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/logging"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
-	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/sf-ethereum/types/testing")
+var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/firehose-ethereum/types/testing")
 
 type from hexString
 

@@ -14,7 +14,7 @@
 
 package cli
 
-import "github.com/streamingfast/sf-ethereum/tools"
+import "github.com/streamingfast/firehose-ethereum/tools"
 
 func init() {
 	RootCmd.AddCommand(tools.Cmd)

@@ -11,8 +11,8 @@ import (
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
-	_ "github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	_ "github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )

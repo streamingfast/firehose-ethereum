@@ -9,8 +9,8 @@ import (
 	bstransform "github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dlauncher/launcher"
 	indexerApp "github.com/streamingfast/index-builder/app/index-builder"
-	"github.com/streamingfast/sf-ethereum/transform"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/firehose-ethereum/transform"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
 
 func init() {

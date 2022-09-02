@@ -31,19 +31,19 @@ import (
 	nodeMindReaderApp "github.com/streamingfast/node-manager/app/node_mindreader"
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/operator"
-	nodemanager "github.com/streamingfast/sf-ethereum/node-manager"
-	"github.com/streamingfast/sf-ethereum/node-manager/geth"
-	"github.com/streamingfast/sf-ethereum/node-manager/openeth"
+	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
+	"github.com/streamingfast/firehose-ethereum/node-manager/geth"
+	"github.com/streamingfast/firehose-ethereum/node-manager/openeth"
 	"go.uber.org/zap"
 )
 
-var nodeLogger, nodeTracer = logging.PackageLogger("node", "github.com/streamingfast/sf-ethereum/node")
-var nodeGethLogger, _ = logging.PackageLogger("node.geth", "github.com/streamingfast/sf-ethereum/node/geth", DefaultLevelInfo)
-var nodeOpenEthereumLogger, _ = logging.PackageLogger("node.openethereum", "github.com/streamingfast/sf-ethereum/node/open-ethereum", DefaultLevelInfo)
+var nodeLogger, nodeTracer = logging.PackageLogger("node", "github.com/streamingfast/firehose-ethereum/node")
+var nodeGethLogger, _ = logging.PackageLogger("node.geth", "github.com/streamingfast/firehose-ethereum/node/geth", DefaultLevelInfo)
+var nodeOpenEthereumLogger, _ = logging.PackageLogger("node.openethereum", "github.com/streamingfast/firehose-ethereum/node/open-ethereum", DefaultLevelInfo)
 
-var mindreaderLogger, mindreaderTracer = logging.PackageLogger("mindreader", "github.com/streamingfast/sf-ethereum/mindreader")
-var mindreaderGethLogger, _ = logging.PackageLogger("mindreader.geth", "github.com/streamingfast/sf-ethereum/mindreader/geth", DefaultLevelInfo)
-var mindreaderOpenEthereumLogger, _ = logging.PackageLogger("mindreader.open-ethereum", "github.com/streamingfast/sf-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
+var mindreaderLogger, mindreaderTracer = logging.PackageLogger("mindreader", "github.com/streamingfast/firehose-ethereum/mindreader")
+var mindreaderGethLogger, _ = logging.PackageLogger("mindreader.geth", "github.com/streamingfast/firehose-ethereum/mindreader/geth", DefaultLevelInfo)
+var mindreaderOpenEthereumLogger, _ = logging.PackageLogger("mindreader.open-ethereum", "github.com/streamingfast/firehose-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
 
 func registerNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
 	launcher.RegisterApp(zlog, &launcher.AppDef{

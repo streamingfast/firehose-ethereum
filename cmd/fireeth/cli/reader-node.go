@@ -24,7 +24,7 @@ import (
 	nodeManager "github.com/streamingfast/node-manager"
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
-	"github.com/streamingfast/sf-ethereum/codec"
+	"github.com/streamingfast/firehose-ethereum/codec"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )

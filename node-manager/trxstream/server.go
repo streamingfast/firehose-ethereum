@@ -18,7 +18,7 @@ import (
 	"sync"
 
 	"github.com/streamingfast/logging"
-	pbtrxstream "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/trxstream/v1"
+	pbtrxstream "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/trxstream/v1"
 	"github.com/streamingfast/shutter"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"

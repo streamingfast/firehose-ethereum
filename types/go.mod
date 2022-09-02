@@ -1,4 +1,4 @@
-module github.com/streamingfast/sf-ethereum/types
+module github.com/streamingfast/firehose-ethereum/types
 
 go 1.17
 

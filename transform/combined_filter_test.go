@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/streamingfast/eth-go"
-	pbtransform "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/transform/v1"
+	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/transform/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/test-go/testify/require"
 )

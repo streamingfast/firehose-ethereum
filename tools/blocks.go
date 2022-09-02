@@ -31,7 +31,7 @@ import (
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/jsonpb"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
 )
 

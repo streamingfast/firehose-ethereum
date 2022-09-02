@@ -26,8 +26,8 @@ import (
 	"github.com/streamingfast/dstore"
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
 	"github.com/streamingfast/logging"
-	ethss "github.com/streamingfast/sf-ethereum/substreams"
-	ethtransform "github.com/streamingfast/sf-ethereum/transform"
+	ethss "github.com/streamingfast/firehose-ethereum/substreams"
+	ethtransform "github.com/streamingfast/firehose-ethereum/transform"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
 	"os"
@@ -39,7 +39,7 @@ var headBlockNumMetric = metricset.NewHeadBlockNumber("firehose")
 var headTimeDriftmetric = metricset.NewHeadTimeDrift("firehose")
 
 func init() {
-	appLogger, _ := logging.PackageLogger("firehose", "github.com/streamingfast/sf-ethereum/firehose")
+	appLogger, _ := logging.PackageLogger("firehose", "github.com/streamingfast/firehose-ethereum/firehose")
 
 	launcher.RegisterApp(zlog, &launcher.AppDef{
 		ID:          "firehose",

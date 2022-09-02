@@ -25,11 +25,11 @@ import (
 	nodeMindreaderStdinApp "github.com/streamingfast/node-manager/app/node_mindreader_stdin"
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/mindreader"
-	"github.com/streamingfast/sf-ethereum/codec"
+	"github.com/streamingfast/firehose-ethereum/codec"
 )
 
 func init() {
-	appLogger, appTracer := logging.PackageLogger("reader-node-stdin", "github.com/streamingfast/sf-ethereum/reader-node-stdin")
+	appLogger, appTracer := logging.PackageLogger("reader-node-stdin", "github.com/streamingfast/firehose-ethereum/reader-node-stdin")
 
 	launcher.RegisterApp(zlog, &launcher.AppDef{
 		ID:            "reader-node-stdin",
