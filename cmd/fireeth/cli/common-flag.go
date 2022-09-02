@@ -58,7 +58,7 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 
 	// Network config
 	cmd.Flags().Uint32("common-chain-id", DefaultChainID, "[COMMON] ETH chain ID (from EIP-155) as returned from JSON-RPC 'eth_chainId' call Used by: dgraphql")
-	cmd.Flags().Uint32("common-network-id", DefaultNetworkID, "[COMMON] ETH network ID as returned from JSON-RPC 'net_version' call. Used by: miner-geth-node, reader-geth-node, reader-openeth-node, peering-geth-node, peering-openeth-node")
+	cmd.Flags().Uint32("common-network-id", DefaultNetworkID, "[COMMON] ETH network ID as returned from JSON-RPC 'net_version' call")
 	cmd.Flags().String("common-deployment-id", DefaultDeploymentID, "[COMMON] Deployment ID, used for some billing functions by dgraphql")
 
 	//// Authentication, metering and rate limiter plugins
