@@ -49,7 +49,6 @@ func init() {
 		Description: "Provides on-demand filtered blocks, depends on common-merged-blocks-store-url and common-live-blocks-addr",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
-			cmd.Flags().String("firehose-vpc-network", "", "VPC network name to use for the firehose server configuration")
 			cmd.Flags().String("firehose-grpc-health-listen-addr", FirehoseGRPCHealthServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
 			cmd.Flags().String("firehose-vpc-network", "", "VPC network name to use for the firehose xDS server configuration")
 
