@@ -33,27 +33,27 @@ go install ./cmd/fireeth
   args:
   - merger
   - firehose
-  - mindreader-node
+  - reader-node
   - relayer
   flags:
     common-chain-id: "1"
     common-network-id: "1"
-    reader-node-bootstrap-data-url: ./mindreader/genesis.json
+    reader-node-bootstrap-data-url: ./reader/genesis.json
     reader-node-log-to-zap: false
     reader-node-arguments: "+--bootnodes=enode://<enode1>@<ip>:<port>,enode://<enode2>@<ip>:<port>"
   ```
 
   **Note** Up to date boot nodes info for Geth supported network(s) can be found [here](https://github.com/ethereum/go-ethereum/blob/master/params/bootnodes.go).
 
-* Create a folder `mindreader`
+* Create a folder `reader`
 
-* Copy the `genesis.json` file of the chain into the `mindreader` folder.
+* Copy the `genesis.json` file of the chain into the `reader` folder.
 
   **Note** It's possible to use `geth dumpgenesis` to dump actual genesis file to disk
-    * Mainnet - `geth --mainnet dumpgenesis > ./mindreader/genesis.json`
-    * Ropsten - `geth --ropsten dumpgenesis > ./mindreader/genesis.json`
-    * Goerli - `geth --goerli dumpgenesis > ./mindreader/genesis.json`
-    * Rinkeby - `geth --rinkeby dumpgenesis > ./mindreader/genesis.json`
+    * Mainnet - `geth --mainnet dumpgenesis > ./reader/genesis.json`
+    * Ropsten - `geth --ropsten dumpgenesis > ./reader/genesis.json`
+    * Goerli - `geth --goerli dumpgenesis > ./reader/genesis.json`
+    * Rinkeby - `geth --rinkeby dumpgenesis > ./reader/genesis.json`
 
 * `fireeth start -vv`
 

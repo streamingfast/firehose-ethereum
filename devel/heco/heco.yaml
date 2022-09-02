@@ -1,6 +1,6 @@
 start:
   args:
-  - mindreader-node
+  - reader-node
   flags:
     common-chain-id: "128"
     common-network-id: "128"

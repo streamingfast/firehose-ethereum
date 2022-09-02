@@ -20,12 +20,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/dlauncher/launcher"
+	"github.com/streamingfast/firehose-ethereum/codec"
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
 	nodeMindreaderStdinApp "github.com/streamingfast/node-manager/app/node_mindreader_stdin"
 	"github.com/streamingfast/node-manager/metrics"
 	"github.com/streamingfast/node-manager/mindreader"
-	"github.com/streamingfast/firehose-ethereum/codec"
 )
 
 func init() {
@@ -49,20 +49,20 @@ func init() {
 				return r, nil
 			}
 
-			metricID := "mindreader-geth-node-stdin"
+			metricID := "reader-geth-node-stdin"
 			headBlockTimeDrift := metrics.NewHeadBlockTimeDrift(metricID)
 			headBlockNumber := metrics.NewHeadBlockNumber(metricID)
 			appReadiness := metrics.NewAppReadiness(metricID)
-			metricsAndReadinessManager := nodeManager.NewMetricsAndReadinessManager(headBlockTimeDrift, headBlockNumber, appReadiness, viper.GetDuration("mindreader-geth-node-readiness-max-latency"))
+			metricsAndReadinessManager := nodeManager.NewMetricsAndReadinessManager(headBlockTimeDrift, headBlockNumber, appReadiness, viper.GetDuration("reader-node-readiness-max-latency"))
 
 			return nodeMindreaderStdinApp.New(&nodeMindreaderStdinApp.Config{
-				GRPCAddr:                   viper.GetString("mindreader-geth-node-grpc-listen-addr"),
+				GRPCAddr:                   viper.GetString("reader-node-grpc-listen-addr"),
 				OneBlocksStoreURL:          archiveStoreURL,
-				MindReadBlocksChanCapacity: viper.GetInt("mindreader-geth-node-blocks-chan-capacity"),
-				StartBlockNum:              viper.GetUint64("mindreader-geth-node-start-block-num"),
-				StopBlockNum:               viper.GetUint64("mindreader-geth-node-stop-block-num"),
-				WorkingDir:                 MustReplaceDataDir(sfDataDir, viper.GetString("mindreader-geth-node-working-dir")),
-				OneBlockSuffix:             viper.GetString("mindreader-geth-node-oneblock-suffix"),
+				MindReadBlocksChanCapacity: viper.GetInt("reader-node-blocks-chan-capacity"),
+				StartBlockNum:              viper.GetUint64("reader-node-start-block-num"),
+				StopBlockNum:               viper.GetUint64("reader-node-stop-block-num"),
+				WorkingDir:                 MustReplaceDataDir(sfDataDir, viper.GetString("reader-node-working-dir")),
+				OneBlockSuffix:             viper.GetString("reader-node-oneblock-suffix"),
 			}, &nodeMindreaderStdinApp.Modules{
 				ConsoleReaderFactory:       consoleReaderFactory,
 				MetricsAndReadinessManager: metricsAndReadinessManager,

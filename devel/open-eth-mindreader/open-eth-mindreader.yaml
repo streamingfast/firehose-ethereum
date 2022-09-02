@@ -1,6 +1,6 @@
 start:
   args:
-  - mindreader-node
+  - reader-node
   flags:
     reader-node-path: "openethereum"
     reader-node-type: "openethereum"

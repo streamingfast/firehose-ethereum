@@ -2,16 +2,16 @@ start:
   args:
   - merger
   - firehose
-  - mindreader-node
+  - reader-node
   - node
   - relayer
   - combined-index-builder
   flags:
     node-role: dev-miner
     node-bootstrap-data-url: ./miner/bootstrap.tar.zst
-    reader-node-bootstrap-data-url: ./mindreader/genesis.json
+    reader-node-bootstrap-data-url: ./reader/genesis.json
     reader-node-enforce-peers: localhost:13041 # App `node` manager API port
-    reader-node-arguments: +--firehose-genesis-file=./mindreader/genesis.json --authrpc.port=8552
+    reader-node-arguments: +--firehose-genesis-file=./reader/genesis.json --authrpc.port=8552
     merger-time-between-store-pruning: 10s
     substreams-enabled: true
     substreams-rpc-endpoints: "http://localhost:8545"

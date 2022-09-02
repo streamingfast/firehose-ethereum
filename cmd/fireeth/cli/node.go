@@ -41,9 +41,9 @@ var nodeLogger, nodeTracer = logging.PackageLogger("node", "github.com/streaming
 var nodeGethLogger, _ = logging.PackageLogger("node.geth", "github.com/streamingfast/firehose-ethereum/node/geth", DefaultLevelInfo)
 var nodeOpenEthereumLogger, _ = logging.PackageLogger("node.openethereum", "github.com/streamingfast/firehose-ethereum/node/open-ethereum", DefaultLevelInfo)
 
-var mindreaderLogger, mindreaderTracer = logging.PackageLogger("mindreader", "github.com/streamingfast/firehose-ethereum/mindreader")
-var mindreaderGethLogger, _ = logging.PackageLogger("mindreader.geth", "github.com/streamingfast/firehose-ethereum/mindreader/geth", DefaultLevelInfo)
-var mindreaderOpenEthereumLogger, _ = logging.PackageLogger("mindreader.open-ethereum", "github.com/streamingfast/firehose-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
+var readerLogger, readerTracer = logging.PackageLogger("reader", "github.com/streamingfast/firehose-ethereum/mindreader")
+var readerGethLogger, _ = logging.PackageLogger("reader.geth", "github.com/streamingfast/firehose-ethereum/mindreader/geth", DefaultLevelInfo)
+var readerOpenEthereumLogger, _ = logging.PackageLogger("reader.open-ethereum", "github.com/streamingfast/firehose-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
 
 func registerNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
 	launcher.RegisterApp(zlog, &launcher.AppDef{
@@ -62,8 +62,8 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 		appLogger := nodeLogger
 		appTracer := nodeTracer
 		if isMindreader {
-			appLogger = mindreaderLogger
-			appTracer = mindreaderTracer
+			appLogger = readerLogger
+			appTracer = readerTracer
 		}
 
 		sfDataDir := runtime.AbsDataDir
@@ -89,7 +89,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 
 		prefix := "node"
 		if isMindreader {
-			prefix = "mindreader-node"
+			prefix = "reader-node"
 		}
 		metricsAndReadinessManager := buildMetricsAndReadinessManager(prefix, readinessMaxLatency)
 
@@ -187,7 +187,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
 			gs := dgrpc.NewServer(dgrpc.WithLogger(appLogger))
 
-			mindreaderPlugin, err := getReaderLogPlugin(
+			readerPlugin, err := getReaderLogPlugin(
 				oneBlocksStoreURL,
 				workingDir,
 				bstream.GetProtocolFirstStreamableBlock,
@@ -204,7 +204,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 				return nil, err
 			}
 
-			superviser.RegisterLogPlugin(mindreaderPlugin)
+			superviser.RegisterLogPlugin(readerPlugin)
 
 			trxPoolLogPlugin := nodemanager.NewTrxPoolLogPlugin(appLogger)
 			superviser.RegisterLogPlugin(trxPoolLogPlugin)
@@ -231,13 +231,13 @@ func getSupervisedProcessLogger(isMindreader bool, nodeType string) *zap.Logger 
 	switch nodeType {
 	case "geth":
 		if isMindreader {
-			return mindreaderGethLogger
+			return readerGethLogger
 		} else {
 			return nodeGethLogger
 		}
 	case "openethereum":
 		if isMindreader {
-			return mindreaderOpenEthereumLogger
+			return readerOpenEthereumLogger
 		} else {
 			return nodeOpenEthereumLogger
 		}
@@ -382,7 +382,7 @@ func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPa
 	if strings.Contains(args, "{public-ip}") {
 		var foundPublicIP string
 		hostname := os.Getenv("HOSTNAME")
-		publicIPs := os.Getenv("PUBLIC_IPS") // format is PUBLIC_IPS="mindreader-v3-1:1.2.3.4 backup-node:5.6.7.8"
+		publicIPs := os.Getenv("PUBLIC_IPS") // format is PUBLIC_IPS="reader-v3-1:1.2.3.4 backup-node:5.6.7.8"
 		for _, pairStr := range strings.Fields(publicIPs) {
 			pair := strings.Split(pairStr, ":")
 			if len(pair) != 2 {
