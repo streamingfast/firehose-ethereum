@@ -20,16 +20,18 @@ import (
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream/transform"
 	dauthAuthenticator "github.com/streamingfast/dauth/authenticator"
+	dgrpcxds "github.com/streamingfast/dgrpc/xds"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/dmetrics"
 	"github.com/streamingfast/dstore"
-	firehoseApp "github.com/streamingfast/firehose/app/firehose"
-	"github.com/streamingfast/logging"
 	ethss "github.com/streamingfast/firehose-ethereum/substreams"
 	ethtransform "github.com/streamingfast/firehose-ethereum/transform"
+	firehoseApp "github.com/streamingfast/firehose/app/firehose"
+	"github.com/streamingfast/logging"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
+	"go.uber.org/zap"
 	"os"
 	"time"
 )
@@ -47,6 +49,7 @@ func init() {
 		Description: "Provides on-demand filtered blocks, depends on common-merged-blocks-store-url and common-live-blocks-addr",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
+			cmd.Flags().String("firehose-vpc-network", "", "VPC network name to use for the firehose server configuration")
 
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
@@ -154,16 +157,16 @@ func init() {
 			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.CombinedFilterFactory(indexStore, possibleIndexSizes))
 
-			//bootStrapFilename := os.Getenv("GRPC_XDS_BOOTSTRAP")
-			//zlog.Info("looked for GRPC_XDS_BOOTSTRAP", zap.String("filename", bootStrapFilename))
-			//
-			//if bootStrapFilename != "" {
-			//	zlog.Info("generating bootstrap file", zap.String("filename", bootStrapFilename))
-			//	err := dgrpcxds.GenerateBootstrapFile("trafficdirector.googleapis.com:443", bootStrapFilename)
-			//	if err != nil {
-			//		panic(fmt.Sprintf("failed to generate bootstrap file: %v", err))
-			//	}
-			//}
+			bootStrapFilename := os.Getenv("GRPC_XDS_BOOTSTRAP")
+			zlog.Info("looked for GRPC_XDS_BOOTSTRAP", zap.String("filename", bootStrapFilename))
+
+			if bootStrapFilename != "" {
+				zlog.Info("generating bootstrap file", zap.String("filename", bootStrapFilename))
+				err := dgrpcxds.GenerateBootstrapFile("trafficdirector.googleapis.com:443", viper.GetString("firehose-vpc-network"), bootStrapFilename)
+				if err != nil {
+					panic(fmt.Sprintf("failed to generate bootstrap file: %v", err))
+				}
+			}
 
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
 				MergedBlocksStoreURL:    mergedBlocksStoreURL,
