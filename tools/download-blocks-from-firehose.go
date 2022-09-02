@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	sftools "github.com/streamingfast/sf-tools"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -28,7 +28,7 @@ var DownloadFromFirehoseCmd = &cobra.Command{
 	Short:   "download blocks from firehose and save them to merged-blocks",
 	Args:    cobra.ExactArgs(4),
 	RunE:    downloadFromFirehoseE,
-	Example: "sfeth tools download-from-firehose api.streamingfast.io 1000 2000 ./outputdir",
+	Example: "fireeth tools download-from-firehose api.streamingfast.io 1000 2000 ./outputdir",
 }
 
 func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {
@@ -55,7 +55,7 @@ func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {
 		fixerFunc = func(in *bstream.Block) (*bstream.Block, error) {
 			block := in.ToProtocol().(*pbeth.Block)
 			block.NormalizeInPlace()
-			return types.BlockFromProto(block)
+			return types.BlockFromProto(block, in.LibNum)
 		}
 	}
 
@@ -80,5 +80,13 @@ func decodeAnyPB(in *anypb.Any) (*bstream.Block, error) {
 		return nil, fmt.Errorf("unmarshal anypb: %w", err)
 	}
 
-	return types.BlockFromProto(block)
+	// FIXME: Damn it, need LibNum from `*bstream.Block` here but since we are actually
+	// downloading from `sf.firehose.v2.Stream`, then `LIBNum` is unavailable. Hence
+	// I don't think we will be able to serve this use case anymore.
+	var changeMeIfYouUpdateCommentAbove = uint64(0)
+	if true {
+		return nil, fmt.Errorf("downloading Firehose blocks is disabled for now a LIBNum cannot be reliably used in all cases anymore")
+	}
+
+	return types.BlockFromProto(block, changeMeIfYouUpdateCommentAbove)
 }

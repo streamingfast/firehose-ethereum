@@ -30,14 +30,14 @@ import (
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/logging"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
-	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var zlog, _ = logging.PackageLogger("sfeth", "github.com/streamingfast/sf-ethereum/types/testing")
+var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/firehose-ethereum/types/testing")
 
 type from hexString
 
@@ -343,23 +343,23 @@ func ToTimestamp(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
-func ToBstreamBlock(t testing.T, block *pbeth.Block) *bstream.Block {
-	blk, err := types.BlockFromProto(block)
+func ToBstreamBlock(t testing.T, block *pbeth.Block, libNum uint64) *bstream.Block {
+	blk, err := types.BlockFromProto(block, libNum)
 	require.NoError(t, err)
 
 	return blk
 }
 
-func ToBstreamBlocks(t testing.T, blocks []*pbeth.Block) (out []*bstream.Block) {
+func ToBstreamBlocks(t testing.T, blocks []*pbeth.Block, libNum uint64) (out []*bstream.Block) {
 	out = make([]*bstream.Block, len(blocks))
 	for i, block := range blocks {
-		out[i] = ToBstreamBlock(t, block)
+		out[i] = ToBstreamBlock(t, block, libNum)
 	}
 	return
 }
 
-func ToPbbstreamBlock(t testing.T, block *pbeth.Block) *pbbstream.Block {
-	blk, err := ToBstreamBlock(t, block).ToProto()
+func ToPbbstreamBlock(t testing.T, block *pbeth.Block, libNum uint64) *pbbstream.Block {
+	blk, err := ToBstreamBlock(t, block, libNum).ToProto()
 	require.NoError(t, err)
 
 	return blk

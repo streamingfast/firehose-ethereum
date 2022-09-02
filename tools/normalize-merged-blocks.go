@@ -2,8 +2,8 @@ package tools
 
 import (
 	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/sf-ethereum/types"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	sftools "github.com/streamingfast/sf-tools"
 )
 
@@ -16,5 +16,5 @@ var NormalizeMergedBlocksCmd = sftools.GetMergedBlocksNormalizer(zlog, tracer, n
 func normalize(in *bstream.Block) (*bstream.Block, error) {
 	block := in.ToProtocol().(*pbeth.Block)
 	block.NormalizeInPlace()
-	return types.BlockFromProto(block)
+	return types.BlockFromProto(block, in.LibNum)
 }

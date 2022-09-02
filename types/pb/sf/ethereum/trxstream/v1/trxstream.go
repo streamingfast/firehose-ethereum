@@ -1,6 +1,6 @@
 package pbtrxstream
 
-import pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+import pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 
 func (t *Transaction) FromTransactionTrace(trace *pbeth.TransactionTrace) {
 	t.To = trace.To

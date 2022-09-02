@@ -8,70 +8,117 @@ for instructions to keep up to date.
 
 ### BREAKING CHANGES
 
-* Protobuf Block model is now tagged `sf.ethereum.type.v2`
-  * If you depend on the proto file, update `import "sf/ethereum/type/v1/type.proto"` to `import "sf/ethereum/type/v2/type.proto"`
-  * If you depend on the proto file, update all occurrences of `sf.ethereum.type.v1.<Something>` to `sf.ethereum.type.v2.<Something>`
-  * If you depend on `sf-ethereum/types` as a library, update all occurrences of `github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v1` to `github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2`.
-* Requires Firehose instrumented binary with instrumentation version *2.0* (tagged `fh2`)
-* Requires reprocessing *all merged block files* and *block indexes (combined: call/logs)* (no more irreversible-index are needed)
-* The Firehose Blocks protocol is now under `sf.firehose.v2` (bumped from `sf.firehose.v1`). Firehose clients must be adapted.
-* The ethereum block protocol is now under `sf.ethereum.type.v2` (bumped from `sf.ethereum.type.v1`). Firehose clients must be adapted.
+#### Project rename
 
-### MIGRATION
-
-* Because of the changes in the ethereum block protocol, an existing deployment cannot be migrated in-place.
-* sf-ethereum v1.0.0 must be deployed to a new environment from block 0, under a new URL (or behind a GRPC load-balancer that routes `/sf.firehose.v2.Stream/*` and `/sf.firehose.v1.Stream/*` to your different versions.
-* a compatibility layer has been added so that `sf.firehose.v1.Stream` is also exposed, but only for specific values for 'ForkSteps' (either 'irreversible' or 'new+undo')
-
-### DETAILED CHANGES
-
-#### Firehose V2 protocol
-
- * it now only allows 2 modes of operation for steps: `NEW,UNDO` (default) and `FINAL` (only serving blocks that reached finality, with parameter `final_blocks_only`)
- * more fields have been removed or renamed
+* The binary name has changed from `sfeth` to `fireeth` (aligned with https://firehose.streamingfast.io/references/naming-conventions)
+* The repo name has changed from `sf-ethereum` to `firehose-ethereum`
 
 #### Ethereum V2 blocks (with fh2-instrumented nodes)
 
- * Fixed Gas Price on dynamic transactions (post-London-fork on ethereum mainnet, EIP-1559)
- * Added "Total Ordering" concept, 'Ordinal' field on all events within a block (trx begin/end, call, log, balance change, etc.)
- * Added TotalDifficulty field to ethereum blocks
- * Fixed wrong transaction status for contract deployments that fail due to out of gas on pre-Homestead transactions (aligned with status reported by chain: SUCCESS -- even if no contract code is set)
- * Added more instrumentation around AccessList and DynamicFee transaction, removed some elements that were useless or not could be derived from other elements in the structure, ex: gasEvents
+* **This will require reprocessing the chain to produce new blocks**
+* Protobuf Block model is now tagged `sf.ethereum.type.v2` and contains the following improvements:
+  * Fixed Gas Price on dynamic transactions (post-London-fork on ethereum mainnet, EIP-1559)
+  * Added "Total Ordering" concept, 'Ordinal' field on all events within a block (trx begin/end, call, log, balance change, etc.)
+  * Added TotalDifficulty field to ethereum blocks
+  * Fixed wrong transaction status for contract deployments that fail due to out of gas on pre-Homestead transactions (aligned with status reported by chain: SUCCESS -- even if no contract code is set)
+  * Added more instrumentation around AccessList and DynamicFee transaction, removed some elements that were useless or could not be derived from other elements in the structure, ex: gasEvents
+  * Added support for finalized block numbers (moved outside the proto-ethereum block, to firehose bstream v2 block)
+* There are *no more "forked blocks"* in the merged-blocks bundles: 
+  * The merged-blocks are therefore produced only after finality passed (before The Merge, this means after 200 confirmations).
+  * One-block-files close to HEAD stay in the one-blocks-store for longer
+  * The blocks that do not make it in the merged-blocks (forked out because of a re-org) are uploaded to another store (common-forked-blocks-store-url) and kept there for a while (to allow resolving cursors)
 
-#### Final-blocks only in merged-blocks
+#### Firehose V2 Protocol
 
- * There are no more "forked blocks" in the merged-blocks bundles. The forked blocks stay in the one-blocks-store, along with the reversible segment close to the HEAD, until finality is passed.
- * To allow resolving cursors that point to forked blocks, you must ensure that you keep those one-block-files for a while (--merger-prune-forked-blocks-after=<number-of-blocks>)
+* **This will require changes in most firehose clients**
+* A compatibility layer has been added to still support `sf.firehose.v1.Stream/Blocks` but only for specific values for 'ForkSteps' in request: 'irreversible' or 'new+undo'
+* The Firehose Blocks protocol is now under `sf.firehose.v2` (bumped from `sf.firehose.v1`). 
+  * Step type `IRREVERSIBLE` renamed to `FINAL`
+  * `Blocks` request now only allows 2 modes regarding steps: `NEW,UNDO` and `FINAL` (gated by the `final_blocks_only` boolean flag)
+  * Blocks that are sent out can have the combined step `NEW+FINAL` to prevent sending the same blocks over and over if they are already final
 
-#### Changed top-level-flags and behavior
+#### Block Indexes
 
-* `sfeth --log-to-file` defaulted to `true` and is now `false`. Be explicit if you want to log to a file.
-* `sfeth --config-file` defaulted to `./sf.yaml` and failed if not present, and now defaults to `""` (doesn't fail is nothing is specified)
-* Default verbosity is to show all loggers as `INFO` level (previously only loggers whose app's name was `sfeth` were at `INFO` by default). `-v` will now activate `DEBUG` logs.
+* Removed the Irreversible indices completely (because the merged-blocks only contain final blocks now)
+* Deprecated the "Call" and "log" indices (`xxxxxxxxxx.yyy.calladdrsig.idx` and `xxxxxxxxxx.yyy.logaddrsig.idx`), now replaced by "combined" index
+* Moved out the `sfeth tools generate-...` command to a new app that can be launched with `sfeth start generate-combined-index[,...]`
+
+#### Flags and environment variables
+
+* All config via environment variables that started with `SFETH_` now starts with `FIREETH_`
 * All logs now output on *stderr* instead of *stdout* like previously
+* Changed `config-file` default from `./sf.yaml` to `""`, preventing failure without this flag.
+* Renamed `common-blocks-store-url` to `common-merged-blocks-store-url`
+* Renamed `common-oneblock-store-url` to `common-one-block-store-url` *now used by firehose and relayer apps*
+* Renamed `common-blockstream-addr` to `common-live-blocks-addr`
+* Renamed the `mindreader` application to `reader`
+* Renamed all the `mindreader-node-*` flags to `reader-node-*`
+* Added `common-forked-blocks-store-url` flag *used by merger and firehose*
+* Changed `--log-to-file` default from `true` to `false`
+* Changed default verbosity level: now all loggers are `INFO` (instead of having most of them to `WARN`). `-v` will now activate all `DEBUG` logs
+* Removed `common-block-index-sizes`, `common-index-store-url`
+* Removed `merger-state-file`, `merger-next-exclusive-highest-block-limit`, `merger-max-one-block-operations-batch-size`, `merger-one-block-deletion-threads`, `merger-writers-leeway`
+* Added `merger-stop-block`, `merger-prune-forked-blocks-after`, `merger-time-between-store-pruning`
+* Removed `mindreader-node-start-block-num`, `mindreader-node-wait-upload-complete-on-shutdown`, `mindreader-node-merge-and-store-directly`, `mindreader-node-merge-threshold-block-age`
+* Removed `firehose-block-index-sizes`,`firehose-block-index-sizes`, `firehose-irreversible-blocks-index-bundle-sizes`, `firehose-irreversible-blocks-index-url`, `firehose-realtime-tolerance`
+* Removed `relayer-buffer-size`, `relayer-merger-addr`, `relayer-min-start-offset`
 
-#### "Combined" call+log indexes as new app 'combined-index-builder'
+### MIGRATION
 
-* Deprecated the "Call" and "log" indexes, now replaced by "combined" index
-  * Generate new indices like this: `sfeth start generate-combined-index --common-blocks-store-url=/path/to/blocks --common-index-store-url=/path/to/index --combined-index-builder-index-size=10000 --combined-index-builder-start-block=0 [--combined-index-builder-stop-block=10000] --combined-index-builder-grpc-listen-addr=:9000`
-  * Delete previous indices named `xxxxxxxxxx.yyy.calladdrsig.idx` and `xxxxxxxxxx.yyy.logaddrsig.idx`
-* There is no more need for an irreversible index, because the merged-blocks only contain final blocks now.
+#### Clients
 
-#### Changes to merger and mindreader
+* If you depend on the proto file, update `import "sf/ethereum/type/v1/type.proto"` to `import "sf/ethereum/type/v2/type.proto"`
+* If you depend on the proto file, update all occurrences of `sf.ethereum.type.v1.<Something>` to `sf.ethereum.type.v2.<Something>`
+* If you depend on `sf-ethereum/types` as a library, update all occurrences of `github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v1` to `github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2`.
 
-* The mindreader *does not automatically merge old blocks* anymore: you need to run block extraction jobs with both mindreader and merger (using `--common-first-streamable-block=x` and `--merger-stop-block=y` to produce merged-blocks files from `x` to `y`)
-* The merger does not expose `PreMergedBlocks` endpoint over GRPC anymore, only HealthCheck. (relayer does not need to talk to it)
+### Server-side
 
-#### Added tools
+#### Deployment
 
-* Added firehose client command `sfeth tools firehose-client [--plaintext] [-a NONE] <firehose:endpoint> <start> [stop]` with filter/index options like `--call-filters=0xAddr1+0xAddr2:,0xAddr3:0xMethod1+0xmethod2`
+* The `reader` requires Firehose-instrumented Geth binary with instrumentation version *2.x* (tagged `fh2`)
+* Because of the changes in the ethereum block protocol, an existing deployment cannot be migrated in-place.
+* You must deploy firehose-ethereum v1.0.0 on a new environment (without any prior block or index data)
+* You can put this new deployment behind a GRPC load-balancer that routes `/sf.firehose.v2.Stream/*` and `/sf.firehose.v1.Stream/*` to your different versions.
+* Go through the list of changed "Flags and environment variables" and adjust your deployment accordingly. 
+  * Determine a (shared) location for your `forked-blocks`.
+  * Make sure that you set the `one-block-store` and `forked-blocks-store` correctly on all the apps that now require it.
+  * Add the `generate-combined-index` app to your new deployment instead of the `tools` command for call/logs indices.
+* If you want to reprocess blocks in batches while you set up a "live" deployment: 
+  * run your reader node from prior data (ex: from a snapshot)
+  * use the `--common-first-streamable-block` flag to a 100-block-aligned boundary right after where this snapshot starts (use this flag on all apps)
+  * perform batch merged-blocks reprocessing jobs
+  * when all the blocks are present, set the `common-first-streamable-block` flag to 0 on your deployment to serve the whole range
+
+#### Producing merged-blocks in batch
+
+* The `reader` requires Firehose-instrumented Geth binary with instrumentation version *2.x* (tagged `fh2`)
+* The `reader` *does NOT merge block files directly anymore*: you need to run it alongside a `merger`:
+  * determine a `start` and `stop` block for your reprocessing job, aligned on a 100-blocks boundary right after your Geth data snapshot
+  * set `--common-first-streamable-block` to your start-block
+  * set `--merger-stop-block` to your stop-block
+  * set `--common-one-block-store-url` to a local folder accessible to both `merger` and `mindreader` apps
+  * set `--common-merged-blocks-store-url` to the final (ex: remote) folder where you will store your merged-blocks
+  * run both apps like this `fireeth start reader,merger --...`
+* You can run as many batch jobs like this as you like in parallel to produce the merged-blocks, as long as you have data snapshots for Geth that start at this point
+
+#### Producing combined block indices in batch
+
+* Run batch jobs like this: `fireeth start generate-combined-index --common-blocks-store-url=/path/to/blocks --common-index-store-url=/path/to/index --combined-index-builder-index-size=10000 --combined-index-builder-start-block=0 [--combined-index-builder-stop-block=10000] --combined-index-builder-grpc-listen-addr=:9000`
+
+### Other (non-breaking) changes
+
+#### Added tools and apps
+
+* Added `tools firehose-client` command with filter/index options
+* Added `tools normalize-merged-blocks` command to remove forked blocks from merged-blocks files (cannot transform ethereum blocks V1 into V2 because some fields are missing in V1)
+* Added substreams server support in firehose app (*alpha*) through `--substreams-enabled` flag
 
 #### Various
 
-* Automatically setting the flag `--firehose-deep-mind-genesis` on `mindreader` nodes if their `mindreader-node-bootstrap-data-url` config value is sets to a `genesis.json` file.
+* The firehose GRPC endpoint now supports requests that are compressed using `gzip` or `zstd`
+* The merger does not expose `PreMergedBlocks` endpoint over GRPC anymore, only HealthCheck. (relayer does not need to talk to it)
+* Automatically setting the flag `--firehose-genesis-file` on `reader` nodes if their `reader-node-bootstrap-data-url` config value is sets to a `genesis.json` file.
 * Note to other Firehose implementors: we changed all command line flags to fit the required/optional format referred to here: https://en.wikipedia.org/wiki/Usage_message
-* Removed merger 'state file' (and `merger-state-file` flag) -- merger now finds where it should merge based on `common-first-streamable-block` and existing merged files...
-* Removed `merger-next-exclusive-highest-block-limit`, it will now ONLY base its decision based on `common-first-streamable-block`, up to the last found merged block
 * Added prometheus boolean metric to all apps called 'ready' with label 'app' (firehose, merger, mindreader-node, node, relayer, combined-index-builder)
 
 ## v0.10.2

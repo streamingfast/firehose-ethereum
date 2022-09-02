@@ -3,8 +3,8 @@ start:
     - firehose
   flags:
     log-to-file: false
-    common-blockstream-addr:
-    common-blocks-store-url: gs://dfuseio-global-blocks-us/eth-bsc-mainnet/v1
+    common-live-blocks-addr:
+    common-merged-blocks-store-url: gs://dfuseio-global-blocks-us/eth-bsc-mainnet/v1
     firehose-irreversible-blocks-index-url: gs://dfuseio-global-blocks-us/eth-bsc-mainnet/irr
     firehose-block-index-url: gs://dfuseio-global-blocks-us/eth-bsc-mainnet/idx
     firehose-grpc-listen-addr: ":9000"

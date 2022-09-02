@@ -3,7 +3,7 @@
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 clean=
-sfeth="$ROOT/../sfeth"
+fireeth="$ROOT/../fireeth"
 
 main() {
   pushd "$ROOT" &> /dev/null
@@ -24,7 +24,7 @@ main() {
     rm -rf sf-data &> /dev/null || true
   fi
 
-  exec $sfeth -c $(basename $ROOT).yaml start "$@"
+  exec $fireeth -c $(basename $ROOT).yaml start "$@"
 }
 
 usage_error() {

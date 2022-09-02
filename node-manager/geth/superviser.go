@@ -31,7 +31,7 @@ import (
 	nodeManager "github.com/streamingfast/node-manager"
 	logplugin "github.com/streamingfast/node-manager/log_plugin"
 	"github.com/streamingfast/node-manager/superviser"
-	nodemanager "github.com/streamingfast/sf-ethereum/node-manager"
+	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -132,11 +132,14 @@ func (s *Superviser) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 }
 
 func (s *Superviser) lastBlockSeenLogPlugin(line string) {
-	if !strings.HasPrefix(line, "DMLOG FINALIZE_BLOCK") {
+	switch {
+	case strings.HasPrefix(line, "DMLOG FINALIZE_BLOCK"):
+		line = strings.TrimSpace(strings.TrimPrefix(line, "DMLOG FINALIZE_BLOCK"))
+	case strings.HasPrefix(line, "FIRE FINALIZE_BLOCK"):
+		line = strings.TrimSpace(strings.TrimPrefix(line, "FIRE FINALIZE_BLOCK"))
+	default:
 		return
 	}
-
-	line = strings.TrimSpace(strings.TrimPrefix(line, "DMLOG FINALIZE_BLOCK"))
 
 	blockNum, err := strconv.ParseUint(line, 10, 64)
 	if err != nil {

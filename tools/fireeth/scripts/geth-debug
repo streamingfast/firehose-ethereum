@@ -1,0 +1,30 @@
+#!/bin/bash
+# description: sets geth verbosity level (1 to 10)
+
+if command -v geth &> /dev/null; then
+    if [[ $1 -lt 1 || $1 -gt 10 ]]; then
+        echo "Debug level must inclusively be between 1 and 10, got $1"
+        exit 1
+    fi
+
+    ipc_path=`printf /sf-data/*/ipc`
+    result=`/app/geth attach -datadir /data --exec "debug.verbosity($1)" "$ipc_path" 2> /tmp/geth_error`
+    if [[ $? != 0 ]]; then
+        echo "Unable to set debug verbosity correctly"
+        cat /tmp/geth_error
+    fi
+
+    if printf $result | grep -q "null"; then
+    echo "Success"
+    else
+        echo "Failed"
+        echo $result
+        exit 1
+    fi
+elif command -v openethereum &> /dev/null; then
+    echo "The command '`basename $0`' for OpenEthereum is not supported, please add support for it in firehose-ethereum repository"
+    exit 1
+else
+    echo "This was run on a node where neither Geth nor OpenEthereum could be found, cannot proceed further"
+    exit 1
+fi

@@ -18,4 +18,4 @@ import (
 	"github.com/streamingfast/logging"
 )
 
-var zlog, _ = logging.PackageLogger("sfeth", "github.com/streamingfast/sf-ethereum/types")
+var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/firehose-ethereum/types")

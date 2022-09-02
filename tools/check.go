@@ -19,7 +19,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	sftools "github.com/streamingfast/sf-tools"
 )
 
@@ -34,7 +34,7 @@ var checkMergedBlocksCmd = &cobra.Command{
 	Short: "Checks for any holes in merged blocks as well as ensuring merged blocks integrity",
 	Args:  cobra.ExactArgs(1),
 	RunE:  checkMergedBlocksE,
-	Example: ExamplePrefixed("sfeth tools check merged-blocks", `
+	Example: ExamplePrefixed("fireeth tools check merged-blocks", `
 		"./sf-data/storage/merged-blocks"
 		"gs://<project>/<bucket>/<path> -s"
 		"s3://<project>/<bucket>/<path> -f"

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/streamingfast/eth-go"
-	pbethss "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/substreams/v1"
+	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

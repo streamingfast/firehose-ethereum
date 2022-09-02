@@ -1,4 +1,4 @@
-project_name: sf-ethereum
+project_name: firehose-ethereum
 
 release:
   github:
@@ -6,7 +6,7 @@ release:
     name: sf-ethereum
   name_template: '{{.Tag}}'
 builds:
-  # sfeth
+  # fireeth
   - id: sf-ethereum
     goos:
     - linux
@@ -18,9 +18,9 @@ builds:
     - linux_amd64
     - darwin_amd64
     - darwin_arm64
-    main: ./cmd/sfeth
+    main: ./cmd/fireeth
     ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
-    binary: sfeth
+    binary: fireeth
     env:
     - CGO_ENABLED=0
 
@@ -39,7 +39,7 @@ builds:
     env:
       - CGO_ENABLED=1
 archives:
-  # sfeth
+  # fireeth
   - name_template: '{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     id: sf-ethereum
     builds:
@@ -100,6 +100,6 @@ brews:
     commit_author:
       name: goreleaserbot
       email: goreleaser@streamingfast.io
-    homepage: "https://github.com/streamingfast/sf-ethereum"
+    homepage: "https://github.com/streamingfast/firehose-ethereum"
     description: "Firehose on Ethereum stack"
     license: "Apache-2.0"

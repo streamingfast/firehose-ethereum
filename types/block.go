@@ -19,11 +19,11 @@ import (
 
 	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
-	pbeth "github.com/streamingfast/sf-ethereum/types/pb/sf/ethereum/type/v2"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"google.golang.org/protobuf/proto"
 )
 
-func BlockFromProto(b *pbeth.Block) (*bstream.Block, error) {
+func BlockFromProto(b *pbeth.Block, libNum uint64) (*bstream.Block, error) {
 	blockTime, err := b.Time()
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func BlockFromProto(b *pbeth.Block) (*bstream.Block, error) {
 		Number:         b.Number,
 		PreviousId:     b.PreviousID(),
 		Timestamp:      blockTime,
-		LibNum:         b.LIBNum(),
+		LibNum:         libNum,
 		PayloadKind:    pbbstream.Protocol_ETH,
 		PayloadVersion: b.Ver,
 	}

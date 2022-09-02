@@ -1,5 +1,5 @@
 # Ethereum on StreamingFast
-[![reference](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/github.com/streamingfast/sf-ethereum)
+[![reference](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/github.com/streamingfast/firehose-ethereum)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Requirements (clone repos, build stuff...)
@@ -14,12 +14,12 @@ go install ./cmd/geth
 go install ./cmd/bootnode
 ```
 
-### Install sfeth
+### Install fireeth
 
 ```
-git clone git@github.com:streamingfast/sf-ethereum.git
-cd sf-ethereum
-go install ./cmd/sfeth
+git clone git@github.com:streamingfast/firehose-ethereum.git
+cd firehose-ethereum
+go install ./cmd/fireeth
 ```
 
 ## Quickstart, connecting to an existing chain
@@ -38,9 +38,9 @@ go install ./cmd/sfeth
   flags:
     common-chain-id: "1"
     common-network-id: "1"
-    mindreader-node-bootstrap-data-url: ./mindreader/genesis.json
-    mindreader-node-log-to-zap: false
-    mindreader-node-arguments: "+--bootnodes=enode://<enode1>@<ip>:<port>,enode://<enode2>@<ip>:<port>"
+    reader-node-bootstrap-data-url: ./mindreader/genesis.json
+    reader-node-log-to-zap: false
+    reader-node-arguments: "+--bootnodes=enode://<enode1>@<ip>:<port>,enode://<enode2>@<ip>:<port>"
   ```
 
   **Note** Up to date boot nodes info for Geth supported network(s) can be found [here](https://github.com/ethereum/go-ethereum/blob/master/params/bootnodes.go).
@@ -55,7 +55,7 @@ go install ./cmd/sfeth
     * Goerli - `geth --goerli dumpgenesis > ./mindreader/genesis.json`
     * Rinkeby - `geth --rinkeby dumpgenesis > ./mindreader/genesis.json`
 
-* `sfeth start -vv`
+* `fireeth start -vv`
 
   **Note** It's recommended to launch with `-vv` the first time to more easily see what's happening under the hood.
 
@@ -75,7 +75,7 @@ Releases are performed using [goreleaser](https://goreleaser.com/).
 
 ## Docker Bundle Image Building
 
-New version of Ethereum clients means releasing a new version of the full bundled image of `sf-ethereum` that contains `sfeth` binary as well as node instrumented binary to sync with the chain. Doing this is really simple as we will simply ask GitHub to launch an action that will build for us the bundled image with the current up to date version of the Ethereum client.
+New version of Ethereum clients means releasing a new version of the full bundled image of `firehose-ethereum` that contains `fireeth` binary as well as node instrumented binary to sync with the chain. Doing this is really simple as we will simply ask GitHub to launch an action that will build for us the bundled image with the current up to date version of the Ethereum client.
 
 First, install the [GitHub CLI](https://github.com/cli/cli#github-cli) and configure it to be connected with your account.
 
