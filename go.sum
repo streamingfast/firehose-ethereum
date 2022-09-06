@@ -768,6 +768,8 @@ github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
 github.com/streamingfast/substreams v0.0.21-0.20220902154727-b5e9563e5430 h1:KwKfxPA4Ilork4aNjY8/Kb6ksNkj5Uvk8R+socvgrfM=
 github.com/streamingfast/substreams v0.0.21-0.20220902154727-b5e9563e5430/go.mod h1:VSWBOw36wm+yis9OaDR7X7wy6tgcbFtYORHs4rSNtoA=
+github.com/streamingfast/substreams v0.0.21-0.20220906123331-65530b8199ba h1:pZv9/XERTWb9aSgZ4ruDweoaVj/kTRjBw4fCiQRMA3Q=
+github.com/streamingfast/substreams v0.0.21-0.20220906123331-65530b8199ba/go.mod h1:VSWBOw36wm+yis9OaDR7X7wy6tgcbFtYORHs4rSNtoA=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
