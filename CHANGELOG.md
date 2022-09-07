@@ -10,6 +10,14 @@ for instructions to keep up to date.
 
 * Reduced how many times `reader read statistics` is displayed down to each 30s (previously each 5s) (and re-wrote log to `reader node statistics`).
 
+### Fixed
+
+* simplify forkablehub startup performance cases
+* fix relayer detection of a hole in stream blocks (restart on unrecoverable issue)
+* fix possible panic in hub when calls to one-block store are timing out
+* fix merger slow one-block-file deletions when there are more than 10000 of them
+
+
 ## v1.0.0
 
 ### BREAKING CHANGES
