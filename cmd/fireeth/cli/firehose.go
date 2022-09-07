@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream/transform"
 	dauthAuthenticator "github.com/streamingfast/dauth/authenticator"
+	discoveryservice "github.com/streamingfast/dgrpc/server/discovery-service"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/dmetrics"
@@ -162,6 +163,10 @@ func init() {
 				serviceDiscoveryURL, err = url.Parse(rawServiceDiscoveryURL)
 				if err != nil {
 					return nil, fmt.Errorf("unable to parse discovery service url: %w", err)
+				}
+				err = discoveryservice.Bootstrap(serviceDiscoveryURL)
+				if err != nil {
+					return nil, fmt.Errorf("unable to bootstrap discovery service: %w", err)
 				}
 			}
 
