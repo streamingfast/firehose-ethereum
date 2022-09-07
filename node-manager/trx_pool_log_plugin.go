@@ -58,7 +58,7 @@ func (p *TrxPoolLogPlugin) Close(_ error) {
 	p.server.Shutdown(nil)
 }
 
-func (p *TrxPoolLogPlugin) RegisterServices(gs *grpc.Server) {
+func (p *TrxPoolLogPlugin) RegisterServices(gs grpc.ServiceRegistrar) {
 	pbtrxstream.RegisterTransactionStreamServer(gs, p.server)
 }
 

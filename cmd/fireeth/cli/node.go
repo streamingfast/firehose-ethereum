@@ -23,7 +23,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/dgrpc"
+	dgrpcserver "github.com/streamingfast/dgrpc/server"
+	dgrpcfactory "github.com/streamingfast/dgrpc/server/factory"
 	"github.com/streamingfast/dlauncher/launcher"
 	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/streamingfast/firehose-ethereum/node-manager/geth"
@@ -185,7 +186,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			batchStopBlockNum := viper.GetUint64("reader-node-stop-block-num")
 			oneBlockFileSuffix := viper.GetString("reader-node-oneblock-suffix")
 			blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
-			gs := dgrpc.NewServer(dgrpc.WithLogger(appLogger))
+			gs := dgrpcfactory.ServerFromOptions(dgrpcserver.WithLogger(appLogger))
 
 			mindreaderPlugin, err := getReaderLogPlugin(
 				oneBlocksStoreURL,
@@ -208,7 +209,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 
 			trxPoolLogPlugin := nodemanager.NewTrxPoolLogPlugin(appLogger)
 			superviser.RegisterLogPlugin(trxPoolLogPlugin)
-			trxPoolLogPlugin.RegisterServices(gs)
+			trxPoolLogPlugin.RegisterServices(gs.ServiceRegistrar())
 
 			return nodeMindReaderApp.New(&nodeMindReaderApp.Config{
 				ManagerAPIAddress: managerAPIAddress,
@@ -216,7 +217,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			}, &nodeMindReaderApp.Modules{
 				Operator:                   chainOperator,
 				MetricsAndReadinessManager: metricsAndReadinessManager,
-				GrpcServer:                 gs,
+				DGrpcServer:                gs,
 			}, appLogger), nil
 
 		}

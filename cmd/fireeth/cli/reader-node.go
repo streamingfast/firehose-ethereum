@@ -15,18 +15,18 @@
 package cli
 
 import (
+	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream/blockstream"
 	"github.com/streamingfast/dlauncher/launcher"
+	"github.com/streamingfast/firehose-ethereum/codec"
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
-	"github.com/streamingfast/firehose-ethereum/codec"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 func registerReaderNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
@@ -63,7 +63,7 @@ func getReaderLogPlugin(
 	blocksChanCapacity int,
 	operatorShutdownFunc func(error),
 	metricsAndReadinessManager *nodeManager.MetricsAndReadinessManager,
-	gs *grpc.Server,
+	gs dgrpcserver.Server,
 	appLogger *zap.Logger,
 	appTracer logging.Tracer) (*mindreader.MindReaderPlugin, error) {
 

@@ -24,12 +24,12 @@ import (
 	"github.com/streamingfast/bstream"
 
 	"github.com/spf13/viper"
-	"github.com/streamingfast/dgrpc"
+	dgrpcstandard "github.com/streamingfast/dgrpc/server/standard"
 	"github.com/streamingfast/dlauncher/launcher"
 )
 
 func init() {
-	dgrpc.Verbosity = 2
+	dgrpcstandard.Verbosity = 2
 }
 
 func setupCmd(cmd *cobra.Command) error {
