@@ -351,6 +351,7 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isReader bool
 }
 
 func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole, bootstrapDataURL string) ([]string, error) {
+	zlog.Info("building node arguments", zap.String("node-type", nodeType), zap.String("node-role", nodeRole))
 	typeRoles, ok := nodeArgsByTypeAndRole[nodeType]
 	if !ok {
 		return nil, fmt.Errorf("invalid node type: %s", nodeType)
