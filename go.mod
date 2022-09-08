@@ -2,17 +2,6 @@ module github.com/streamingfast/firehose-ethereum
 
 go 1.18
 
-//replace (
-//	github.com/streamingfast/bstream => ../bstream
-//	github.com/streamingfast/dgrpc => ../dgrpc
-//	github.com/streamingfast/dlauncher => ../dlauncher
-//	github.com/streamingfast/firehose => ../firehose
-//	github.com/streamingfast/merger => ../merger
-//	github.com/streamingfast/node-manager => ../node-manager
-//	github.com/streamingfast/relayer => ../relayer
-//	github.com/streamingfast/substreams => ../substreams
-//)
-
 require (
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
@@ -24,11 +13,11 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220907160159-e3aed3bb2ef0
+	github.com/streamingfast/bstream v0.0.2-0.20220908152317-e9ffc67ba56e
 	github.com/streamingfast/cli v0.0.4-0.20220419231930-a555cea243fc
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
-	github.com/streamingfast/dgrpc v0.0.0-20220908130457-6fa51b635574
+	github.com/streamingfast/dgrpc v0.0.0-20220908152412-2777204d23eb
 	github.com/streamingfast/dlauncher v0.0.0-20220907160118-eca6eae090f6
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
@@ -38,15 +27,15 @@ require (
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20220902130254-0b6bace8f5c6
 	github.com/streamingfast/index-builder v0.0.0-20220812125759-4ea1e5a3aa91
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
-	github.com/streamingfast/logging v0.0.0-20220511154537-ce373d264338
-	github.com/streamingfast/merger v0.0.3-0.20220907155803-7b12d4dc9d99
-	github.com/streamingfast/node-manager v0.0.2-0.20220907155945-b934ef3b2c4f
+	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
+	github.com/streamingfast/merger v0.0.3-0.20220908152130-169511e79886
+	github.com/streamingfast/node-manager v0.0.2-0.20220908152228-3a9e3254381d
 	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
 	github.com/streamingfast/relayer v0.0.2-0.20220907155902-c82d11881e00
 	github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.21-0.20220907174838-48d4924267ae
+	github.com/streamingfast/substreams v0.0.21-0.20220908152603-4580c1e5c839
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1
