@@ -32,7 +32,6 @@ import (
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
 	"net/url"
-	_ "google.golang.org/grpc/xds"
 	"os"
 	"time"
 )
@@ -100,17 +99,6 @@ func init() {
 				endpoints[i] = os.ExpandEnv(endpoint)
 			}
 
-			bootStrapFilename := os.Getenv("GRPC_XDS_BOOTSTRAP")
-			zlog.Info("looked for GRPC_XDS_BOOTSTRAP", zap.String("filename", bootStrapFilename))
-
-			if bootStrapFilename != "" {
-				zlog.Info("generating bootstrap file", zap.String("filename", bootStrapFilename))
-				err := dgrpcxds.GenerateBootstrapFile("trafficdirector.googleapis.com:443", viper.GetString("firehose-vpc-network"), bootStrapFilename)
-				if err != nil {
-					panic(fmt.Sprintf("failed to generate bootstrap file: %v", err))
-				}
-			}
-
 			sfDataDir := runtime.AbsDataDir
 			var registerServiceExt firehoseApp.RegisterServiceExtensionFunc
 			if viper.GetBool("substreams-enabled") {
@@ -151,7 +139,7 @@ func init() {
 					viper.GetBool("substreams-client-plaintext"),
 				)
 
-				sss, err := substreamsService.New(
+				sss := substreamsService.New(
 					stateStore,
 					"sf.ethereum.type.v2.Block",
 					viper.GetInt("substreams-sub-request-parallel-jobs"),
@@ -159,10 +147,6 @@ func init() {
 					substreamsClientConfig,
 					opts...,
 				)
-
-				if err != nil {
-					return nil, fmt.Errorf("setting up substreams service: %w", err)
-				}
 
 				registerServiceExt = sss.Register
 			}
