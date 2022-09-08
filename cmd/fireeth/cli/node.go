@@ -42,9 +42,9 @@ var nodeLogger, nodeTracer = logging.PackageLogger("node", "github.com/streaming
 var nodeGethLogger, _ = logging.PackageLogger("node.geth", "github.com/streamingfast/firehose-ethereum/node/geth", DefaultLevelInfo)
 var nodeOpenEthereumLogger, _ = logging.PackageLogger("node.openethereum", "github.com/streamingfast/firehose-ethereum/node/open-ethereum", DefaultLevelInfo)
 
-var mindreaderLogger, mindreaderTracer = logging.PackageLogger("mindreader", "github.com/streamingfast/firehose-ethereum/mindreader")
-var mindreaderGethLogger, _ = logging.PackageLogger("mindreader.geth", "github.com/streamingfast/firehose-ethereum/mindreader/geth", DefaultLevelInfo)
-var mindreaderOpenEthereumLogger, _ = logging.PackageLogger("mindreader.open-ethereum", "github.com/streamingfast/firehose-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
+var readerLogger, readerTracer = logging.PackageLogger("reader", "github.com/streamingfast/firehose-ethereum/mindreader")
+var readerGethLogger, _ = logging.PackageLogger("reader.geth", "github.com/streamingfast/firehose-ethereum/mindreader/geth", DefaultLevelInfo)
+var readerOpenEthereumLogger, _ = logging.PackageLogger("reader.open-ethereum", "github.com/streamingfast/firehose-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
 
 func registerNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
 	launcher.RegisterApp(zlog, &launcher.AppDef{
@@ -58,13 +58,13 @@ func registerNodeApp(backupModuleFactories map[string]operator.BackupModuleFacto
 		FactoryFunc: nodeFactoryFunc(false, backupModuleFactories)})
 }
 
-func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operator.BackupModuleFactory) func(*launcher.Runtime) (launcher.App, error) {
+func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.BackupModuleFactory) func(*launcher.Runtime) (launcher.App, error) {
 	return func(runtime *launcher.Runtime) (launcher.App, error) {
 		appLogger := nodeLogger
 		appTracer := nodeTracer
-		if isMindreader {
-			appLogger = mindreaderLogger
-			appTracer = mindreaderTracer
+		if isReader {
+			appLogger = readerLogger
+			appTracer = readerTracer
 		}
 
 		sfDataDir := runtime.AbsDataDir
@@ -83,18 +83,18 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			backupConfigs,
 			shutdownDelay,
 			nodeArguments,
-			err := parseCommonNodeFlags(appLogger, sfDataDir, isMindreader)
+			err := parseCommonNodeFlags(appLogger, sfDataDir, isReader)
 		if err != nil {
 			return nil, err
 		}
 
 		prefix := "node"
-		if isMindreader {
-			prefix = "mindreader-node"
+		if isReader {
+			prefix = "reader-node"
 		}
 		metricsAndReadinessManager := buildMetricsAndReadinessManager(prefix, readinessMaxLatency)
 
-		nodeLogger := getSupervisedProcessLogger(isMindreader, nodeType)
+		nodeLogger := getSupervisedProcessLogger(isReader, nodeType)
 
 		superviser, err := buildSuperviser(
 			metricsAndReadinessManager,
@@ -169,7 +169,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			chainOperator.RegisterBackupSchedule(sched)
 		}
 
-		if !isMindreader {
+		if !isReader {
 			return nodeManagerApp.New(&nodeManagerApp.Config{
 				ManagerAPIAddress: managerAPIAddress,
 			}, &nodeManagerApp.Modules{
@@ -188,7 +188,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 			blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
 			gs := dgrpcfactory.ServerFromOptions(dgrpcserver.WithLogger(appLogger))
 
-			mindreaderPlugin, err := getReaderLogPlugin(
+			readerPlugin, err := getReaderLogPlugin(
 				oneBlocksStoreURL,
 				workingDir,
 				bstream.GetProtocolFirstStreamableBlock,
@@ -205,7 +205,7 @@ func nodeFactoryFunc(isMindreader bool, backupModuleFactories map[string]operato
 				return nil, err
 			}
 
-			superviser.RegisterLogPlugin(mindreaderPlugin)
+			superviser.RegisterLogPlugin(readerPlugin)
 
 			trxPoolLogPlugin := nodemanager.NewTrxPoolLogPlugin(appLogger)
 			superviser.RegisterLogPlugin(trxPoolLogPlugin)
@@ -228,17 +228,17 @@ func isGenesisBootstrapper(bootstrapDataURL string) bool {
 	return strings.HasSuffix(bootstrapDataURL, "json")
 }
 
-func getSupervisedProcessLogger(isMindreader bool, nodeType string) *zap.Logger {
+func getSupervisedProcessLogger(isReader bool, nodeType string) *zap.Logger {
 	switch nodeType {
 	case "geth":
-		if isMindreader {
-			return mindreaderGethLogger
+		if isReader {
+			return readerGethLogger
 		} else {
 			return nodeGethLogger
 		}
 	case "openethereum":
-		if isMindreader {
-			return mindreaderOpenEthereumLogger
+		if isReader {
+			return readerOpenEthereumLogger
 		} else {
 			return nodeOpenEthereumLogger
 		}
@@ -251,15 +251,15 @@ type nodeArgsByRole map[string]string
 
 var nodeArgsByTypeAndRole = map[string]nodeArgsByRole{
 	"geth": {
-		"dev-miner":  "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --http --http.api=eth,net,web3,personal --http.port=" + NodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
-		"peering":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --http --http.api=eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --firehose-block-progress",
-		"mindreader": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + MindreaderNodeP2PPort + " --http --http.api=eth,net,web3 --http.port=" + MindreaderNodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --firehose-enabled",
-		"bootstrap":  "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
+		"dev-miner": "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + NodeP2PPort + " --http --http.api=eth,net,web3,personal --http.port=" + NodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --mine --nodiscover --allow-insecure-unlock --password=/dev/null --miner.etherbase=" + devMinerAddress + " --unlock=" + devMinerAddress,
+		"peering":   "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=30304 --http --http.api=eth,net,web3 --http.port=8546 --http.addr=0.0.0.0 --http.vhosts=* --firehose-block-progress",
+		"reader":    "--networkid={network-id} --datadir={node-data-dir} --ipcpath={node-ipc-path} --port=" + ReaderNodeP2PPort + " --http --http.api=eth,net,web3 --http.port=" + ReaderNodeRPCPort + " --http.addr=0.0.0.0 --http.vhosts=* --firehose-enabled",
+		"bootstrap": "--networkid={network-id} --datadir={node-data-dir} --maxpeers 10 init {node-data-dir}/genesis.json",
 	},
 	"openethereum": {
 		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-block-progress",
 		//"dev-miner": ...
-		"mindreader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + MindreaderNodeP2PPort + " --jsonrpc-port=" + MindreaderNodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-enabled --no-warp",
+		"reader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + ReaderNodeP2PPort + " --jsonrpc-port=" + ReaderNodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-enabled --no-warp",
 	},
 }
 
@@ -269,11 +269,11 @@ func registerEthereumNodeFlags(cmd *cobra.Command) error {
 	return nil
 }
 
-// flags common to mindreader and regular node
-func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
+// flags common to reader and regular node
+func registerCommonNodeFlags(cmd *cobra.Command, isReader bool) {
 	prefix := "node-"
 	managerAPIAddr := NodeManagerAPIAddr
-	if isMindreader {
+	if isReader {
 		prefix = "reader-node-"
 		managerAPIAddr = ReaderNodeManagerAPIAddr
 	}
@@ -281,7 +281,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	cmd.Flags().String(prefix+"path", "geth", "command that will be launched by the node manager")
 	cmd.Flags().String(prefix+"type", "geth", "one of: ['geth','openethereum']")
 	cmd.Flags().String(prefix+"arguments", "", "If not empty, overrides the list of default node arguments (computed from node type and role). Start with '+' to append to default args instead of replacing. You can use the {public-ip} token, that will be matched against space-separated hostname:IP pairs in PUBLIC_IPS env var, taking hostname from HOSTNAME env var.")
-	cmd.Flags().String(prefix+"data-dir", "{sf-data-dir}/{node-role}/data", "Directory for node data ({node-role} is either mindreader, peering or dev-miner)")
+	cmd.Flags().String(prefix+"data-dir", "{sf-data-dir}/{node-role}/data", "Directory for node data ({node-role} is either reader, peering or dev-miner)")
 	cmd.Flags().String(prefix+"ipc-path", "{sf-data-dir}/{node-role}/ipc", "IPC path cannot be more than 64chars on geth")
 
 	cmd.Flags().String(prefix+"manager-api-addr", managerAPIAddr, "Ethereum node manager API address")
@@ -296,7 +296,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isMindreader bool) {
 	cmd.Flags().Bool(prefix+"debug-firehose-logs", false, "[DEV] Prints firehose instrumentation logs to standard output, should be use for debugging purposes only")
 }
 
-func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader bool) (
+func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isReader bool) (
 	nodePath string,
 	networkID string,
 	nodeType string,
@@ -315,9 +315,9 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isMindreader 
 ) {
 	prefix := "node-"
 	nodeRole := viper.GetString("node-role")
-	if isMindreader {
+	if isReader {
 		prefix = "reader-node-"
-		nodeRole = "mindreader"
+		nodeRole = "reader"
 	}
 
 	nodePath = viper.GetString(prefix + "path")
@@ -361,10 +361,10 @@ func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPa
 		return nil, fmt.Errorf("invalid node role: %s for type %s", nodeRole, nodeType)
 	}
 
-	// This sets `--firehose-genesis-file` if the node role is of type mindreader
+	// This sets `--firehose-genesis-file` if the node role is of type reader
 	// (for which case we are sure that Firehose patch is supported) and if the bootstrap data
 	// url is a `genesis.json` file.
-	if nodeRole == "mindreader" && isGenesisBootstrapper(bootstrapDataURL) {
+	if nodeRole == "reader" && isGenesisBootstrapper(bootstrapDataURL) {
 		args += fmt.Sprintf(" --firehose-genesis-file=%s", bootstrapDataURL)
 	}
 
@@ -383,7 +383,7 @@ func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPa
 	if strings.Contains(args, "{public-ip}") {
 		var foundPublicIP string
 		hostname := os.Getenv("HOSTNAME")
-		publicIPs := os.Getenv("PUBLIC_IPS") // format is PUBLIC_IPS="mindreader-v3-1:1.2.3.4 backup-node:5.6.7.8"
+		publicIPs := os.Getenv("PUBLIC_IPS") // format is PUBLIC_IPS="reader-v3-1:1.2.3.4 backup-node:5.6.7.8"
 		for _, pairStr := range strings.Fields(publicIPs) {
 			pair := strings.Split(pairStr, ":")
 			if len(pair) != 2 {

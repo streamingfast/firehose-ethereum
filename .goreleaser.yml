@@ -3,11 +3,11 @@ project_name: firehose-ethereum
 release:
   github:
     owner: streamingfast
-    name: sf-ethereum
+    name: firehose-ethereum
   name_template: '{{.Tag}}'
 builds:
   # fireeth
-  - id: sf-ethereum
+  - id: firehose-ethereum
     goos:
     - linux
     - darwin
@@ -22,45 +22,18 @@ builds:
     ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
     binary: fireeth
     env:
-    - CGO_ENABLED=0
+    - CGO_ENABLED=1
 
-  # substreams
-  - id: substreams-alpha
-    goos:
-    - darwin
-    goarch:
-    - arm64
-    - amd64
-    targets:
-    - darwin_amd64
-    - darwin_arm64
-    main: ./cmd/substreams-alpha
-    binary: substreams-alpha
-    env:
-      - CGO_ENABLED=1
 archives:
   # fireeth
   - name_template: '{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    id: sf-ethereum
+    id: firehose-ethereum
     builds:
-    - sf-ethereum
+    - firehose-ethereum
     replacements:
       amd64: x86_64
       darwin: macOS
       linux: linux
-    format: tar.gz
-    files:
-    - LICENSE
-    - README.md
-
-  # substreams
-  - name_template: '{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    id: substreams-alpha
-    builds:
-    - substreams-alpha
-    replacements:
-      amd64: x86_64
-      darwin: macOS
     format: tar.gz
     files:
     - LICENSE
@@ -91,9 +64,9 @@ signs:
 env_files:
   github_token: ~/.config/goreleaser/github_token
 brews:
-  - name: sf-ethereum
+  - name: firehose-ethereum
     ids:
-    - sf-ethereum
+    - firehose-ethereum
     tap:
       owner: streamingfast
       name: homebrew-tap

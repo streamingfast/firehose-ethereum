@@ -4,7 +4,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v1.0.0-UNRELEASED
+## Unreleased
+
+### Changed
+
+* Reduced how many times `reader read statistics` is displayed down to each 30s (previously each 5s) (and re-wrote log to `reader node statistics`).
+
+### Fixed
+
+* simplify forkablehub startup performance cases
+* fix relayer detection of a hole in stream blocks (restart on unrecoverable issue)
+* fix possible panic in hub when calls to one-block store are timing out
+* fix merger slow one-block-file deletions when there are more than 10000 of them
+
+
+## v1.0.0
 
 ### BREAKING CHANGES
 
@@ -23,7 +37,7 @@ for instructions to keep up to date.
   * Fixed wrong transaction status for contract deployments that fail due to out of gas on pre-Homestead transactions (aligned with status reported by chain: SUCCESS -- even if no contract code is set)
   * Added more instrumentation around AccessList and DynamicFee transaction, removed some elements that were useless or could not be derived from other elements in the structure, ex: gasEvents
   * Added support for finalized block numbers (moved outside the proto-ethereum block, to firehose bstream v2 block)
-* There are *no more "forked blocks"* in the merged-blocks bundles: 
+* There are *no more "forked blocks"* in the merged-blocks bundles:
   * The merged-blocks are therefore produced only after finality passed (before The Merge, this means after 200 confirmations).
   * One-block-files close to HEAD stay in the one-blocks-store for longer
   * The blocks that do not make it in the merged-blocks (forked out because of a re-org) are uploaded to another store (common-forked-blocks-store-url) and kept there for a while (to allow resolving cursors)
@@ -32,7 +46,7 @@ for instructions to keep up to date.
 
 * **This will require changes in most firehose clients**
 * A compatibility layer has been added to still support `sf.firehose.v1.Stream/Blocks` but only for specific values for 'ForkSteps' in request: 'irreversible' or 'new+undo'
-* The Firehose Blocks protocol is now under `sf.firehose.v2` (bumped from `sf.firehose.v1`). 
+* The Firehose Blocks protocol is now under `sf.firehose.v2` (bumped from `sf.firehose.v1`).
   * Step type `IRREVERSIBLE` renamed to `FINAL`
   * `Blocks` request now only allows 2 modes regarding steps: `NEW,UNDO` and `FINAL` (gated by the `final_blocks_only` boolean flag)
   * Blocks that are sent out can have the combined step `NEW+FINAL` to prevent sending the same blocks over and over if they are already final
@@ -79,11 +93,11 @@ for instructions to keep up to date.
 * Because of the changes in the ethereum block protocol, an existing deployment cannot be migrated in-place.
 * You must deploy firehose-ethereum v1.0.0 on a new environment (without any prior block or index data)
 * You can put this new deployment behind a GRPC load-balancer that routes `/sf.firehose.v2.Stream/*` and `/sf.firehose.v1.Stream/*` to your different versions.
-* Go through the list of changed "Flags and environment variables" and adjust your deployment accordingly. 
+* Go through the list of changed "Flags and environment variables" and adjust your deployment accordingly.
   * Determine a (shared) location for your `forked-blocks`.
   * Make sure that you set the `one-block-store` and `forked-blocks-store` correctly on all the apps that now require it.
   * Add the `generate-combined-index` app to your new deployment instead of the `tools` command for call/logs indices.
-* If you want to reprocess blocks in batches while you set up a "live" deployment: 
+* If you want to reprocess blocks in batches while you set up a "live" deployment:
   * run your reader node from prior data (ex: from a snapshot)
   * use the `--common-first-streamable-block` flag to a 100-block-aligned boundary right after where this snapshot starts (use this flag on all apps)
   * perform batch merged-blocks reprocessing jobs

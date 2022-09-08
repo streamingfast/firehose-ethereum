@@ -1,7 +1,7 @@
 start:
   args:
   - merger
-  - mindreader-node
+  - reader-node
   flags:
     common-chain-id: 5
     common-network-id: 5

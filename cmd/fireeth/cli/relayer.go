@@ -31,7 +31,7 @@ func init() {
 		Description: "Serves blocks as a stream, with a buffer",
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("relayer-grpc-listen-addr", RelayerServingAddr, "Address to listen for incoming gRPC requests")
-			cmd.Flags().StringSlice("relayer-source", []string{ReaderGRPCAddr}, "List of Blockstream sources (mindreaders) to connect to for live block feeds (repeat flag as needed)")
+			cmd.Flags().StringSlice("relayer-source", []string{ReaderGRPCAddr}, "List of Blockstream sources (reader-nodes) to connect to for live block feeds (repeat flag as needed)")
 			cmd.Flags().Duration("relayer-max-source-latency", 999999*time.Hour, "Max latency tolerated to connect to a source. A performance optimization for when you have redundant sources and some may not have caught up")
 			return nil
 		},

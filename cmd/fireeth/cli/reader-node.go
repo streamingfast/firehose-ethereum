@@ -45,10 +45,10 @@ func registerReaderNodeFlags(cmd *cobra.Command) error {
 	registerCommonNodeFlags(cmd, true)
 
 	cmd.Flags().String("reader-node-grpc-listen-addr", ReaderGRPCAddr, "Address to listen for incoming gRPC requests")
-	cmd.Flags().String("reader-node-working-dir", "{sf-data-dir}/mindreader/work", "Path where mindreader will stores its files")
-	cmd.Flags().Uint("reader-node-stop-block-num", 0, "Shutdown mindreader when we the following 'stop-block-num' has been reached, inclusively.")
-	cmd.Flags().Int("reader-node-blocks-chan-capacity", 100, "Capacity of the channel holding blocks read by the mindreader. Process will shutdown superviser/geth if the channel gets over 90% of that capacity to prevent horrible consequences. Raise this number when processing tiny blocks very quickly")
-	cmd.Flags().String("reader-node-oneblock-suffix", "default", "Unique identifier for that mindreader, so that it can produce 'oneblock files' in the same store as another instance without competing for writes.")
+	cmd.Flags().String("reader-node-working-dir", "{sf-data-dir}/reader/work", "Path where reader will stores its files")
+	cmd.Flags().Uint("reader-node-stop-block-num", 0, "Shutdown reader node when we the following 'stop-block-num' has been reached, inclusively.")
+	cmd.Flags().Int("reader-node-blocks-chan-capacity", 100, "Capacity of the channel holding blocks read by the reader node. Process will shutdown superviser/geth if the channel gets over 90% of that capacity to prevent horrible consequences. Raise this number when processing tiny blocks very quickly")
+	cmd.Flags().String("reader-node-oneblock-suffix", "default", "Unique identifier for that reader, so that it can produce 'oneblock files' in the same store as another instance without competing for writes.")
 
 	return nil
 }

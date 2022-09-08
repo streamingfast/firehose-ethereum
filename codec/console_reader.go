@@ -50,7 +50,7 @@ type ConsoleReader struct {
 
 func NewConsoleReader(logger *zap.Logger, lines chan string) (*ConsoleReader, error) {
 	globalStats := newConsoleReaderStats()
-	globalStats.StartPeriodicLogToZap(context.Background(), logger, 5*time.Second)
+	globalStats.StartPeriodicLogToZap(context.Background(), logger, 30*time.Second)
 
 	l := &ConsoleReader{
 		lines: lines,
@@ -102,7 +102,7 @@ func (s *consoleReaderStats) StartPeriodicLogToZap(ctx context.Context, logger *
 		for {
 			select {
 			case <-ticker.C:
-				logger.Info("mindreader read statistics", s.ZapFields()...)
+				logger.Info("reader node statistics", s.ZapFields()...)
 			case <-ctx.Done():
 				return
 			}
@@ -142,7 +142,7 @@ func newParsingStats(logger *zap.Logger, block uint64) *parsingStats {
 }
 
 func (s *parsingStats) log() {
-	s.logger.Debug("mindreader block stats",
+	s.logger.Debug("reader block stats",
 		zap.Uint64("block_num", s.blockNum),
 		zap.Int64("duration", int64(time.Since(s.startAt))),
 		zap.Reflect("stats", s.data),

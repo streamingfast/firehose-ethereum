@@ -52,9 +52,9 @@ const (
 	StateDBGRPCServingAddr        string = ":13035"
 
 	// Geth instance port definitions
-	MindreaderNodeP2PPort string = "30305"
-	MindreaderNodeRPCPort string = "8547"
-	NodeP2PPort           string = "30303"
-	NodeRPCPort           string = "8545"
-	devMinerAddress       string = "0x821b55d8abe79bc98f05eb675fdc50dfe796b7ab"
+	ReaderNodeP2PPort string = "30305"
+	ReaderNodeRPCPort string = "8547"
+	NodeP2PPort       string = "30303"
+	NodeRPCPort       string = "8545"
+	devMinerAddress   string = "0x821b55d8abe79bc98f05eb675fdc50dfe796b7ab"
 )
