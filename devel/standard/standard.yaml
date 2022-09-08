@@ -2,7 +2,7 @@ start:
   args:
   - merger
   - firehose
-  - mindreader-node
+  - reader-node
   - node
   - relayer
   - combined-index-builder

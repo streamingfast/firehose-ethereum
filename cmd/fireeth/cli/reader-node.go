@@ -15,11 +15,9 @@
 package cli
 
 import (
-	dgrpcserver "github.com/streamingfast/dgrpc/server"
-	"strings"
-
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream/blockstream"
+	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/firehose-ethereum/codec"
 	"github.com/streamingfast/logging"
@@ -27,6 +25,7 @@ import (
 	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
 	"go.uber.org/zap"
+	"strings"
 )
 
 func registerReaderNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
