@@ -37,6 +37,7 @@ import (
 )
 
 var metricset = dmetrics.NewSet()
+
 var headBlockNumMetric = metricset.NewHeadBlockNumber("firehose")
 var headTimeDriftmetric = metricset.NewHeadTimeDrift("firehose")
 
