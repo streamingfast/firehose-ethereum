@@ -13,29 +13,29 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20220908152317-e9ffc67ba56e
+	github.com/streamingfast/bstream v0.0.2-0.20220909121429-4647fd1522c9
 	github.com/streamingfast/cli v0.0.4-0.20220419231930-a555cea243fc
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
-	github.com/streamingfast/dgrpc v0.0.0-20220908152412-2777204d23eb
-	github.com/streamingfast/dlauncher v0.0.0-20220907160118-eca6eae090f6
+	github.com/streamingfast/dgrpc v0.0.0-20220909121013-162e9305bbfc
+	github.com/streamingfast/dlauncher v0.0.0-20220909121534-7a9aa91dbb32
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
 	github.com/streamingfast/dstore v0.1.1-0.20220830184623-b0f0cc804743
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
-	github.com/streamingfast/firehose v0.1.1-0.20220908132128-8ed6ea1aef9a
+	github.com/streamingfast/firehose v0.1.1-0.20220909121738-2f3bc007ea2b
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20220902130254-0b6bace8f5c6
 	github.com/streamingfast/index-builder v0.0.0-20220812125759-4ea1e5a3aa91
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
-	github.com/streamingfast/merger v0.0.3-0.20220908152130-169511e79886
-	github.com/streamingfast/node-manager v0.0.2-0.20220908152228-3a9e3254381d
+	github.com/streamingfast/merger v0.0.3-0.20220909122033-9ca15beb25f5
+	github.com/streamingfast/node-manager v0.0.2-0.20220909122247-8e761977ad9f
 	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
-	github.com/streamingfast/relayer v0.0.2-0.20220907155902-c82d11881e00
+	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9
 	github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.21-0.20220908152603-4580c1e5c839
+	github.com/streamingfast/substreams v0.0.21-0.20220909123253-9f44d2ecc609
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.12.1

@@ -140,7 +140,7 @@ func init() {
 					viper.GetBool("substreams-client-plaintext"),
 				)
 
-				sss := substreamsService.New(
+				sss, err := substreamsService.New(
 					stateStore,
 					"sf.ethereum.type.v2.Block",
 					viper.GetInt("substreams-sub-request-parallel-jobs"),
@@ -148,6 +148,10 @@ func init() {
 					substreamsClientConfig,
 					opts...,
 				)
+
+				if err != nil {
+					return nil, fmt.Errorf("creating substreams service: %w", err)
+				}
 
 				registerServiceExt = sss.Register
 			}
