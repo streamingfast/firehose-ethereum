@@ -44,7 +44,17 @@ func MustReplaceDataDir(dataDir, in string) string {
 var commonStoresCreated bool
 var indexStoreCreated bool
 
-func GetCommonStoresURLs(dataDir string) (mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL string, err error) {
+func mustGetCommonStoresURLs(dataDir string) (mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL string) {
+	var err error
+	mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL, err = getCommonStoresURLs(dataDir)
+	if err != nil {
+		panic(err)
+	}
+
+	return
+}
+
+func getCommonStoresURLs(dataDir string) (mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL string, err error) {
 	mergedBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-merged-blocks-store-url"))
 	oneBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-one-block-store-url"))
 	forkedBlocksStoreURL = MustReplaceDataDir(dataDir, viper.GetString("common-forked-blocks-store-url"))

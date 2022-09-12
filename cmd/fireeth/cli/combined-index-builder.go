@@ -8,9 +8,9 @@ import (
 	"github.com/streamingfast/bstream"
 	bstransform "github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dlauncher/launcher"
-	indexerApp "github.com/streamingfast/index-builder/app/index-builder"
 	"github.com/streamingfast/firehose-ethereum/transform"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	indexerApp "github.com/streamingfast/index-builder/app/index-builder"
 )
 
 func init() {
@@ -30,7 +30,7 @@ func init() {
 		},
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 
-			mergedBlocksStoreURL, _, _, err := GetCommonStoresURLs(runtime.AbsDataDir)
+			mergedBlocksStoreURL, _, _, err := getCommonStoresURLs(runtime.AbsDataDir)
 			if err != nil {
 				return nil, err
 			}

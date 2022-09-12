@@ -16,6 +16,10 @@ package cli
 
 import (
 	"fmt"
+	"net/url"
+	"os"
+	"time"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream/transform"
@@ -31,9 +35,6 @@ import (
 	"github.com/streamingfast/logging"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
-	"net/url"
-	"os"
-	"time"
 )
 
 var metricset = dmetrics.NewSet()
@@ -86,7 +87,7 @@ func init() {
 			}
 			dmetering.SetDefaultMeter(metering)
 
-			mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL, err := GetCommonStoresURLs(runtime.AbsDataDir)
+			mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL, err := getCommonStoresURLs(runtime.AbsDataDir)
 			if err != nil {
 				return nil, err
 			}

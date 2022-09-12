@@ -22,20 +22,22 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/streamingfast/bstream"
-	dgrpcserver "github.com/streamingfast/dgrpc/server"
-	dgrpcfactory "github.com/streamingfast/dgrpc/server/factory"
+	"github.com/streamingfast/bstream/blockstream"
 	"github.com/streamingfast/dlauncher/launcher"
+	"github.com/streamingfast/firehose-ethereum/codec"
 	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/streamingfast/firehose-ethereum/node-manager/geth"
 	"github.com/streamingfast/firehose-ethereum/node-manager/openeth"
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
-	nodeManagerApp "github.com/streamingfast/node-manager/app/node_manager"
-	nodeMindReaderApp "github.com/streamingfast/node-manager/app/node_mindreader"
+	nodeManagerApp "github.com/streamingfast/node-manager/app/node_manager2"
 	"github.com/streamingfast/node-manager/metrics"
+	reader "github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
+	pbheadinfo "github.com/streamingfast/pbgo/sf/headinfo/v1"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 var nodeLogger, nodeTracer = logging.PackageLogger("node", "github.com/streamingfast/firehose-ethereum/node")
@@ -76,7 +78,7 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 			nodeIPCPath,
 			debugDeepMind,
 			logToZap,
-			managerAPIAddress,
+			httpAddr,
 			readinessMaxLatency,
 			nodeEnforcePeers,
 			bootstrapDataURL,
@@ -92,8 +94,8 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 		if isReader {
 			prefix = "reader-node"
 		}
-		metricsAndReadinessManager := buildMetricsAndReadinessManager(prefix, readinessMaxLatency)
 
+		metricsAndReadinessManager := buildMetricsAndReadinessManager(prefix, readinessMaxLatency)
 		nodeLogger := getSupervisedProcessLogger(isReader, nodeType)
 
 		superviser, err := buildSuperviser(
@@ -171,56 +173,65 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 
 		if !isReader {
 			return nodeManagerApp.New(&nodeManagerApp.Config{
-				ManagerAPIAddress: managerAPIAddress,
+				HTTPAddr: httpAddr,
 			}, &nodeManagerApp.Modules{
 				Operator:                   chainOperator,
 				MetricsAndReadinessManager: metricsAndReadinessManager,
 			}, appLogger), nil
-		} else {
-			GRPCAddr := viper.GetString("reader-node-grpc-listen-addr")
-			_, oneBlocksStoreURL, _, err := GetCommonStoresURLs(runtime.AbsDataDir)
-			if err != nil {
-				return nil, err
-			}
-			workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("reader-node-working-dir"))
-			batchStopBlockNum := viper.GetUint64("reader-node-stop-block-num")
-			oneBlockFileSuffix := viper.GetString("reader-node-oneblock-suffix")
-			blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
-			gs := dgrpcfactory.ServerFromOptions(dgrpcserver.WithLogger(appLogger))
-
-			readerPlugin, err := getReaderLogPlugin(
-				oneBlocksStoreURL,
-				workingDir,
-				bstream.GetProtocolFirstStreamableBlock,
-				batchStopBlockNum,
-				oneBlockFileSuffix,
-				blocksChanCapacity,
-				chainOperator.Shutdown,
-				metricsAndReadinessManager,
-				gs,
-				appLogger,
-				appTracer,
-			)
-			if err != nil {
-				return nil, err
-			}
-
-			superviser.RegisterLogPlugin(readerPlugin)
-
-			trxPoolLogPlugin := nodemanager.NewTrxPoolLogPlugin(appLogger)
-			superviser.RegisterLogPlugin(trxPoolLogPlugin)
-			trxPoolLogPlugin.RegisterServices(gs.ServiceRegistrar())
-
-			return nodeMindReaderApp.New(&nodeMindReaderApp.Config{
-				ManagerAPIAddress: managerAPIAddress,
-				GRPCAddr:          GRPCAddr,
-			}, &nodeMindReaderApp.Modules{
-				Operator:                   chainOperator,
-				MetricsAndReadinessManager: metricsAndReadinessManager,
-				DGrpcServer:                gs,
-			}, appLogger), nil
-
 		}
+
+		blockStreamServer := blockstream.NewUnmanagedServer(blockstream.ServerOptionWithLogger(appLogger))
+		gprcListenAddr := viper.GetString("reader-node-grpc-listen-addr")
+		_, oneBlocksStoreURL, _ := mustGetCommonStoresURLs(runtime.AbsDataDir)
+		workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("reader-node-working-dir"))
+		batchStartBlockNum := viper.GetUint64("reader-node-start-block-num")
+		batchStopBlockNum := viper.GetUint64("reader-node-stop-block-num")
+		oneBlockFileSuffix := viper.GetString("reader-node-oneblock-suffix")
+		blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
+
+		readerPlugin, err := reader.NewMindReaderPlugin(
+			oneBlocksStoreURL,
+			workingDir,
+			func(lines chan string) (reader.ConsolerReader, error) {
+				return codec.NewConsoleReader(appLogger, lines)
+			},
+			batchStartBlockNum,
+			batchStopBlockNum,
+			blocksChanCapacity,
+			metricsAndReadinessManager.UpdateHeadBlock,
+			func(error) {
+				chainOperator.Shutdown(nil)
+			},
+			oneBlockFileSuffix,
+			blockStreamServer,
+			appLogger,
+			appTracer,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("new reader plugin: %w", err)
+		}
+
+		superviser.RegisterLogPlugin(readerPlugin)
+
+		trxPoolLogPlugin := nodemanager.NewTrxPoolLogPlugin(appLogger)
+		superviser.RegisterLogPlugin(trxPoolLogPlugin)
+
+		return nodeManagerApp.New(&nodeManagerApp.Config{
+			HTTPAddr: httpAddr,
+			GRPCAddr: gprcListenAddr,
+		}, &nodeManagerApp.Modules{
+			Operator:                   chainOperator,
+			MindreaderPlugin:           readerPlugin,
+			MetricsAndReadinessManager: metricsAndReadinessManager,
+			RegisterGRPCService: func(server grpc.ServiceRegistrar) error {
+				pbheadinfo.RegisterHeadInfoServer(server, blockStreamServer)
+				pbbstream.RegisterBlockStreamServer(server, blockStreamServer)
+
+				trxPoolLogPlugin.RegisterServices(server)
+
+				return nil
+			},
+		}, appLogger), nil
 	}
 }
 

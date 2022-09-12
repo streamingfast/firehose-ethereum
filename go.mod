@@ -29,7 +29,7 @@ require (
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
 	github.com/streamingfast/merger v0.0.3-0.20220909122033-9ca15beb25f5
-	github.com/streamingfast/node-manager v0.0.2-0.20220909122247-8e761977ad9f
+	github.com/streamingfast/node-manager v0.0.2-0.20220912231842-6183da12a907
 	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
 	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9
 	github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46
@@ -38,7 +38,7 @@ require (
 	github.com/streamingfast/substreams v0.0.21-0.20220909123253-9f44d2ecc609
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
-	github.com/tidwall/gjson v1.12.1
+	github.com/tidwall/gjson v1.14.1
 	go.uber.org/zap v1.21.0
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.0
