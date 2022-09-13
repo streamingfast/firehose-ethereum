@@ -1,0 +1,14 @@
+start:
+  args:
+  - relayer
+  - merger
+  - reader-node
+  flags:
+    common-chain-id: 1
+    common-network-id: 1
+    common-live-blocks-addr: :23011
+    merger-grpc-listen-addr: :23012
+    reader-node-arguments: +--cache 8192 --maxpeers 100 --metrics --metrics.port 6061 --metrics.addr 0.0.0.0 --port=40303 -authrpc.addr=0.0.0.0 --authrpc.port=10551 --authrpc.vhosts=* --http.port=10545 --snapshot=false --cache.snapshot=0 --txlookuplimit=128
+    reader-node-grpc-listen-addr: :23010
+    reader-node-manager-api-addr: :23009
+    relayer-grpc-listen-addr: :23011
