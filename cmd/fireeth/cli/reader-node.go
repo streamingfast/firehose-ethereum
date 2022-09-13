@@ -16,16 +16,8 @@ package cli
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/streamingfast/bstream/blockstream"
-	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	"github.com/streamingfast/dlauncher/launcher"
-	"github.com/streamingfast/firehose-ethereum/codec"
-	"github.com/streamingfast/logging"
-	nodeManager "github.com/streamingfast/node-manager"
-	"github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
-	"go.uber.org/zap"
-	"strings"
 )
 
 func registerReaderNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
@@ -51,52 +43,4 @@ func registerReaderNodeFlags(cmd *cobra.Command) error {
 	cmd.Flags().String("reader-node-oneblock-suffix", "default", "Unique identifier for that reader, so that it can produce 'oneblock files' in the same store as another instance without competing for writes.")
 
 	return nil
-}
-
-func getReaderLogPlugin(
-	oneBlockStoreURL string,
-	workingDir string,
-	batchStartBlockNum uint64,
-	batchStopBlockNum uint64,
-	oneBlockFileSuffix string,
-	blocksChanCapacity int,
-	operatorShutdownFunc func(error),
-	metricsAndReadinessManager *nodeManager.MetricsAndReadinessManager,
-	gs dgrpcserver.Server,
-	appLogger *zap.Logger,
-	appTracer logging.Tracer) (*mindreader.MindReaderPlugin, error) {
-
-	// It's important that this call goes prior running gRPC server since it's doing
-	// some service registration. If it's call later on, the overall application exits.
-	blockStreamServer := blockstream.NewServer(gs, blockstream.ServerOptionWithLogger(appLogger))
-
-	consoleReaderFactory := func(lines chan string) (mindreader.ConsolerReader, error) {
-		return codec.NewConsoleReader(appLogger, lines)
-	}
-
-	logPlugin, err := mindreader.NewMindReaderPlugin(
-		oneBlockStoreURL,
-		workingDir,
-		consoleReaderFactory,
-		batchStartBlockNum,
-		batchStopBlockNum,
-		blocksChanCapacity,
-		metricsAndReadinessManager.UpdateHeadBlock,
-		func(error) {
-			operatorShutdownFunc(nil)
-		},
-		oneBlockFileSuffix,
-		blockStreamServer,
-		appLogger,
-		appTracer,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return logPlugin, nil
-}
-
-func replaceNodeRole(nodeRole, in string) string {
-	return strings.Replace(in, "{node-role}", nodeRole, -1)
 }

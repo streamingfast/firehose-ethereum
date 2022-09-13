@@ -506,3 +506,7 @@ func buildChainOperator(
 	}
 	return o, nil
 }
+
+func replaceNodeRole(nodeRole, in string) string {
+	return strings.Replace(in, "{node-role}", nodeRole, -1)
+}
