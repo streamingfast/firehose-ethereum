@@ -20,15 +20,34 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Log and CallTo Filters, applied as 'inclusive OR'
+// CombinedFilter is a combination of "LogFilters" and "CallToFilters"
+//
+// It transforms the requested stream in two ways:
+//   1. STRIPPING
+//      The block data is stripped from all transactions that don't
+//      match any of the filters.
+//
+//   2. SKIPPING
+//      If an "block index" covers a range containing a
+//      block that does NOT match any of the filters, the block will be
+//      skipped altogether, UNLESS send_all_block_headers is enabled
+//      In that case, the block would still be sent, but without any
+//      transactionTrace
+//
+// The SKIPPING feature only applies to historical blocks, because
+// the "block index" is always produced after the merged-blocks files
+// are produced. Therefore, the "live" blocks are never filtered out.
+//
 type CombinedFilter struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	LogFilters          []*LogFilter    `protobuf:"bytes,1,rep,name=log_filters,json=logFilters,proto3" json:"log_filters,omitempty"`
-	CallFilters         []*CallToFilter `protobuf:"bytes,2,rep,name=call_filters,json=callFilters,proto3" json:"call_filters,omitempty"`
-	SendAllBlockHeaders bool            `protobuf:"varint,3,opt,name=send_all_block_headers,json=sendAllBlockHeaders,proto3" json:"send_all_block_headers,omitempty"` // prevents skipping any block by letting through all block headers even when they are stripped from their transactions
+	LogFilters  []*LogFilter    `protobuf:"bytes,1,rep,name=log_filters,json=logFilters,proto3" json:"log_filters,omitempty"`
+	CallFilters []*CallToFilter `protobuf:"bytes,2,rep,name=call_filters,json=callFilters,proto3" json:"call_filters,omitempty"`
+	// Always send all blocks. if they don't match any log_filters or call_filters,
+	// all the transactions will be filtered out, sending only the header.
+	SendAllBlockHeaders bool `protobuf:"varint,3,opt,name=send_all_block_headers,json=sendAllBlockHeaders,proto3" json:"send_all_block_headers,omitempty"`
 }
 
 func (x *CombinedFilter) Reset() {
