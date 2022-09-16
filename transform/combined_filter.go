@@ -165,9 +165,6 @@ func (f *CombinedFilter) String() string {
 }
 
 func (f *CombinedFilter) matches(trace *pbeth.TransactionTrace) bool {
-	if f.sendAllBlockHeaders {
-		return true
-	}
 	for _, lf := range f.LogFilters {
 		if lf.matches(trace) {
 			return true
