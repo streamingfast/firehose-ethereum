@@ -80,13 +80,8 @@ func decodeAnyPB(in *anypb.Any) (*bstream.Block, error) {
 		return nil, fmt.Errorf("unmarshal anypb: %w", err)
 	}
 
-	// FIXME: Damn it, need LibNum from `*bstream.Block` here but since we are actually
-	// downloading from `sf.firehose.v2.Stream`, then `LIBNum` is unavailable. Hence
-	// I don't think we will be able to serve this use case anymore.
-	var changeMeIfYouUpdateCommentAbove = uint64(0)
-	if true {
-		return nil, fmt.Errorf("downloading Firehose blocks is disabled for now a LIBNum cannot be reliably used in all cases anymore")
-	}
-
-	return types.BlockFromProto(block, changeMeIfYouUpdateCommentAbove)
+	// We are downloading only final blocks from the Firehose connection which means the LIB for them
+	// can be set to themself (althought we use `- 1` to ensure problem would occur if codde don't like
+	// `LIBNum == self.BlockNum`).
+	return types.BlockFromProto(block, block.Number-1)
 }

@@ -12,11 +12,11 @@ for instructions to keep up to date.
 
 ### Fixed
 
-* simplify forkablehub startup performance cases
-* fix relayer detection of a hole in stream blocks (restart on unrecoverable issue)
-* fix possible panic in hub when calls to one-block store are timing out
-* fix merger slow one-block-file deletions when there are more than 10000 of them
-
+* Fix `fireeth tools download-blocks-from-firehose` tool that was not working anymore.
+* Simplify `forkablehub` startup performance cases.
+* Fix relayer detection of a hole in stream blocks (restart on unrecoverable issue).
+* Fix possible panic in hub when calls to one-block store are timing out.
+* Fix merger slow one-block-file deletions when there are more than 10000 of them.
 
 ## v1.0.0
 
