@@ -1451,8 +1451,6 @@ type TransactionReceipt struct {
 	// **sure** you could build a proof and point to state in the middle of a block. Geth client
 	// uses `PostState + root + PostStateOrStatus`` while Parity used `status_code, root...`` this piles
 	// hardforks, see (read the EIPs first):
-	// - https://github.com/eoscanada/go-ethereum-private/blob/deep-mind/core/types/receipt.go#L147
-	// - https://github.com/eoscanada/go-ethereum-private/blob/deep-mind/core/types/receipt.go#L50-L86
 	// - https://github.com/ethereum/EIPs/blob/master/EIPS/eip-658.md
 	//
 	// Moreover, the notion of `Outcome`` in parity, which segregates the two concepts, which are

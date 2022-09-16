@@ -15,11 +15,12 @@ func init() {
 	firehoseClientCmd := sftools.GetFirehoseClientCmd(zlog, tracer, transformsSetter)
 	firehoseClientCmd.Flags().String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
 	firehoseClientCmd.Flags().String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
+	firehoseClientCmd.Flags().Bool("send-all-block-headers", false, "ask for all the blocks to be sent (header-only if there is no match)")
 	Cmd.AddCommand(firehoseClientCmd)
 }
 
 var transformsSetter = func(cmd *cobra.Command) (transforms []*anypb.Any, err error) {
-	filters, err := parseFilters(mustGetString(cmd, "call-filters"), mustGetString(cmd, "log-filters"))
+	filters, err := parseFilters(mustGetString(cmd, "call-filters"), mustGetString(cmd, "log-filters"), mustGetBool(cmd, "send-all-block-headers"))
 	if err != nil {
 		return nil, err
 	}
@@ -34,10 +35,10 @@ var transformsSetter = func(cmd *cobra.Command) (transforms []*anypb.Any, err er
 	return
 }
 
-func parseFilters(callFilters, logFilters string) (*pbtransform.CombinedFilter, error) {
+func parseFilters(callFilters, logFilters string, sendAllBlockHeaders bool) (*pbtransform.CombinedFilter, error) {
 	mf := &pbtransform.CombinedFilter{}
 
-	if callFilters == "" && logFilters == "" {
+	if callFilters == "" && logFilters == "" && !sendAllBlockHeaders {
 		return nil, nil
 	}
 	if callFilters != "" {
@@ -96,6 +97,9 @@ func parseFilters(callFilters, logFilters string) (*pbtransform.CombinedFilter, 
 		}
 	}
 
+	if sendAllBlockHeaders {
+		mf.SendAllBlockHeaders = true
+	}
 	return mf, nil
 }
 

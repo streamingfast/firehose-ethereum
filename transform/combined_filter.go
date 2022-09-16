@@ -43,17 +43,17 @@ func CombinedFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
 
-			if len(filter.CallFilters) == 0 && len(filter.LogFilters) == 0 {
-				return nil, fmt.Errorf("a combined filter transform requires at-least one callto filter or one logfilter")
+			if len(filter.CallFilters) == 0 && len(filter.LogFilters) == 0 && !filter.SendAllBlockHeaders {
+				return nil, fmt.Errorf("a combined filter transform requires at-least one callto filter, one log filter or it must have have send_all_block_headers enabled")
 			}
 
-			return newCombinedFilter(filter.CallFilters, filter.LogFilters, indexStore, possibleIndexSizes)
+			return newCombinedFilter(filter.CallFilters, filter.LogFilters, indexStore, possibleIndexSizes, filter.SendAllBlockHeaders)
 
 		},
 	}
 }
 
-func newCombinedFilter(pbCallToFilters []*pbtransform.CallToFilter, pbLogFilters []*pbtransform.LogFilter, indexStore dstore.Store, possibleIndexSizes []uint64) (*CombinedFilter, error) {
+func newCombinedFilter(pbCallToFilters []*pbtransform.CallToFilter, pbLogFilters []*pbtransform.LogFilter, indexStore dstore.Store, possibleIndexSizes []uint64, sendAllBlockHeaders bool) (*CombinedFilter, error) {
 	var callToFilters []*CallToFilter
 	if l := len(pbCallToFilters); l > 0 {
 		callToFilters = make([]*CallToFilter, l)
@@ -80,10 +80,11 @@ func newCombinedFilter(pbCallToFilters []*pbtransform.CallToFilter, pbLogFilters
 	}
 
 	f := &CombinedFilter{
-		CallToFilters:      callToFilters,
-		LogFilters:         logFilters,
-		indexStore:         indexStore,
-		possibleIndexSizes: possibleIndexSizes,
+		CallToFilters:       callToFilters,
+		LogFilters:          logFilters,
+		indexStore:          indexStore,
+		possibleIndexSizes:  possibleIndexSizes,
+		sendAllBlockHeaders: sendAllBlockHeaders,
 	}
 
 	return f, nil
@@ -95,6 +96,8 @@ type CombinedFilter struct {
 
 	indexStore         dstore.Store
 	possibleIndexSizes []uint64
+
+	sendAllBlockHeaders bool
 }
 
 type EthCombinedIndexer struct {
@@ -158,7 +161,7 @@ func (f *CombinedFilter) String() string {
 		logFilters[i] = addSigString(f)
 	}
 
-	return fmt.Sprintf("Combined filter: Calls:[%s], Logs:[%s]", truncate(strings.Join(callFilters, ","), 90, "...}"), truncate(strings.Join(logFilters, ","), 90, "...}"))
+	return fmt.Sprintf("Combined filter: Calls:[%s], Logs:[%s], SendAllBlockHeaders: %v", truncate(strings.Join(callFilters, ","), 90, "...}"), truncate(strings.Join(logFilters, ","), 90, "...}"), f.sendAllBlockHeaders)
 }
 
 func (f *CombinedFilter) matches(trace *pbeth.TransactionTrace) bool {
@@ -190,6 +193,10 @@ func (f *CombinedFilter) Transform(readOnlyBlk *bstream.Block, in transform.Inpu
 // GetIndexProvider will instantiate a new index conforming to the bstream.BlockIndexProvider interface
 func (f *CombinedFilter) GetIndexProvider() bstream.BlockIndexProvider {
 	if f.indexStore == nil {
+		return nil
+	}
+
+	if f.sendAllBlockHeaders {
 		return nil
 	}
 
