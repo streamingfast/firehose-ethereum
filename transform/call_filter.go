@@ -97,7 +97,7 @@ func MultiCallToFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
 
-			return newCombinedFilter(filter.CallFilters, nil, indexStore, possibleIndexSizes)
+			return newCombinedFilter(filter.CallFilters, nil, indexStore, possibleIndexSizes, false)
 		},
 	}
 }

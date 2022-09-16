@@ -97,7 +97,7 @@ func MultiLogFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64)
 			if err != nil {
 				return nil, fmt.Errorf("unexpected unmarshall error: %w", err)
 			}
-			return newCombinedFilter(nil, filter.LogFilters, indexStore, possibleIndexSizes)
+			return newCombinedFilter(nil, filter.LogFilters, indexStore, possibleIndexSizes, false)
 		},
 	}
 }
