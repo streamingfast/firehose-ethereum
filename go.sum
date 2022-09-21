@@ -709,6 +709,8 @@ github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c/go.mod h1:f
 github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648/go.mod h1:SHSEIPowGeE1TfNNmGeAUUnlO3dwevmX5kFOSazU60M=
 github.com/streamingfast/dstore v0.1.1-0.20220830184623-b0f0cc804743 h1:DYhr8sEuH+LqClO4q1MTH4DpB8gR+PXhi8whE85Cyek=
 github.com/streamingfast/dstore v0.1.1-0.20220830184623-b0f0cc804743/go.mod h1:SHSEIPowGeE1TfNNmGeAUUnlO3dwevmX5kFOSazU60M=
+github.com/streamingfast/dstore v0.1.1-0.20220921155016-7a52fdb3fe5f h1:3nO7RSBgMO8ZnjtKvmL+9u2P43B+VwUNWYGnadZduWA=
+github.com/streamingfast/dstore v0.1.1-0.20220921155016-7a52fdb3fe5f/go.mod h1:SHSEIPowGeE1TfNNmGeAUUnlO3dwevmX5kFOSazU60M=
 github.com/streamingfast/dtracing v0.0.0-20210811175635-d55665d3622a/go.mod h1:bqiYZaX6L/MoXNfFQeAdau6g9HLA3yKHkX8KzStt58Q=
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c h1:wy7a9uNZxSV27AiSsK4TLLSh2Ub3Vd2yumHuUakpDr0=
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c/go.mod h1:Nu6Sb4T/fuETQ2eRcve4x8fygSD3oE5NY5foJ09xeBc=
@@ -757,6 +759,8 @@ github.com/streamingfast/substreams v0.0.21-0.20220909123253-9f44d2ecc609 h1:G6D
 github.com/streamingfast/substreams v0.0.21-0.20220909123253-9f44d2ecc609/go.mod h1:W5X/bR8000Hh/2cmsxOBzdTXk+hnG/UIWpd95d/2fEc=
 github.com/streamingfast/substreams v0.0.21-0.20220919130904-5bf01d2cddc7 h1:W6Jm74PX+OJSP8raxJ3NgZLMx+DgHZDHSK23/L9WVss=
 github.com/streamingfast/substreams v0.0.21-0.20220919130904-5bf01d2cddc7/go.mod h1:W5X/bR8000Hh/2cmsxOBzdTXk+hnG/UIWpd95d/2fEc=
+github.com/streamingfast/substreams v0.0.21-0.20220921155104-18c3c6a71415 h1:aq6mLMKbLW8S+yK4ELzMWguKXq/aBQMpvcr+TcvW5IY=
+github.com/streamingfast/substreams v0.0.21-0.20220921155104-18c3c6a71415/go.mod h1:cG05tgtk6Xh3K3uaPpirPIOTgneLWiysZb2ZRJJqMUc=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=

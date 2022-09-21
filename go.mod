@@ -21,7 +21,7 @@ require (
 	github.com/streamingfast/dlauncher v0.0.0-20220909121534-7a9aa91dbb32
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
-	github.com/streamingfast/dstore v0.1.1-0.20220830184623-b0f0cc804743
+	github.com/streamingfast/dstore v0.1.1-0.20220921155016-7a52fdb3fe5f
 	github.com/streamingfast/eth-go v0.0.0-20220503135943-15f8a118d3b8
 	github.com/streamingfast/firehose v0.1.1-0.20220909121738-2f3bc007ea2b
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20220916201048-5cbeddcb86b4
@@ -35,7 +35,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.21-0.20220919130904-5bf01d2cddc7
+	github.com/streamingfast/substreams v0.0.21-0.20220921155104-18c3c6a71415
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
