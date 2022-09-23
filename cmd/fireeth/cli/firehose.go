@@ -103,6 +103,20 @@ func init() {
 
 			sfDataDir := runtime.AbsDataDir
 			var registerServiceExt firehoseApp.RegisterServiceExtensionFunc
+
+			rawServiceDiscoveryURL := viper.GetString("firehose-discovery-service-url")
+			var serviceDiscoveryURL *url.URL
+			if rawServiceDiscoveryURL != "" {
+				serviceDiscoveryURL, err = url.Parse(rawServiceDiscoveryURL)
+				if err != nil {
+					return nil, fmt.Errorf("unable to parse discovery service url: %w", err)
+				}
+				err = discoveryservice.Bootstrap(serviceDiscoveryURL)
+				if err != nil {
+					return nil, fmt.Errorf("unable to bootstrap discovery service: %w", err)
+				}
+			}
+
 			if viper.GetBool("substreams-enabled") {
 				rpcEngine, err := ethss.NewRPCEngine(
 					MustReplaceDataDir(sfDataDir, viper.GetString("substreams-rpc-cache-store-url")),
@@ -162,19 +176,6 @@ func init() {
 			registry.Register(ethtransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.CombinedFilterFactory(indexStore, possibleIndexSizes))
-
-			rawServiceDiscoveryURL := viper.GetString("firehose-discovery-service-url")
-			var serviceDiscoveryURL *url.URL
-			if rawServiceDiscoveryURL != "" {
-				serviceDiscoveryURL, err = url.Parse(rawServiceDiscoveryURL)
-				if err != nil {
-					return nil, fmt.Errorf("unable to parse discovery service url: %w", err)
-				}
-				err = discoveryservice.Bootstrap(serviceDiscoveryURL)
-				if err != nil {
-					return nil, fmt.Errorf("unable to bootstrap discovery service: %w", err)
-				}
-			}
 
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
 				MergedBlocksStoreURL:    mergedBlocksStoreURL,
