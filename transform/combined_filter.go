@@ -145,6 +145,9 @@ func addSigString(in AddressSignatureFilter) string {
 }
 
 func truncate(in string, size int, suffix string) string {
+	if tracer.Enabled() {
+		return in
+	}
 	if len(in) < size {
 		return in
 	}
