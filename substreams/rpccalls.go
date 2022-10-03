@@ -148,7 +148,7 @@ func (e *RPCEngine) ethCall(ctx context.Context, request *pbsubstreams.Request, 
 		panic("no cache initialized for this request?!")
 	}
 
-	res := e.rpcCalls(ctx, cache, clock.Id, calls)
+	res := e.rpcCalls(ctx, cache, clock.Number, calls)
 	cnt, err := proto.Marshal(res)
 	if err != nil {
 		return nil, fmt.Errorf("marshal RpcResponses proto: %w", err)
@@ -173,9 +173,9 @@ type RPCResponse struct {
 	CallError     error // always deterministic
 }
 
-func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
+func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockNum uint64, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
 	callsBytes, _ := proto.Marshal(calls)
-	cacheKey := fmt.Sprintf("%s:%x", blockHash, sha256.Sum256(callsBytes))
+	cacheKey := fmt.Sprintf("%d:%x", blockNum, sha256.Sum256(callsBytes))
 	if len(callsBytes) != 0 {
 		val, found := cache.Get(cacheKey)
 		if found {
@@ -197,7 +197,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 					"data": call.Data,
 					"gas":  50_000_000,
 				},
-				blockHash,
+				blockNum,
 			},
 		}
 	}
@@ -221,7 +221,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 			}
 
 			e.rollRpcClient()
-			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
+			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.Uint64("at_block", blockNum), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
 			continue
 		}
 
@@ -238,7 +238,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 					}
 				}
 
-				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client))
+				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.Uint64("at_block", blockNum), zap.Stringer("endpoint", client))
 				deterministicResp = false
 				break
 			}
