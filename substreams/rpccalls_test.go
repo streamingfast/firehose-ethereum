@@ -20,9 +20,12 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		buffer := bytes.NewBuffer(nil)
 		_, err := buffer.ReadFrom(r.Body)
-		require.NoError(t, err)
 
-		assert.Equal(t, `[{"params":[{"data":"0x313ce567","gas":"0x2faf080","to":"0xea674fdde714fd979de3edf0f56aa9716b898ec8"},"0x1"],"method":"eth_call","jsonrpc":"2.0","id":"0x1"}]`, buffer.String())
+		require.NoError(t, err)
+		assert.Equal(t,
+			`[{"params":[{"data":"0x313ce567","gas":"0x2faf080","to":"0xea674fdde714fd979de3edf0f56aa9716b898ec8"},{"blockHash":"00000001a"}],"method":"eth_call","jsonrpc":"2.0","id":"0x1"}]`,
+			buffer.String(),
+		)
 
 		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
 	}))
@@ -40,7 +43,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
 	require.NoError(t, err)
 
-	out, err := engine.ethCall(context.Background(), request, &pbsubstreams.Clock{Number: 1}, protoCalls)
+	out, err := engine.ethCall(context.Background(), request, &pbsubstreams.Clock{Number: 1, Id: "00000001a"}, protoCalls)
 	require.NoError(t, err)
 
 	responses := &pbethss.RpcResponses{}
