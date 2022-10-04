@@ -189,19 +189,11 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 
 	reqs := make([]*rpc.RPCRequest, len(calls.Calls))
 	for i, call := range calls.Calls {
-		reqs[i] = &rpc.RPCRequest{
-			Method: "eth_call",
-			Params: []interface{}{
-				map[string]interface{}{
-					"to":   call.ToAddr,
-					"data": call.Data,
-					"gas":  50_000_000,
-				},
-				map[string]interface{}{
-					"blockHash": blockHash,
-				},
-			},
-		}
+		reqs[i] = rpc.NewRawETHCall(rpc.CallParams{
+			To:       call.ToAddr,
+			GasLimit: 50_000_000,
+			Data:     call.Data,
+		}, rpc.BlockHash(blockHash)).ToRequest()
 	}
 
 	var delay time.Duration
