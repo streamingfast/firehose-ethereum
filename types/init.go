@@ -17,6 +17,7 @@ package types
 import (
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/streamingfast/bstream"
@@ -30,6 +31,9 @@ func init() {
 	bstream.GetBlockWriterHeaderLen = 10
 	bstream.GetBlockPayloadSetter = bstream.MemoryBlockPayloadSetter
 	bstream.GetMemoizeMaxAge = 20 * time.Second
+	bstream.NormalizeBlockID = func(in string) string {
+		return strings.TrimPrefix(strings.ToLower(in), "0x")
+	}
 }
 
 func blockReaderFactory(reader io.Reader) (bstream.BlockReader, error) {
