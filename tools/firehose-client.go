@@ -17,6 +17,9 @@ func init() {
 	firehoseClientCmd.Flags().String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
 	firehoseClientCmd.Flags().Bool("send-all-block-headers", false, "ask for all the blocks to be sent (header-only if there is no match)")
 	Cmd.AddCommand(firehoseClientCmd)
+
+	firehoseSingleBlockClientCmd := sftools.GetFirehoseSingleBlockClientCmd(zlog, tracer)
+	Cmd.AddCommand(firehoseSingleBlockClientCmd)
 }
 
 var transformsSetter = func(cmd *cobra.Command) (transforms []*anypb.Any, err error) {

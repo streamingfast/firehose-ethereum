@@ -13,7 +13,7 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20221011170448-52a3776dacb7
+	github.com/streamingfast/bstream v0.0.2-0.20221017131819-2a7e38be1047
 	github.com/streamingfast/cli v0.0.4-0.20220630165922-bc58c6666fc8
 	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
 	github.com/streamingfast/derr v0.0.0-20220526184630-695c21740145
@@ -23,16 +23,16 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
 	github.com/streamingfast/dstore v0.1.1-0.20220921155016-7a52fdb3fe5f
 	github.com/streamingfast/eth-go v0.0.0-20221004173352-5738e9aa2af6
-	github.com/streamingfast/firehose v0.1.1-0.20221005191206-4c5d3db2224f
-	github.com/streamingfast/firehose-ethereum/types v0.0.0-20220916201048-5cbeddcb86b4
+	github.com/streamingfast/firehose v0.1.1-0.20221017143750-c857d3655494
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20221017135158-cf809e4f9899
 	github.com/streamingfast/index-builder v0.0.0-20220812125759-4ea1e5a3aa91
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
 	github.com/streamingfast/merger v0.0.3-0.20220909122033-9ca15beb25f5
 	github.com/streamingfast/node-manager v0.0.2-0.20220912235129-6c08463b0c01
-	github.com/streamingfast/pbgo v0.0.6-0.20220801202203-c32e42ac42a8
+	github.com/streamingfast/pbgo v0.0.6-0.20221014191646-3a05d7bc30c8
 	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9
-	github.com/streamingfast/sf-tools v0.0.0-20220810183745-b514ffd4aa46
+	github.com/streamingfast/sf-tools v0.0.0-20221017145408-47cd870ff289
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
 	github.com/streamingfast/substreams v0.0.21-0.20221007144200-d25230540279
