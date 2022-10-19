@@ -18,8 +18,8 @@ import (
 	"fmt"
 
 	"github.com/streamingfast/bstream"
-	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -28,8 +28,8 @@ func BlockDecoder(blk *bstream.Block) (interface{}, error) {
 		return nil, fmt.Errorf("expected kind %s, got %s", pbbstream.Protocol_ETH, blk.Kind())
 	}
 
-	if blk.Version() != 2 && blk.Version() != 1 {
-		return nil, fmt.Errorf("this decoder only knows about version 1 and 2, got %d", blk.Version())
+	if blk.Version() > 3 || blk.Version() < 1 {
+		return nil, fmt.Errorf("this decoder only knows about version 1, 2 and 3, got %d", blk.Version())
 	}
 
 	block := new(pbeth.Block)

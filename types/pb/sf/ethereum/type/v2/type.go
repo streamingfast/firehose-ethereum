@@ -191,6 +191,15 @@ func isPolygonException(log *Log) bool {
 	return bytes.Equal(log.Address, polygonFeeSystemAddress) && len(log.Topics) == 4 && bytes.Equal(log.Topics[0], polygonNeverRevertedTopic)
 }
 
+func callAtIndex(idx uint32, calls []*Call) *Call {
+	for _, call := range calls {
+		if call.Index == idx {
+			return call
+		}
+	}
+	return nil
+}
+
 // NormalizeBlockInPlace
 func (block *Block) NormalizeInPlace() {
 	// We reconstruct the state reverted value per call, for each transaction traces. We also
@@ -215,6 +224,22 @@ func (block *Block) NormalizeInPlace() {
 	if err := block.PopulateLogBlockIndices(); err != nil {
 		panic(fmt.Errorf("normalizing log block indices: %w", err))
 	}
+
+	if block.Ver == 2 {
+		for _, trx := range block.TransactionTraces {
+			for _, call := range trx.Calls {
+				if call.CallType == CallType_DELEGATE {
+					parent := callAtIndex(call.ParentIndex, trx.Calls)
+					if parent == nil {
+						panic(fmt.Sprintf("normalize_in_place: cannot find call parent of call %d on trx %s", call.Index, eth.Bytes(trx.Hash).Pretty()))
+					}
+					call.Caller = parent.Address
+				}
+			}
+		}
+		block.Ver = 3
+	}
+
 }
 
 func NormalizeSignaturePoint(value []byte) []byte {
