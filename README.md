@@ -3,72 +3,19 @@
 </a>
 
 # Firehose for Ethereum
+
 [![reference](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/github.com/streamingfast/firehose-ethereum)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+Quick start with Firehose for Ethereum can be found in the official Firehose docs. Here some quick links to it:
 
-## Requirements (clone repos, build stuff...)
-
-### Install Geth
-
-```
-git clone git@github.com:streamingfast/go-ethereum.git
-cd go-ethereum
-git checkout release/geth-1.10.x-dm
-go install ./cmd/geth
-go install ./cmd/bootnode
-```
-
-### Install fireeth
-
-```
-git clone git@github.com:streamingfast/firehose-ethereum.git
-cd firehose-ethereum
-go install ./cmd/fireeth
-```
-
-## Quickstart, connecting to an existing chain
-
-* Start from a clean folder
-
-* Create a file named `sf.yaml` and put the following content:
-
-  ```
-  start:
-  args:
-  - merger
-  - firehose
-  - reader-node
-  - relayer
-  flags:
-    common-chain-id: "1"
-    common-network-id: "1"
-    reader-node-bootstrap-data-url: ./reader/genesis.json
-    reader-node-log-to-zap: false
-    reader-node-arguments: "+--bootnodes=enode://<enode1>@<ip>:<port>,enode://<enode2>@<ip>:<port>"
-  ```
-
-  **Note** Up to date boot nodes info for Geth supported network(s) can be found [here](https://github.com/ethereum/go-ethereum/blob/master/params/bootnodes.go).
-
-* Create a folder `reader`
-
-* Copy the `genesis.json` file of the chain into the `reader` folder.
-
-  **Note** It's possible to use `geth dumpgenesis` to dump actual genesis file to disk
-    * Mainnet - `geth --mainnet dumpgenesis > ./reader/genesis.json`
-    * Ropsten - `geth --ropsten dumpgenesis > ./reader/genesis.json`
-    * Goerli - `geth --goerli dumpgenesis > ./reader/genesis.json`
-    * Rinkeby - `geth --rinkeby dumpgenesis > ./reader/genesis.json`
-
-* `fireeth start -vv`
-
-  **Note** It's recommended to launch with `-vv` the first time to more easily see what's happening under the hood.
-
-* Wait around a minute leaving enough time for the `Geth` process to start the syncing process. You should then have some merged blocks under `./sf-data/storage/merged-blocks`. You should also be able to test that Firehose is able to stream some blocks to you.
-
-  `grpcurl -plaintext -import-path ../proto -import-path ./proto -proto sf/ethereum/type/v2/type.proto -proto sf/firehose/v1/firehose.proto -d '{"start_block_num": -1}' localhost:13042 sf.firehose.v1.Stream.Blocks"
-
-  **Note** You will need to have [grpcurl](https://github.com/fullstorydev/grpcurl) and a clone of https://github.com/streamingfast/proto, we assume they are sibling of the folder you are currently in, adjust `-import-path ...` flags in the command above to where the files are located.
+- [Firehose Overview](https://firehose.streamingfast.io/introduction/firehose-overview)
+- [Concepts & Architectures](https://firehose.streamingfast.io/concepts-and-architeceture)
+  - [Components](https://firehose.streamingfast.io/concepts-and-architeceture/components)
+  - [Data Flow](https://firehose.streamingfast.io/concepts-and-architeceture/data-flow)
+  - [Data Storage](https://firehose.streamingfast.io/concepts-and-architeceture/data-storage)
+  - [Design Principles](https://firehose.streamingfast.io/concepts-and-architeceture/design-principles)
+- [Ethereum Syncing](https://firehose.streamingfast.io/firehose-setup/ethereum)
 
 ## Release
 
