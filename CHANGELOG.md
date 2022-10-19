@@ -11,6 +11,18 @@ for instructions to keep up to date.
 * Added sf.firehose.v2.Fetch/Block endpoint on firehose, allows fetching single block by num, num+ID or cursor
 * Added `tools firehose-single-block-client` to call that new endpoint
 
+### Changed
+* Renamed tools `normalize-merged-blocks` to `upgrade-merged-blocks`
+
+### Fixed DELEGATECALL caller bug -- geth upgrade recommended, merged-blocks operation required, index reprocessing required --
+
+* Fixed the Caller on delegateCall to align with what the traces API gives
+* Bumped sf.ethereum.type.v2.Block field `Ver` from 2 to 3
+* This requires upgrading the blocks from Ver.2 to Ver.3 using `tools upgrade-merged-blocks`
+* This requires reprocessing the combined indexes from those new blocks Ver.3
+* While the upgrade from blocks Ver.2 to Ver.3 will be applied in real-time for future blocks, 
+  but you should upgrade your geth instrumented with firehose version 2.1
+
 ## v1.1.0
 
 ### Added
