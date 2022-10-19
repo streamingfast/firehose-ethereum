@@ -2,12 +2,28 @@ start:
   args:
   - merger
   - reader-node
+  - relayer
+  - firehose
+  - combined-index-builder
   flags:
     common-chain-id: 5
     common-network-id: 5
     common-live-blocks-addr: :23011
     merger-grpc-listen-addr: :23012
-    reader-node-arguments: +--goerli --http.port=9545 --ws.port=9546 --port=40303
+    # We have set `authrpc.addr` and `http.addr` to `0.0.0.0` so that RPC listen on all interfaces, we also
+    # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
+    # to ensure foreign access to these connection are protected.
+    reader-node-arguments: +
+      --goerli
+      --authrpc.jwtsecret=jwt.txt
+      --authrpc.addr=0.0.0.0
+      --authrpc.port=9551
+      --authrpc.vhosts=*
+      --http.addr=0.0.0.0
+      --http.port=9545
+      --http.vhosts=*
+      --ws.port=9546
+      --port=40303
     reader-node-grpc-listen-addr: :23010
     reader-node-manager-api-addr: :23009
     relayer-grpc-listen-addr: :23011
