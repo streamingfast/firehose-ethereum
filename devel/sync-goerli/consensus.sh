@@ -55,13 +55,15 @@ usage_error() {
 usage() {
   echo "usage: start.sh [-c]"
   echo ""
-  echo "Start $(basename $ROOT) environment."
+  echo "Start Consensus Client (lighthouse) for $(basename $ROOT) environment."
+  echo ""
+  echo "Two environment variables can tweak it:"
+  echo ""
+  echo " 'LIGHTHOUSE_BIN' | Absolute path where to find 'lighthouse' binary, defaults to 'lighthouse' which will be picked in your 'PATH'"
+  echo " 'CHECKPOINT_SYNC_URL' | URL where 'lighthouse' can reach to bootstrap the consensus client database from a pre-made checkpoint, sets '--checkpoint-sync-url' flag on 'lighthouse' startup. A community maintained list of public checkpoint sync URLs can be seen https://eth-clients.github.io/checkpoint-sync-endpoints/. **Important** if you already have some data for your consensus client, '--checkpoint-sync-url' has no effect, delete 'cs-data' folder first and then start it back with the environment variable"
   echo ""
   echo "Options"
-  echo "    -c             Clean actual data directory first"
-  echo ""
-  echo "Examples"
-  echo "   Stream blocks    grpcurl -insecure -import-path ../proto -import-path ../proto-ethereum -proto dfuse/ethereum/codec/v1/codec.proto -proto dfuse/bstream/v1/bstream.proto -d '{\"start_block_num\": -1}' localhost:13042 dfuse.bstream.v1.BlockStreamV2.Blocks"
-}
+  echo "    -c             Clean actual data directory '$ROOT/cs-data' first"
+ }
 
 main "$@"
