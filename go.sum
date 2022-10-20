@@ -738,14 +738,13 @@ github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308/go.mod h1:K1p
 github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef h1:9IVFHRsqvI+vKJwgF1OMV6L55jHbaV/ZLoU4IAG/dME=
 github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef/go.mod h1:cq8CvbZ3ioFmGrHokSAJalS0lC+pVXLKhITScItUGXY=
 github.com/streamingfast/pbgo v0.0.6-0.20220629184423-cfd0608e0cf4/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
-github.com/streamingfast/pbgo v0.0.6-0.20221014191646-3a05d7bc30c8 h1:tz5y88t3tVJPrCjjWXk3ojEg3JKj0Gc3pv7eR1Iqx8U=
 github.com/streamingfast/pbgo v0.0.6-0.20221014191646-3a05d7bc30c8/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
 github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28 h1:wmQg8T0rIFl/R3dy97OWRi8OSdM3llvRw2p3TPFVKZQ=
 github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
 github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9 h1:V3LPBmTofZbmT46qQsr0lFa+0qDHZNJXgqLRo9iZBHY=
 github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9/go.mod h1:55E/1g+ojZoX86Odp48LFgceJVyh1xx9ZuhknKfmc/o=
-github.com/streamingfast/sf-tools v0.0.0-20221019180429-c38626788cdd h1:fXmue89DqjCBNPPHLxXOTTiXUcSILeeOp4xQK0YEJW4=
-github.com/streamingfast/sf-tools v0.0.0-20221019180429-c38626788cdd/go.mod h1:NTrKtcP7QPEMEu/rRbThGqwNb3dI7LHLmE5Kn00UyGU=
+github.com/streamingfast/sf-tools v0.0.0-20221020185155-d5fe94d7578e h1:lwh8frSAg7ZruEn+FB7d1chvrH081jwgE/6z2MTMKrY=
+github.com/streamingfast/sf-tools v0.0.0-20221020185155-d5fe94d7578e/go.mod h1:NTrKtcP7QPEMEu/rRbThGqwNb3dI7LHLmE5Kn00UyGU=
 github.com/streamingfast/sf-tracing v0.0.0-20220829120927-5a5d2e0fe525 h1:U93LqP9yxd5sWKhFDkZeaVVAmP1SKRDhDg5NM591zzE=
 github.com/streamingfast/sf-tracing v0.0.0-20220829120927-5a5d2e0fe525/go.mod h1:k3hivbalRWW6hvGSV3vJ3wtBSt1pszXI6m9MJa5k0/I=
 github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAtyaTOgs=
