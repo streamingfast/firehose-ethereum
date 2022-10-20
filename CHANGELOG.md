@@ -11,6 +11,20 @@ for instructions to keep up to date.
 * Added sf.firehose.v2.Fetch/Block endpoint on firehose, allows fetching single block by num, num+ID or cursor
 * Added `tools firehose-single-block-client` to call that new endpoint
 
+### Changed
+* Renamed tools `normalize-merged-blocks` to `upgrade-merged-blocks`
+
+
+...
+### Fixed
+
+*  Fixed `DELEGATECALL`'s `caller` (a.k.a `from`)
+
+#### Upgrade Procedure
+
+* Upgrade Firehose blocks from `version: 2` to `version: 3` using `fireeth tools upgrade-merged-blocks`
+* Re-create combined indexes from those new blocks
+* Blocks produced in real-time for future blocks, but you should upgrade your Geth instrumented binary with latest published version
 ## v1.1.0
 
 ### Added

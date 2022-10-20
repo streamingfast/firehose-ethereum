@@ -33,7 +33,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var BlockVersion = int32(2)
+var BlockVersion = int32(0) // this will be set inside readInit()
 
 // ConsoleReader is what reads the `geth` output directly. It builds
 // up some LogEntry objects. See `LogReader to read those entries .
@@ -409,6 +409,9 @@ func (ctx *parseCtx) popCallIndexReturnParent() (int32, uint32, error) {
 // Formats
 // FIRE BEGIN_BLOCK <NUM>
 func (ctx *parseCtx) readBeginBlock(line string) error {
+	if BlockVersion == 0 {
+		return fmt.Errorf("cannot start reading block: INIT not done")
+	}
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
@@ -904,16 +907,21 @@ func (ctx *parseCtx) readInit(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	dmVersion := chunks[0]
+	fhVersion := chunks[0]
 	nodeVariant := chunks[1]
 	nodeVersion := chunks[2]
 
-	if !strings.HasPrefix(dmVersion, "2.") {
-		return fmt.Errorf("deepmind major version is unsupported (expected: 2.x, found %s)", dmVersion)
+	switch fhVersion {
+	case "2.0":
+		BlockVersion = 2
+	case "2.1":
+		BlockVersion = 3
+	default:
+		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: 2.0 or 2.1, found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", fhVersion)
 	}
 
 	ctx.logger.Info("read firehose instrumentation init line",
-		zap.String("dm_version", dmVersion),
+		zap.String("fh_version", fhVersion),
 		zap.String("node_variant", nodeVariant),
 		zap.String("node_version", nodeVersion),
 	)
