@@ -8,28 +8,31 @@ for instructions to keep up to date.
 
 ### Added
 
-* Added sf.firehose.v2.Fetch/Block endpoint on firehose, allows fetching single block by num, num+ID or cursor
-* Added `tools firehose-single-block-client` to call that new endpoint
+* Added `sf.firehose.v2.Fetch/Block` endpoint on firehose, allows fetching single block by num, num+ID or cursor.
+
+* Added `tools firehose-single-block-client` to call that new endpoint.
 
 ### Changed
-* Renamed tools `normalize-merged-blocks` to `upgrade-merged-blocks`
 
+* Renamed tools `normalize-merged-blocks` to `upgrade-merged-blocks`.
 
-...
 ### Fixed
 
-*  Fixed `DELEGATECALL`'s `caller` (a.k.a `from`)
+* Fixed `common-blocks-cache-dir` flag's description.
+
+*  Fixed `DELEGATECALL`'s `caller` (a.k.a `from`).
 
 #### Upgrade Procedure
 
-* Upgrade Firehose blocks from `version: 2` to `version: 3` using `fireeth tools upgrade-merged-blocks`
-* Re-create combined indexes from those new blocks
-* Blocks produced in real-time for future blocks, but you should upgrade your Geth instrumented binary with latest published version
+* Upgrade Firehose blocks from `version: 2` to `version: 3` using `fireeth tools upgrade-merged-blocks`.
+* Re-create combined indexes from those new blocks.
+* Blocks produced in real-time for future blocks, but you should upgrade your Geth instrumented binary with latest published version.
+
 ## v1.1.0
 
 ### Added
 
-* Added 'SendAllBlockHeaders' param to CombinedFilter transform when we want to prevent skipping blocks but still want to filter out trxs
+* Added 'SendAllBlockHeaders' param to CombinedFilter transform when we want to prevent skipping blocks but still want to filter out trxs.
 
 ### Changed
 
