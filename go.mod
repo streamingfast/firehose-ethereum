@@ -30,7 +30,7 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df
 	github.com/streamingfast/merger v0.0.3-0.20220909122033-9ca15beb25f5
 	github.com/streamingfast/node-manager v0.0.2-0.20220912235129-6c08463b0c01
-	github.com/streamingfast/pbgo v0.0.6-0.20221014191646-3a05d7bc30c8
+	github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28
 	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9
 	github.com/streamingfast/sf-tools v0.0.0-20221017171331-b1fccddb33da
 	github.com/streamingfast/shutter v1.5.0

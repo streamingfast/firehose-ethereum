@@ -740,6 +740,8 @@ github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef/go.mod h1
 github.com/streamingfast/pbgo v0.0.6-0.20220629184423-cfd0608e0cf4/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
 github.com/streamingfast/pbgo v0.0.6-0.20221014191646-3a05d7bc30c8 h1:tz5y88t3tVJPrCjjWXk3ojEg3JKj0Gc3pv7eR1Iqx8U=
 github.com/streamingfast/pbgo v0.0.6-0.20221014191646-3a05d7bc30c8/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
+github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28 h1:wmQg8T0rIFl/R3dy97OWRi8OSdM3llvRw2p3TPFVKZQ=
+github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28/go.mod h1:huKwfgTGFIFZMKSVbD5TywClM7zAeBUG/zePZMqvXQQ=
 github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9 h1:V3LPBmTofZbmT46qQsr0lFa+0qDHZNJXgqLRo9iZBHY=
 github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9/go.mod h1:55E/1g+ojZoX86Odp48LFgceJVyh1xx9ZuhknKfmc/o=
 github.com/streamingfast/sf-tools v0.0.0-20221017171331-b1fccddb33da h1:Chve6djto6DIhRlFVCv5pxJzZtxlVr71Pa9yvqHBODs=
