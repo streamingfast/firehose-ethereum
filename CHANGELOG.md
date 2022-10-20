@@ -14,15 +14,17 @@ for instructions to keep up to date.
 ### Changed
 * Renamed tools `normalize-merged-blocks` to `upgrade-merged-blocks`
 
-### Fixed DELEGATECALL caller bug -- geth upgrade recommended, merged-blocks operation required, index reprocessing required --
 
-* Fixed the Caller on delegateCall to align with what the traces API gives
-* Bumped sf.ethereum.type.v2.Block field `Ver` from 2 to 3
-* This requires upgrading the blocks from Ver.2 to Ver.3 using `tools upgrade-merged-blocks`
-* This requires reprocessing the combined indexes from those new blocks Ver.3
-* While the upgrade from blocks Ver.2 to Ver.3 will be applied in real-time for future blocks, 
-  but you should upgrade your geth instrumented with firehose version 2.1
+...
+### Fixed
 
+*  Fixed `DELEGATECALL`'s `caller` (a.k.a `from`)
+
+#### Upgrade Procedure
+
+* Upgrade Firehose blocks from `version: 2` to `version: 3` using `fireeth tools upgrade-merged-blocks`
+* Re-create combined indexes from those new blocks
+* Blocks produced in real-time for future blocks, but you should upgrade your Geth instrumented binary with latest published version
 ## v1.1.0
 
 ### Added
