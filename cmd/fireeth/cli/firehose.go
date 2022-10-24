@@ -66,8 +66,8 @@ func init() {
 			cmd.Flags().String("substreams-client-jwt", "", "jwt for substreams client authentication")
 			cmd.Flags().Bool("substreams-client-insecure", false, "substreams client in insecure mode")
 			cmd.Flags().Bool("substreams-client-plaintext", true, "substreams client in plaintext mode")
-			cmd.Flags().Int("substreams-sub-request-parallel-jobs", 5, "substreams subrequest parallel jobs for the scheduler")
-			cmd.Flags().Int("substreams-sub-request-block-range-size", 1000, "substreams subrequest block range size value for the scheduler")
+			cmd.Flags().Uint64("substreams-sub-request-parallel-jobs", 5, "substreams subrequest parallel jobs for the scheduler")
+			cmd.Flags().Uint64("substreams-sub-request-block-range-size", 1000, "substreams subrequest block range size value for the scheduler")
 			return nil
 		},
 
@@ -158,8 +158,8 @@ func init() {
 				sss, err := substreamsService.New(
 					stateStore,
 					"sf.ethereum.type.v2.Block",
-					viper.GetInt("substreams-sub-request-parallel-jobs"),
-					viper.GetInt("substreams-sub-request-block-range-size"),
+					viper.GetUint64("substreams-sub-request-parallel-jobs"),
+					viper.GetUint64("substreams-sub-request-block-range-size"),
 					substreamsClientConfig,
 					opts...,
 				)
