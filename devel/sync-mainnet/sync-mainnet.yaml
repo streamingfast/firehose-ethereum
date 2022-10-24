@@ -1,14 +1,36 @@
 start:
   args:
-  - relayer
-  - merger
-  - reader-node
+    - merger
+    - reader-node
+    - relayer
+    - firehose
+    - combined-index-builder
   flags:
     common-chain-id: 1
     common-network-id: 1
     common-live-blocks-addr: :23011
     merger-grpc-listen-addr: :23012
-    reader-node-arguments: +--cache 8192 --maxpeers 100 --metrics --metrics.port 6061 --metrics.addr 0.0.0.0 --port=40303 -authrpc.addr=0.0.0.0 --authrpc.port=10551 --authrpc.vhosts=* --http.port=10545 --snapshot=false --cache.snapshot=0 --txlookuplimit=128
+    # We have set `authrpc.addr` and `http.addr` to `0.0.0.0` so that RPC listen on all interfaces, we also
+    # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
+    # to ensure foreign access to these connection are protected.
+    reader-node-arguments: +
+      --authrpc.addr=0.0.0.0
+      --authrpc.jwtsecret=jwt.txt
+      --authrpc.port=9551
+      --authrpc.vhosts=* 
+      --cache 8192 
+      --cache.snapshot=0
+      --http.addr=0.0.0.0
+      --http.port=9545
+      --http.vhosts=*
+      --maxpeers 100 
+      --metrics 
+      --metrics.addr 0.0.0.0 
+      --metrics.port 6061 
+      --port=40303 
+      --snapshot=false 
+      --txlookuplimit=128
+      --ws.port=9546
     reader-node-grpc-listen-addr: :23010
     reader-node-manager-api-addr: :23009
     relayer-grpc-listen-addr: :23011
