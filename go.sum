@@ -710,6 +710,8 @@ github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c/go.mod h1:f
 github.com/streamingfast/dstore v0.1.1-0.20220607202639-35118aeaf648/go.mod h1:SHSEIPowGeE1TfNNmGeAUUnlO3dwevmX5kFOSazU60M=
 github.com/streamingfast/dstore v0.1.1-0.20220921155016-7a52fdb3fe5f h1:3nO7RSBgMO8ZnjtKvmL+9u2P43B+VwUNWYGnadZduWA=
 github.com/streamingfast/dstore v0.1.1-0.20220921155016-7a52fdb3fe5f/go.mod h1:SHSEIPowGeE1TfNNmGeAUUnlO3dwevmX5kFOSazU60M=
+github.com/streamingfast/dstore v0.1.1-0.20221021155138-4baa2d406146 h1:THCdjFr0IJHTFpVl4Vfp2EdhQEXMKdIZYkRlwJAnpjk=
+github.com/streamingfast/dstore v0.1.1-0.20221021155138-4baa2d406146/go.mod h1:SHSEIPowGeE1TfNNmGeAUUnlO3dwevmX5kFOSazU60M=
 github.com/streamingfast/dtracing v0.0.0-20210811175635-d55665d3622a/go.mod h1:bqiYZaX6L/MoXNfFQeAdau6g9HLA3yKHkX8KzStt58Q=
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c h1:wy7a9uNZxSV27AiSsK4TLLSh2Ub3Vd2yumHuUakpDr0=
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c/go.mod h1:Nu6Sb4T/fuETQ2eRcve4x8fygSD3oE5NY5foJ09xeBc=
@@ -753,6 +755,8 @@ github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
 github.com/streamingfast/substreams v0.0.21-0.20221007144200-d25230540279 h1:p+Yq+OMe82Pzcve92dK01JNcqq4b/EiV1GnCiuU7IGg=
 github.com/streamingfast/substreams v0.0.21-0.20221007144200-d25230540279/go.mod h1:TV2lu9OQej22gE65ARtGegxHURr5gXkNgRI+qPyWdz8=
+github.com/streamingfast/substreams v0.0.21-0.20221024145255-5adfd8369291 h1:KP0VWaqm16yv67lAYtohPgqsyAdaFOH3+Lcix0V7x7U=
+github.com/streamingfast/substreams v0.0.21-0.20221024145255-5adfd8369291/go.mod h1:y9DwvwtlLSYDKznY4lbXvo/CN7h1O9OsBCCc1d5pU7k=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
@@ -845,6 +849,8 @@ go.uber.org/atomic v1.6.0/go.mod h1:sABNBOSYdrvTF6hTgEIbc7YasKWGhgEQZyfxyTvoXHQ=
 go.uber.org/atomic v1.7.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
 go.uber.org/atomic v1.9.0 h1:ECmE8Bn/WFTYwEW/bpKD3M8VtR/zQVbavAoalC1PYyE=
 go.uber.org/atomic v1.9.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
+go.uber.org/atomic v1.10.0 h1:9qC72Qh0+3MqyJbAn8YU5xVq1frD8bn3JtD2oXtafVQ=
+go.uber.org/atomic v1.10.0/go.mod h1:LUxbIzbOniOlMKjJjyPfpl4v+PKK2cNJn91OQbhoJI0=
 go.uber.org/goleak v1.1.11-0.20210813005559-691160354723/go.mod h1:cwTWslyiVhfpKIDGSZEM2HlOvcqm+tG4zioyIeLoqMQ=
 go.uber.org/goleak v1.1.11/go.mod h1:cwTWslyiVhfpKIDGSZEM2HlOvcqm+tG4zioyIeLoqMQ=
 go.uber.org/goleak v1.1.12 h1:gZAh5/EyT/HQwlpkCy6wTpqfH9H8Lz8zbm3dZh+OyzA=

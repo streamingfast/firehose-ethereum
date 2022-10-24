@@ -21,7 +21,7 @@ require (
 	github.com/streamingfast/dlauncher v0.0.0-20220909121534-7a9aa91dbb32
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c
-	github.com/streamingfast/dstore v0.1.1-0.20220921155016-7a52fdb3fe5f
+	github.com/streamingfast/dstore v0.1.1-0.20221021155138-4baa2d406146
 	github.com/streamingfast/eth-go v0.0.0-20221004173352-5738e9aa2af6
 	github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20221019183101-bdeb8dafed8d
@@ -36,7 +36,7 @@ require (
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
 	// This is branch `stable` of Substreams, please keep like that until Substreams are stabilized
-	github.com/streamingfast/substreams v0.0.21-0.20221007144200-d25230540279
+	github.com/streamingfast/substreams v0.0.21-0.20221024145255-5adfd8369291
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -161,7 +161,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.9.0 // indirect
 	go.opentelemetry.io/otel/trace v1.9.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.18.0 // indirect
-	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
