@@ -58,7 +58,7 @@ func Main(
 	RootCmd.PersistentFlags().String("log-level-switcher-listen-addr", "localhost:1065", "If non-empty, the process will listen on this address for json-formatted requests to change different logger levels (see DEBUG.md for more info)")
 	RootCmd.PersistentFlags().String("metrics-listen-addr", MetricsListenAddr, "If non-empty, the process will listen on this address to server Prometheus metrics")
 	RootCmd.PersistentFlags().String("pprof-listen-addr", "localhost:6060", "If non-empty, the process will listen on this address for pprof analysis (see https://golang.org/pkg/net/http/pprof/)")
-	RootCmd.PersistentFlags().Duration("startup-delay", 0, "[DEV] Delay before launching actual application(s), useful to leave some time to perform maintenance operations, on persistent disks for example.")
+	RootCmd.PersistentFlags().Duration("startup-delay", 0, "[DEV] Delay with units (like 10s or 1m) before launching actual application(s), useful to leave some time to perform maintenance operations, on persistent disks for example.")
 
 	// Those must come before `launcher.RegisterFlags` call because they register themselves some flags that are checked by `launcher.RegisterFlags`
 	registerNodeApp(backupModuleFactories)
