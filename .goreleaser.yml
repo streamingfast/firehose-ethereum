@@ -1,6 +1,7 @@
 project_name: firehose-ethereum
 
 release:
+  draft: true
   github:
     owner: streamingfast
     name: firehose-ethereum
