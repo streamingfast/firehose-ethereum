@@ -4,12 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v1.2.0
 
 ### Added
 
 * Added `sf.firehose.v2.Fetch/Block` endpoint on firehose, allows fetching single block by num, num+ID or cursor.
-
 * Added `tools firehose-single-block-client` to call that new endpoint.
 
 ### Changed
@@ -19,14 +18,24 @@ for instructions to keep up to date.
 ### Fixed
 
 * Fixed `common-blocks-cache-dir` flag's description.
+* Fixed `DELEGATECALL`'s `caller` (a.k.a `from`). -> requires upgrade of blocks to `version: 3`
 
-*  Fixed `DELEGATECALL`'s `caller` (a.k.a `from`).
+### Upgrade Procedure
 
-#### Upgrade Procedure
+Assuming that you are running a firehose deployment v1.1.0 writing blocks to folders `/v2-oneblock`, `/v2-forked` and `/v2`, 
+you will deploy a new setup that writes blocks to folders `/v3-oneblock`, `v3-forked` and `/v3`
 
-* Upgrade Firehose blocks from `version: 2` to `version: 3` using `fireeth tools upgrade-merged-blocks`.
-* Re-create combined indexes from those new blocks.
-* Blocks produced in real-time for future blocks, but you should upgrade your Geth instrumented binary with latest published version.
+This procedure describes an upgrade without any downtime. With proper parallelization, it should be possible to complete this upgrade within a single day.
+
+1. Launch a new reader with this code, running instrumented geth binary: https://github.com/streamingfast/go-ethereum/releases/tag/geth-v1.10.25-fh2.1
+   (you can start from a backup that is close to head)
+2. Upgrade your merged-blocks from `version: 2` to `version: 3` using `fireeth tools upgrade-merged-blocks /path/to/v2 /path/to/v3 {start} {stop}`
+   (you can run multiple upgrade commands in parallel to cover the whole blocks range)
+3. Create combined indexes from those new blocks with `fireeth start combined-index-builder` 
+   (you can run multiple commands in parallel to fill the block range)
+4. When your merged-blocks have been upgraded and the one-block-files are being produced by the new reader, launch a merger
+5. When the reader, merger and combined-index-builder caught up to live, you can launch the relayer(s), firehose(s)
+6. When the firehoses are ready, you can now switch traffic to them.
 
 ## v1.1.0
 
