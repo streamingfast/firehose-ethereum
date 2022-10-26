@@ -10,6 +10,7 @@ start:
     substreams-partial-mode-enabled: true
     substreams-rpc-endpoints: "$ETH_MAINNET_RPC"
     substreams-state-store-url: "gs://dfuseio-global-blocks-us/eth-mainnet/substreams-states-unstable/v4"
+    substreams-request-stats-enabled: true
     substreams-stores-save-interval: 10000
     substreams-sub-request-block-range-size: 10000
     substreams-sub-request-parallel-jobs: 1
