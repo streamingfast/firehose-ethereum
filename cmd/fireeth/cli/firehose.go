@@ -55,7 +55,7 @@ func init() {
 
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
-			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Enables stats per request, like block rate. Should only be enabled in debugging instance not in production")
+			cmd.Flags().Bool("substreams-request-stats-enabled", false, "Enables stats per request, like block rate. Should only be enabled in debugging instance not in production")
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			cmd.Flags().String("substreams-rpc-cache-store-url", "{sf-data-dir}/rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().String("substreams-state-store-url", "{sf-data-dir}/localdata", "where substreams state data are stored")
