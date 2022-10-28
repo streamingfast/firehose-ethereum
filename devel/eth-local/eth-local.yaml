@@ -14,4 +14,4 @@ start:
     substreams-stores-save-interval: 10000
     substreams-sub-request-block-range-size: 10000
     substreams-sub-request-parallel-jobs: 1
-
+    substreams-client-endpoint: :9000
