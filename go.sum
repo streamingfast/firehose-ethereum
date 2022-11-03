@@ -766,6 +766,8 @@ github.com/streamingfast/substreams v0.0.22-0.20221101195424-65509b03cf60 h1:61Y
 github.com/streamingfast/substreams v0.0.22-0.20221101195424-65509b03cf60/go.mod h1:N3OfzIYjH8RaDv+QjCWDD7rIBQs0EI2WEUnF4Neb5bc=
 github.com/streamingfast/substreams v0.0.22-0.20221103132238-1ae119dfc3c9 h1:8n1stROBFbaNa4vI9NAibLc0PIOB7h5UOLoUp6jUN6o=
 github.com/streamingfast/substreams v0.0.22-0.20221103132238-1ae119dfc3c9/go.mod h1:N3OfzIYjH8RaDv+QjCWDD7rIBQs0EI2WEUnF4Neb5bc=
+github.com/streamingfast/substreams v0.0.22-0.20221103132634-bd5764b92536 h1:oz2XqxYapJiUSeHYhpz/UO5ugiyQ0JV/lK/vmtePHoI=
+github.com/streamingfast/substreams v0.0.22-0.20221103132634-bd5764b92536/go.mod h1:N3OfzIYjH8RaDv+QjCWDD7rIBQs0EI2WEUnF4Neb5bc=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
