@@ -4,7 +4,7 @@ start:
   flags:
     log-to-file: false
     common-live-blocks-addr:
-    common-merged-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v2
+    common-merged-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v3
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
     substreams-partial-mode-enabled: true

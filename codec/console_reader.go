@@ -78,9 +78,9 @@ func (c *ConsoleReader) Close() {
 
 type consoleReaderStats struct {
 	lastBlock             bstream.BlockRef
-	blockRate             *dmetrics.LocalCounter
-	blockAverageParseTime *dmetrics.LocalCounter
-	transactionRate       *dmetrics.LocalCounter
+	blockRate             *dmetrics.RateCounter
+	blockAverageParseTime *dmetrics.AvgDurationCounter
+	transactionRate       *dmetrics.AvgCounter
 
 	cancelPeriodicLogger context.CancelFunc
 }
@@ -89,8 +89,8 @@ func newConsoleReaderStats() *consoleReaderStats {
 	return &consoleReaderStats{
 		lastBlock:             bstream.BlockRefEmpty,
 		blockRate:             dmetrics.NewPerMinuteLocalRateCounter("blocks"),
-		blockAverageParseTime: dmetrics.NewAvgPerMinuteLocalRateCounter("ms/block"),
-		transactionRate:       dmetrics.NewPerMinuteLocalRateCounter("trxs"),
+		blockAverageParseTime: dmetrics.NewAvgDurationCounter(1*time.Minute, 1*time.Millisecond, "processing block"),
+		transactionRate:       dmetrics.NewAvgCounter(1*time.Minute, "trxs"),
 	}
 }
 
@@ -1055,7 +1055,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 
 	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
 	ctx.globalStats.blockRate.Inc()
-	ctx.globalStats.blockAverageParseTime.IncByElapsedTime(ctx.stats.startAt)
+	ctx.globalStats.blockAverageParseTime.AddElapsedTime(ctx.stats.startAt)
 	ctx.globalStats.transactionRate.IncBy(int64(len(ctx.transactionTraces)))
 
 	block := ctx.currentBlock
