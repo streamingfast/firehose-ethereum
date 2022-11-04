@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -88,7 +89,7 @@ func (e *RPCEngine) rollRpcClient() {
 func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 	return map[string]map[string]wasm.WASMExtension{
 		"rpc": {
-			"eth_call": e.ethCall,
+			"eth_call": e.ETHCall,
 		},
 	}
 }
@@ -130,10 +131,16 @@ func (e *RPCEngine) unregisterRequestCache(req *pbsubstreams.Request) {
 	delete(e.perRequestCache, req)
 }
 
-func (e *RPCEngine) ethCall(ctx context.Context, request *pbsubstreams.Request, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
+func (e *RPCEngine) ETHCall(ctx context.Context, request *pbsubstreams.Request, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
+	// We set `alwaysRetry` parameter to `true` here so it means `deterministic` return value will always be `true` and we can safely ignore it
+	out, _, err = e.ethCall(ctx, true, request, clock, in)
+	return out, err
+}
+
+func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, request *pbsubstreams.Request, clock *pbsubstreams.Clock, in []byte) (out []byte, deterministic bool, err error) {
 	calls := &pbethss.RpcCalls{}
 	if err := proto.Unmarshal(in, calls); err != nil {
-		return nil, fmt.Errorf("unmarshal RpcCalls proto: %w", err)
+		return nil, false, fmt.Errorf("unmarshal rpc calls proto: %w", err)
 	}
 
 	e.perRequestCacheLock.RLock()
@@ -145,16 +152,20 @@ func (e *RPCEngine) ethCall(ctx context.Context, request *pbsubstreams.Request, 
 	}
 
 	if cache == nil {
-		panic("no cache initialized for this request?!")
+		panic("no cache initialized for this request")
 	}
 
-	res := e.rpcCalls(ctx, cache, clock.Id, calls)
+	res, deterministic, err := e.rpcCalls(ctx, alwaysRetry, cache, clock.Id, calls)
+	if err != nil {
+		return nil, deterministic, err
+	}
+
 	cnt, err := proto.Marshal(res)
 	if err != nil {
-		return nil, fmt.Errorf("marshal RpcResponses proto: %w", err)
+		return nil, false, fmt.Errorf("marshal rpc responses proto: %w", err)
 	}
 
-	return cnt, nil
+	return cnt, deterministic, nil
 }
 
 type RPCCall struct {
@@ -173,7 +184,12 @@ type RPCResponse struct {
 	CallError     error // always deterministic
 }
 
-func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses) {
+var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(timeout\s*=\s*[^\)]+\)`)
+
+// rpcsCalls performs the RPC calls with full retry unless `alwaysRetry` is `false` in which case output is
+// returned right away. If `alwaysRetry` is sets to `true` than `deterministic` will always return `true`
+// and `err` will always be nil.
+func (e *RPCEngine) rpcCalls(ctx context.Context, alwaysRetry bool, cache Cache, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
 	callsBytes, _ := proto.Marshal(calls)
 	cacheKey := fmt.Sprintf("%s:%x", blockHash, sha256.Sum256(callsBytes))
 	if len(callsBytes) != 0 {
@@ -182,7 +198,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 			out = &pbethss.RpcResponses{}
 			err := proto.Unmarshal(val, out)
 			if err == nil {
-				return out
+				return out, true, nil
 			}
 		}
 	}
@@ -209,9 +225,13 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 
 		out, err := client.DoRequests(ctx, reqs)
 		if err != nil {
+			if !alwaysRetry {
+				return nil, false, err
+			}
+
 			if errors.Is(err, context.Canceled) {
 				zlog.Debug("stopping rpc calls here, context is canceled")
-				return nil
+				return nil, false, err
 			}
 
 			e.rollRpcClient()
@@ -222,10 +242,9 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 		deterministicResp := true
 		for _, resp := range out {
 			if !resp.Deterministic() {
-
 				if resp.Err != nil {
 					if rpcErr, ok := resp.Err.(*rpc.ErrResponse); ok {
-						if strings.Contains(rpcErr.Message, "execution aborted (timeout = 5s)") {
+						if evmExecutionExecutionTimeoutRegex.MatchString(rpcErr.Message) {
 							deterministicResp = true
 							break
 						}
@@ -237,6 +256,11 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 				break
 			}
 		}
+
+		if !alwaysRetry {
+			return toProtoResponses(out), deterministicResp, nil
+		}
+
 		if !deterministicResp {
 			e.rollRpcClient()
 			continue
@@ -250,7 +274,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, cache Cache, blockHash string,
 			}
 		}
 
-		return resp
+		return resp, deterministicResp, nil
 	}
 }
 

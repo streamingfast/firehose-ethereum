@@ -19,10 +19,11 @@ for instructions to keep up to date.
 
 * Fixed `common-blocks-cache-dir` flag's description.
 * Fixed `DELEGATECALL`'s `caller` (a.k.a `from`). -> requires upgrade of blocks to `version: 3`
+* Fixed `execution aborted (timeout = 5s)` hard-coded timeout value when detecting in Substreams if `eth_call` error response was deterministic.
 
 ### Upgrade Procedure
 
-Assuming that you are running a firehose deployment v1.1.0 writing blocks to folders `/v2-oneblock`, `/v2-forked` and `/v2`, 
+Assuming that you are running a firehose deployment v1.1.0 writing blocks to folders `/v2-oneblock`, `/v2-forked` and `/v2`,
 you will deploy a new setup that writes blocks to folders `/v3-oneblock`, `v3-forked` and `/v3`
 
 This procedure describes an upgrade without any downtime. With proper parallelization, it should be possible to complete this upgrade within a single day.
@@ -31,7 +32,7 @@ This procedure describes an upgrade without any downtime. With proper paralleliz
    (you can start from a backup that is close to head)
 2. Upgrade your merged-blocks from `version: 2` to `version: 3` using `fireeth tools upgrade-merged-blocks /path/to/v2 /path/to/v3 {start} {stop}`
    (you can run multiple upgrade commands in parallel to cover the whole blocks range)
-3. Create combined indexes from those new blocks with `fireeth start combined-index-builder` 
+3. Create combined indexes from those new blocks with `fireeth start combined-index-builder`
    (you can run multiple commands in parallel to fill the block range)
 4. When your merged-blocks have been upgraded and the one-block-files are being produced by the new reader, launch a merger
 5. When the reader, merger and combined-index-builder caught up to live, you can launch the relayer(s), firehose(s)
