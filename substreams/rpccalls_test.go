@@ -62,19 +62,29 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 }
 
 func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
+	type want struct {
+		deterministic bool
+		response      *pbethss.RpcResponse
+	}
+
 	tests := []struct {
 		err     string
-		wantOut *pbethss.RpcResponse
+		wantOut want
 	}{
 		{
 			`{"code": -32000, "message": "execution aborted (timeout = 5s)"}`,
-			&pbethss.RpcResponse{Failed: true},
+			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
 		},
 		{
 			`{"code": -32000, "message": "execution aborted (timeout = 30s)"}`,
-			&pbethss.RpcResponse{Failed: true},
+			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
+		},
+		{
+			`{"code":-32000,"message":"out of gas"}`,
+			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.err, func(t *testing.T) {
 			localCache := t.TempDir()
@@ -90,15 +100,15 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 
 			engine.registerRequestCache(request, NoOpCache{})
 
-			address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
-			data := eth.MustNewMethodDef("decimals()").MethodID()
+			address := eth.MustNewAddress("0x0000000000000000000000000000000000000000")
+			data := eth.MustNewMethodDef("any()").MethodID()
 
 			protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
 			require.NoError(t, err)
 
 			out, deterministic, err := engine.ethCall(context.Background(), false, request, clockBlock1, protoCalls)
 			require.NoError(t, err)
-			require.True(t, deterministic)
+			require.Equal(t, tt.wantOut.deterministic, deterministic)
 
 			responses := &pbethss.RpcResponses{}
 			err = proto.Unmarshal(out, responses)
@@ -106,7 +116,7 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 
 			assertProtoEqual(t, &pbethss.RpcResponses{
 				Responses: []*pbethss.RpcResponse{
-					tt.wantOut,
+					tt.wantOut.response,
 				},
 			}, responses)
 		})
