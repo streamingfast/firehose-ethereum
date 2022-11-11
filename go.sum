@@ -692,8 +692,9 @@ github.com/spf13/viper v1.10.1/go.mod h1:IGlFPqhNAPKRxohIzWpI5QEy4kuI7tcl5WvR+8q
 github.com/stoewer/go-strcase v1.2.0/go.mod h1:IBiWB2sKIp3wVVQ3Y035++gc+knqhUQag1KpM8ahLw8=
 github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680 h1:fGJnUx0shX9Y312QOlz+/+yLquihXRhNqctJ26jtZZM=
 github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680/go.mod h1:iISPGAstbUsPgyC3auLLi7PYUTi9lHv5z0COam0OPOY=
-github.com/streamingfast/bstream v0.0.2-0.20221017131819-2a7e38be1047 h1:BExIqX4qVbbjD6yyiNYJIY1prLlbuBvnPweIwtZZgp4=
 github.com/streamingfast/bstream v0.0.2-0.20221017131819-2a7e38be1047/go.mod h1:Njkx972HcZiz0djWBylxqO/eq686eDGr+egQ1lePj3Q=
+github.com/streamingfast/bstream v0.0.2-0.20221111183559-9c729a2945fd h1:LIUm/6st6x0/02L8tiyJU0dz1VIkhuuulYqTGQCIhqE=
+github.com/streamingfast/bstream v0.0.2-0.20221111183559-9c729a2945fd/go.mod h1:Njkx972HcZiz0djWBylxqO/eq686eDGr+egQ1lePj3Q=
 github.com/streamingfast/cli v0.0.4-0.20220630165922-bc58c6666fc8 h1:1W2VZY4jRTh7GJ6+PnydanRcr3Hj45SKDnb+kBQQwlc=
 github.com/streamingfast/cli v0.0.4-0.20220630165922-bc58c6666fc8/go.mod h1:Lmirl0ABgXzidX33syiUG6lX64mJMK5pDNTBFuz8xZI=
 github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1/go.mod h1:FIYpVqt+ICVuNBoOH3ZIicIctpVoCq3393+RpfXsPEM=
@@ -763,6 +764,8 @@ github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
 github.com/streamingfast/substreams v0.0.22-0.20221111162408-85c57bc428bf h1:dpfoW7nM73qLUjkVg9PIIFkIp+9Q2ECexuhjINtCEvs=
 github.com/streamingfast/substreams v0.0.22-0.20221111162408-85c57bc428bf/go.mod h1:uDAV/KfBYDCKVzouTWU0aQpZvOB4WQo63wzZoDXgS70=
+github.com/streamingfast/substreams v0.0.22-0.20221111191452-e28f1e8d17f0 h1:k3ImsDhOGgbHYtqpFzeD99WVE8y8cr3fm6VOMQIpw9Q=
+github.com/streamingfast/substreams v0.0.22-0.20221111191452-e28f1e8d17f0/go.mod h1:fbd1D1rBdvWbsij9LiXei0COPF5wBxuoKnQA9PzdztI=
 github.com/streamingfast/wasmtime-go v0.0.0-20221110162800-03b0c10e9b6a h1:RpsrFpfcGE4fgI8q+UQixUDmt914mVaDtP3T4uJBdNw=
 github.com/streamingfast/wasmtime-go v0.0.0-20221110162800-03b0c10e9b6a/go.mod h1:jjlqQbWUfVSbehpErw3UoWFndBXRRMvfikYH6KsCwOg=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
