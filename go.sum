@@ -724,8 +724,6 @@ github.com/streamingfast/dstore v0.1.1-0.20221025062403-36259703e97b/go.mod h1:S
 github.com/streamingfast/dtracing v0.0.0-20210811175635-d55665d3622a/go.mod h1:bqiYZaX6L/MoXNfFQeAdau6g9HLA3yKHkX8KzStt58Q=
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c h1:wy7a9uNZxSV27AiSsK4TLLSh2Ub3Vd2yumHuUakpDr0=
 github.com/streamingfast/dtracing v0.0.0-20220301163030-15ce3f71dd1c/go.mod h1:Nu6Sb4T/fuETQ2eRcve4x8fygSD3oE5NY5foJ09xeBc=
-github.com/streamingfast/eth-go v0.0.0-20221107215025-b8c04bcaf932 h1:Qs/rA/CrxaUawFmx33RpV52qnkEol5YzoxmLt/tKbKs=
-github.com/streamingfast/eth-go v0.0.0-20221107215025-b8c04bcaf932/go.mod h1:Qwr1CF6VXB2h5kFtK62qtPQyp/kqMexz5vQBlj/lJCQ=
 github.com/streamingfast/eth-go v0.0.0-20221108140424-93bd30c1579c h1:jNUUFETY6I3d/uByyZRGfNXY/AGVrYdx2/P7SqqJ6zQ=
 github.com/streamingfast/eth-go v0.0.0-20221108140424-93bd30c1579c/go.mod h1:Qwr1CF6VXB2h5kFtK62qtPQyp/kqMexz5vQBlj/lJCQ=
 github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d h1:jSPu9IE+bdddw+svgvRvqSGikKpnoXs8fhi0qizsDaU=
@@ -765,8 +763,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.22-0.20221107205240-bfdacad367f1 h1:6PHprOZhSM0Ta4sYrUBrRtuoxw84bo2eZnnLsaUvPPo=
-github.com/streamingfast/substreams v0.0.22-0.20221107205240-bfdacad367f1/go.mod h1:4ATgmFStyslxymu6UWavLb+CeZMgbHcAJZxaxR+fskA=
+github.com/streamingfast/substreams v0.0.22-0.20221111131859-727b3e7f7aac h1:048unWYLjfc/giHWgI4ZQ3FCqasW1aCxee2j4lpR8vQ=
+github.com/streamingfast/substreams v0.0.22-0.20221111131859-727b3e7f7aac/go.mod h1:JCuGInQherFrNrbRKMLXOih1Y7RXUMPcphgAsKpn0P0=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
