@@ -46,7 +46,7 @@ usage() {
   echo "    -c             Clean actual data directory first"
   echo ""
   echo "Examples"
-  echo "    anvil --block-time 1 --firehose-enabled 2> >(./devel/anvil/start.sh -c)"
+  echo "    anvil --block-time 1 --firehose-enabled 2> >(./devel/standard-stdin/start.sh -c)"
 }
 
 main "$@"
