@@ -1,0 +1,12 @@
+start:
+  args:
+  - merger
+  - firehose
+  - reader-node-stdin
+  - relayer
+  - combined-index-builder
+  flags:
+    merger-time-between-store-pruning: 10s
+    substreams-enabled: true
+    substreams-rpc-endpoints: "http://localhost:8545"
+    substreams-stores-save-interval: 100
