@@ -180,7 +180,10 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 			}, appLogger), nil
 		}
 
-		blockStreamServer := blockstream.NewUnmanagedServer(blockstream.ServerOptionWithLogger(appLogger))
+		blockStreamServer := blockstream.NewUnmanagedServer(
+			blockstream.ServerOptionWithLogger(appLogger),
+			blockstream.ServerOptionWithBuffer(1),
+		)
 		gprcListenAddr := viper.GetString("reader-node-grpc-listen-addr")
 		_, oneBlocksStoreURL, _ := mustGetCommonStoresURLs(runtime.AbsDataDir)
 		workingDir := MustReplaceDataDir(sfDataDir, viper.GetString("reader-node-working-dir"))

@@ -41,10 +41,11 @@ func init() {
 				return nil, err
 			}
 			return relayerApp.New(&relayerApp.Config{
-				SourcesAddr:      viper.GetStringSlice("relayer-source"),
-				OneBlocksURL:     oneBlocksStoreURL,
-				GRPCListenAddr:   viper.GetString("relayer-grpc-listen-addr"),
-				MaxSourceLatency: viper.GetDuration("relayer-max-source-latency"),
+				SourceRequestBurst: 1,
+				SourcesAddr:        viper.GetStringSlice("relayer-source"),
+				OneBlocksURL:       oneBlocksStoreURL,
+				GRPCListenAddr:     viper.GetString("relayer-grpc-listen-addr"),
+				MaxSourceLatency:   viper.GetDuration("relayer-max-source-latency"),
 			}), nil
 		},
 	})

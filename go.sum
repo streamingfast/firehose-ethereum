@@ -693,8 +693,8 @@ github.com/stoewer/go-strcase v1.2.0/go.mod h1:IBiWB2sKIp3wVVQ3Y035++gc+knqhUQag
 github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680 h1:fGJnUx0shX9Y312QOlz+/+yLquihXRhNqctJ26jtZZM=
 github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680/go.mod h1:iISPGAstbUsPgyC3auLLi7PYUTi9lHv5z0COam0OPOY=
 github.com/streamingfast/bstream v0.0.2-0.20221017131819-2a7e38be1047/go.mod h1:Njkx972HcZiz0djWBylxqO/eq686eDGr+egQ1lePj3Q=
-github.com/streamingfast/bstream v0.0.2-0.20221115093410-5c4ec709d3fe h1:5+RmmKmJuhECdaljtx93CHbIDAvIlQZcXE+3QHerdoA=
-github.com/streamingfast/bstream v0.0.2-0.20221115093410-5c4ec709d3fe/go.mod h1:Njkx972HcZiz0djWBylxqO/eq686eDGr+egQ1lePj3Q=
+github.com/streamingfast/bstream v0.0.2-0.20221115101451-752234eb5e18 h1:MRlbOgm0JtU96BHa2tvuoI8kZJcx6A81Id1fSkHuAZY=
+github.com/streamingfast/bstream v0.0.2-0.20221115101451-752234eb5e18/go.mod h1:Njkx972HcZiz0djWBylxqO/eq686eDGr+egQ1lePj3Q=
 github.com/streamingfast/cli v0.0.4-0.20220630165922-bc58c6666fc8 h1:1W2VZY4jRTh7GJ6+PnydanRcr3Hj45SKDnb+kBQQwlc=
 github.com/streamingfast/cli v0.0.4-0.20220630165922-bc58c6666fc8/go.mod h1:Lmirl0ABgXzidX33syiUG6lX64mJMK5pDNTBFuz8xZI=
 github.com/streamingfast/dauth v0.0.0-20210812020920-1c83ba29add1/go.mod h1:FIYpVqt+ICVuNBoOH3ZIicIctpVoCq3393+RpfXsPEM=
@@ -741,8 +741,8 @@ github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df h1:P4pTLzwgd
 github.com/streamingfast/logging v0.0.0-20220813175024-b4fbb0e893df/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
 github.com/streamingfast/merger v0.0.3-0.20220909122033-9ca15beb25f5 h1:p/uCSOE2/+zGL9DKD3lIZe58Y2M6UmvCkYV1rJYoA0k=
 github.com/streamingfast/merger v0.0.3-0.20220909122033-9ca15beb25f5/go.mod h1:WGMs+zwpPQNfzRnOqnyNdQfyGSG4lXYWQacicAGiP4s=
-github.com/streamingfast/node-manager v0.0.2-0.20220912235129-6c08463b0c01 h1:O4dW/nWcMAUC9i7UbnbfiWGkIZ0jQ4tnZJ+Ib+35ux0=
-github.com/streamingfast/node-manager v0.0.2-0.20220912235129-6c08463b0c01/go.mod h1:Psu8LJm3iV0N3Zxsa4cMirNJh5I7qoAdH6J46hkSdoU=
+github.com/streamingfast/node-manager v0.0.2-0.20221115101723-d9823ffd7ad5 h1:R7hbTRB1NfC2J2C4BJYrYGtfBpDJCjctvoedAPpPoBQ=
+github.com/streamingfast/node-manager v0.0.2-0.20221115101723-d9823ffd7ad5/go.mod h1:6z7e2s6kcZCzM/UN8IUtGU24+TRp5Nygv+1ucvfXvJA=
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 h1:xlWSfi1BoPfsHtPb0VEHGUcAdBF208LUiFCwfaVPfLA=
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308/go.mod h1:K1p8Bj/wG34KJvYzPUqtzpndffmpkrVY11u2hkyxCWQ=
 github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef h1:9IVFHRsqvI+vKJwgF1OMV6L55jHbaV/ZLoU4IAG/dME=
