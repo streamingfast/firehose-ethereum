@@ -1,0 +1,8 @@
+*
+
+# NOTE: Inverse glob patterns are only supported in buildkit
+!**/*.go
+!**/go.mod
+!**/go.sum
+
+!tools/fireeth
