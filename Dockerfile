@@ -33,10 +33,12 @@ RUN rm /etc/localtime && ln -snf /usr/share/zoneinfo/America/Montreal /etc/local
 COPY tools/fireeth/motd_generic /etc/motd
 COPY tools/fireeth/99-fireeth.sh /etc/profile.d/
 
-COPY --from=build /build/fireeth /usr/local/bin/fireeth
+COPY --from=build /build/fireeth /app/fireeth
 
 # On SSH connection, /root/.bashrc is invoked which invokes '/root/.bash_aliases' if existing,
 # so we hijack the file to "execute" our specialized bash script
 RUN echo ". /etc/profile.d/99-fireeth.sh" > /root/.bash_aliases
 
-ENTRYPOINT ["fireeth"]
+ENV PATH "$PATH:/app"
+
+ENTRYPOINT ["/app/fireeth"]
