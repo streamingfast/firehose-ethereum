@@ -1,3 +1,6 @@
+# syntax = docker/dockerfile:1.4
+
+# This dockerfile must be built using 'docker buildx build'
 FROM ubuntu:20.04 as build
 WORKDIR /build
 
@@ -10,7 +13,8 @@ RUN curl -L https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o go${GO_VERSI
 ENV PATH "$PATH:/usr/local/go/bin"
 
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/root/go/pkg/mod \
+       go mod download
 
 COPY . .
 
@@ -18,7 +22,8 @@ ARG BUILD_VERSION=local
 ARG BUILD_COMMIT=dev
 ARG BUILD_DATE=1970-01-01T00:00Z
 
-RUN go build -v -ldflags "-X main.version=${BUILD_VERSION} -X main.commit=${BUILD_COMMIT} -X main.date=${BUILD_DATE}" -o ./fireeth ./cmd/fireeth
+RUN --mount=type=cache,target=/root/.cache/go-build \
+       go build -v -ldflags "-X main.version=${BUILD_VERSION} -X main.commit=${BUILD_COMMIT} -X main.date=${BUILD_DATE}" -o ./fireeth ./cmd/fireeth
 
 FROM ubuntu:20.04 
 
