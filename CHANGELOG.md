@@ -6,9 +6,24 @@ for instructions to keep up to date.
 
 ## Unreleased
 
-### Fixed
+## v1.2.1
 
-* **Substreams** Fixed `eth_call` handler not flagging `out of gas` error as deterministic.
+### Substreams improvements
+
+#### Performance
+
+* Changed cache file format for stores and outputs (faster with vtproto) -- requires removing the existing state files
+* Various improvements to scheduling
+
+#### Fixes
+
+* Fixed `eth_call` handler not flagging `out of gas` error as deterministic.
+* Fixed Memory leak in wasmtime
+
+### Merger fixes
+
+* Removed the unused 'previous' one-block in merged-blocks (99 inside bundle:100)
+* Fix: also prevent rare bug of bundling "very old" one-blocks in merged-blocks
 
 ## v1.2.0
 
