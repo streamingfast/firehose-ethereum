@@ -4,20 +4,21 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"testing"
+
+	"github.com/mitchellh/go-testing-interface"
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
-	"github.com/streamingfast/jsonpb"
-	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	_ "github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/jsonpb"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
 
-func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
+func testBlockFromFiles(t testing.T, filename string) *bstream.Block {
 	file, err := os.Open("./testdata/" + filename)
 	require.NoError(t, err)
 
@@ -42,7 +43,7 @@ func testBlockFromFiles(t *testing.T, filename string) *bstream.Block {
 	return blk
 }
 
-func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Block {
+func testEthBlock(t testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Block {
 
 	if len(addrs) == 0 || len(sigs) == 0 {
 		t.Fatal("require at least 1 addr and 1 sig")
@@ -108,7 +109,7 @@ func testEthBlock(t *testing.T, blkNum uint64, addrs, sigs []string) *pbeth.Bloc
 
 // testEthBlocks returns a slice of pbeth.Block's
 // it takes a size parameter, to truncate with [:size]
-func testEthBlocks(t *testing.T, size int) []*pbeth.Block {
+func testEthBlocks(t testing.T, size int) []*pbeth.Block {
 	blocks := []*pbeth.Block{
 		testEthBlock(t, 10,
 			[]string{
@@ -180,7 +181,7 @@ func testEthBlocks(t *testing.T, size int) []*pbeth.Block {
 
 // testBlockIndexMockStoreWithFiles will populate a MockStore with indexes of the provided Blocks, according to the provided indexSize
 // this implementation uses an EthLogIndexer to write the index files
-func testMockstoreWithFiles(t *testing.T, blocks []*pbeth.Block, indexSize uint64) *dstore.MockStore {
+func testMockstoreWithFiles(t testing.T, blocks []*pbeth.Block, indexSize uint64) *dstore.MockStore {
 	results := make(map[string][]byte)
 
 	// spawn an indexStore which will populate the results

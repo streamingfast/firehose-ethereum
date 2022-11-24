@@ -8,6 +8,7 @@ start:
     firehose-grpc-listen-addr: ":9000"
     substreams-enabled: true
     substreams-partial-mode-enabled: true
+    substreams-client-endpoint: ":9000"
     substreams-rpc-endpoints: "$ETH_MAINNET_RPC"
     substreams-request-stats-enabled: true
     substreams-stores-save-interval: 1000
