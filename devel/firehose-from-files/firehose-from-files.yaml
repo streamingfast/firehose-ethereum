@@ -1,0 +1,17 @@
+start:
+  args:
+    - firehose
+  flags:
+    common-merged-blocks-store-url: ./local/merged-blocks
+    # Disable live blocks support, will only serve request for blocks found in `merged_blocks`
+    common-live-blocks-addr: ""
+    firehose-grpc-listen-addr: :9000
+    substreams-enabled: true
+    substreams-rpc-endpoints: "$SUBSTREAMS_RPC_ENDPOINTS"
+    substreams-client-endpoint: "localhost:9000"
+    substreams-client-plaintext: true
+    substreams-partial-mode-enabled: true
+    substreams-sub-request-block-range-size: 10000
+    substreams-output-cache-save-interval: 100
+    substreams-stores-save-interval: 1000
+    substreams-sub-request-parallel-jobs: 8

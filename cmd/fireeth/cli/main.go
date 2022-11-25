@@ -45,6 +45,8 @@ func Main(
 	registerCommonModules func(runtime *launcher.Runtime) error,
 	backupModuleFactories map[string]operator.BackupModuleFactory,
 ) {
+	proto.Unmar
+
 	cobra.OnInitialize(func() {
 		allFlags = flags.AutoBind(RootCmd, "FIREETH")
 	})
@@ -109,7 +111,7 @@ func Version(version, commit, date string) string {
 	return fmt.Sprintf("%s (%s)", version, strings.Join(labels, ", "))
 }
 
-var startCmdExample = `fireeth start relayer merger --merger-grpc-serving-addr=localhost:12345 --relayer-merger-addr=localhost:12345`
+var startCmdExample = `fireeth start -c config.yaml`
 var startCmdHelpTemplate = `Usage:{{if .Runnable}}
   {{.UseLine}}{{end}} [all|command1 [command2...]]{{if gt (len .Aliases) 0}}
 
