@@ -45,8 +45,6 @@ func Main(
 	registerCommonModules func(runtime *launcher.Runtime) error,
 	backupModuleFactories map[string]operator.BackupModuleFactory,
 ) {
-	proto.Unmar
-
 	cobra.OnInitialize(func() {
 		allFlags = flags.AutoBind(RootCmd, "FIREETH")
 	})
