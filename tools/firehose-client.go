@@ -13,6 +13,7 @@ import (
 
 func init() {
 	firehoseClientCmd := sftools.GetFirehoseClientCmd(zlog, tracer, transformsSetter)
+	firehoseClientCmd.Flags().Bool("header-only", false, "Apply the HeaderOnly transform sending back Block's header only (with few top-level fields), exclusive option")
 	firehoseClientCmd.Flags().String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
 	firehoseClientCmd.Flags().String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
 	firehoseClientCmd.Flags().Bool("send-all-block-headers", false, "ask for all the blocks to be sent (header-only if there is no match)")
@@ -28,13 +29,29 @@ var transformsSetter = func(cmd *cobra.Command) (transforms []*anypb.Any, err er
 		return nil, err
 	}
 
+	headerOnly := mustGetBool(cmd, "header-only")
+	if filters != nil && headerOnly {
+		return nil, fmt.Errorf("'header-only' flag is exclusive with 'call-filters', 'log-filters' and 'send-all-block-headers' choose either 'header-only' or a combination of the others")
+	}
+
+	if headerOnly {
+		t, err := anypb.New(&pbtransform.HeaderOnly{})
+		if err != nil {
+			return nil, err
+		}
+
+		return []*anypb.Any{t}, nil
+	}
+
 	if filters != nil {
 		t, err := anypb.New(filters)
 		if err != nil {
 			return nil, err
 		}
-		transforms = append(transforms, t)
+
+		return []*anypb.Any{t}, nil
 	}
+
 	return
 }
 

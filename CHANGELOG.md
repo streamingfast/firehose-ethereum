@@ -8,9 +8,11 @@ for instructions to keep up to date.
 
 ### Added
 
+* Added `--header-only` support on `fireeth tools firehose-client`.
+
 * Added `HeaderOnly` transform that can be used to return only the Block's header a few top-level fields `Ver`, `Hash`, `Number` and `Size`.
 
-* Added `tools firehose-prometheus-exporter` to use as a client-side monitoring tool of a Firehose endpoint.
+* Added `fireeth tools firehose-prometheus-exporter` to use as a client-side monitoring tool of a Firehose endpoint.
 
 ### Deprecated
 
