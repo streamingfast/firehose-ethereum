@@ -28,7 +28,7 @@ type Indexer interface {
 
 var CombinedFilterMessageName = proto.MessageName(&pbtransform.CombinedFilter{})
 
-func CombinedFilterFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
+func CombinedFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{
 		Obj: &pbtransform.CombinedFilter{},
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {

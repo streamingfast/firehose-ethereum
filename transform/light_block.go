@@ -15,7 +15,7 @@ import (
 
 var LightBlockMessageName = proto.MessageName(&pbtransform.LightBlock{})
 
-var LightBlockFilterFactory = &transform.Factory{
+var LightBlockTransformFactory = &transform.Factory{
 	Obj: &pbtransform.LightBlock{},
 	NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 		mname := message.MessageName()
@@ -58,8 +58,7 @@ func (p *LightBlockFilter) Transform(readOnlyBlk *bstream.Block, in transform.In
 		},
 	}
 
-	var newTrace func(fullTrxTrace *pbeth.TransactionTrace) (trxTrace *pbeth.TransactionTrace)
-	newTrace = func(fullTrxTrace *pbeth.TransactionTrace) (trxTrace *pbeth.TransactionTrace) {
+	newTrace := func(fullTrxTrace *pbeth.TransactionTrace) (trxTrace *pbeth.TransactionTrace) {
 		trxTrace = &pbeth.TransactionTrace{
 			Hash:    fullTrxTrace.Hash,
 			Receipt: fullTrxTrace.Receipt,

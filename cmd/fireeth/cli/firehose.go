@@ -173,10 +173,11 @@ func init() {
 			}
 
 			registry := transform.NewRegistry()
-			registry.Register(ethtransform.LightBlockFilterFactory)
-			registry.Register(ethtransform.MultiLogFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(ethtransform.MultiCallToFilterFactory(indexStore, possibleIndexSizes))
-			registry.Register(ethtransform.CombinedFilterFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.LightBlockTransformFactory)
+			registry.Register(ethtransform.HeaderOnlyTransformFactory)
+			registry.Register(ethtransform.MultiLogFilterTransformFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.MultiCallToFilterTransformFactory(indexStore, possibleIndexSizes))
+			registry.Register(ethtransform.CombinedFilterTransformFactory(indexStore, possibleIndexSizes))
 
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
 				MergedBlocksStoreURL:    mergedBlocksStoreURL,

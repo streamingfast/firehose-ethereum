@@ -20,7 +20,7 @@ func lightBlockTransform(t *testing.T) *anypb.Any {
 
 func TestBlockLight_Transform(t *testing.T) {
 	transformReg := transform.NewRegistry()
-	transformReg.Register(LightBlockFilterFactory)
+	transformReg.Register(LightBlockTransformFactory)
 
 	transforms := []*anypb.Any{lightBlockTransform(t)}
 
