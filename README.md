@@ -33,8 +33,7 @@ First, install the [GitHub CLI](https://github.com/cli/cli#github-cli) and confi
 
 Run the following commands:
 
-- Release trunk `0.10.x` with Firehose V1 Instrumentation (production builds): `gh workflow run docker.yml -f geth_version=fh1 --ref release/v0.10.x`
-- Release trunk `develop` with Firehose V1 Instrumentation (development builds): `gh workflow run docker.yml -f geth_version=fh1 --ref develop`
+- Release latest official release with Firehose V2 Instrumentation: `gh workflow run docker.yml -f geth_version=fh2 --ref v1.2.2`
 - Release trunk `develop` with Firehose V2 Instrumentation (development builds): `gh workflow run docker.yml -f geth_version=fh2 --ref develop`
 
 ## Contributing

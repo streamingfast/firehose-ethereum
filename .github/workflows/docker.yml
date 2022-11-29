@@ -13,12 +13,11 @@ on:
   workflow_dispatch:
     inputs:
       geth_version:
-        description: 'The Geth version to build from, either fh1 or fh2'
+        description: 'The Geth version to build from, fh2 only'
         required: true
         default: 'fh2'
         type: choice
         options:
-        - fh1
         - fh2
 
 env:
