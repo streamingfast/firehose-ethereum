@@ -2,7 +2,6 @@ package transform
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/mitchellh/go-testing-interface"
@@ -186,7 +185,7 @@ func testMockstoreWithFiles(t testing.T, blocks []*pbeth.Block, indexSize uint64
 
 	// spawn an indexStore which will populate the results
 	indexStore := dstore.NewMockStore(func(base string, f io.Reader) error {
-		content, err := ioutil.ReadAll(f)
+		content, err := io.ReadAll(f)
 		require.NoError(t, err)
 		results[base] = content
 		return nil

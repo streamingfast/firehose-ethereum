@@ -8,11 +8,17 @@ for instructions to keep up to date.
 
 ### Added
 
-* add `tools firehose-prometheus-exporter` to use as a client-side monitoring tool of a firehose endpoint
+* Added `HeaderOnly` transform that can be used to return only the Block's header a few top-level fields `Ver`, `Hash`, `Number` and `Size`.
+
+* Added `tools firehose-prometheus-exporter` to use as a client-side monitoring tool of a Firehose endpoint.
+
+### Deprecated
+
+* **Deprecated** `LightBlock` is deprecated and will be removed in the next major version, it's goal is now much better handled by `CombineFilter` transform or `HeaderOnly` transform if you required only Block's header.
 
 ## v1.2.2
 
-* Hotfix 'nil pointer' panic when saving uninitialized cache
+* Hotfix 'nil pointer' panic when saving uninitialized cache.
 
 ## v1.2.1
 
@@ -20,18 +26,18 @@ for instructions to keep up to date.
 
 #### Performance
 
-* Changed cache file format for stores and outputs (faster with vtproto) -- requires removing the existing state files
-* Various improvements to scheduling
+* Changed cache file format for stores and outputs (faster with vtproto) -- requires removing the existing state files.
+* Various improvements to scheduling.
 
 #### Fixes
 
 * Fixed `eth_call` handler not flagging `out of gas` error as deterministic.
-* Fixed Memory leak in wasmtime
+* Fixed Memory leak in wasmtime.
 
 ### Merger fixes
 
-* Removed the unused 'previous' one-block in merged-blocks (99 inside bundle:100)
-* Fix: also prevent rare bug of bundling "very old" one-blocks in merged-blocks
+* Removed the unused 'previous' one-block in merged-blocks (99 inside bundle:100).
+* Fix: also prevent rare bug of bundling "very old" one-blocks in merged-blocks.
 
 ## v1.2.0
 
