@@ -727,8 +727,6 @@ github.com/streamingfast/eth-go v0.0.0-20221108140424-93bd30c1579c h1:jNUUFETY6I
 github.com/streamingfast/eth-go v0.0.0-20221108140424-93bd30c1579c/go.mod h1:Qwr1CF6VXB2h5kFtK62qtPQyp/kqMexz5vQBlj/lJCQ=
 github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d h1:jSPu9IE+bdddw+svgvRvqSGikKpnoXs8fhi0qizsDaU=
 github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d/go.mod h1:weGz9xDNJMBNmn03XiJZ/b5Ngw8UAUoLirarqG7OwQY=
-github.com/streamingfast/firehose-ethereum/types v0.0.0-20221019183101-bdeb8dafed8d h1:HNRLaZen5tx9IVmkiBN6ZPilrsrXq/f0l2GFvdkyAjo=
-github.com/streamingfast/firehose-ethereum/types v0.0.0-20221019183101-bdeb8dafed8d/go.mod h1:Kh5fptEEMKVw/QXrdfr49ldY3SP5+/MJoUPQfUtByUU=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20221129151535-42f0a2b8d76d h1:xdk62Yk05kNbKvaqgs+r1cyULnZoUEdHN/CQ+NwYSwQ=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20221129151535-42f0a2b8d76d/go.mod h1:Kh5fptEEMKVw/QXrdfr49ldY3SP5+/MJoUPQfUtByUU=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 h1:dgYLhP3STiPi30fISAijFPEB11D4r1fQFc8D3cpgV5s=
@@ -764,8 +762,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea h1:urZ/9/yTatDNjiny9LizyRm7zi350mhpymTWkjKq5g4=
 github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea/go.mod h1:DdwE8twv+VjF/6AGqL5JSfS3/Pc59pPxaKJmIu9Y/T4=
-github.com/streamingfast/substreams v0.0.22-0.20221129163257-08cf9b0355fa h1:uzHyNJLZx6GmmbappbZewXgay2i3Cr1DcfzS7eM9IyY=
-github.com/streamingfast/substreams v0.0.22-0.20221129163257-08cf9b0355fa/go.mod h1:eGKUIbROn+jr+Ncb+/Nc4cSfsGjuYCz7YI413bBVcVw=
+github.com/streamingfast/substreams v0.0.22-0.20221129170311-c0add0b05f25 h1:xTQMhmx1qYNpAHCVGTePRCTu+7uIYp94o1aCVcmXSDc=
+github.com/streamingfast/substreams v0.0.22-0.20221129170311-c0add0b05f25/go.mod h1:eGKUIbROn+jr+Ncb+/Nc4cSfsGjuYCz7YI413bBVcVw=
 github.com/streamingfast/wasmtime-go v0.0.0-20221110162800-03b0c10e9b6a h1:RpsrFpfcGE4fgI8q+UQixUDmt914mVaDtP3T4uJBdNw=
 github.com/streamingfast/wasmtime-go v0.0.0-20221110162800-03b0c10e9b6a/go.mod h1:jjlqQbWUfVSbehpErw3UoWFndBXRRMvfikYH6KsCwOg=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
