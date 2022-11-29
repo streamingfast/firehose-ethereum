@@ -6,6 +6,7 @@ import (
 
 func init() {
 	prometheusExporterCmd := sftools.GetFirehosePrometheusExporterCmd(zlog, tracer, transformsSetter)
+	prometheusExporterCmd.Flags().Bool("header-only", false, "Apply the HeaderOnly transform sending back Block's header only (with few top-level fields), exclusive option")
 	prometheusExporterCmd.Flags().String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
 	prometheusExporterCmd.Flags().String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
 	prometheusExporterCmd.Flags().Bool("send-all-block-headers", false, "ask for all the blocks to be sent (header-only if there is no match)")
