@@ -226,7 +226,7 @@ func testReaderConsoleReader(helperFunc func(), lines chan string, closer func()
 	l := &ConsoleReader{
 		lines:  lines,
 		close:  closer,
-		ctx:    &parseCtx{logger: zlog, globalStats: newConsoleReaderStats()},
+		ctx:    &parseCtx{logger: zlog, stats: newParsingStats(zlog, 0), globalStats: newConsoleReaderStats()},
 		logger: zlog,
 	}
 
