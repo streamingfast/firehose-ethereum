@@ -77,20 +77,18 @@ func (c *ConsoleReader) Close() {
 }
 
 type consoleReaderStats struct {
-	lastBlock             bstream.BlockRef
-	blockRate             *dmetrics.RateCounter
-	blockAverageParseTime *dmetrics.AvgDurationCounter
-	transactionRate       *dmetrics.AvgCounter
+	lastBlock       bstream.BlockRef
+	blockRate       *dmetrics.AvgRatePromCounter
+	transactionRate *dmetrics.AvgRatePromCounter
 
 	cancelPeriodicLogger context.CancelFunc
 }
 
 func newConsoleReaderStats() *consoleReaderStats {
 	return &consoleReaderStats{
-		lastBlock:             bstream.BlockRefEmpty,
-		blockRate:             dmetrics.NewPerMinuteLocalRateCounter("blocks"),
-		blockAverageParseTime: dmetrics.NewAvgDurationCounter(1*time.Minute, 1*time.Millisecond, "processing block"),
-		transactionRate:       dmetrics.NewAvgCounter(1*time.Minute, "trxs"),
+		lastBlock:       bstream.BlockRefEmpty,
+		blockRate:       dmetrics.MustNewAvgRateFromPromCounter(BlockReadCount, 1*time.Second, 30*time.Second, "blocks"),
+		transactionRate: dmetrics.MustNewAvgRateFromPromCounter(TransactionReadCount, 1*time.Second, 30*time.Second, "trxs"),
 	}
 }
 
@@ -121,15 +119,15 @@ func (s *consoleReaderStats) ZapFields() []zap.Field {
 		zap.Stringer("block_rate", s.blockRate),
 		zap.Stringer("trx_rate", s.transactionRate),
 		zap.Stringer("last_block", s.lastBlock),
-		zap.Stringer("block_average_parse_time", s.blockAverageParseTime),
 	}
 }
 
 type parsingStats struct {
-	startAt  time.Time
-	blockNum uint64
-	data     map[string]int
-	logger   *zap.Logger
+	startAt    time.Time
+	trxStartAt time.Time
+	blockNum   uint64
+	data       map[string]int
+	logger     *zap.Logger
 }
 
 func newParsingStats(logger *zap.Logger, block uint64) *parsingStats {
@@ -170,8 +168,6 @@ type parseCtx struct {
 
 	transactionTraces   []*pbeth.TransactionTrace
 	evmCallStackIndexes []int32
-
-	blockStoreURL string
 
 	stats       *parsingStats
 	globalStats *consoleReaderStats
@@ -444,6 +440,8 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	if ctx.currentTrace != nil {
 		return fmt.Errorf("received when trx already begun")
 	}
+
+	ctx.stats.trxStartAt = time.Now()
 
 	chunks, err := SplitInChunks(line, 16)
 	if err != nil {
@@ -809,6 +807,9 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	// reset top level for new transaction
 	ctx.currentRootCall = nil
 
+	TransactionReadCount.Inc()
+	TrxTotalParseTime.AddInt64(int64(time.Since(ctx.stats.trxStartAt)))
+
 	return nil
 }
 
@@ -1054,9 +1055,6 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	ctx.currentBlock.TransactionTraces = ctx.transactionTraces
 
 	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
-	ctx.globalStats.blockRate.Inc()
-	ctx.globalStats.blockAverageParseTime.AddElapsedTime(ctx.stats.startAt)
-	ctx.globalStats.transactionRate.IncBy(int64(len(ctx.transactionTraces)))
 
 	block := ctx.currentBlock
 	ctx.transactionTraces = nil
@@ -1073,7 +1071,15 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
 	}
 
-	return types.BlockFromProto(block, libNum)
+	bstreamBlock, err := types.BlockFromProto(block, libNum)
+	if err != nil {
+		return nil, err
+	}
+
+	BlockReadCount.Inc()
+	BlockTotalParseTime.AddInt64(int64(time.Since(ctx.stats.startAt)))
+
+	return bstreamBlock, nil
 }
 
 func computeProofOfWorkLIBNum(blockNum uint64, firstStreamableBlockNum uint64) uint64 {

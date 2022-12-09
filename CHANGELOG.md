@@ -8,6 +8,10 @@ for instructions to keep up to date.
 
 ### Added
 
+* New Prometheus metric `console_reader_trx_read_count` can be used to obtain a transaction rate of how many transactions were read from the node over a period of time.
+
+* New Prometheus metric `console_reader_block_read_count` can be used to obtain a block rate of how many blocks were read from the node over a period of time.
+
 * Added `--header-only` support on `fireeth tools firehose-client`.
 
 * Added `HeaderOnly` transform that can be used to return only the Block's header a few top-level fields `Ver`, `Hash`, `Number` and `Size`.
