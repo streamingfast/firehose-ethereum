@@ -74,11 +74,36 @@ func gethLogTransformer(in string) string {
 	return lowerFirst(gethLogTransformRegex.ReplaceAllString(in, ""))
 }
 
+// lowerFirst lowers the first character of the string with an exception case
+// for strings starting with 2 consecutive upper characters or more which is common
+// when a string start with an acronym like `HTTP status code is 200`.
 func lowerFirst(s string) string {
 	if s == "" {
 		return ""
 	}
 
-	r, n := utf8.DecodeRuneInString(s)
-	return string(unicode.ToLower(r)) + s[n:]
+	firstRune, n := utf8.DecodeRuneInString(s)
+	if firstRune == utf8.RuneError {
+		// String is malformed, let's pass the problem to someone else
+		return s
+	}
+
+	// Now that we have our first character and offset (n), if there is a following
+	// character to this and the following character is upper case, we won't lower
+	// case first, it's an exception so that `HTTP` remains `HTTP`.
+	afterFirst := s[n:]
+	if afterFirst != "" {
+		secondRune, _ := utf8.DecodeRuneInString(afterFirst)
+		if secondRune == utf8.RuneError {
+			// String is malformed, let's pass the problem to someone else
+			return s
+		}
+
+		if unicode.IsUpper(secondRune) {
+			// We have our exception case, two consecutive upper case runes, we keep it untouched
+			return s
+		}
+	}
+
+	return string(unicode.ToLower(firstRune)) + afterFirst
 }

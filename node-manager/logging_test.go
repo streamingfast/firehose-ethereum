@@ -54,6 +54,16 @@ func TestToZapLogPlugin_LogLevel(t *testing.T) {
 			"OTHER [10-05|09:54:00.585] message ...",
 			`{"level":"info","msg":"message ..."}`,
 		},
+		{
+			"first upper is lowered",
+			"WARN [10-05|09:54:00.585] Message ...",
+			`{"level":"warn","msg":"message ..."}`,
+		},
+		{
+			"two consecutive characters or more are untouched",
+			"WARN [10-05|09:54:00.585] HTTP ...",
+			`{"level":"warn","msg":"HTTP ..."}`,
+		},
 	}
 
 	for _, test := range tests {
