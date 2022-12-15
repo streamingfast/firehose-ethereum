@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/streamingfast/bstream v0.0.2-0.20221209144659-0fb1074db0f3
 	github.com/streamingfast/cli v0.0.4-0.20220630165922-bc58c6666fc8
-	github.com/streamingfast/dauth v0.0.0-20220404140613-a40f4cd81626
+	github.com/streamingfast/dauth v0.0.0-20221027185237-b209f25fa3ff
 	github.com/streamingfast/derr v0.0.0-20221125175206-82e01d420d45
 	github.com/streamingfast/dgrpc v0.0.0-20221107145847-122ea65be343
 	github.com/streamingfast/dlauncher v0.0.0-20220909121534-7a9aa91dbb32
@@ -36,7 +36,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20221129171534-a0708b599ce5
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.0.22-0.20221214135920-6fee0a976ff3
+	github.com/streamingfast/substreams v0.0.22-0.20221215143419-8813b9ebe567
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -89,6 +89,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
