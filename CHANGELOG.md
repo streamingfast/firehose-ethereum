@@ -6,6 +6,10 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+## v1.3.1
+
+* Release made to fix our building workflows, nothing different than [v1.3.0](#v130).
+
 ## v1.3.0
 
 ### Changed
