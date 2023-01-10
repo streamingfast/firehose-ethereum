@@ -4,13 +4,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
 ## v1.3.0
 
-### Added
+### Changed
 
 * Updated to Substreams `v0.1.0`, please refer to release page for further info about Substreams changes.
 
     > **Warning** The state output format for `map` and `store` modules has changed internally to be more compact in Protobuf format. When deploying this new version and using Substreams feature, previous existing state files should be deleted or deployment updated to point to a new store location. The state output store is defined by the flag `--substreams-state-store-url` flag.
+
+
+### Added
 
 * New Prometheus metric `console_reader_trx_read_count` can be used to obtain a transaction rate of how many transactions were read from the node over a period of time.
 
