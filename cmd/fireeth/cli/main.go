@@ -16,6 +16,7 @@ package cli
 
 import (
 	"fmt"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -92,7 +93,15 @@ func Main(
 	derr.Check("dfuse", RootCmd.Execute())
 }
 
-func Version(version, commit, date string) string {
+func Version(version string) string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		panic("we should have been able to retrieve info from 'runtime/debug#ReadBuildInfo'")
+	}
+
+	commit := findSetting("vcs.revision", info.Settings)
+	date := findSetting("vcs.time", info.Settings)
+
 	var labels []string
 	if len(commit) >= 7 {
 		labels = append(labels, fmt.Sprintf("Commit %s", commit[0:7]))
@@ -107,6 +116,16 @@ func Version(version, commit, date string) string {
 	}
 
 	return fmt.Sprintf("%s (%s)", version, strings.Join(labels, ", "))
+}
+
+func findSetting(key string, settings []debug.BuildSetting) (value string) {
+	for _, setting := range settings {
+		if setting.Key == key {
+			return setting.Value
+		}
+	}
+
+	return ""
 }
 
 var startCmdExample = `fireeth start -c config.yaml`

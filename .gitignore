@@ -2,6 +2,7 @@
 .idea/
 .vscode/
 .envrc
+.env.release
 *.spkg
 /sf-data
 /sf.yaml

@@ -23,7 +23,7 @@ Use the `./bin/release.sh` Bash script to perform a new release. It will ask you
 as well as driving all the required commands, performing the necessary operation automatically.
 The Bash script runs in dry-mode by default, so you can check first that everything is all right.
 
-Releases are performed using [goreleaser](https://goreleaser.com/).
+Releases are performed using [goreleaser](https://goreleaser.com/) and specifically [goreleaser-cross](https://github.com/goreleaser/goreleaser-cross).
 
 ## Docker Bundle Image Building
 

@@ -15,22 +15,16 @@
 package main
 
 import (
-	"github.com/streamingfast/node-manager/operator"
 	"github.com/streamingfast/firehose-ethereum/cmd/fireeth/cli"
+	"github.com/streamingfast/node-manager/operator"
 	"github.com/streamingfast/snapshotter"
 )
-
-// Commit sha1 value, injected via go build `ldflags` at build time
-var commit = ""
 
 // Version value, injected via go build `ldflags` at build time
 var version = "dev"
 
-// Date value, injected via go build `ldflags` at build time
-var date = ""
-
 func init() {
-	cli.RootCmd.Version = cli.Version(version, commit, date)
+	cli.RootCmd.Version = cli.Version(version)
 }
 
 func main() {

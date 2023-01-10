@@ -12,14 +12,8 @@ main() {
     version=`cat .version`
   fi
 
-  commit=`git rev-list -1 HEAD`
-  dirty=
-  if [[ ! -z "$(git status --untracked-files=no --porcelain)" ]]; then
-    dirty="dirty"
-  fi
-
   pushd "$ROOT" &> /dev/null
-    go install -ldflags "-X main.Version=$version -X main.Commit=$commit -X main.IsDirty=$dirty" ./cmd/fireeth
+    go install -ldflags "-X main.Version=$version" ./cmd/fireeth
   popd &> /dev/null
 
   if [[ $KILL_AFTER != "" ]]; then
