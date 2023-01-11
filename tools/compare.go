@@ -62,28 +62,30 @@ func init() {
 }
 
 func compareBlocksE(cmd *cobra.Command, args []string) error {
+	fmt.Printf("\n-----starting comparison-----\n")
 	ctx := cmd.Context()
 
-	storeADef := args[0]
-	storeBDef := args[1]
+	storeExpectedDef := args[0]
+	storeReceivedDef := args[1]
 	blockRange := block.ParseRange(args[2])
 
-	storeA, err := dstore.NewDBinStore(storeADef)
+	storeExpected, err := dstore.NewDBinStore(storeExpectedDef)
 	if err != nil {
-		return fmt.Errorf("unable to create store at path %q: %w", storeADef, err)
+		return fmt.Errorf("unable to create store at path %q: %w", storeExpectedDef, err)
 	}
 
-	storeB, err := dstore.NewDBinStore(storeBDef)
+	storeReceived, err := dstore.NewDBinStore(storeReceivedDef)
 	if err != nil {
-		return fmt.Errorf("unable to create store at path %q: %w", storeBDef, err)
+		return fmt.Errorf("unable to create store at path %q: %w", storeReceivedDef, err)
 	}
 
-	blocksA := make(map[uint64]*pbeth.Block)
-	blocksB := make(map[uint64]*pbeth.Block)
+	blocksExpected := make(map[uint64]*pbeth.Block)
+	blocksReceived := make(map[uint64]*pbeth.Block)
 
-	collectBlocks := func(store dstore.Store, blockMap map[uint64]*pbeth.Block) error {
+	collectBlocksExpected := func(store dstore.Store, blockMap map[uint64]*pbeth.Block) error {
+		fmt.Printf("collecting expected blocks\n")
 		var files []string
-		err = storeA.Walk(ctx, "", func(filename string) (err error) {
+		err = storeExpected.Walk(ctx, "", func(filename string) (err error) {
 			files = append(files, filename)
 			return nil
 		})
@@ -91,7 +93,10 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 		var toClose []io.ReadCloser
 		defer func() {
 			for i := range toClose {
-				toClose[i].Close()
+				err := toClose[i].Close()
+				if err != nil {
+					return
+				}
 			}
 		}()
 
@@ -108,30 +113,86 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 			}
 
 			for {
-				block, err := blockReader.Read()
+				curBlock, err := blockReader.Read()
 				if err == io.EOF {
 					break
 				}
 				if err != nil {
 					return err
 				}
-				if blockRange.Contains(block.Number) {
-					blockMap[block.Number] = block.ToNative().(*pbeth.Block)
+				if blockRange.Contains(curBlock.Number) {
+					blockMap[curBlock.Number] = curBlock.ToProtocol().(*pbeth.Block)
+					if uint64(len(blockMap)) >= blockRange.Len() {
+						break
+					}
 				}
 			}
 		}
+
+		fmt.Printf("finished collected expected blocks\n")
 		return nil
 	}
+
+	collectBlocksReceived := func(store dstore.Store, blockMap map[uint64]*pbeth.Block) error {
+		fmt.Printf("collecting Received blocks\n")
+		var files []string
+		err = storeReceived.Walk(ctx, "", func(filename string) (err error) {
+			files = append(files, filename)
+			return nil
+		})
+
+		var toClose []io.ReadCloser
+		defer func() {
+			for i := range toClose {
+				err := toClose[i].Close()
+				if err != nil {
+					return
+				}
+			}
+		}()
+
+		for _, filepath := range files {
+			reader, err := store.OpenObject(ctx, filepath)
+			if err != nil {
+				return err
+			}
+			toClose = append(toClose, reader)
+
+			blockReader, err := bstream.GetBlockReaderFactory.New(reader)
+			if err != nil {
+				return err
+			}
+
+			for {
+				curBlock, err := blockReader.Read()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					return err
+				}
+				if blockRange.Contains(curBlock.Number) {
+					blockMap[curBlock.Number] = curBlock.ToProtocol().(*pbeth.Block)
+					if uint64(len(blockMap)) >= blockRange.Len() {
+						break
+					}
+				}
+			}
+		}
+		fmt.Printf("finished collected Received blocks\n")
+
+		return nil
+	}
+
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		_ = collectBlocks(storeA, blocksA)
+		_ = collectBlocksExpected(storeExpected, blocksExpected)
 	}()
-
 	go func() {
 		defer wg.Done()
-		_ = collectBlocks(storeB, blocksB)
+		_ = collectBlocksReceived(storeReceived, blocksReceived)
 	}()
 	wg.Wait()
 
@@ -140,84 +201,82 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	blocksCounted := 0
 	differentBlocks := make(map[uint64]block.Range)
 
-	if uint64(len(blocksA)) < blockRange.Len() || uint64(len(blocksA)) < blockRange.Len() {
+	if uint64(len(blocksExpected)) < blockRange.Len() || uint64(len(blocksReceived)) < blockRange.Len() {
 		return fmt.Errorf("insufficient blocks for range")
 	}
 
 	isDiff, err := cmd.Flags().GetBool("diff")
 	if err != nil {
-		return fmt.Errorf("identifying --diff flag %w\n", err)
+		return fmt.Errorf("identifying --diff flag: %w", err)
 	}
 
 	if !isDiff {
-		for blockNum, blockA := range blocksA {
-			blockB, exists := blocksB[blockNum]
+		for blockNum, blockExpected := range blocksExpected {
+			blocksCounted++
+			blockReceived, exists := blocksReceived[blockNum]
 			if !exists {
 				continue
 			}
 
-			if !proto.Equal(blockA, blockB) {
-				differentBlocks[blockA.Number] = block.Range{StartBlock: uint64(math.Round(float64(blockA.Number/100.0))) * 100,
-					ExclusiveEndBlock: (uint64(math.Round(float64(blockA.Number/100.0))) * 100) + 100}
+			if !proto.Equal(blockExpected, blockReceived) {
+				differentBlocks[blockExpected.Number] = block.Range{StartBlock: uint64(math.Round(float64(blockExpected.Number/100.0))) * 100,
+					ExclusiveEndBlock: (uint64(math.Round(float64(blockExpected.Number/100.0))) * 100) + 100}
 
 				if rangeIsGood {
 					rangeIsGood = false
-					fmt.Sprintf("bundle %d - %d is different", (rangeNum)*100000, (rangeNum+1)*100000)
+					fmt.Printf("bundle %d - %d is different\n", (rangeNum)*100000, (rangeNum+1)*100000)
 				}
+				fmt.Printf("Block #%v is different", blockExpected.Number)
 			}
-			if blocksCounted >= 100000 || uint64(blocksCounted) >= blockRange.Len()-uint64(rangeNum*100000) {
+			if blocksCounted >= 100000 || uint64(blocksCounted) >= blockRange.Len()-uint64(rangeNum*100000) || blocksCounted == len(blocksExpected) {
 				if rangeIsGood {
-					fmt.Sprintf("✓ bundle %d - %d has no differences", (rangeNum)*100000, (rangeNum+1)*100000)
+					fmt.Printf("✓ bundle %d - %d has no differences\n", (rangeNum)*100000, (rangeNum+1)*100000)
 				}
 				rangeIsGood = true
 				rangeNum++
 				blocksCounted = -1
 			}
-
-			blocksCounted++
 		}
 	} else {
 		if blockRange.Len() != 100 {
 			return fmt.Errorf("when using --diff, make size of range equal to 100")
 		}
-		for i := blockRange.StartBlock; i <= blockRange.ExclusiveEndBlock; i++ {
-			blockB, exists := blocksB[i]
+		for i := blockRange.StartBlock; i < blockRange.ExclusiveEndBlock; i++ {
+			blockReceived, exists := blocksReceived[i]
 			if !exists {
-				fmt.Sprintf("Block #%v is missing in %v", i, storeBDef)
+				fmt.Printf("Block #%v is missing in %v\n", i, storeReceivedDef)
 			}
-			blockA, exists := blocksA[i]
+			blockExpected, exists := blocksExpected[i]
 			if !exists {
-				fmt.Sprintf("Block #%v is missing in %v", i, storeADef)
+				fmt.Printf("Block #%v is missing in %v\n", i, storeExpectedDef)
 			}
 
-			if !proto.Equal(blockA, blockB) {
-				differentBlocks[blockA.Number] = block.Range{StartBlock: uint64(math.Round(float64(blockA.Number/100.0))) * 100,
-					ExclusiveEndBlock: (uint64(math.Round(float64(blockA.Number/100.0))) * 100) + 100}
+			if !proto.Equal(blockExpected, blockReceived) {
+				differentBlocks[blockExpected.Number] = block.Range{StartBlock: uint64(math.Round(float64(blockExpected.Number/100.0))) * 100,
+					ExclusiveEndBlock: (uint64(math.Round(float64(blockExpected.Number/100.0))) * 100) + 100}
 
-				fmt.Sprintf("Block #%v %v is different", blockA.Number, blockA.Hash)
+				fmt.Printf("Block #%v is different\n", blockExpected.Number)
 
-				blockAJson, err := json.Marshal(blockA)
+				blockExpectedJson, err := json.Marshal(blockExpected)
 				if err != nil {
-					return fmt.Errorf("marshaling block %w\n", blockAJson)
+					return fmt.Errorf("marshaling block: %v", err)
 				}
-				blockBJson, err := json.Marshal(blockB)
+				blockReceivedJson, err := json.Marshal(blockReceived)
 				if err != nil {
-					return fmt.Errorf("marshaling block %w\n", blockAJson)
+					return fmt.Errorf("marshaling block: %v", err)
 				}
 
-				diff := cmp.Diff(blockAJson, blockBJson)
+				diff := cmp.Diff(blockExpectedJson, blockReceivedJson)
 				if diff != "" {
-					fmt.Sprintf("%v\n\n", diff)
+					fmt.Printf("%v\n\n", diff)
 				}
 			}
 		}
 	}
 
-	fmt.Sprintf(cli.Dedent(`
-		\nTo see for details of the differences for the different bundles, run one of those commands:\n
-	`))
+	fmt.Printf("\n\nTo see for details of the differences for the different bundles, run one of those commands:\n")
 	for _, blk := range differentBlocks {
-		fmt.Sprintf("fireeth tools compare-blocks --diff %v %v %v-%v\n\n", storeADef, storeBDef, blk.StartBlock, blk.ExclusiveEndBlock)
+		fmt.Printf("- fireeth tools compare-blocks --diff=true %v %v %v-%v\n\n", storeExpectedDef, storeReceivedDef, blk.StartBlock, blk.ExclusiveEndBlock)
 	}
 	return nil
 }
