@@ -33,30 +33,17 @@ import (
 
 var compareBlocksCmd = &cobra.Command{
 	Use:   "compare-blocks <expected_bundle> <actual_bundle> [<block_range>]",
-	Short: "Checks for any differences between merge files of two different stores. (To compare the output of two different instrumentations, for example)",
+	Short: "Checks for any differences between merge files of two different stores. (To compare the output of two different instrumentation's, for example)",
 	Long: cli.Dedent(`
-		If --diff is not provided, will print a summary of the differences found with specific instructions to 
-		run the detailed dif for each bundle. It will print a summary every 100,000 blocks checked. Output will look like:\n\n
-
-		Bundle 0 - 100,000 is different\n
-		✓ Bundle 100,000 - 200,000 has no differences\n
-		Bundle 300,000 - 400,000 is different\n\n
-	
-		At the end of the command output, the following instructions will be printed to assist to locate a specific difference:\n\n
+		compare-blocks takes in two stores of merged blocks and a range specifying the first x blocks you want to compare.
+		It operates in chunks of 100,000 blocks. Chunks that contain a difference will be communicated as well as the blocks within 
+		that contain differences. Chunks that do not have any differences will be outputted as identical.
 		
-		To see for details of the differences for the different bundles, run one of those commands:\n
-		fireeth tools compare-blocks --diff <expected_bundle_from_arg> <actual_bundle_from_arg> 
-		<range_for_matching_only_first_offending_bundle> \n
- 		fireeth tools compare-blocks --diff <expected_bundle_from_arg> <actual_bundle_from_arg>
-		<range_for_matching_only_second_offending_bundle> \n\n
-		
-		If --diff=true, range of blocks should match 1 bundle, so a range of 100. When a difference is found in the bundle, 
-		for each block with differences, a message is printed. \n\n
+		After passing through the chunks, it will output instructions on how to locate a specific difference based on the
+		blocks that were given. This is done by applying the --diff=true flag before your args. 
 
-		Block #<Number> <Hash> is missing in <Bundle>\n\n
-
-		Block #<Number> <Hash> is different\n
-		<Difference>\n\n
+		Commands inputted with --diff=true will display the blocks that have differences, as well as the difference. 
+		These commands should have a range that matches 1 bundle, so a range of 100.
 	`),
 	Args: cobra.ExactArgs(3),
 	RunE: compareBlocksE,
