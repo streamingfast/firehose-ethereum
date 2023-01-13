@@ -33,26 +33,25 @@ import (
 
 var compareBlocksCmd = &cobra.Command{
 	Use:   "compare-blocks <expected_bundle> <actual_bundle> [<block_range>]",
-	Short: "Checks for any differences between merge files of two different stores. (To compare the output of two different instrumentation's, for example)",
+	Short: "Checks for any differences between two block stores between a specified range. (To compare the likeness of two block ranges, for example)",
 	Long: cli.Dedent(`
-		compare-blocks takes in two stores of merged blocks and a range specifying the first x blocks you want to compare.
-		It operates in chunks of 100,000 blocks. Chunks that contain a difference will be communicated as well as the blocks within 
-		that contain differences. Chunks that do not have any differences will be outputted as identical.
+		compare-blocks takes in two paths to stores of merged blocks and a range specifying the blocks you want to compare (written as: start-finish).
+		It will output the status of the likeness of every million blocks, on completion, or on encountering a difference. 
+		Increments that contain a difference will be communicated as well as the blocks within that contain differences.
+		Increments that do not have any differences will be outputted as identical.
 		
-		After passing through the chunks, it will output instructions on how to locate a specific difference based on the
-		blocks that were given. This is done by applying the --diff=true flag before your args. 
+		After passing through the blocks, it will output instructions on how to locate a specific difference based on the
+		blocks that were given. This is done by applying the --diff flag before your args. 
 
-		Commands inputted with --diff=true will display the blocks that have differences, as well as the difference. 
-		These commands should have a range that matches 1 bundle, so a range of 100.
+		Commands inputted with --diff will display the blocks that have differences, as well as the difference. 
 	`),
-	Args: cobra.ExactArgs(3),
 	RunE: compareBlocksE,
 	Example: cli.Dedent(`
 		# Run over full block range
 		fireeth tools compare-blocks sf_bundle/ cs_bundle/ 100-200
 
-		# Run over specific block range (inclusive/inclusive)
-		fireeth tools compare-blocks --diff=true sf_bundle/ cs_bundle/ 100-200
+		# Run over specific block range, displaying differences in blocks
+		fireeth tools compare-blocks --diff sf_bundle/ cs_bundle/ 100-200
 	`),
 }
 
