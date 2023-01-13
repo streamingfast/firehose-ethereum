@@ -18,17 +18,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/go-cmp/cmp"
+	"github.com/spf13/cobra"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
+	"github.com/streamingfast/dstore"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/substreams/block"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"math"
-	"sync"
-
-	"github.com/spf13/cobra"
-	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/dstore"
-	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"strconv"
 )
 
 var compareBlocksCmd = &cobra.Command{
