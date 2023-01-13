@@ -57,7 +57,15 @@ var compareBlocksCmd = &cobra.Command{
 
 func init() {
 	Cmd.AddCommand(compareBlocksCmd)
-	compareBlocksCmd.PersistentFlags().Bool("diff", false, "A flag to check for differences over small range")
+	compareBlocksCmd.PersistentFlags().Bool("diff", false, "When activated, difference is displayed for each block with a difference")
+}
+
+func getBundleFloor(num uint64) uint64 {
+	return uint64(math.Round(float64(num/100.0))) * 100
+}
+
+func getBundleCeiling(num uint64) uint64 {
+	return (uint64(math.Round(float64(num/100.0))) * 100) + 100
 }
 
 func compareBlocksE(cmd *cobra.Command, args []string) error {
