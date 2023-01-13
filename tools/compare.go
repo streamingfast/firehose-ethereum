@@ -17,7 +17,6 @@ package tools
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
@@ -27,6 +26,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"io"
 	"math"
+	"os"
+	"os/exec"
 	"strconv"
 )
 
@@ -67,7 +68,31 @@ func getBundleCeiling(num uint64) uint64 {
 	return (uint64(math.Round(float64(num/100.0))) * 100) + 100
 }
 
+func unifiedDiff(cnt1, cnt2 []byte) (string, error) {
+	file1 := "/tmp/block-difference-expected-bundle"
+	file2 := "/tmp/block-difference-received-bundle"
+	err := os.WriteFile(file1, cnt1, 0600)
+	if err != nil {
+		return "", fmt.Errorf("writing temp file: %w", err)
+	}
+	err = os.WriteFile(file2, cnt2, 0600)
+	if err != nil {
+		return "", fmt.Errorf("writing temp file: %w", err)
+	}
+
+	cmd := exec.Command("diff", "-u", file1, file2)
+	buffer, _ := cmd.Output()
+
+	out := string(buffer)
+
+	return out, nil
+}
+
 func compareBlocksE(cmd *cobra.Command, args []string) error {
+	if len(args) < 3 {
+		fmt.Println("improper args. should look like: <store_one> <store_two> <starting_block-ending_block>")
+		return nil
+	}
 	isDiff, err := cmd.Flags().GetBool("diff")
 	if err != nil {
 		return fmt.Errorf("identifying --diff flag: %w", err)
@@ -243,10 +268,12 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 							}
 						}
 
-						// Add to final differences to be printed
-						if hasDif {
-							differentBlocks[string(curBlock.ToProtocol().(*pbeth.Block).Hash)] = block.Range{StartBlock: getBundleFloor(curBlock.Number),
-								ExclusiveEndBlock: getBundleCeiling(curBlock.Number)}
+							diff, err := unifiedDiff(blockExpectedJSON, blockReceivedJSON)
+							if err != nil {
+								return fmt.Errorf("getting diff: %w", err)
+							}
+							fmt.Printf("difference: \n%s\n", diff)
+
 						}
 
 					}
