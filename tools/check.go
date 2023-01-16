@@ -74,7 +74,7 @@ func checkMergedBlocksE(cmd *cobra.Command, args []string) error {
 }
 
 func blockPrinter(block *bstream.Block) {
-	ethBlock := block.ToProtocol().(*pbeth.Block)
+	ethBlock := block.ToNative().(*pbeth.Block)
 
 	callCount := 0
 	for _, trxTrace := range ethBlock.TransactionTraces {
