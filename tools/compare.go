@@ -38,24 +38,24 @@ var compareBlocksCmd = &cobra.Command{
 	Use:   "compare-blocks <expected_bundle> <actual_bundle> [<block_range>]",
 	Short: "Checks for any differences between two block stores between a specified range. (To compare the likeness of two block ranges, for example)",
 	Long: cli.Dedent(`
-		compare-blocks takes in two paths to stores of merged blocks and a range specifying the blocks you want to compare (written as: start-finish).
-		It will output the status of the likeness of every million blocks, on completion, or on encountering a difference. 
+		The 'compare-blocks'' takes in two paths to stores of merged blocks and a range specifying the blocks you want to compare, written as: '<start>:<finish>'.
+		It will output the status of the likeness of every 100,000 blocks, on completion, or on encountering a difference. 
 		Increments that contain a difference will be communicated as well as the blocks within that contain differences.
 		Increments that do not have any differences will be outputted as identical.
 		
 		After passing through the blocks, it will output instructions on how to locate a specific difference based on the
-		blocks that were given. This is done by applying the --diff flag before your args. 
+		blocks that were given. This is done by applying the '--diff' flag before your args. 
 
-		Commands inputted with --diff will display the blocks that have differences, as well as the difference. 
+		Commands inputted with '--diff' will display the blocks that have differences, as well as the difference. 
 	`),
 	Args: cobra.ExactArgs(3),
 	RunE: compareBlocksE,
 	Example: cli.Dedent(`
 		# Run over full block range
-		fireeth tools compare-blocks sf_bundle/ cs_bundle/ 0-16000000
+		fireeth tools compare-blocks sf_bundle/ cs_bundle/ 0:16000000
 
 		# Run over specific block range, displaying differences in blocks
-		fireeth tools compare-blocks --diff sf_bundle/ cs_bundle/ 100-200
+		fireeth tools compare-blocks --diff sf_bundle/ cs_bundle/ 100:200
 	`),
 }
 
@@ -132,6 +132,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 		}
 	}()
 	displayDiff := mustGetBool(cmd, "diff")
+	chunkSize := 100000
 
 	ctx := cmd.Context()
 	blockRange, err := bstream.ParseRange(args[2])
@@ -162,18 +163,18 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	chunkIsGood := true
 	rangeNum := 0
 	err = storeExpected.Walk(ctx, "00", func(filename string) (err error) {
-		fileRange, err := strconv.Atoi(filename)
+		bundleStartBlock, err := strconv.Atoi(filename)
 		if err != nil {
 			return fmt.Errorf("parsing filename: %w", err)
 		}
 
 		// If reached end of range
-		if *blockRange.EndBlock() <= uint64(fileRange) {
+		if *blockRange.EndBlock() <= uint64(bundleStartBlock) {
 			return dstore.StopIteration
 		}
 
-		// If bundleExpected is valid
-		if blockRange.Contains(uint64(fileRange)) {
+		// If bundle is in range
+		if blockRange.Contains(uint64(bundleStartBlock)) {
 			var wg sync.WaitGroup
 			var bundleErrLock sync.Mutex
 			var bundleReadErr error
@@ -216,9 +217,9 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 				receivedBlock, existsInReceived := receivedBlocks[expectedBlockHash]
 
 				// Reset chunk, print if good
-				if blocksCountedInChunk >= 100000 || uint64(blocksCountedInChunk) >= (blockRangeSize-uint64(rangeNum*100000)-1) || uint64(blocksCountedInChunk) == blockRangeSize-1 {
+				if blocksCountedInChunk >= chunkSize || uint64(blocksCountedInChunk) >= (blockRangeSize-uint64(rangeNum*chunkSize)-1) || uint64(blocksCountedInChunk) == blockRangeSize-1 {
 					if chunkIsGood {
-						fmt.Printf("✓ Bundle %d - %d has no differences\n", (rangeNum)*100000, (rangeNum+1)*100000)
+						fmt.Printf("✓ Bundle %d - %d has no differences\n", (rangeNum)*chunkSize, (rangeNum+1)*chunkSize)
 					}
 					chunkIsGood = true
 					rangeNum++
@@ -228,25 +229,23 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 				// false && first error in chunk
 				if !existsInReceived && chunkIsGood {
 					chunkIsGood = false
-					fmt.Printf("✖ Bundle %d - %d is different\n", (rangeNum)*100000, (rangeNum+1)*100000)
+					fmt.Printf("✖ Bundle %d - %d is different\n", (rangeNum)*chunkSize, (rangeNum+1)*chunkSize)
 					bundleHasDiff = true
 				}
 
-				// Check if --diff is enabled
-				if displayDiff {
-					if !existsInReceived {
-						fmt.Printf("- Block (%s) is present in %s but missing in %s\n", expectedBlock.AsRef(), args[0], args[1])
-						bundleHasDiff = true
+				if !existsInReceived {
+					fmt.Printf("- Block (%s) is present in %s but missing in %s\n", expectedBlock.AsRef(), args[0], args[1])
+					bundleHasDiff = true
+				} else if !proto.Equal(expectedBlock, receivedBlock) {
+					bundleHasDiff = true
+
+					if chunkIsGood {
+						chunkIsGood = false
+						fmt.Printf("✖ Bundle %d - %d is different\n", (rangeNum)*chunkSize, (rangeNum+1)*chunkSize)
 					}
-					if !proto.Equal(expectedBlock, receivedBlock) {
-						bundleHasDiff = true
 
-						if chunkIsGood {
-							chunkIsGood = false
-							fmt.Printf("✖ Bundle %d - %d is different\n", (rangeNum)*100000, (rangeNum+1)*100000)
-						}
-						fmt.Printf("- Block (%s) is different\n", expectedBlock.AsRef())
-
+					fmt.Printf("- Block (%s) is different\n", expectedBlock.AsRef())
+					if displayDiff {
 						expectedBlockJSON, err := rpc.MarshalJSONRPCIndent(expectedBlock, "", " ")
 						if err != nil {
 							return fmt.Errorf("marshaling block: %w", err)
@@ -261,23 +260,6 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 							return fmt.Errorf("getting diff: %w", err)
 						}
 						fmt.Printf("difference: \n%s\n", diff)
-					}
-				} else {
-
-					// And doesn't exist
-					if !existsInReceived {
-						fmt.Printf("- Block #%d (%s) is different\n", expectedBlock.Number, expectedBlock.Hash)
-						bundleHasDiff = true
-
-						// Exists but has diff
-					} else if !proto.Equal(expectedBlock, receivedBlock) {
-						bundleHasDiff = true
-
-						if chunkIsGood {
-							chunkIsGood = false
-							fmt.Printf("✖ Bundle %d - %d is different\n", (rangeNum)*100000, (rangeNum+1)*100000)
-						}
-						fmt.Printf("- Block (%s) is different\n", expectedBlock.AsRef())
 					}
 				}
 
@@ -298,7 +280,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	if !displayDiff {
 		fmt.Printf("\n\nTo see for details of the differences for the different bundles, run one of those commands:\n")
 		for _, blk := range differentBlocks {
-			fmt.Printf("- fireeth tools compare-blocks --diff %s %s %d-%d\n\n", args[0], args[1], blk.StartBlock, blk.ExclusiveEndBlock)
+			fmt.Printf("- fireeth tools compare-blocks --diff %s %s %d:%d\n\n", args[0], args[1], blk.StartBlock, blk.ExclusiveEndBlock)
 		}
 	}
 	return nil
