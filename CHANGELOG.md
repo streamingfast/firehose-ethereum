@@ -6,6 +6,12 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Fixed
+
+* Fixed various issues with `fireeth tools check merged-blocks`
+    * The `stopWalk` error is not reported as a real `error` anymore.
+    * `Incomplete range` should now be printed more accurately.
+
 ## v1.3.1
 
 * Release made to fix our building workflows, nothing different than [v1.3.0](#v130).
