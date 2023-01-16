@@ -18,7 +18,7 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20220630165922-bc58c6666fc8
 	github.com/streamingfast/dauth v0.0.0-20221027185237-b209f25fa3ff
 	github.com/streamingfast/derr v0.0.0-20221125175206-82e01d420d45
-	github.com/streamingfast/dgrpc v0.0.0-20230113212008-1898f17e0ac7
+	github.com/streamingfast/dgrpc v0.0.0-20221107145847-122ea65be343
 	github.com/streamingfast/dlauncher v0.0.0-20220909121534-7a9aa91dbb32
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20221129121022-a1733eca1981
@@ -133,7 +133,6 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
-	github.com/rs/cors v1.8.3 // indirect
 	github.com/sethvargo/go-retry v0.2.3 // indirect
 	github.com/someone1/gcp-jwt-go v2.0.1+incompatible // indirect
 	github.com/spf13/afero v1.6.0 // indirect
