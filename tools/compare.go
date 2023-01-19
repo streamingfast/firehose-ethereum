@@ -23,11 +23,11 @@ import (
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go/rpc"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	sftools "github.com/streamingfast/sf-tools"
 	"github.com/streamingfast/substreams/block"
 	"go.uber.org/multierr"
 	"google.golang.org/protobuf/proto"
 	"io"
-	"math"
 	"os"
 	"os/exec"
 	"strconv"
@@ -38,7 +38,7 @@ var compareBlocksCmd = &cobra.Command{
 	Use:   "compare-blocks <expected_bundle> <actual_bundle> [<block_range>]",
 	Short: "Checks for any differences between two block stores between a specified range. (To compare the likeness of two block ranges, for example)",
 	Long: cli.Dedent(`
-		The 'compare-blocks'' takes in two paths to stores of merged blocks and a range specifying the blocks you want to compare, written as: '<start>:<finish>'.
+		The 'compare-blocks' takes in two paths to stores of merged blocks and a range specifying the blocks you want to compare, written as: '<start>:<finish>'.
 		It will output the status of the likeness of every 100,000 blocks, on completion, or on encountering a difference. 
 		Increments that contain a difference will be communicated as well as the blocks within that contain differences.
 		Increments that do not have any differences will be outputted as identical.
@@ -52,24 +52,16 @@ var compareBlocksCmd = &cobra.Command{
 	RunE: compareBlocksE,
 	Example: cli.Dedent(`
 		# Run over full block range
-		fireeth tools compare-blocks sf_bundle/ cs_bundle/ 0:16000000
+		fireeth tools compare-blocks expected_bundle/ actual_bundle/ 0:16000000
 
 		# Run over specific block range, displaying differences in blocks
-		fireeth tools compare-blocks --diff sf_bundle/ cs_bundle/ 100:200
+		fireeth tools compare-blocks --diff expected_bundle/ actual_bundle/ 100:200
 	`),
 }
 
 func init() {
 	Cmd.AddCommand(compareBlocksCmd)
 	compareBlocksCmd.PersistentFlags().Bool("diff", false, "When activated, difference is displayed for each block with a difference")
-}
-
-func getBundleFloor(num uint64) uint64 {
-	return uint64(math.Round(float64(num/100.0))) * 100
-}
-
-func getBundleCeiling(num uint64) uint64 {
-	return (uint64(math.Round(float64(num/100.0))) * 100) + 100
 }
 
 func unifiedDiff(cnt1, cnt2 []byte) (string, error) {
@@ -94,13 +86,11 @@ func unifiedDiff(cnt1, cnt2 []byte) (string, error) {
 
 func readBundle(ctx context.Context, filename string, store dstore.Store) ([]string, map[string]*pbeth.Block, error) {
 
-	// Create a fileReader
 	fileReader, err := store.OpenObject(ctx, filename)
 	if err != nil {
 		return nil, nil, fmt.Errorf("creating reader: %w", err)
 	}
 
-	// Create a blockReader
 	blockReader, err := bstream.GetBlockReaderFactory.New(fileReader)
 	if err != nil {
 		return nil, nil, fmt.Errorf("creating block reader: %w", err)
@@ -146,6 +136,11 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	if blockRangeSize == 0 {
 		return fmt.Errorf("invalid block range")
 	}
+	blockRangeAsRange := sftools.BlockRange{
+		blockRange.StartBlock(),
+		*blockRange.EndBlock(),
+	}
+	blockRangePrefix := sftools.WalkBlockPrefix(blockRangeAsRange, 100)
 
 	// Create stores
 	storeExpected, err := dstore.NewDBinStore(args[0])
@@ -162,7 +157,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	blocksCountedInChunk := -1
 	chunkIsGood := true
 	rangeNum := 0
-	err = storeExpected.Walk(ctx, "00", func(filename string) (err error) {
+	err = storeExpected.Walk(ctx, blockRangePrefix, func(filename string) (err error) {
 		bundleStartBlock, err := strconv.Atoi(filename)
 		if err != nil {
 			return fmt.Errorf("parsing filename: %w", err)
@@ -265,8 +260,8 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 
 				// Add to final differences to be printed
 				if bundleHasDiff {
-					differentBlocks[string(expectedBlock.Hash)] = block.Range{StartBlock: getBundleFloor(expectedBlock.Number),
-						ExclusiveEndBlock: getBundleCeiling(expectedBlock.Number)}
+					differentBlocks[string(expectedBlock.Hash)] = block.Range{StartBlock: uint64(sftools.RoundToBundleStartBlock(uint32(expectedBlock.Number), 100)),
+						ExclusiveEndBlock: uint64(sftools.RoundToBundleEndBlock(uint32(expectedBlock.Number), 100))}
 				}
 				bundleHasDiff = false
 			}
