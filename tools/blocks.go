@@ -30,8 +30,8 @@ import (
 	"github.com/streamingfast/cli"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
-	"github.com/streamingfast/jsonpb"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/jsonpb"
 	"go.uber.org/zap"
 )
 
@@ -152,7 +152,7 @@ func printBlocks(inputIdentifier string, reader io.Reader, printTransactions boo
 		seenBlockCount++
 
 		//payloadSize, err := len(block.Payload.Get()) //disabled after rework
-		ethBlock := block.ToNative().(*pbeth.Block)
+		ethBlock := block.ToProtocol().(*pbeth.Block)
 
 		fmt.Printf("Block #%d (%s) (prev: %s, lib: %d): %d transactions, %d balance changes\n",
 			block.Num(),
@@ -231,7 +231,7 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 			)
 			continue
 		}
-		ethBlock := block.ToNative().(*pbeth.Block)
+		ethBlock := block.ToProtocol().(*pbeth.Block)
 
 		if printFull {
 			jsonPayload, _ := jsonpb.MarshalIndentToString(ethBlock, "  ")
@@ -358,7 +358,7 @@ func printBlockFromReader(identifier string, reader io.Reader) error {
 }
 
 func printBlock(block *bstream.Block) error {
-	nativeBlock := block.ToNative().(*pbeth.Block)
+	nativeBlock := block.ToProtocol().(*pbeth.Block)
 
 	data, err := json.MarshalIndent(nativeBlock, "", "  ")
 	if err != nil {

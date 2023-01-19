@@ -61,7 +61,7 @@ func init() {
 
 			combinedIndexer := transform.NewEthCombinedIndexer(indexStore, viper.GetUint64("combined-index-builder-index-size"))
 			handler := bstream.HandlerFunc(func(blk *bstream.Block, obj interface{}) error {
-				combinedIndexer.ProcessBlock(blk.ToNative().(*pbeth.Block))
+				combinedIndexer.ProcessBlock(blk.ToProtocol().(*pbeth.Block))
 				return nil
 			})
 

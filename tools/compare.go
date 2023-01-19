@@ -98,7 +98,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 				if err != nil {
 					return err
 				}
-				blockMap[block.ID()] = block.ToNative().(*pbeth.Block)
+				blockMap[block.ID()] = block.ToProtocol().(*pbeth.Block)
 			}
 		}
 		return nil
