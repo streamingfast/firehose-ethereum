@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -102,7 +103,7 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 		Out:
 			for {
 				b, err := br.Read()
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					break Out
 				}
 
@@ -112,7 +113,7 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 
 				zlog.Debug("read block", zap.String("id", b.ID()), zap.Uint64("num", b.Num()))
 
-				if err != nil {
+				if err != nil && !errors.Is(err, io.EOF) {
 					return fmt.Errorf("reading block: %w", err)
 				}
 			}
@@ -122,7 +123,7 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 			return nil
 		}()
 
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			panic(err)
 		}
 	}
