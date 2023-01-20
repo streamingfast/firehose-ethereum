@@ -49,10 +49,12 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 	err = srcStore.WalkFrom(ctx, "", fmt.Sprintf("%010d", start), func(filename string) error {
 		i, err := strconv.Atoi(filename)
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to parse filename %q: %w", filename, err)
 		}
+
 		if uint64(i) > stop {
-			return io.EOF
+			zlog.Debug("file is past the requested stop block. returning dstore.StopIteration", zap.String("filename", filename))
+			return dstore.StopIteration
 		}
 
 		zlog.Debug("found bundle", zap.String("filename", filename))
@@ -60,8 +62,8 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 		return nil
 	})
 
-	if err != nil && err != io.EOF {
-		return err
+	if err != nil {
+		return fmt.Errorf("unable to walk source store: %w", err)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Hour)
@@ -83,7 +85,7 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 		filename := bundles[rand.Intn(len(bundles))]
 
 		//get a random block from the bundle and read it
-		err = func() error { // this is in a func like this in order to defer the rc.Close() call correctly.
+		readErr := func() error { // this is in a func like this in order to defer the rc.Close() call correctly.
 			zlog.Debug("opening bundle", zap.String("filename", filename))
 
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
@@ -93,7 +95,14 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return fmt.Errorf("failed to open %s: %w", filename, err)
 			}
-			defer rc.Close()
+
+			defer func() {
+				zlog.Info("finished reading bundle", zap.String("filename", filename))
+				closeErr := rc.Close()
+				if closeErr != nil {
+					zlog.Error("error closing bundle", zap.Error(closeErr))
+				}
+			}()
 
 			br, err := bstream.GetBlockReaderFactory.New(rc)
 			if err != nil {
@@ -101,30 +110,22 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 			}
 
 			// iterate through the blocks in the file
-		Out:
 			for {
 				b, err := br.Read()
-				if errors.Is(err, io.EOF) {
-					break Out
-				}
-
-				//
-				p := b.ToProtocol()
-				_ = p
-
-				zlog.Debug("read block", zap.String("id", b.ID()), zap.Uint64("num", b.Num()))
-
-				if err != nil && !errors.Is(err, io.EOF) {
+				if err != nil {
+					if errors.Is(err, io.EOF) {
+						return nil
+					}
 					return fmt.Errorf("reading block: %w", err)
 				}
+
+				_ = b.ToProtocol()
+
+				zlog.Debug("read block", zap.String("id", b.ID()), zap.Uint64("num", b.Num()))
 			}
-
-			zlog.Info("finished reading bundle", zap.String("filename", filename))
-
-			return nil
 		}()
 
-		if err != nil && !errors.Is(err, io.EOF) {
+		if readErr != nil {
 			panic(err)
 		}
 	}
