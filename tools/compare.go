@@ -17,6 +17,12 @@ package tools
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"strconv"
+	"sync"
+
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
@@ -27,35 +33,32 @@ import (
 	"github.com/streamingfast/substreams/block"
 	"go.uber.org/multierr"
 	"google.golang.org/protobuf/proto"
-	"io"
-	"os"
-	"os/exec"
-	"strconv"
-	"sync"
 )
 
 var compareBlocksCmd = &cobra.Command{
 	Use:   "compare-blocks <expected_bundle> <actual_bundle> [<block_range>]",
 	Short: "Checks for any differences between two block stores between a specified range. (To compare the likeness of two block ranges, for example)",
 	Long: cli.Dedent(`
-		The 'compare-blocks' takes in two paths to stores of merged blocks and a range specifying the blocks you want to compare, written as: '<start>:<finish>'.
-		It will output the status of the likeness of every 100,000 blocks, on completion, or on encountering a difference. 
-		Increments that contain a difference will be communicated as well as the blocks within that contain differences.
-		Increments that do not have any differences will be outputted as identical.
-		
-		After passing through the blocks, it will output instructions on how to locate a specific difference based on the
-		blocks that were given. This is done by applying the '--diff' flag before your args. 
+		The 'compare-blocks' takes in two paths to stores of merged blocks and a range specifying the blocks you
+		want to compare, written as: '<start>:<finish>'. It will output the status of the likeness of every
+		100,000 blocks, on completion, or on encountering a difference. Increments that contain a difference will
+		be communicated as well as the blocks within that contain differences. Increments that do not have any
+		differences will be outputted as identical.
 
-		Commands inputted with '--diff' will display the blocks that have differences, as well as the difference. 
+		After passing through the blocks, it will output instructions on how to locate a specific difference
+		based on the blocks that were given. This is done by applying the '--diff' flag before your args.
+
+		Commands inputted with '--diff' will display the blocks that have differences, as well as the
+		difference.
 	`),
 	Args: cobra.ExactArgs(3),
 	RunE: compareBlocksE,
-	Example: cli.Dedent(`
+	Example: ExamplePrefixed("fireeth tools compare-blocks", `
 		# Run over full block range
-		fireeth tools compare-blocks expected_bundle/ actual_bundle/ 0:16000000
+		expected_store/ actual_store/ 0:16000000
 
 		# Run over specific block range, displaying differences in blocks
-		fireeth tools compare-blocks --diff expected_bundle/ actual_bundle/ 100:200
+		--diff expected_store/ actual_store/ 100:200
 	`),
 }
 
