@@ -116,11 +116,6 @@ func readBundle(ctx context.Context, filename string, store dstore.Store) ([]str
 }
 
 func compareBlocksE(cmd *cobra.Command, args []string) error {
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Println(err)
-		}
-	}()
 	displayDiff := mustGetBool(cmd, "diff")
 	chunkSize := 100000
 
@@ -137,8 +132,8 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid block range")
 	}
 	blockRangeAsRange := sftools.BlockRange{
-		blockRange.StartBlock(),
-		*blockRange.EndBlock(),
+		Start: blockRange.StartBlock(),
+		Stop:  *blockRange.EndBlock(),
 	}
 	blockRangePrefix := sftools.WalkBlockPrefix(blockRangeAsRange, 100)
 
