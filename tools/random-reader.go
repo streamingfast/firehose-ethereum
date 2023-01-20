@@ -103,6 +103,11 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 				if err == io.EOF {
 					return nil
 				}
+
+				//
+				p := b.ToProtocol()
+				_ = p
+
 				zlog.Debug("read block", zap.String("id", b.ID()), zap.Uint64("num", b.Num()))
 
 				if err != nil {
