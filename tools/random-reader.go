@@ -72,6 +72,7 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 		case <-ctx.Done():
 			log.Print("done")
 			return nil
+
 		default:
 			///
 		}
@@ -98,10 +99,11 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 			}
 
 			// iterate through the blocks in the file
+		Out:
 			for {
 				b, err := br.Read()
 				if err == io.EOF {
-					return nil
+					break Out
 				}
 
 				//
@@ -114,6 +116,10 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 					return fmt.Errorf("reading block: %w", err)
 				}
 			}
+
+			zlog.Info("finished reading bundle", zap.String("filename", filename))
+
+			return nil
 		}()
 
 		if err != nil {
