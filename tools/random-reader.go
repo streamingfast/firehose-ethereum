@@ -30,8 +30,6 @@ func init() {
 
 func randomReadE(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
-	ctx, cancel := context.WithTimeout(ctx, 1*time.Hour)
-	defer cancel()
 
 	srcStore, err := dstore.NewDBinStore(args[0])
 	if err != nil {
@@ -65,6 +63,9 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 	if err != nil && err != io.EOF {
 		return err
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Hour)
+	defer cancel()
 
 	zlog.Debug("done walking source store", zap.Int("bundles", len(bundles)))
 
