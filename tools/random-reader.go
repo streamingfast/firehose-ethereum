@@ -122,7 +122,7 @@ func randomReadE(cmd *cobra.Command, args []string) error {
 			return nil
 		}()
 
-		if err != nil {
+		if err != nil && err != io.EOF {
 			panic(err)
 		}
 	}
