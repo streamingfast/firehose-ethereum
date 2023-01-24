@@ -35,7 +35,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20230116200621-b84f19a2e142
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.1.1-0.20230124203635-c525fae98e57
+	github.com/streamingfast/substreams v0.1.1-0.20230124210021-d5ed02e6ce87
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
