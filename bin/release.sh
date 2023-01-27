@@ -8,17 +8,20 @@ force="false"
 main() {
   pushd "$ROOT" &> /dev/null
 
-  while getopts "hnf" opt; do
+  while getopts "hnfw" opt; do
     case $opt in
       h) usage && exit 0;;
       n) dry_run="true";;
       f) force="true";;
+      w) review_web="true";;
       \?) usage_error "Invalid option: -$OPTARG";;
     esac
   done
   shift $((OPTIND-1))
 
   verify_github_token
+  verify_gh
+  verify_skip
 
   # We do not sign releases anymore because they are done in a Docker env now
   # so some adaptation is required
@@ -29,22 +32,26 @@ main() {
   fi
 
   version="$1"; shift
-  if [[ "$version" == "" ]]; then
-    printf "What version do you want to release (current latest is `git describe --tags --abbrev=0`)? "
-    read version
-  fi
 
-  if [[ ! "$version" =~ ^v ]]; then
-    echo "Version $version is invalid, must start with a 'v'"
-    exit 1
-  fi
+  while true; do
+   if [[ "$version" == "" ]]; then
+      printf "What version do you want to release (current latest is `git describe --tags --abbrev=0`)? "
+      read version
+    fi
+
+    if [[ ! "$version" =~ ^v ]]; then
+      echo "Version $version is invalid, must start with a 'v'"
+    else
+      break
+    fi
+  done
 
   mode="Dry Run, use -f flag to switch to publishing mode"
   if [[ "$force" == "true" ]]; then
     mode="Publishing"
   fi
 
-  echo "About to release version tagged $version ($mode)"
+  echo "About to release version $version ($mode)"
   sleep 3
 
   if [[ "$force" == "true" ]]; then
@@ -52,20 +59,27 @@ main() {
     git push
   fi
 
-  args="--rm-dist"
+  # We tag the version because goreleaser needs it to perform its work properly,
+  # but we delete it at the end of the script because we will let GitHub create
+  # the tag when the release is performed
+  git tag "$version"
+  trap "git tag -d $version" EXIT
+
+  start_at=$(grep -n -m 1 '<!-- release_note_start -->' CHANGELOG.md | cut -f 1 -d :)
+  changelod_trimmed=$(skip $start_at CHANGELOG.md | skip 1)
+
+  # It's important to work on trimmed content to determine end because `head -n$end_at`
+  # below is applied to trimmed content and thus line number found must be relative to it
+  end_at=$(printf "$changelod_trimmed" | grep -n -m 1 -E '^## .+' | cut -f 1 -d :)
+  printf "$changelod_trimmed" | head -n$end_at | skip -2 > .release_notes.md
+
+  args="--rm-dist --release-notes=.release_notes.md"
   if [[ "$force" == "false" ]]; then
     args="--skip-publish --skip-validate $args"
   fi
 
-  set -e
-  git tag "$version"
-  set +e
-
   package_name="github.com/streamingfast/firehose-ethereum"
   golang_cross_version="v1.19.4"
-
-  # We have no customized sysroot, so nothing to link now
-  #-v "`pwd`/sysroot:/sysroot" \
 
 	docker run \
 		--rm \
@@ -77,8 +91,49 @@ main() {
 		"goreleaser/goreleaser-cross:${golang_cross_version}" \
 		$args
 
-  if [[ $? -gt 0 || "$force" == "false" ]]; then
-    git tag -d "$version"
+  echo "Release draft has been created succesuflly, but it's not published"
+  echo "yet. You must now review the release and publish it if everything is"
+  echo "correct."
+  echo ""
+  echo "Showing you the release in the terminal..."
+  sleep 0.5
+
+  args=""
+  if [[ "$review_web" == "true" ]]; then
+    args="--web"
+  fi
+
+  gh release view "$version" $args
+
+  echo ""
+  printf "Would you like to publish it right now? "
+  read answer
+  echo ""
+
+  if [[ "$answer" == "Y" || "$answer" == "y" || "$answer" == "Yes" || "$answer" == "yes" ]]; then
+    gh release edit "$version" --draft=false
+    echo ""
+
+    echo "Release published at $(gh release view $version --json url -q '.url')"
+  else
+    echo "If something is wrong, you can delete the release from GitHub"
+    echo "and try again, delete the release by doing the command:"
+    echo ""
+    echo "  gh release delete $version"
+    echo ""
+    echo "You can also publish it from the GitHub UI directly, on the release"
+    echo "page, press the small pencil button in the right corner to edit the release"
+    echo "and then press the 'Publish release' green button (scroll down to the bottom"
+    echo "of the page."
+    echo ""
+
+    printf "Do you want to open it right now? "
+    read answer
+    echo ""
+
+    if [[ "$answer" == "Y" || "$answer" == "y" || "$answer" == "Yes" || "$answer" == "yes" ]]; then
+      gh release view "$version" --web
+    fi
   fi
 }
 
@@ -110,13 +165,27 @@ verify_github_token() {
   fi
 }
 
-verify_keybase() {
-  if ! command keybase &> /dev/null; then
-    echo "Keybase is required to sign the release (the checksum of all the artifacts"
-    echo "to be precise)."
+verify_gh() {
+  if ! command -v gh &> /dev/null; then
+    echo "The GitHub CLI utility (https://cli.github.com/) is required to obtain"
+    echo "information about the current draft release."
     echo ""
-    echo "You will need to have it available ('brew install keybase' on Mac OS X) and"
-    echo "configure it, just setting your Git username and a password should be enough."
+    echo "Install via brew with 'brew install gh' or refer https://github.com/cli/cli#installation"
+    echo "otherwise."
+    echo ""
+    echo "Don't forget to activate link with GitHub by doing 'gh auth login'."
+    echo ""
+    exit 1
+  fi
+}
+
+verify_skip() {
+  if ! command -v skip &> /dev/null; then
+    echo "The 'skip' utility is required to generate the release notes from the"
+    echo "changelog file."
+    echo ""
+    echo "Install from source using 'go install github.com/streamingfast/tooling/cmd/skip@latest'"
+    echo ""
     exit 1
   fi
 }
@@ -132,7 +201,7 @@ usage_error() {
 }
 
 usage() {
-  echo "usage: release.sh [-h] [-f] [-n] [<version>]"
+  echo "usage: release.sh [-h] [-f] [-n] [-w] [<version>]"
   echo ""
   echo "Perform the necessary commands to perform a release of the project."
   echo "The <version> is optional, if not provided, you'll be asked the question."
@@ -151,6 +220,7 @@ usage() {
   echo "Options"
   echo "    -f          Run in write mode publishing the release to GitHub"
   echo "    -n          Run in dry-run mode skipping validation and publishing"
+  echo "    -w          Review the draft release within the browser instead of through the CLI"
   echo "    -h          Display help about this script"
 }
 

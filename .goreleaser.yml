@@ -76,13 +76,6 @@ snapshot:
 checksum:
   name_template: checksums.txt
 
-changelog:
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'
-  sort: asc
-
 dist: dist
 
 brews:

@@ -6,6 +6,8 @@ for instructions to keep up to date.
 
 ## v1.3.2
 
+<!-- release_note_start -->
+
 ### Updated
 
 * Updated to Substreams version `v0.2.0` please refer to [release page](https://github.com/streamingfast/substreams/releases/tag/v0.2.0) for further info about Substreams changes.
