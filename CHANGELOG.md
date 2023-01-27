@@ -20,10 +20,9 @@ for instructions to keep up to date.
 
 ### Changed
 
-* Updated to Substreams `v0.1.0`, please refer to release page for further info about Substreams changes.
+* Updated to Substreams `v0.1.0`, please refer to [release page](https://github.com/streamingfast/substreams/releases/tag/v0.1.0) for further info about Substreams changes.
 
     > **Warning** The state output format for `map` and `store` modules has changed internally to be more compact in Protobuf format. When deploying this new version and using Substreams feature, previous existing state files should be deleted or deployment updated to point to a new store location. The state output store is defined by the flag `--substreams-state-store-url` flag.
-
 
 ### Added
 
