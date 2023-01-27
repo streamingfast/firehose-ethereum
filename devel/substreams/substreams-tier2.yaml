@@ -14,8 +14,5 @@ start:
     substreams-client-endpoint: ''
     substreams-client-plaintext: true
     substreams-partial-mode-enabled: true
-    substreams-sub-request-block-range-size: 0
-    substreams-output-cache-save-interval: 100
-    substreams-stores-save-interval: 1000
-    substreams-sub-request-parallel-jobs: 0
+    substreams-cache-save-interval: 100
     #substreams-state-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/substreams-states-unstable/v1

@@ -24,11 +24,13 @@ func init() {
 }
 
 var DownloadFromFirehoseCmd = &cobra.Command{
-	Use:     "download-from-firehose <endpoint> <start> <stop> <destination>",
-	Short:   "download blocks from firehose and save them to merged-blocks",
-	Args:    cobra.ExactArgs(4),
-	RunE:    downloadFromFirehoseE,
-	Example: "fireeth tools download-from-firehose api.streamingfast.io 1000 2000 ./outputdir",
+	Use:   "download-from-firehose <endpoint> <start> <stop> <destination>",
+	Short: "download blocks from firehose and save them to merged-blocks",
+	Args:  cobra.ExactArgs(4),
+	RunE:  downloadFromFirehoseE,
+	Example: ExamplePrefixed("fireeth tools download-from-firehose", `
+		api.streamingfast.io 1000 2000 ./outputdir
+	`),
 }
 
 func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {

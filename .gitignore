@@ -3,6 +3,7 @@
 .vscode/
 .envrc
 .env.release
+.release_notes.md
 *.spkg
 /sf-data
 /sf.yaml

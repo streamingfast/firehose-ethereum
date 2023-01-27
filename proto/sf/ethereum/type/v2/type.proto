@@ -7,10 +7,15 @@ option go_package = "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethe
 import "google/protobuf/timestamp.proto";
 
 message Block {
-  int32 ver = 1;
+  // Hash is the block's hash.
   bytes hash = 2;
+  // Number is the block's height at which this block was mined.
   uint64 number = 3;
+  // Size is the size in bytes of the RLP encoding of the block according to Ethereum
+  // rules.
   uint64 size = 4;
+  // Header contain's the block's header information like its parent hash, the merkel root hash
+  // and all other information the form a block.
   BlockHeader header = 5;
 
   // Uncles represents block produced with a valid solution but were not actually choosen
@@ -20,46 +25,34 @@ message Block {
   // field will actually be always empty.
   repeated BlockHeader uncles = 6;
 
+  // TransactionTraces hold the execute trace of all the transactions that were executed
+  // in this block. In in there that you will find most of the Ethereum data model.
   repeated TransactionTrace transaction_traces = 10;
+
+  // BalanceChanges here is the array of ETH transfer that happened at the block level
+  // outside of the normal transaction flow of a block. The best example of this is mining
+  // reward for the block mined, the transfer of ETH to the miner happens outside the normal
+  // transaction flow of the chain and is recorded as a `BalanceChange` here since we cannot
+  // attached it to any transaction.
   repeated BalanceChange balance_changes = 11;
+
+  // CodeChanges here is the array of smart code change that happened that happened at the block level
+  // outside of the normal transaction flow of a block. Some Ethereum's fork like BSC and Polygon
+  // has some capabilities to upgrade internal smart contracts used usually to track the validator
+  // list.
+  //
+  // On hard fork, some procedure runs to upgrade the smart contract code to a new version. In those
+  // network, a `CodeChange` for each modified smart contract on upgrade would be present here. Note
+  // that this happen rarely, so the vast majority of block will have an empty list here.
   repeated CodeChange code_changes = 20;
 
   reserved 40; // bool filtering_applied = 40 [deprecated = true];
   reserved 41; // string filtering_include_filter_expr = 41 [deprecated = true];
   reserved 42; // string filtering_exclude_filter_expr = 42 [deprecated = true];
-}
 
-// HeaderOnlyBlock is used to optimally unpack the [Block] structure (note the
-// corresponding message number for the `header` field) while consuming less
-// memory, when only the `header` is desired.
-//
-// WARN: this is a client-side optimization pattern and should be moved in the
-// consuming code.
-message HeaderOnlyBlock {
-  BlockHeader header = 5;
-}
-
-// BlockWithRefs is a lightweight block, with traces and transactions
-// purged from the `block` within, and only.  It is used in transports
-// to pass block data around.
-message BlockWithRefs {
-  string id = 1;
-  Block block = 2;
-  TransactionRefs transaction_trace_refs = 3;
-  bool irreversible = 4;
-}
-
-message TransactionRefs {
-  repeated bytes hashes = 1;
-}
-
-message UnclesHeaders {
-  repeated BlockHeader uncles = 1;
-}
-
-message BlockRef {
-  bytes hash = 1;
-  uint64 number = 2;
+  // Ver represents that data model version of the block, it is used internally by Firehose on Ethereum
+  // as a validation that we are reading the correct version.
+  int32 ver = 1;
 }
 
 message BlockHeader {
@@ -244,12 +237,6 @@ message TransactionTrace {
 message AccessTuple {
   bytes address = 1;
   repeated bytes storage_keys = 2;
-}
-
-// TransactionTraceWithBlockRef
-message TransactionTraceWithBlockRef {
-  TransactionTrace trace = 1;
-  BlockRef block_ref = 2;
 }
 
 enum TransactionTraceStatus {
@@ -503,4 +490,38 @@ message GasChange {
   }
 
   uint64 ordinal = 4;
+}
+
+// HeaderOnlyBlock is used to optimally unpack the [Block] structure (note the
+// corresponding message number for the `header` field) while consuming less
+// memory, when only the `header` is desired.
+//
+// WARN: this is a client-side optimization pattern and should be moved in the
+// consuming code.
+message HeaderOnlyBlock {
+  BlockHeader header = 5;
+}
+
+// BlockWithRefs is a lightweight block, with traces and transactions
+// purged from the `block` within, and only.  It is used in transports
+// to pass block data around.
+message BlockWithRefs {
+  string id = 1;
+  Block block = 2;
+  TransactionRefs transaction_trace_refs = 3;
+  bool irreversible = 4;
+}
+
+message TransactionTraceWithBlockRef {
+  TransactionTrace trace = 1;
+  BlockRef block_ref = 2;
+}
+
+message TransactionRefs {
+  repeated bytes hashes = 1;
+}
+
+message BlockRef {
+  bytes hash = 1;
+  uint64 number = 2;
 }
