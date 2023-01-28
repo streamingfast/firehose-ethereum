@@ -3,15 +3,17 @@
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 dry_run=""
-force="false"
+publish="false"
+force=""
 
 main() {
   pushd "$ROOT" &> /dev/null
 
-  while getopts "hnfw" opt; do
+  while getopts "hnfpw" opt; do
     case $opt in
       h) usage && exit 0;;
       n) dry_run="true";;
+      p) publish="true";;
       f) force="true";;
       w) review_web="true";;
       \?) usage_error "Invalid option: -$OPTARG";;
@@ -27,8 +29,8 @@ main() {
   # so some adaptation is required
   #verify_keybase
 
-  if [[ "$dry_run" == "true" && "$force" == "true" ]]; then
-    usage_error "Only one of -n (dry run) or -f (force) can be provided at a time"
+  if [[ "$dry_run" == "true" && "$publish" == "true" ]]; then
+    usage_error "Only one of -n (dry run) or -p (publish) can be provided at a time"
   fi
 
   version="$1"; shift
@@ -46,15 +48,15 @@ main() {
     fi
   done
 
-  mode="Dry Run, use -f flag to switch to publishing mode"
-  if [[ "$force" == "true" ]]; then
+  mode="Dry run (build artifacts but no GitHub release creation), use -p flag to switch to publishing mode"
+  if [[ "$publish" == "true" ]]; then
     mode="Publishing"
   fi
 
   echo "About to release version $version ($mode)"
   sleep 3
 
-  if [[ "$force" == "true" ]]; then
+  if [[ "$publish" == "true" ]]; then
     echo "Pushing to ensure GitHub knowns about the latest commit(s)"
     git push
   fi
@@ -63,9 +65,9 @@ main() {
   # but we delete it at the end of the script because we will let GitHub create
   # the tag when the release is performed
   git tag "$version"
-  trap "git tag -d $version" EXIT
+  trap "git tag -d $version > /dev/null" EXIT
 
-  start_at=$(grep -n -m 1 '<!-- release_note_start -->' CHANGELOG.md | cut -f 1 -d :)
+  start_at=$(grep -n -m 1 -E '^## .+' CHANGELOG.md | cut -f 1 -d :)
   changelod_trimmed=$(skip $start_at CHANGELOG.md | skip 1)
 
   # It's important to work on trimmed content to determine end because `head -n$end_at`
@@ -74,7 +76,7 @@ main() {
   printf "$changelod_trimmed" | head -n$end_at | skip -2 > .release_notes.md
 
   args="--rm-dist --release-notes=.release_notes.md"
-  if [[ "$force" == "false" ]]; then
+  if [[ "$publish" == "false" ]]; then
     args="--skip-publish --skip-validate $args"
   fi
 
@@ -91,6 +93,10 @@ main() {
 		"goreleaser/goreleaser-cross:${golang_cross_version}" \
 		$args
 
+  if [[ "$publish" == "false" ]]; then
+    exit 0
+  fi
+
   echo "Release draft has been created succesuflly, but it's not published"
   echo "yet. You must now review the release and publish it if everything is"
   echo "correct."
@@ -105,12 +111,16 @@ main() {
 
   gh release view "$version" $args
 
-  echo ""
-  printf "Would you like to publish it right now? "
-  read answer
-  echo ""
+  if [[ "$force" == "true" ]]; then
+      publish_now="yes"
+  else
+    echo ""
+    printf "Would you like to publish it right now? "
+    read publish_now
+    echo ""
+  fi
 
-  if [[ "$answer" == "Y" || "$answer" == "y" || "$answer" == "Yes" || "$answer" == "yes" ]]; then
+  if [[ "$publish_now" == "Y" || "$publish_now" == "y" || "$publish_now" == "Yes" || "$publish_now" == "yes" ]]; then
     gh release edit "$version" --draft=false
     echo ""
 
@@ -201,7 +211,7 @@ usage_error() {
 }
 
 usage() {
-  echo "usage: release.sh [-h] [-f] [-n] [-w] [<version>]"
+  echo "usage: release.sh [-h] [-p] [-f] [-n] [-w] [<version>]"
   echo ""
   echo "Perform the necessary commands to perform a release of the project."
   echo "The <version> is optional, if not provided, you'll be asked the question."
@@ -218,8 +228,9 @@ usage() {
   echo "configure it, just setting your Git username and a password should be enough."
   echo ""
   echo "Options"
-  echo "    -f          Run in write mode publishing the release to GitHub"
-  echo "    -n          Run in dry-run mode skipping validation and publishing"
+  echo "    -n          Run in dry-run mode building artifacts but skipping validation and GitHub release publication"
+  echo "    -p          Run in publishing mode building artifacts, peforming validation and publishing the release to GitHub in **draft** mode"
+  echo "    -f          Forcing the GitHub release to be published right away instead of leaving it in draft mode"
   echo "    -w          Review the draft release within the browser instead of through the CLI"
   echo "    -h          Display help about this script"
 }

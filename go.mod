@@ -17,13 +17,13 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20230120202400-0357b9c6f2be
 	github.com/streamingfast/dauth v0.0.0-20221027185237-b209f25fa3ff
 	github.com/streamingfast/derr v0.0.0-20221125175206-82e01d420d45
-	github.com/streamingfast/dgrpc v0.0.0-20230113212008-1898f17e0ac7
+	github.com/streamingfast/dgrpc v0.0.0-20230128021224-2643ade3df8f
 	github.com/streamingfast/dlauncher v0.0.0-20220909121534-7a9aa91dbb32
 	github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9
 	github.com/streamingfast/dmetrics v0.0.0-20221129121022-a1733eca1981
 	github.com/streamingfast/dstore v0.1.1-0.20230126133209-44cda2076cfe
 	github.com/streamingfast/eth-go v0.0.0-20221108140424-93bd30c1579c
-	github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d
+	github.com/streamingfast/firehose v0.1.1-0.20230128021313-216c8477ad22
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20221129151535-42f0a2b8d76d
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
