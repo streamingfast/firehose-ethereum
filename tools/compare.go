@@ -87,6 +87,18 @@ func unifiedDiff(cnt1, cnt2 []byte) (string, error) {
 	return out, nil
 }
 
+func sanitizeBlock(block *pbeth.Block) *pbeth.Block {
+	for _, trxTrace := range block.TransactionTraces {
+		for _, call := range trxTrace.Calls {
+			if call.FailureReason != "" {
+				call.FailureReason = "(varying field)"
+			}
+		}
+	}
+
+	return block
+}
+
 func readBundle(ctx context.Context, filename string, store dstore.Store) ([]string, map[string]*pbeth.Block, error) {
 
 	fileReader, err := store.OpenObject(ctx, filename)
@@ -110,7 +122,7 @@ func readBundle(ctx context.Context, filename string, store dstore.Store) ([]str
 			return nil, nil, fmt.Errorf("reading blocks: %w", err)
 		}
 
-		curBlockPB := curBlock.ToProtocol().(*pbeth.Block)
+		curBlockPB := sanitizeBlock(curBlock.ToProtocol().(*pbeth.Block))
 		blockHashes = append(blockHashes, string(curBlockPB.Hash))
 		blocksMap[string(curBlockPB.Hash)] = curBlockPB
 	}
