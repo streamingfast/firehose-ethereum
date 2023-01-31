@@ -10,6 +10,10 @@ for instructions to keep up to date.
 
 * Increased gRPC max received message size accepted by Firehose and Substreams gRPC endpoints to 25 MiB.
 
+### Removed
+
+* Command `fireeth init` has been removed, this was a leftover from another time and the command was not working anyway.
+
 ## v1.3.2
 
 ### Updated
