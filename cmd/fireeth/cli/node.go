@@ -348,7 +348,7 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isReader bool
 	nodeEnforcePeers = viper.GetString(prefix + "enforce-peers")
 	bootstrapDataURL = viper.GetString(prefix + "bootstrap-data-url")
 	backupConfigs = viper.GetStringSlice(prefix + "backups")
-	shutdownDelay = viper.GetDuration("common-system-shutdown-signal-delay") // we reuse this global value
+	shutdownDelay = viper.GetDuration(CommonSystemShutdownSignalDelay) // we reuse this global value
 
 	nodeArguments, err = buildNodeArguments(
 		appLogger,

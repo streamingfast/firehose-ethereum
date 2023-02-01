@@ -14,6 +14,11 @@ for instructions to keep up to date.
 
 * Command `fireeth init` has been removed, this was a leftover from another time and the command was not working anyway.
 
+### Added
+
+* flag `common-auto-max-procs` to optimize go thread management using github.com/uber-go/automaxprocs
+* flag `common-auto-mem-limit-percent` to specify GOMEMLIMIT based on a percentage of available memory
+
 ## v1.3.2
 
 ### Updated

@@ -89,6 +89,10 @@ func setupCmd(cmd *cobra.Command) error {
 	})
 	launcher.SetupTracing("firehose-ethereum")
 	launcher.SetupAnalyticsMetrics(zlog, viper.GetString("global-metrics-listen-addr"), viper.GetString("global-pprof-listen-addr"))
+	if viper.GetBool(CommonAutoMaxProcsFlag) {
+		launcher.SetAutoMaxProcs(zlog)
+	}
+	launcher.SetAutoMemoryLimit(viper.GetUint64(CommonAutoMemLimitFlag), zlog)
 
 	return nil
 }
