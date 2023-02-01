@@ -34,7 +34,7 @@ jobs:
 
     strategy:
       matrix:
-        go-version: [1.18.x]
+        go-version: [1.19.x]
 
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
