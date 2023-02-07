@@ -18,6 +18,7 @@ import (
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/streamingfast/substreams/pipeline"
 	"github.com/streamingfast/substreams/wasm"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
@@ -155,6 +156,10 @@ func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, request *pbsu
 		panic("no cache initialized for this request")
 	}
 
+	if err := e.validateCalls(ctx, calls); err != nil {
+		return nil, true, err
+	}
+
 	res, deterministic, err := e.rpcCalls(ctx, alwaysRetry, cache, clock.Id, calls)
 	if err != nil {
 		return nil, deterministic, err
@@ -182,6 +187,16 @@ type RPCResponse struct {
 	Raw           string
 	DecodingError error
 	CallError     error // always deterministic
+}
+
+func (e *RPCEngine) validateCalls(ctx context.Context, calls *pbethss.RpcCalls) (err error) {
+	for i, call := range calls.Calls {
+		if len(call.ToAddr) != 20 {
+			err = multierr.Append(err, fmt.Errorf("invalid call #%d: 'ToAddr' should contain 20 bytes, got %d bytes", i, len(call.ToAddr)))
+		}
+	}
+
+	return err
 }
 
 var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(timeout\s*=\s*[^\)]+\)`)

@@ -62,34 +62,70 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 }
 
 func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
+	rpcCall := func(address string, data []byte) *pbethss.RpcCall {
+		ethAddress := eth.MustNewAddress(address)
+
+		return &pbethss.RpcCall{ToAddr: ethAddress, Data: data}
+	}
+
+	dummyRPCCall := rpcCall("0x0000000000000000000000000000000000000000", eth.MustNewMethodDef("any()").MethodID())
+
 	type want struct {
 		deterministic bool
 		response      *pbethss.RpcResponse
 	}
 
 	tests := []struct {
-		err     string
-		wantOut want
+		name        string
+		rpcCall     *pbethss.RpcCall
+		response    string
+		wantOut     want
+		expectedErr require.ErrorAssertionFunc
 	}{
 		{
+			"exection timeout 5s",
+			dummyRPCCall,
 			`{"code": -32000, "message": "execution aborted (timeout = 5s)"}`,
 			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
+			require.NoError,
 		},
 		{
+			"exection timeout 30s",
+			dummyRPCCall,
 			`{"code": -32000, "message": "execution aborted (timeout = 30s)"}`,
 			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
+			require.NoError,
 		},
 		{
+			"out of gas",
+			dummyRPCCall,
 			`{"code":-32000,"message":"out of gas"}`,
 			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
+			require.NoError,
+		},
+		{
+			"invalid request error code",
+			dummyRPCCall,
+			`{"code":-32602,"message":"invalid request"}`,
+			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
+			require.NoError,
+		},
+		{
+			"invalid RpcCall",
+			rpcCall("aa", eth.MustNewMethodDef("any()").MethodID()),
+			`{"code":-32602,"message":"invalid request"}`,
+			want{deterministic: true, response: &pbethss.RpcResponse{Failed: false}},
+			func(tt require.TestingT, err error, _ ...interface{}) {
+				require.EqualError(tt, err, "invalid call #0: 'ToAddr' should contain 20 bytes, got 1 bytes")
+			},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.err, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			localCache := t.TempDir()
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-				w.Write([]byte(fmt.Sprintf(`{"jsonrpc":"2.0","id":"0x1","error":%s}`, tt.err)))
+				w.Write([]byte(fmt.Sprintf(`{"jsonrpc":"2.0","id":"0x1","error":%s}`, tt.response)))
 			}))
 			defer server.Close()
 
@@ -100,15 +136,16 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 
 			engine.registerRequestCache(request, NoOpCache{})
 
-			address := eth.MustNewAddress("0x0000000000000000000000000000000000000000")
-			data := eth.MustNewMethodDef("any()").MethodID()
-
-			protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+			protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{tt.rpcCall}})
 			require.NoError(t, err)
 
 			out, deterministic, err := engine.ethCall(context.Background(), false, request, clockBlock1, protoCalls)
-			require.NoError(t, err)
+			tt.expectedErr(t, err)
 			require.Equal(t, tt.wantOut.deterministic, deterministic)
+
+			if err != nil {
+				return
+			}
 
 			responses := &pbethss.RpcResponses{}
 			err = proto.Unmarshal(out, responses)
