@@ -82,7 +82,7 @@ func GetIndexStore(dataDir string) (indexStore dstore.Store, possibleIndexSizes 
 	if indexStoreURL != "" {
 		s, err := dstore.NewStore(indexStoreURL, "", "", false)
 		if err != nil {
-			return nil, nil, fmt.Errorf("couldn't create indexStore: %w", err)
+			return nil, nil, fmt.Errorf("couldn't create index store: %w", err)
 		}
 		if !indexStoreCreated {
 			if err = mkdirStorePathIfLocal(indexStoreURL); err != nil {

@@ -67,7 +67,7 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().String("common-ratelimiter-plugin", "null://", "[COMMON] Rate Limiter plugin URI, see streamingfast/dauth repository")
 
 	// System Behavior
-	cmd.Flags().Duration(CommonSystemShutdownSignalDelay, 0, "[COMMON] Add a delay between receiving SIGTERM signal and shutting down apps. Apps will respond negatively to /healthz during this period")
+	cmd.Flags().Duration(CommonSystemShutdownSignalDelayFlag, 0, "[COMMON] Add a delay between receiving SIGTERM signal and shutting down apps. Apps will respond negatively to /healthz during this period")
 	cmd.Flags().Uint64(CommonAutoMemLimitFlag, 0, "[COMMON] Automatically sets GOMEMLIMIT to a percentage of memory limit from cgroup (useful for container environments)")
 	cmd.Flags().Bool(CommonAutoMaxProcsFlag, false, "[COMMON] Automatically sets GOMAXPROCS to max cpu available from cgroup (useful for container environments)")
 

@@ -112,7 +112,7 @@ func Start(dataDir string, args []string) (err error) {
 
 	printWelcomeMessage(apps)
 
-	signalHandler := derr.SetupSignalHandler(viper.GetDuration(CommonSystemShutdownSignalDelay))
+	signalHandler := derr.SetupSignalHandler(viper.GetDuration(CommonSystemShutdownSignalDelayFlag))
 	select {
 	case <-signalHandler:
 		zlog.Info("received termination signal, quitting")

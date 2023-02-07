@@ -91,14 +91,10 @@ func init() {
 			if err != nil {
 				return nil, err
 			}
+
 			indexStore, possibleIndexSizes, err := GetIndexStore(runtime.AbsDataDir)
 			if err != nil {
 				return nil, fmt.Errorf("unable to initialize indexes: %w", err)
-			}
-
-			endpoints := viper.GetStringSlice("substreams-rpc-endpoints")
-			for i, endpoint := range endpoints {
-				endpoints[i] = os.ExpandEnv(endpoint)
 			}
 
 			sfDataDir := runtime.AbsDataDir
@@ -118,6 +114,11 @@ func init() {
 			}
 
 			if viper.GetBool("substreams-enabled") {
+				endpoints := viper.GetStringSlice("substreams-rpc-endpoints")
+				for i, endpoint := range endpoints {
+					endpoints[i] = os.ExpandEnv(endpoint)
+				}
+
 				rpcEngine, err := ethss.NewRPCEngine(
 					MustReplaceDataDir(sfDataDir, viper.GetString("substreams-rpc-cache-store-url")),
 					endpoints,

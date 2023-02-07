@@ -58,7 +58,7 @@ const (
 	NodeRPCPort       string = "8545"
 	devMinerAddress   string = "0x821b55d8abe79bc98f05eb675fdc50dfe796b7ab"
 
-	CommonAutoMaxProcsFlag          string = "common-auto-max-procs"
-	CommonAutoMemLimitFlag          string = "common-auto-mem-limit-percent"
-	CommonSystemShutdownSignalDelay string = "common-system-shutdown-signal-delay"
+	CommonAutoMaxProcsFlag              string = "common-auto-max-procs"
+	CommonAutoMemLimitFlag              string = "common-auto-mem-limit-percent"
+	CommonSystemShutdownSignalDelayFlag string = "common-system-shutdown-signal-delay"
 )
