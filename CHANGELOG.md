@@ -6,6 +6,10 @@ for instructions to keep up to date.
 
 ## UNRELEASED
 
+### Fixed
+
+* Substreams `RpcCall` JSON-RPC code `-32602` is now treated as a deterministic error (invalid request).
+
 ### Added
 
 * support for "requester pays" buckets on Google Storage in url, ex: `gs://my-bucket/path?project=my-project-id`
