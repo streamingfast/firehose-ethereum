@@ -32,6 +32,7 @@ import (
 	ethss "github.com/streamingfast/firehose-ethereum/substreams"
 	ethtransform "github.com/streamingfast/firehose-ethereum/transform"
 	firehoseApp "github.com/streamingfast/firehose/app/firehose"
+	firehoseServer "github.com/streamingfast/firehose/server"
 	"github.com/streamingfast/logging"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
@@ -52,6 +53,8 @@ func init() {
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("firehose-grpc-listen-addr", FirehoseGRPCServingAddr, "Address on which the firehose will listen, appending * to the end of the listen address will start the server over an insecure TLS connection. By default firehose will start in plain-text mode.")
 			cmd.Flags().String("firehose-discovery-service-url", "", "url to configure the grpc discovery service") //traffic-director://xds?vpc_network=vpc-global&use_xds_reds=true
+			cmd.Flags().Int("firehose-rate-limit-bucket-size", -1, "Rate limit bucket size (default: no rate limit)")
+			cmd.Flags().Duration("firehose-rate-limit-bucket-fill-rate", 10*time.Second, "Rate limit bucket refill rate (default: 10s)")
 
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
@@ -177,6 +180,14 @@ func init() {
 			registry.Register(ethtransform.MultiCallToFilterTransformFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.CombinedFilterTransformFactory(indexStore, possibleIndexSizes))
 
+			serverOptions := []firehoseServer.Option{}
+
+			limiterSize := viper.GetInt("firehose-rate-limit-bucket-size")
+			limiterRefillRate := viper.GetDuration("firehose-rate-limit-bucket-fill-rate")
+			if limiterSize > 0 {
+				serverOptions = append(serverOptions, firehoseServer.WithLeakyBucketLimiter(limiterSize, limiterRefillRate))
+			}
+
 			return firehoseApp.New(appLogger, &firehoseApp.Config{
 				MergedBlocksStoreURL:    mergedBlocksStoreURL,
 				OneBlocksStoreURL:       oneBlocksStoreURL,
@@ -185,6 +196,7 @@ func init() {
 				GRPCListenAddr:          viper.GetString("firehose-grpc-listen-addr"),
 				ServiceDiscoveryURL:     serviceDiscoveryURL,
 				GRPCShutdownGracePeriod: time.Second,
+				ServerOptions:           serverOptions,
 			}, &firehoseApp.Modules{
 				Authenticator:            authenticator,
 				HeadTimeDriftMetric:      headTimeDriftmetric,
