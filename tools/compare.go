@@ -15,14 +15,15 @@
 package tools
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"os"
-	"os/exec"
+	"reflect"
 	"strconv"
 	"sync"
 
+	jd "github.com/josephburnett/jd/lib"
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
@@ -30,13 +31,14 @@ import (
 	"github.com/streamingfast/eth-go/rpc"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	sftools "github.com/streamingfast/sf-tools"
-	"github.com/streamingfast/substreams/block"
 	"go.uber.org/multierr"
+	"google.golang.org/protobuf/encoding/protowire"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 var compareBlocksCmd = &cobra.Command{
-	Use:   "compare-blocks <expected_bundle> <actual_bundle> [<block_range>]",
+	Use:   "compare-blocks <reference_blocks_store> <current_blocks_store> [<block_range>]",
 	Short: "Checks for any differences between two block stores between a specified range. (To compare the likeness of two block ranges, for example)",
 	Long: cli.Dedent(`
 		The 'compare-blocks' takes in two paths to stores of merged blocks and a range specifying the blocks you
@@ -55,36 +57,17 @@ var compareBlocksCmd = &cobra.Command{
 	RunE: compareBlocksE,
 	Example: ExamplePrefixed("fireeth tools compare-blocks", `
 		# Run over full block range
-		expected_store/ actual_store/ 0:16000000
+		reference_store/ current_store/ 0:16000000
 
 		# Run over specific block range, displaying differences in blocks
-		--diff expected_store/ actual_store/ 100:200
+		--diff reference_store/ current_store/ 100:200
 	`),
 }
 
 func init() {
 	Cmd.AddCommand(compareBlocksCmd)
 	compareBlocksCmd.PersistentFlags().Bool("diff", false, "When activated, difference is displayed for each block with a difference")
-}
-
-func unifiedDiff(cnt1, cnt2 []byte) (string, error) {
-	file1 := "/tmp/block-difference-expected-bundle"
-	file2 := "/tmp/block-difference-received-bundle"
-	err := os.WriteFile(file1, cnt1, 0600)
-	if err != nil {
-		return "", fmt.Errorf("writing temporary file: %w", err)
-	}
-	err = os.WriteFile(file2, cnt2, 0600)
-	if err != nil {
-		return "", fmt.Errorf("writing temporary file: %w", err)
-	}
-
-	cmd := exec.Command("diff", "-u", file1, file2)
-	buffer, _ := cmd.Output()
-
-	out := string(buffer)
-
-	return out, nil
+	compareBlocksCmd.PersistentFlags().Bool("include-unknown-fields", false, "When activated, the 'unknown fields' in the protobuf message will also be compared. These would not generate any difference when unmarshalled with the current protobuf definition.")
 }
 
 func sanitizeBlock(block *pbeth.Block) *pbeth.Block {
@@ -99,7 +82,7 @@ func sanitizeBlock(block *pbeth.Block) *pbeth.Block {
 	return block
 }
 
-func readBundle(ctx context.Context, filename string, store dstore.Store) ([]string, map[string]*pbeth.Block, error) {
+func readBundle(ctx context.Context, filename string, store dstore.Store, stopBlock uint64) ([]string, map[string]*pbeth.Block, error) {
 
 	fileReader, err := store.OpenObject(ctx, filename)
 	if err != nil {
@@ -121,6 +104,9 @@ func readBundle(ctx context.Context, filename string, store dstore.Store) ([]str
 		if err != nil {
 			return nil, nil, fmt.Errorf("reading blocks: %w", err)
 		}
+		if curBlock.Number >= stopBlock {
+			break
+		}
 
 		curBlockPB := sanitizeBlock(curBlock.ToProtocol().(*pbeth.Block))
 		blockHashes = append(blockHashes, string(curBlockPB.Hash))
@@ -132,7 +118,8 @@ func readBundle(ctx context.Context, filename string, store dstore.Store) ([]str
 
 func compareBlocksE(cmd *cobra.Command, args []string) error {
 	displayDiff := mustGetBool(cmd, "diff")
-	chunkSize := 100000
+	ignoreUnknown := !mustGetBool(cmd, "include-unknown-fields")
+	segmentSize := uint64(100000)
 
 	ctx := cmd.Context()
 	blockRange, err := bstream.ParseRange(args[2])
@@ -146,51 +133,54 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	if blockRangeSize == 0 {
 		return fmt.Errorf("invalid block range")
 	}
-	blockRangeAsRange := sftools.BlockRange{
+
+	stopBlock := *blockRange.EndBlock()
+	blockRangePrefix := sftools.WalkBlockPrefix(sftools.BlockRange{
 		Start: blockRange.StartBlock(),
-		Stop:  *blockRange.EndBlock(),
-	}
-	blockRangePrefix := sftools.WalkBlockPrefix(blockRangeAsRange, 100)
+		Stop:  stopBlock,
+	}, 100)
 
 	// Create stores
-	storeExpected, err := dstore.NewDBinStore(args[0])
+	storeReference, err := dstore.NewDBinStore(args[0])
 	if err != nil {
 		return fmt.Errorf("unable to create store at path %q: %w", args[0], err)
 	}
-	storeReceived, err := dstore.NewDBinStore(args[1])
+	storeCurrent, err := dstore.NewDBinStore(args[1])
 	if err != nil {
 		return fmt.Errorf("unable to create store at path %q: %w", args[1], err)
 	}
 
-	// Walk expected files
-	differentBlocks := make(map[string]block.Range)
-	blocksCountedInChunk := -1
-	chunkIsGood := true
-	rangeNum := 0
-	err = storeExpected.Walk(ctx, blockRangePrefix, func(filename string) (err error) {
-		bundleStartBlock, err := strconv.Atoi(filename)
+	segments, err := blockRange.Split(segmentSize)
+	if err != nil {
+		return fmt.Errorf("unable to split blockrage in segments: %w", err)
+	}
+	processState := &state{
+		segments: segments,
+	}
+
+	err = storeReference.Walk(ctx, blockRangePrefix, func(filename string) (err error) {
+		fileStartBlock, err := strconv.Atoi(filename)
 		if err != nil {
 			return fmt.Errorf("parsing filename: %w", err)
 		}
 
 		// If reached end of range
-		if *blockRange.EndBlock() <= uint64(bundleStartBlock) {
+		if *blockRange.EndBlock() <= uint64(fileStartBlock) {
 			return dstore.StopIteration
 		}
 
-		// If bundle is in range
-		if blockRange.Contains(uint64(bundleStartBlock)) {
+		if blockRange.Contains(uint64(fileStartBlock)) {
 			var wg sync.WaitGroup
 			var bundleErrLock sync.Mutex
 			var bundleReadErr error
-			var expectedBlockHashes []string
-			var expectedBlocks map[string]*pbeth.Block
-			var receivedBlocks map[string]*pbeth.Block
+			var referenceBlockHashes []string
+			var referenceBlocks map[string]*pbeth.Block
+			var currentBlocks map[string]*pbeth.Block
 
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				expectedBlockHashes, expectedBlocks, err = readBundle(ctx, filename, storeExpected)
+				referenceBlockHashes, referenceBlocks, err = readBundle(ctx, filename, storeReference, stopBlock)
 				if err != nil {
 					bundleErrLock.Lock()
 					bundleReadErr = multierr.Append(bundleReadErr, err)
@@ -201,7 +191,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				_, receivedBlocks, err = readBundle(ctx, filename, storeReceived)
+				_, currentBlocks, err = readBundle(ctx, filename, storeCurrent, stopBlock)
 				if err != nil {
 					bundleErrLock.Lock()
 					bundleReadErr = multierr.Append(bundleReadErr, err)
@@ -213,67 +203,24 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("reading bundles: %w", bundleReadErr)
 			}
 
-			// check if all blocks exists
-			bundleHasDiff := false
+			for _, referenceBlockHash := range referenceBlockHashes {
+				referenceBlock := referenceBlocks[referenceBlockHash]
+				currentBlock, existsInCurrent := currentBlocks[referenceBlockHash]
 
-			for _, expectedBlockHash := range expectedBlockHashes {
-				blocksCountedInChunk++
-				expectedBlock := expectedBlocks[expectedBlockHash]
-				receivedBlock, existsInReceived := receivedBlocks[expectedBlockHash]
-
-				// Reset chunk, print if good
-				if blocksCountedInChunk >= chunkSize || uint64(blocksCountedInChunk) >= (blockRangeSize-uint64(rangeNum*chunkSize)-1) || uint64(blocksCountedInChunk) == blockRangeSize-1 {
-					if chunkIsGood {
-						fmt.Printf("✓ Bundle %d - %d has no differences\n", (rangeNum)*chunkSize, (rangeNum+1)*chunkSize)
-					}
-					chunkIsGood = true
-					rangeNum++
-					blocksCountedInChunk = -1
-				}
-
-				// false && first error in chunk
-				if !existsInReceived && chunkIsGood {
-					chunkIsGood = false
-					fmt.Printf("✖ Bundle %d - %d is different\n", (rangeNum)*chunkSize, (rangeNum+1)*chunkSize)
-					bundleHasDiff = true
-				}
-
-				if !existsInReceived {
-					fmt.Printf("- Block (%s) is present in %s but missing in %s\n", expectedBlock.AsRef(), args[0], args[1])
-					bundleHasDiff = true
-				} else if !proto.Equal(expectedBlock, receivedBlock) {
-					bundleHasDiff = true
-
-					if chunkIsGood {
-						chunkIsGood = false
-						fmt.Printf("✖ Bundle %d - %d is different\n", (rangeNum)*chunkSize, (rangeNum+1)*chunkSize)
-					}
-
-					fmt.Printf("- Block (%s) is different\n", expectedBlock.AsRef())
-					if displayDiff {
-						expectedBlockJSON, err := rpc.MarshalJSONRPCIndent(expectedBlock, "", " ")
-						if err != nil {
-							return fmt.Errorf("marshaling block: %w", err)
+				var isEqual bool
+				if existsInCurrent {
+					var differences []string
+					isEqual, differences = compare(referenceBlock, currentBlock, ignoreUnknown)
+					if !isEqual {
+						fmt.Printf("- Block (%s) is different\n", referenceBlock.AsRef())
+						if displayDiff {
+							for _, diff := range differences {
+								fmt.Println("  · ", diff)
+							}
 						}
-						receivedBlockJSON, err := rpc.MarshalJSONRPCIndent(receivedBlock, "", " ")
-						if err != nil {
-							return fmt.Errorf("marshaling block: %w", err)
-						}
-
-						diff, err := unifiedDiff(expectedBlockJSON, receivedBlockJSON)
-						if err != nil {
-							return fmt.Errorf("getting diff: %w", err)
-						}
-						fmt.Printf("difference: \n%s\n", diff)
 					}
 				}
-
-				// Add to final differences to be printed
-				if bundleHasDiff {
-					differentBlocks[string(expectedBlock.Hash)] = block.Range{StartBlock: uint64(sftools.RoundToBundleStartBlock(uint32(expectedBlock.Number), 100)),
-						ExclusiveEndBlock: uint64(sftools.RoundToBundleEndBlock(uint32(expectedBlock.Number), 100))}
-				}
-				bundleHasDiff = false
+				processState.process(referenceBlock.Number, !isEqual, !existsInCurrent)
 			}
 		}
 		return nil
@@ -281,12 +228,146 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("walking files: %w", err)
 	}
+	processState.print()
 
-	if !displayDiff {
-		fmt.Printf("\n\nTo see for details of the differences for the different bundles, run one of those commands:\n")
-		for _, blk := range differentBlocks {
-			fmt.Printf("- fireeth tools compare-blocks --diff %s %s %d:%d\n\n", args[0], args[1], blk.StartBlock, blk.ExclusiveEndBlock)
+	return nil
+}
+
+type state struct {
+	segments                   []*bstream.Range
+	currentSegmentIdx          int
+	blocksCountedInThisSegment int
+	differencesFound           int
+	missingBlocks              int
+	totalBlocksCounted         int
+}
+
+func (s *state) process(blockNum uint64, isDifferent bool, isMissing bool) {
+	if !s.segments[s.currentSegmentIdx].Contains(blockNum) { // moving forward
+		s.print()
+		for i := s.currentSegmentIdx; i < len(s.segments); i++ {
+			if s.segments[i].Contains(blockNum) {
+				s.currentSegmentIdx = i
+				s.totalBlocksCounted += s.blocksCountedInThisSegment
+				s.differencesFound = 0
+				s.missingBlocks = 0
+				s.blocksCountedInThisSegment = 0
+			}
 		}
 	}
-	return nil
+
+	s.totalBlocksCounted++
+	if isMissing {
+		s.missingBlocks++
+	} else if isDifferent {
+		s.differencesFound++
+	}
+
+}
+
+func (s *state) print() {
+	endBlock := "∞"
+	if end := s.segments[s.currentSegmentIdx].EndBlock(); end != nil {
+		endBlock = fmt.Sprintf("%d", *end)
+	}
+	if s.totalBlocksCounted == 0 {
+		fmt.Printf("✖ No blocks were found at all for segment %d - %s\n", s.segments[s.currentSegmentIdx].StartBlock(), endBlock)
+		return
+	}
+
+	if s.differencesFound == 0 && s.missingBlocks == 0 {
+		fmt.Printf("✓ Segment %d - %s has no differences (%d blocks counted)\n", s.segments[s.currentSegmentIdx].StartBlock(), endBlock, s.totalBlocksCounted)
+		return
+	}
+
+	if s.differencesFound == 0 && s.missingBlocks == 0 {
+		fmt.Printf("✓~ Segment %d - %s has no differences but does have %d missing blocks (%d blocks counted)\n", s.segments[s.currentSegmentIdx].StartBlock(), endBlock, s.missingBlocks, s.totalBlocksCounted)
+		return
+	}
+
+	fmt.Printf("✖ Segment %d - %s has %d different blocks and %d missing blocks (%d blocks counted)\n", s.segments[s.currentSegmentIdx].StartBlock(), endBlock, s.differencesFound, s.missingBlocks, s.totalBlocksCounted)
+}
+
+func compare(reference, current *pbeth.Block, ignoreUnknown bool) (isEqual bool, differences []string) {
+	if reference == nil && current == nil {
+		return true, nil
+	}
+	if reflect.TypeOf(reference).Kind() == reflect.Ptr && reference == current {
+		return true, nil
+	}
+
+	referenceMsg := reference.ProtoReflect()
+	currentMsg := current.ProtoReflect()
+	if referenceMsg.IsValid() && !currentMsg.IsValid() {
+		return false, []string{fmt.Sprintf("reference block is valid protobuf message, but current block is invalid")}
+	}
+	if !referenceMsg.IsValid() && currentMsg.IsValid() {
+		return false, []string{fmt.Sprintf("reference block is invalid protobuf message, but current block is valid")}
+	}
+
+	if ignoreUnknown {
+		referenceMsg.SetUnknown(nil)
+		currentMsg.SetUnknown(nil)
+		reference = referenceMsg.Interface().(*pbeth.Block)
+		current = currentMsg.Interface().(*pbeth.Block)
+	} else {
+		x := referenceMsg.GetUnknown()
+		y := currentMsg.GetUnknown()
+
+		if !bytes.Equal(x, y) {
+			// from https://github.com/protocolbuffers/protobuf-go/tree/v1.28.1/proto
+			mx := make(map[protoreflect.FieldNumber]protoreflect.RawFields)
+			my := make(map[protoreflect.FieldNumber]protoreflect.RawFields)
+			for len(x) > 0 {
+				fnum, _, n := protowire.ConsumeField(x)
+				mx[fnum] = append(mx[fnum], x[:n]...)
+				x = x[n:]
+			}
+			for len(y) > 0 {
+				fnum, _, n := protowire.ConsumeField(y)
+				my[fnum] = append(my[fnum], y[:n]...)
+				y = y[n:]
+			}
+			for k, v := range mx {
+				vv, ok := my[k]
+				if !ok {
+					differences = append(differences, fmt.Sprintf("reference block contains unknown protobuf field number %d (%x), but current block does not", k, v))
+					continue
+				}
+				if !bytes.Equal(v, vv) {
+					differences = append(differences, fmt.Sprintf("unknown protobuf field number %d has different values. Reference: %x, current: %x", k, v, vv))
+				}
+			}
+			for k := range my {
+				v, ok := my[k]
+				if !ok {
+					differences = append(differences, fmt.Sprintf("current block contains unknown protobuf field number %d (%x), but reference block does not", k, v))
+					continue
+				}
+			}
+		}
+	}
+
+	if !proto.Equal(reference, current) {
+		ref, err := rpc.MarshalJSONRPCIndent(reference, "", " ")
+		mustNoError(err)
+		cur, err := rpc.MarshalJSONRPCIndent(current, "", " ")
+		mustNoError(err)
+		r, err := jd.ReadJsonString(string(ref))
+		mustNoError(err)
+		c, err := jd.ReadJsonString(string(cur))
+		mustNoError(err)
+
+		if diff := r.Diff(c).Render(); diff != "" {
+			differences = append(differences, diff)
+		}
+		return false, differences
+	}
+	return true, nil
+}
+
+func mustNoError(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

@@ -6,6 +6,7 @@ require (
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
 	github.com/golang/protobuf v1.5.2
+	github.com/josephburnett/jd v1.7.1
 	github.com/klauspost/compress v1.15.9
 	github.com/lithammer/dedent v1.1.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
@@ -93,7 +94,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
-	github.com/go-openapi/swag v0.19.14 // indirect
+	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/godbus/dbus/v5 v5.0.4 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -119,7 +120,7 @@ require (
 	github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a // indirect
 	github.com/lunixbochs/vtclean v0.0.0-20180621232353-2d01aacdc34a // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
-	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-ieproxy v0.0.1 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
@@ -157,7 +158,7 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.9.0 // indirect

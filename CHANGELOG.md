@@ -9,8 +9,9 @@ for instructions to keep up to date.
 ### Fixed
 
 * Substreams `RpcCall` object are now validated before being performed to ensure they are correct.
-
 * Substreams `RpcCall` JSON-RPC code `-32602` is now treated as a deterministic error (invalid request).
+* `tools compare-blocks` now correctly handle segment health reporting and properly prints all differences with `-diff`.
+* `tools compare-blocks` now ignores 'unknown fields' in the protobuf message, unless `--include-unknown-fields=true`
 
 ### Added
 
