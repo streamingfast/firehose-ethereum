@@ -81,7 +81,8 @@ func (b *Block) PreviousID() string {
 }
 
 // FIXME: This logic at some point is hard-coded and will need to be re-visited in regard
-//        of the fork logic.
+//
+//	of the fork logic.
 func (b *Block) LIBNum() uint64 {
 	if b.Number <= bstream.GetProtocolFirstStreamableBlock+200 {
 		return bstream.GetProtocolFirstStreamableBlock
@@ -229,11 +230,20 @@ func (block *Block) NormalizeInPlace() {
 		for _, trx := range block.TransactionTraces {
 			for _, call := range trx.Calls {
 				if call.CallType == CallType_DELEGATE {
-					parent := callAtIndex(call.ParentIndex, trx.Calls)
-					if parent == nil {
-						panic(fmt.Sprintf("normalize_in_place: cannot find call parent of call %d on trx %s", call.Index, eth.Bytes(trx.Hash).Pretty()))
+					idx := call.ParentIndex
+					for {
+						parent := callAtIndex(idx, trx.Calls)
+						if parent == nil {
+							panic(fmt.Sprintf("normalize_in_place: cannot find call parent of call %d on trx %s", call.Index, eth.Bytes(trx.Hash).Pretty()))
+						}
+						if parent.CallType == CallType_DELEGATE {
+							idx = parent.ParentIndex
+							continue
+						}
+
+						call.Caller = parent.Address
+						break
 					}
-					call.Caller = parent.Address
 				}
 			}
 		}
