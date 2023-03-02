@@ -4,7 +4,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## UNRELEASED
+## v1.3.4
+
+### Highlights
+
+#### Fixed the 'upgrade-merged-blocks' from v2 to v3
+
+Blocks that were migrated from v2 to v3 using the 'upgrade-merged-blocks' should now be considered invalid. 
+The upgrade mechanism did not correctly fix the "caller" on DELEGATECALLs when these calls were nested under another DELEGATECALL.
+
+You should run the `upgrade-merged-blocks` again if you previously used 'v2' blocks that were upgraded to 'v3'.
+
+#### Backoff mechanism for bursts
+
+This mechanism uses a leaky-bucket mechanism, allowing an initial burst of X connections, allowing a new connection every Y seconds or whenever an existing connection closes.
+
+Use `--firehose-rate-limit-bucket-size=50` and `--firehose-rate-limit-bucket-fill-rate=1s` to allow 50 connections instantly, and another connection every second. 
+Note that when the server is above the limit, it waits 500ms before it returns codes.Unavailable to the client, forcing a minimal back-off.
 
 ### Fixed
 
@@ -12,10 +28,12 @@ for instructions to keep up to date.
 * Substreams `RpcCall` JSON-RPC code `-32602` is now treated as a deterministic error (invalid request).
 * `tools compare-blocks` now correctly handle segment health reporting and properly prints all differences with `-diff`.
 * `tools compare-blocks` now ignores 'unknown fields' in the protobuf message, unless `--include-unknown-fields=true`
+* `tools compare-blocks` now ignores when a block bundle contains the 'last block of previous bundle' (a now-deprecated feature)
 
 ### Added
 
 * support for "requester pays" buckets on Google Storage in url, ex: `gs://my-bucket/path?project=my-project-id`
+* substreams were also bumped to current March 1st develop HEAD
 
 ## v1.3.3
 
