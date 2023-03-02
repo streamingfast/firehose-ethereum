@@ -64,6 +64,8 @@ var compareBlocksCmd = &cobra.Command{
 	`),
 }
 
+var warnAboutExtraBlocks sync.Once
+
 func init() {
 	Cmd.AddCommand(compareBlocksCmd)
 	compareBlocksCmd.PersistentFlags().Bool("diff", false, "When activated, difference is displayed for each block with a difference")
@@ -82,7 +84,7 @@ func sanitizeBlock(block *pbeth.Block) *pbeth.Block {
 	return block
 }
 
-func readBundle(ctx context.Context, filename string, store dstore.Store, stopBlock uint64) ([]string, map[string]*pbeth.Block, error) {
+func readBundle(ctx context.Context, filename string, store dstore.Store, fileStartBlock, stopBlock uint64) ([]string, map[string]*pbeth.Block, error) {
 
 	fileReader, err := store.OpenObject(ctx, filename)
 	if err != nil {
@@ -106,6 +108,12 @@ func readBundle(ctx context.Context, filename string, store dstore.Store, stopBl
 		}
 		if curBlock.Number >= stopBlock {
 			break
+		}
+		if curBlock.Number < fileStartBlock {
+			warnAboutExtraBlocks.Do(func() {
+				fmt.Printf("Warn: Bundle file %s contains block %d, preceding its start_block. This 'feature' is not used anymore and extra blocks like this one will be ignored during compare\n", store.ObjectURL(filename), curBlock.Number)
+			})
+			continue
 		}
 
 		curBlockPB := sanitizeBlock(curBlock.ToProtocol().(*pbeth.Block))
@@ -180,7 +188,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				referenceBlockHashes, referenceBlocks, err = readBundle(ctx, filename, storeReference, stopBlock)
+				referenceBlockHashes, referenceBlocks, err = readBundle(ctx, filename, storeReference, uint64(fileStartBlock), stopBlock)
 				if err != nil {
 					bundleErrLock.Lock()
 					bundleReadErr = multierr.Append(bundleReadErr, err)
@@ -191,7 +199,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				_, currentBlocks, err = readBundle(ctx, filename, storeCurrent, stopBlock)
+				_, currentBlocks, err = readBundle(ctx, filename, storeCurrent, uint64(fileStartBlock), stopBlock)
 				if err != nil {
 					bundleErrLock.Lock()
 					bundleReadErr = multierr.Append(bundleReadErr, err)
