@@ -228,6 +228,7 @@ func (block *Block) NormalizeInPlace() {
 
 	if block.Ver == 2 {
 		for _, trx := range block.TransactionTraces {
+			headParents := make(map[uint32]uint32)
 			for _, call := range trx.Calls {
 				if call.CallType == CallType_DELEGATE {
 					idx := call.ParentIndex
@@ -238,9 +239,12 @@ func (block *Block) NormalizeInPlace() {
 						}
 						if parent.CallType == CallType_DELEGATE {
 							idx = parent.ParentIndex
+							if headParent, ok := headParents[parent.ParentIndex]; ok {
+								idx = headParent // skip to head parent
+							}
 							continue
 						}
-
+						headParents[call.Index] = idx
 						call.Caller = parent.Address
 						break
 					}
