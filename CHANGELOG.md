@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## UNRELEASED
+
+### Added
+
+* `--substreams-max-fuel-per-block-module` will limit the number of wasmtime instructions for a single module in a single block
+
 ## v1.3.4
 
 ### Highlights

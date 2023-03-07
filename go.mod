@@ -36,7 +36,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20230116200621-b84f19a2e142
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
-	github.com/streamingfast/substreams v0.2.1-0.20230301190247-04e14183d833
+	github.com/streamingfast/substreams v0.2.1-0.20230307161700-5d311cdc9bf5
 	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -210,4 +210,4 @@ replace (
 	github.com/graph-gophers/graphql-go => github.com/streamingfast/graphql-go v0.0.0-20210204202750-0e485a040a3c
 )
 
-replace github.com/bytecodealliance/wasmtime-go/v4 => github.com/streamingfast/wasmtime-go/v4 v4.0.0-freemem
+replace github.com/bytecodealliance/wasmtime-go/v4 => github.com/streamingfast/wasmtime-go/v4 v4.0.0-freemem3
