@@ -2,10 +2,10 @@ start:
   args:
     - firehose
   flags:
-    common-one-block-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v3-oneblock
-    common-forked-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v3-forked
-    common-merged-blocks-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v3
-    common-index-store-url: gs://dfuseio-global-blocks-us/eth-mainnet/v3-idx
+    common-one-block-store-url: gs://dfuseio-global-blocks-uscentral/eth-mainnet/v4-oneblock?project=dfuseio-global
+    common-forked-blocks-store-url: gs://dfuseio-global-blocks-uscentral/eth-mainnet/v4-forked?project=dfuseio-global
+    common-merged-blocks-store-url: gs://dfuseio-global-blocks-uscentral/eth-mainnet/v4?project=dfuseio-global
+    common-index-store-url: gs://dfuseio-global-blocks-uscentral/eth-mainnet/v4-idx?project=dfuseio-global
     # Comment out 'common-live-blocks-addr' to only use historical which improves the start up speed of 'fireeth'
     common-live-blocks-addr: ''
     firehose-grpc-listen-addr: :9000
