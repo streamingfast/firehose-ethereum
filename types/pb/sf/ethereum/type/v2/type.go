@@ -16,6 +16,7 @@ package pbeth
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -186,6 +187,9 @@ var polygonSystemAddress = eth.MustNewAddress("0xffffFFFfFFffffffffffffffFfFFFff
 
 var polygonNeverRevertedTopic = eth.MustNewBytes("0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63")
 var polygonFeeSystemAddress = eth.MustNewAddress("0x0000000000000000000000000000000000001010")
+var polygonMergeableTrxAddress = eth.MustNewAddress("0x0000000000000000000000000000000000001001")
+var nullAddress = eth.MustNewAddress("0x0000000000000000000000000000000000000000")
+var bigIntZero = BigIntFromBytes(nil)
 
 // polygon has a fee log that will never be skipped even if call failed
 func isPolygonException(log *Log) bool {
@@ -201,8 +205,23 @@ func callAtIndex(idx uint32, calls []*Call) *Call {
 	return nil
 }
 
+type Variant int
+
+const (
+	VariantUnset Variant = iota
+	VariantGeth
+	VariantPolygon
+	VariantBNB
+)
+
 // NormalizeBlockInPlace
-func (block *Block) NormalizeInPlace() {
+func (block *Block) NormalizeInPlace(v Variant) {
+
+	switch v {
+	case VariantPolygon:
+		block.TransactionTraces = CombinePolygonSystemTransactions(block.TransactionTraces, block.Number, block.Hash)
+	}
+
 	// We reconstruct the state reverted value per call, for each transaction traces. We also
 	// normalize signature curve points since we were not setting to be alwasy 32 bytes long and
 	// sometimes, it would have been only 31 bytes long.
@@ -254,6 +273,155 @@ func (block *Block) NormalizeInPlace() {
 		block.Ver = 3
 	}
 
+}
+
+// CombinePolygonSystemTransactions will identify transactions that are "system transactions" and merge them into a single transaction with a predictive name, like the `bor` client does.
+// It reorders the calls and logs to match expected output from RPC API.
+func CombinePolygonSystemTransactions(traces []*TransactionTrace, blockNum uint64, blockHash []byte) (out []*TransactionTrace) {
+
+	var systemTransactions []*TransactionTrace
+	var normalTransactions []*TransactionTrace
+
+	for _, trace := range traces {
+		if bytes.Equal(trace.From, polygonSystemAddress) &&
+			bytes.Equal(trace.To, polygonMergeableTrxAddress) {
+			systemTransactions = append(systemTransactions, trace)
+		} else {
+			normalTransactions = append(normalTransactions, trace)
+		}
+	}
+
+	if systemTransactions != nil {
+		var allCalls []*Call
+		var allLogs []*Log
+		var beginOrdinal uint64
+		var seenFirstBeginOrdinal bool
+
+		var seenFirstCallOrdinal bool
+		var lowestCallBeginOrdinal uint64
+		var highestCallEndOrdinal uint64
+
+		var endOrdinal uint64
+		var callIdxOffset = uint32(1) // initial offset for all calls because of artificial top level call
+
+		var lowestTrxIndex uint32
+		var seenFirstTrxIndex bool
+
+		for _, trace := range systemTransactions {
+			if !seenFirstTrxIndex || trace.Index < lowestTrxIndex {
+				lowestTrxIndex = trace.Index
+			}
+			if !seenFirstBeginOrdinal || trace.BeginOrdinal < beginOrdinal {
+				beginOrdinal = trace.BeginOrdinal
+				seenFirstBeginOrdinal = true
+			}
+
+			if trace.EndOrdinal > endOrdinal {
+				endOrdinal = trace.EndOrdinal
+			}
+			highestCallIndex := callIdxOffset
+			for _, call := range trace.Calls {
+				if !seenFirstCallOrdinal || call.BeginOrdinal < lowestCallBeginOrdinal {
+					lowestCallBeginOrdinal = call.BeginOrdinal
+					seenFirstCallOrdinal = true
+				}
+				if call.EndOrdinal > highestCallEndOrdinal {
+					highestCallEndOrdinal = call.EndOrdinal
+				}
+
+				call.Index += callIdxOffset
+
+				// all top level calls must be children of the very first (artificial) call.
+				call.Depth += 1
+				if call.ParentIndex == 0 {
+					call.ParentIndex = 1
+				} else {
+					call.ParentIndex += callIdxOffset
+				}
+				if call.Index > highestCallIndex {
+					highestCallIndex = call.Index
+				}
+				allCalls = append(allCalls, call)
+				allLogs = append(allLogs, call.Logs...)
+				// note: the receipt.logs on these transactions is not populated, so we take them from the call
+			}
+			callIdxOffset = highestCallIndex
+		}
+		artificialTopLevelCall := &Call{
+			Index:        1,
+			ParentIndex:  0,
+			Depth:        0,
+			CallType:     CallType_CALL,
+			GasLimit:     0,
+			GasConsumed:  0,
+			Caller:       nullAddress,
+			Address:      nullAddress,
+			Value:        bigIntZero,
+			Input:        nil,
+			GasChanges:   nil,
+			BeginOrdinal: lowestCallBeginOrdinal,
+			EndOrdinal:   highestCallEndOrdinal,
+		}
+		allCalls = append([]*Call{artificialTopLevelCall}, allCalls...)
+
+		sort.Slice(allLogs, func(i, j int) bool {
+			return allLogs[i].BlockIndex < allLogs[j].BlockIndex
+		})
+
+		mergedSystemTrx := &TransactionTrace{
+			Hash:         computePolygonHash(blockNum, blockHash),
+			From:         nullAddress,
+			To:           nullAddress,
+			Nonce:        0,
+			GasPrice:     bigIntZero,
+			GasLimit:     0,
+			Value:        bigIntZero,
+			Index:        lowestTrxIndex,
+			Input:        nil,
+			GasUsed:      0,
+			Type:         TransactionTrace_TRX_TYPE_LEGACY,
+			BeginOrdinal: beginOrdinal,
+			EndOrdinal:   endOrdinal,
+			Calls:        allCalls,
+			Status:       TransactionTraceStatus_SUCCEEDED,
+			Receipt: &TransactionReceipt{
+				Logs:      allLogs,
+				LogsBloom: computeLogsBloom(allLogs),
+				// CumulativeGasUsed // Reported as empty from the API. does not impact much because it is the last transaction in the block, this is reset every block.
+				// StateRoot // Deprecated EIP 658
+			},
+		}
+		return append(normalTransactions, mergedSystemTrx)
+	}
+
+	return normalTransactions
+}
+
+type BloomFilter [256]byte
+
+func (b *BloomFilter) add(data []byte) {
+	hash := eth.Keccak256(data)
+	b[256-uint((binary.BigEndian.Uint16(hash)&0x7ff)>>3)-1] |= byte(1 << (hash[1] & 0x7))
+	b[256-uint((binary.BigEndian.Uint16(hash[2:])&0x7ff)>>3)-1] |= byte(1 << (hash[3] & 0x7))
+	b[256-uint((binary.BigEndian.Uint16(hash[4:])&0x7ff)>>3)-1] |= byte(1 << (hash[5] & 0x7))
+}
+
+func computeLogsBloom(logs []*Log) []byte {
+	var bf = new(BloomFilter)
+	for _, log := range logs {
+		bf.add(log.Address)
+		for _, topic := range log.Topics {
+			bf.add(topic)
+		}
+	}
+	return bf[:]
+}
+
+func computePolygonHash(blockNum uint64, blockHash []byte) []byte {
+	enc := make([]byte, 8)
+	binary.BigEndian.PutUint64(enc, blockNum)
+	key := append(append([]byte("matic-bor-receipt-"), enc...), blockHash...)
+	return eth.Keccak256(key)
 }
 
 func NormalizeSignaturePoint(value []byte) []byte {

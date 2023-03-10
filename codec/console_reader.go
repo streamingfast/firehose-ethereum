@@ -158,6 +158,7 @@ func (s *parsingStats) inc(key string) {
 }
 
 type parseCtx struct {
+	currentVariant       pbeth.Variant
 	currentBlock         *pbeth.Block
 	currentTrace         *pbeth.TransactionTrace
 	currentTraceLogCount int
@@ -323,6 +324,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		case strings.HasPrefix(line, "FINALIZE_BLOCK") && readType == readBlock:
 			ctx.stats.inc("FINALIZE_BLOCK")
 			err = ctx.readFinalizeBlock(line)
+
+		case strings.HasPrefix(line, "CANCEL_BLOCK") && readType == readBlock:
+			ctx.stats.inc("CANCEL_BLOCK")
+			err = ctx.readCancelBlock(line)
 
 		case strings.HasPrefix(line, "FAILED_APPLY_TRX") && readType == readBlock:
 			// This fails the whole block, and happens when we get a
@@ -853,12 +858,45 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	fmt.Printf("FAILED trx %q at block %d (hash unavailable, probably forked): %s\n", hex.EncodeToString(ctx.currentTrace.Hash), ctx.currentBlock.Number, chunks[0])
+	ctx.logger.Warn("FAILED trx (hash unavailable, probably forked)", zap.String("current_trace_hash", hex.EncodeToString(ctx.currentTrace.Hash)), zap.Uint64("current_block_number", ctx.currentBlock.Number), zap.String("message", chunks[0]))
 
 	ctx.currentBlock = nil
 	ctx.transactionTraces = nil
 	ctx.currentTrace = nil
 	ctx.currentTraceLogCount = 0
+	ctx.finalizing = false
+
+	return nil
+}
+
+// Formats
+// FIRE CANCEL_BLOCK 123456 Something wrong happened, etc.
+func (ctx *parseCtx) readCancelBlock(line string) error {
+	if ctx.currentBlock == nil {
+		return fmt.Errorf("no block started")
+	}
+
+	chunks, err := SplitInBoundedChunks(line, 3)
+	if err != nil {
+		return fmt.Errorf("split: %s", err)
+	}
+
+	blockNum, err := strconv.ParseUint(chunks[0], 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse blockNum: %s", err)
+	}
+
+	if blockNum != ctx.currentBlock.Number {
+		return fmt.Errorf("end block does not match active block num, got block num %d but current is block num %d", blockNum, ctx.currentBlock.Number)
+	}
+
+	ctx.logger.Warn("cancelling current block (probably missing StateSync data or failing validation)", zap.Uint64("current_block_number", ctx.currentBlock.Number), zap.String("message", chunks[1]))
+
+	ctx.currentBlock = nil
+	ctx.transactionTraces = nil
+	ctx.currentTrace = nil
+	ctx.currentTraceLogCount = 0
+	ctx.currentRootCall = nil
 	ctx.finalizing = false
 
 	return nil
@@ -915,10 +953,19 @@ func (ctx *parseCtx) readInit(line string) error {
 	switch fhVersion {
 	case "2.0":
 		BlockVersion = 2
-	case "2.1":
+	case "2.1", "2.2":
 		BlockVersion = 3
 	default:
-		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: 2.0 or 2.1, found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", fhVersion)
+		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", fhVersion)
+	}
+
+	switch strings.ToLower(nodeVariant) {
+	case "polygon":
+		ctx.currentVariant = pbeth.VariantPolygon
+	case "bsc", "bnb":
+		ctx.currentVariant = pbeth.VariantBNB
+	default:
+		ctx.currentVariant = pbeth.VariantGeth
 	}
 
 	ctx.logger.Info("read firehose instrumentation init line",
@@ -1062,7 +1109,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	ctx.finalizing = false
 	ctx.stats.log()
 
-	block.NormalizeInPlace()
+	block.NormalizeInPlace(ctx.currentVariant)
 
 	var libNum uint64
 	if len(endBlockData.FinalizedBlockHash) > 0 {
