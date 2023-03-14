@@ -9,6 +9,7 @@ for instructions to keep up to date.
 ### Added
 
 * `--substreams-max-fuel-per-block-module` will limit the number of wasmtime instructions for a single module in a single block
+* proto: added support for `withdrawal` balance change reason
 
 ## v1.3.4
 

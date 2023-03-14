@@ -420,6 +420,7 @@ message BalanceChange {
     REASON_CALL_BALANCE_OVERRIDE = 12;
     // Used on chain(s) where some Ether burning happens
     REASON_BURN = 15;
+    REASON_WITHDRAWAL = 16;
   }
 
   uint64 ordinal = 5;
