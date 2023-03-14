@@ -6,10 +6,10 @@ for instructions to keep up to date.
 
 ## UNRELEASED
 
-### Added
+## v1.3.5
 
 * `--substreams-max-fuel-per-block-module` will limit the number of wasmtime instructions for a single module in a single block
-* proto: added support for `withdrawal` balance change reason
+* proto: added support for `withdrawal` balance change reason.  This is required for running on most recent Goerli hard fork.
 
 ## v1.3.4
 
