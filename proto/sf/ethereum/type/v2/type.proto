@@ -127,13 +127,17 @@ message BlockHeader {
   //    extra_data,
   //    mix_hash,
   //    nonce,
-  //    base_fee_per_gas
+  //    base_fee_per_gas (to be included, only if London Fork is active)
+  //    withdrawals_root (to be included, only if Shangai Fork is active)
   //  ]))
   //
   bytes hash = 16;
 
   // Base fee per gas according to EIP-1559 (e.g. London Fork) rules, only set if London is present/active on the chain.
   BigInt base_fee_per_gas = 18;
+
+  // Withdrawals root hash according to EIP-4895 (e.g. Shangai Fork) rules, only set if Shangai is present/active on the chain.
+  bytes withdrawals_root = 19;
 }
 
 message BigInt {

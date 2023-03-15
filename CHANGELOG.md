@@ -8,8 +8,9 @@ for instructions to keep up to date.
 
 ## v1.3.5
 
-* `--substreams-max-fuel-per-block-module` will limit the number of wasmtime instructions for a single module in a single block
-* proto: added support for `withdrawal` balance change reason.  This is required for running on most recent Goerli hard fork.
+* Added support for `withdrawal` balance change reason in block model, this is required for running on most recent Goerli Shangai hard fork.
+* Added support for `withdrawals_root` on `Header` in the block model, this will be populated only if the chain has activated Shangai hard fork.
+* `--substreams-max-fuel-per-block-module` will limit the number of wasmtime instructions for a single module in a single block.
 
 ## v1.3.4
 
@@ -17,7 +18,7 @@ for instructions to keep up to date.
 
 #### Fixed the 'upgrade-merged-blocks' from v2 to v3
 
-Blocks that were migrated from v2 to v3 using the 'upgrade-merged-blocks' should now be considered invalid. 
+Blocks that were migrated from v2 to v3 using the 'upgrade-merged-blocks' should now be considered invalid.
 The upgrade mechanism did not correctly fix the "caller" on DELEGATECALLs when these calls were nested under another DELEGATECALL.
 
 You should run the `upgrade-merged-blocks` again if you previously used 'v2' blocks that were upgraded to 'v3'.
@@ -26,7 +27,7 @@ You should run the `upgrade-merged-blocks` again if you previously used 'v2' blo
 
 This mechanism uses a leaky-bucket mechanism, allowing an initial burst of X connections, allowing a new connection every Y seconds or whenever an existing connection closes.
 
-Use `--firehose-rate-limit-bucket-size=50` and `--firehose-rate-limit-bucket-fill-rate=1s` to allow 50 connections instantly, and another connection every second. 
+Use `--firehose-rate-limit-bucket-size=50` and `--firehose-rate-limit-bucket-fill-rate=1s` to allow 50 connections instantly, and another connection every second.
 Note that when the server is above the limit, it waits 500ms before it returns codes.Unavailable to the client, forcing a minimal back-off.
 
 ### Fixed
