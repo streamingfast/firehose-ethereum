@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v1.3.6
+
+### Highlights
+
+* This release implements the new `CANCEL_BLOCK` instruction from firehose protocol 2.2, to reject blocks that fail post-validation.
+* This release fixes polygon "StateSync" transactions by grouping the calls inside an artificial transaction. 
+
+If you had previous blocks from a Polygon chain (bor), you will need to reprocess all your blocks from the node because some StateSync transactions may be missing on some blocks.
+
 ## v1.3.5
 
 ### Highlights
