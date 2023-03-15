@@ -1,8 +1,10 @@
 package tools
 
 import (
+	"strings"
 	"sync"
 
+	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
@@ -13,12 +15,13 @@ import (
 var logUpgrade sync.Once
 
 func init() {
+	UpgradeMergedBlocksCmd.Flags().String("variant", "", "shortname of the geth variant (polygon, bnb, geth), to apply specific upgrade logic")
 	Cmd.AddCommand(UpgradeMergedBlocksCmd)
 }
 
 var UpgradeMergedBlocksCmd = sftools.GetMergedBlocksUpgrader(zlog, tracer, normalize)
 
-func normalize(in *bstream.Block) (*bstream.Block, error) {
+func normalize(cmd *cobra.Command, in *bstream.Block) (*bstream.Block, error) {
 	block := in.ToProtocol().(*pbeth.Block)
 
 	prevVersion := block.Ver
@@ -26,7 +29,22 @@ func normalize(in *bstream.Block) (*bstream.Block, error) {
 	if block.Ver == 3 {
 		block.Ver = 2
 	}
-	block.NormalizeInPlace()
+
+	variant := pbeth.VariantUnset
+
+	variantStr := strings.ToLower(mustGetString(cmd, "variant"))
+	switch variantStr {
+	case "polygon":
+		variant = pbeth.VariantPolygon
+	case "geth":
+		variant = pbeth.VariantGeth
+	case "bnb", "bsc":
+		variant = pbeth.VariantBNB
+	default:
+		zlog.Warn("unknown pbeth variant to this tool, ignoring variant-specific upgrades", zap.String("given value", variantStr))
+	}
+
+	block.NormalizeInPlace(variant)
 	logUpgrade.Do(func() {
 		if prevVersion == block.Ver {
 			if prevVersion == 3 {

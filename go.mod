@@ -25,7 +25,7 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20230202164314-93694544e2ca
 	github.com/streamingfast/eth-go v0.0.0-20230207194511-7d7968462321
 	github.com/streamingfast/firehose v0.1.1-0.20230302211622-876ce189e9c4
-	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230315143735-f4d855962985
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230315185907-5ecaf111e822
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20221209193439-bff11742bf4c
@@ -33,7 +33,7 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20221115101723-d9823ffd7ad5
 	github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28
 	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9
-	github.com/streamingfast/sf-tools v0.0.0-20230116200621-b84f19a2e142
+	github.com/streamingfast/sf-tools v0.0.0-20230310203226-5fe04b74a5f6
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20220413132715-3f71bf33f0ea
 	github.com/streamingfast/substreams v1.0.1-0.20230313163604-1a17468a2893
