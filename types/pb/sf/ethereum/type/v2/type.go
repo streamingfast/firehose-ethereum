@@ -219,7 +219,9 @@ func (block *Block) NormalizeInPlace(v Variant) {
 
 	switch v {
 	case VariantPolygon:
-		block.TransactionTraces = CombinePolygonSystemTransactions(block.TransactionTraces, block.Number, block.Hash)
+		if hasPolygonSystemTransactions(block) {
+			block.TransactionTraces = CombinePolygonSystemTransactions(block.TransactionTraces, block.Number, block.Hash)
+		}
 	}
 
 	// We reconstruct the state reverted value per call, for each transaction traces. We also
@@ -275,12 +277,21 @@ func (block *Block) NormalizeInPlace(v Variant) {
 
 }
 
+func hasPolygonSystemTransactions(block *Block) bool {
+	if len(block.TransactionTraces) == 0 {
+		return false
+	}
+	// system transactions are always inserted last
+	last := block.TransactionTraces[len(block.TransactionTraces)-1]
+	return bytes.Equal(last.From, polygonSystemAddress) && bytes.Equal(last.To, polygonMergeableTrxAddress)
+}
+
 // CombinePolygonSystemTransactions will identify transactions that are "system transactions" and merge them into a single transaction with a predictive name, like the `bor` client does.
 // It reorders the calls and logs to match expected output from RPC API.
 func CombinePolygonSystemTransactions(traces []*TransactionTrace, blockNum uint64, blockHash []byte) (out []*TransactionTrace) {
 
 	var systemTransactions []*TransactionTrace
-	var normalTransactions []*TransactionTrace
+	normalTransactions := make([]*TransactionTrace, 0, len(traces))
 
 	for _, trace := range traces {
 		if bytes.Equal(trace.From, polygonSystemAddress) &&
