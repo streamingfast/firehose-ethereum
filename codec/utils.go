@@ -135,5 +135,6 @@ func FromHeader(header *BlockHeader) *pbeth.BlockHeader {
 		Nonce:            uint64(header.Nonce),
 		Hash:             header.Hash,
 		BaseFeePerGas:    pbeth.BigIntFromBytes(header.BaseFeePerGas),
+		WithdrawalsRoot:  header.WithdrawalsHash,
 	}
 }

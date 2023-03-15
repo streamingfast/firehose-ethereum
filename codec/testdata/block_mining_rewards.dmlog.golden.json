@@ -1,5 +1,4 @@
 [{
-  "ver": 3,
   "hash": "736fb90beb572642b589ee15f8d73516d8a41b4b79ee60fe97565203009c00ea",
   "number": "6430278",
   "size": "1902",
@@ -79,6 +78,7 @@
       "reason": "REASON_REWARD_MINE_BLOCK",
       "ordinal": "3"
     }
-  ]
+  ],
+  "ver": 3
 }
 ]

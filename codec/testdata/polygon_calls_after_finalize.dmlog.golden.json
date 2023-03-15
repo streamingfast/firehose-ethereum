@@ -1,5 +1,4 @@
 [{
-  "ver": 3,
   "hash": "e9853ab6f7bf6aa4e30ff8d13c9c6ba64f68a5005ffd3028e7df928d4aabd097",
   "number": "64",
   "size": "606",
@@ -660,6 +659,7 @@
         }
       ]
     }
-  ]
+  ],
+  "ver": 3
 }
 ]
