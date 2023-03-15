@@ -4,9 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## UNRELEASED
-
 ## v1.3.5
+
+### Highlights
+
+This release is required if you run on Goerli and is mostly about supporting the upcoming Shangai fork that has been activated on Goerli on March 14th.
+
+### Changed
 
 * Added support for `withdrawal` balance change reason in block model, this is required for running on most recent Goerli Shangai hard fork.
 * Added support for `withdrawals_root` on `Header` in the block model, this will be populated only if the chain has activated Shangai hard fork.
