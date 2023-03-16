@@ -217,6 +217,10 @@ const (
 // NormalizeBlockInPlace
 func (block *Block) NormalizeInPlace(v Variant) {
 
+	for _, trx := range block.TransactionTraces {
+		trx.PopulateStateReverted() // this needs to run before the CombinePolygonSystemTransactions
+	}
+
 	switch v {
 	case VariantPolygon:
 		if hasPolygonSystemTransactions(block) {
@@ -228,7 +232,6 @@ func (block *Block) NormalizeInPlace(v Variant) {
 	// normalize signature curve points since we were not setting to be alwasy 32 bytes long and
 	// sometimes, it would have been only 31 bytes long.
 	for _, trx := range block.TransactionTraces {
-		trx.PopulateStateReverted()
 		trx.PopulateTrxStatus()
 
 		if len(trx.R) > 0 && len(trx.R) != 32 {
@@ -353,8 +356,12 @@ func CombinePolygonSystemTransactions(traces []*TransactionTrace, blockNum uint6
 					highestCallIndex = call.Index
 				}
 				allCalls = append(allCalls, call)
-				allLogs = append(allLogs, call.Logs...)
-				// note: the receipt.logs on these transactions is not populated, so we take them from the call
+				// the receipt.logs on these transactions is not populated before
+				for _, log := range call.Logs {
+					if !call.StateReverted || isPolygonException(log) {
+						allLogs = append(allLogs, log)
+					}
+				}
 			}
 			callIdxOffset = highestCallIndex
 		}
