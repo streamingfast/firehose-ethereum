@@ -24,21 +24,30 @@ for instructions to keep up to date.
 
 ### Highlights
 
-* This release implements the new `CANCEL_BLOCK` instruction from firehose protocol 2.2, to reject blocks that fail post-validation.
+* This release implements the new `CANCEL_BLOCK` instruction from Firehose protocol 2.2 (`fh2.2`), to reject blocks that failed post-validation.
 * This release fixes polygon "StateSync" transactions by grouping the calls inside an artificial transaction.
 
 If you had previous blocks from a Polygon chain (bor), you will need to reprocess all your blocks from the node because some StateSync transactions may be missing on some blocks.
+
+#### Operators
+
+This release now supports the new Firehose node exchange format 2.2 which introduced a new exchanged message `CANCEL_BLOCK`. This has an implication on the Firehose instrumented `Geth` binary you can use with the release.
+
+- If you use Firehose instrumented `Geth` binary tagged `fh2.2` (like `geth-v1.11.4-fh2.2-1`), you must use `firehose-ethereum` version `>= 1.3.6`
+- If you use Firehose instrumented `Geth` binary tagged `fh2.1` (like `geth-v1.11.3-fh2.1`), you can use `firehose-ethereum` version `>= 1.0.0`
+
+New releases of Firehose instrumented `Geth` binary for all chain will soon all be tagged `fh2.2`, so upgrade to `>= 1.3.6` of `firehose-ethereum` will be required.
 
 ## v1.3.5
 
 ### Highlights
 
-This release is required if you run on Goerli and is mostly about supporting the upcoming Shangai fork that has been activated on Goerli on March 14th.
+This release is required if you run on Goerli and is mostly about supporting the upcoming Shanghai fork that has been activated on Goerli on March 14th.
 
 ### Changed
 
-* Added support for `withdrawal` balance change reason in block model, this is required for running on most recent Goerli Shangai hard fork.
-* Added support for `withdrawals_root` on `Header` in the block model, this will be populated only if the chain has activated Shangai hard fork.
+* Added support for `withdrawal` balance change reason in block model, this is required for running on most recent Goerli Shanghai hard fork.
+* Added support for `withdrawals_root` on `Header` in the block model, this will be populated only if the chain has activated Shanghai hard fork.
 * `--substreams-max-fuel-per-block-module` will limit the number of wasmtime instructions for a single module in a single block.
 
 ## v1.3.4
