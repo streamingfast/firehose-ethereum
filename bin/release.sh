@@ -81,7 +81,7 @@ main() {
   fi
 
   package_name="github.com/streamingfast/firehose-ethereum"
-  golang_cross_version="v1.19.4"
+  golang_cross_version="v1.20.2"
 
 	docker run \
 		--rm \
