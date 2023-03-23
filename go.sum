@@ -719,6 +719,8 @@ github.com/streamingfast/derr v0.0.0-20221125175206-82e01d420d45/go.mod h1:QSm/A
 github.com/streamingfast/dgrpc v0.0.0-20220909121013-162e9305bbfc/go.mod h1:YlFJuFiB9rmglB5UfTfnsOTfKC1rFo+D0sRbTzLcqgc=
 github.com/streamingfast/dgrpc v0.0.0-20230316191129-05a511a6020d h1:PkI2l77o8zJkpf77pvAXPifV/qARNgRV5t6zr4pRBCA=
 github.com/streamingfast/dgrpc v0.0.0-20230316191129-05a511a6020d/go.mod h1:/Hmb3/6m9q2qwr9JfO3O+ft+vgZ5m7yGVrIg94oMr1k=
+github.com/streamingfast/dgrpc v0.0.0-20230323160028-75702708cf92 h1:YLkaJV3QGM3j2EnP6OD80KTq+cPL1+8DOsxFBcDVOJ0=
+github.com/streamingfast/dgrpc v0.0.0-20230323160028-75702708cf92/go.mod h1:/Hmb3/6m9q2qwr9JfO3O+ft+vgZ5m7yGVrIg94oMr1k=
 github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13 h1:B+sUDgOmOAPWhUcRIcuDitTGGiOCWDwhGWv+XIaeeNc=
 github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13/go.mod h1:xErlHEDd5+4NlR+Mg3ZtW7BTTLB0yZBxZAjHPrkk8X4=
 github.com/streamingfast/dmetering v0.0.0-20220301165106-a642bb6a21bd/go.mod h1:Eu1SH2HyBbDUmQqJV+f5oowCQ/c02HkAZyR5U2BKIT8=
@@ -739,6 +741,8 @@ github.com/streamingfast/eth-go v0.0.0-20230207194511-7d7968462321/go.mod h1:UEm
 github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d/go.mod h1:weGz9xDNJMBNmn03XiJZ/b5Ngw8UAUoLirarqG7OwQY=
 github.com/streamingfast/firehose v0.1.1-0.20230302211622-876ce189e9c4 h1:1xmeZhhF2GXzQ/rtO7khZ20iDlS5FiN2D2/M94jA4IE=
 github.com/streamingfast/firehose v0.1.1-0.20230302211622-876ce189e9c4/go.mod h1:ZHC/kGzxcoRzWcB0du8WVE3lkhUu8QOQMcT2tEcpcmk=
+github.com/streamingfast/firehose v0.1.1-0.20230323160111-a466e158021b h1:4CwbWqCrdCRJEkEBMm4B0oRM2VUp9YxTJZE4rwAyNEM=
+github.com/streamingfast/firehose v0.1.1-0.20230323160111-a466e158021b/go.mod h1:F9NEtrL0S89e0VdEaVJG9XvkcAuYDUZfeWXCV/I2Rlo=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20230316134139-96b3c7a682b7 h1:qeTlbEySoDPs9NUpnE9xrymwwwwjmReEQm7oe6/dcmo=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20230316134139-96b3c7a682b7/go.mod h1:Kh5fptEEMKVw/QXrdfr49ldY3SP5+/MJoUPQfUtByUU=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 h1:dgYLhP3STiPi30fISAijFPEB11D4r1fQFc8D3cpgV5s=
