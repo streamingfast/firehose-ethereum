@@ -6,6 +6,12 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Changed
+
+* Now using Golang 1.20 for building releases.
+
+* Changed default value of flag `substreams-sub-request-block-range-size` from `1000` to `10000`.
+
 ## v1.3.7
 
 ### Fixed
@@ -15,10 +21,6 @@ for instructions to keep up to date.
 ### Added
 
 * Support for gcp `archive` types of snapshots
-
-### Changed
-
-* Now using Golang 1.20 for building releases.
 
 ## v1.3.6
 

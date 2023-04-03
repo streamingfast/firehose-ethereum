@@ -59,19 +59,20 @@ func init() {
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
 			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
 			cmd.Flags().Bool("substreams-request-stats-enabled", false, "Enables stats per request, like block rate. Should only be enabled in debugging instance not in production")
-			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
-			cmd.Flags().String("substreams-rpc-cache-store-url", "{sf-data-dir}/rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().String("substreams-state-store-url", "{sf-data-dir}/localdata", "where substreams state data are stored")
 			cmd.Flags().Uint64("substreams-cache-save-interval", uint64(1_000), "Interval in blocks at which to save store snapshots and output caches")
 			cmd.Flags().Uint64("substreams-max-fuel-per-block-module", uint64(5_000_000_000_000), "Hard limit for the number of instructions within the execution of a single wasmtime module for a single block")
-			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
 			cmd.Flags().Int("substreams-parallel-subrequest-limit", 4, "number of parallel subrequests substream can make to synchronize its stores")
 			cmd.Flags().String("substreams-client-endpoint", FirehoseGRPCServingAddr, "firehose endpoint for substreams client.")
-			cmd.Flags().String("substreams-client-jwt", "", "jwt for substreams client authentication")
+			cmd.Flags().String("substreams-client-jwt", "", "JWT for substreams client authentication")
 			cmd.Flags().Bool("substreams-client-insecure", false, "substreams client in insecure mode")
 			cmd.Flags().Bool("substreams-client-plaintext", true, "substreams client in plaintext mode")
 			cmd.Flags().Uint64("substreams-sub-request-parallel-jobs", 5, "substreams subrequest parallel jobs for the scheduler")
-			cmd.Flags().Uint64("substreams-sub-request-block-range-size", 1000, "substreams subrequest block range size value for the scheduler")
+			cmd.Flags().Uint64("substreams-sub-request-block-range-size", 10000, "substreams subrequest block range size value for the scheduler")
+
+			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
+			cmd.Flags().String("substreams-rpc-cache-store-url", "{sf-data-dir}/rpc-cache", "where rpc cache will be store call responses")
+			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
 			return nil
 		},
 
@@ -196,8 +197,8 @@ func init() {
 				ForkedBlocksStoreURL:    forkedBlocksStoreURL,
 				BlockStreamAddr:         blockstreamAddr,
 				GRPCListenAddr:          viper.GetString("firehose-grpc-listen-addr"),
-				ServiceDiscoveryURL:     serviceDiscoveryURL,
 				GRPCShutdownGracePeriod: time.Second,
+				ServiceDiscoveryURL:     serviceDiscoveryURL,
 				ServerOptions:           serverOptions,
 			}, &firehoseApp.Modules{
 				Authenticator:            authenticator,
