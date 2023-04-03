@@ -1,6 +1,6 @@
 #!/bin/bash
 
-port=${MANAGER_API_PORT:-8080}
+port=${MANAGER_API_PORT:-13009}
 
 # description: Stop geth for maintenance, start it back with debug deep mind enabled, wait 60s and remove the flag
 curl -sS -XPOST localhost:$port/v1/maintenance?sync=true
