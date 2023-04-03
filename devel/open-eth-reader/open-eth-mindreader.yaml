@@ -1,7 +1,0 @@
-start:
-  args:
-  - reader-node
-  flags:
-    reader-node-path: "openethereum"
-    reader-node-type: "openethereum"
-    common-network-id: "1"

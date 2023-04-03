@@ -1,9 +1,0 @@
-start:
-  args:
-  - node
-  flags:
-    common-network-id: "1"
-    node-path: "openethereum"
-    node-type: "openethereum"
-    #node-role: peering #default
-    node-arguments: +--no-warp
