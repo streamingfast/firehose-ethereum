@@ -10,13 +10,13 @@ import (
 
 	"github.com/streamingfast/eth-go"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
-	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
+	pbsubstreamsrpc "github.com/streamingfast/substreams/pb/sf/substreams/rpc/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
 
-var clockBlock1 = &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"}
+var clockBlock1 = &pbsubstreamsrpc.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"}
 
 func TestRPCEngine_rpcCalls(t *testing.T) {
 	localCache := t.TempDir()
@@ -36,9 +36,8 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 	engine, err := NewRPCEngine(localCache, []string{server.URL}, 1)
 	require.NoError(t, err)
 
-	request := &pbsubstreams.Request{}
-
-	engine.registerRequestCache(request, NoOpCache{})
+	traceID := "someTraceID"
+	engine.registerRequestCache(traceID, NoOpCache{})
 
 	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
 	data := eth.MustNewMethodDef("decimals()").MethodID()
@@ -46,7 +45,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
 	require.NoError(t, err)
 
-	out, deterministic, err := engine.ethCall(context.Background(), false, request, clockBlock1, protoCalls)
+	out, deterministic, err := engine.ethCall(context.Background(), false, traceID, clockBlock1, protoCalls)
 	require.NoError(t, err)
 	require.True(t, deterministic)
 
@@ -132,14 +131,14 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			engine, err := NewRPCEngine(localCache, []string{server.URL}, 1)
 			require.NoError(t, err)
 
-			request := &pbsubstreams.Request{}
+			traceID := "someTraceID"
 
-			engine.registerRequestCache(request, NoOpCache{})
+			engine.registerRequestCache(traceID, NoOpCache{})
 
 			protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{tt.rpcCall}})
 			require.NoError(t, err)
 
-			out, deterministic, err := engine.ethCall(context.Background(), false, request, clockBlock1, protoCalls)
+			out, deterministic, err := engine.ethCall(context.Background(), false, traceID, clockBlock1, protoCalls)
 			tt.expectedErr(t, err)
 			require.Equal(t, tt.wantOut.deterministic, deterministic)
 
