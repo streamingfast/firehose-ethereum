@@ -36,9 +36,8 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 	engine, err := NewRPCEngine(localCache, []string{server.URL}, 1)
 	require.NoError(t, err)
 
-	request := &pbsubstreams.Request{}
-
-	engine.registerRequestCache(request, NoOpCache{})
+	traceID := "someTraceID"
+	engine.registerRequestCache(traceID, NoOpCache{})
 
 	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
 	data := eth.MustNewMethodDef("decimals()").MethodID()
@@ -46,7 +45,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
 	require.NoError(t, err)
 
-	out, deterministic, err := engine.ethCall(context.Background(), false, request, clockBlock1, protoCalls)
+	out, deterministic, err := engine.ethCall(context.Background(), false, traceID, clockBlock1, protoCalls)
 	require.NoError(t, err)
 	require.True(t, deterministic)
 
@@ -132,14 +131,14 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			engine, err := NewRPCEngine(localCache, []string{server.URL}, 1)
 			require.NoError(t, err)
 
-			request := &pbsubstreams.Request{}
+			traceID := "someTraceID"
 
-			engine.registerRequestCache(request, NoOpCache{})
+			engine.registerRequestCache(traceID, NoOpCache{})
 
 			protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{tt.rpcCall}})
 			require.NoError(t, err)
 
-			out, deterministic, err := engine.ethCall(context.Background(), false, request, clockBlock1, protoCalls)
+			out, deterministic, err := engine.ethCall(context.Background(), false, traceID, clockBlock1, protoCalls)
 			tt.expectedErr(t, err)
 			require.Equal(t, tt.wantOut.deterministic, deterministic)
 

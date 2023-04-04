@@ -37,7 +37,7 @@ type RPCEngine struct {
 	currentRpcClientIndex int
 	cacheChunkSizeInBlock uint64
 
-	perRequestCache     map[*pbsubstreams.Request]Cache
+	perRequestCache     map[string]Cache
 	perRequestCacheLock sync.RWMutex
 }
 
@@ -67,7 +67,7 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 	}
 
 	return &RPCEngine{
-		perRequestCache:       map[*pbsubstreams.Request]Cache{},
+		perRequestCache:       map[string]Cache{},
 		rpcCacheStore:         rpcCacheStore,
 		rpcClients:            rpcClients,
 		cacheChunkSizeInBlock: cacheChunkSizeInBlock,
@@ -95,9 +95,9 @@ func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 	}
 }
 
-func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.Request) []pipeline.Option {
-	pipelineCache := NewStoreBackedCache(ctx, e.rpcCacheStore, uint64(request.StartBlockNum), e.cacheChunkSizeInBlock)
-	e.registerRequestCache(request, pipelineCache)
+func (e *RPCEngine) PipelineOptions(ctx context.Context, startBlockNum, stopBlockNum uint64, traceID string) []pipeline.Option {
+	pipelineCache := NewStoreBackedCache(ctx, e.rpcCacheStore, startBlockNum, e.cacheChunkSizeInBlock)
+	e.registerRequestCache(traceID, pipelineCache)
 
 	preBlock := func(ctx context.Context, clock *pbsubstreams.Clock) error {
 		pipelineCache.UpdateCache(ctx, clock.Number)
@@ -105,11 +105,11 @@ func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.R
 	}
 
 	postJob := func(ctx context.Context, clock *pbsubstreams.Clock) error {
-		if clock.Number < request.StopBlockNum {
+		if clock.Number < stopBlockNum {
 			return nil
 		}
 		pipelineCache.Save(ctx)
-		e.unregisterRequestCache(request)
+		e.unregisterRequestCache(traceID)
 		return nil
 	}
 
@@ -119,37 +119,40 @@ func (e *RPCEngine) PipelineOptions(ctx context.Context, request *pbsubstreams.R
 	}
 }
 
-func (e *RPCEngine) registerRequestCache(req *pbsubstreams.Request, c Cache) {
+func (e *RPCEngine) registerRequestCache(traceID string, c Cache) {
 	e.perRequestCacheLock.Lock()
 	defer e.perRequestCacheLock.Unlock()
-	e.perRequestCache[req] = c
+	e.perRequestCache[traceID] = c
+	zlog.Debug("register request cache", zap.String("trace_id", traceID))
 }
 
-func (e *RPCEngine) unregisterRequestCache(req *pbsubstreams.Request) {
+func (e *RPCEngine) unregisterRequestCache(traceID string) {
 	e.perRequestCacheLock.Lock()
 	defer e.perRequestCacheLock.Unlock()
-
-	delete(e.perRequestCache, req)
+	if tracer.Enabled() {
+		zlog.Debug("unregister request cache", zap.String("trace_id", traceID))
+	}
+	delete(e.perRequestCache, traceID)
 }
 
-func (e *RPCEngine) ETHCall(ctx context.Context, request *pbsubstreams.Request, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
+func (e *RPCEngine) ETHCall(ctx context.Context, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
 	// We set `alwaysRetry` parameter to `true` here so it means `deterministic` return value will always be `true` and we can safely ignore it
-	out, _, err = e.ethCall(ctx, true, request, clock, in)
+	out, _, err = e.ethCall(ctx, true, traceID, clock, in)
 	return out, err
 }
 
-func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, request *pbsubstreams.Request, clock *pbsubstreams.Clock, in []byte) (out []byte, deterministic bool, err error) {
+func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, deterministic bool, err error) {
 	calls := &pbethss.RpcCalls{}
 	if err := proto.Unmarshal(in, calls); err != nil {
 		return nil, false, fmt.Errorf("unmarshal rpc calls proto: %w", err)
 	}
 
 	e.perRequestCacheLock.RLock()
-	cache, found := e.perRequestCache[request]
+	cache, found := e.perRequestCache[traceID]
 	e.perRequestCacheLock.RUnlock()
 
 	if !found {
-		panic("cache not found")
+		panic(fmt.Sprintf("cache not found for trace ID %s", traceID))
 	}
 
 	if cache == nil {

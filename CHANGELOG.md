@@ -9,6 +9,7 @@ for instructions to keep up to date.
 ### Added
 
 * `firehose-client` tool now accepts `--limit` flag to only send that number of blocks. Get the latest block like this: `fireeth tools firehose-client <endpoint> --limit=1 -- -1 0`
+* Bumps substreams from v1.0.x to v1.1.1 -> RPC protocol changed from sf.substreams.v1.Stream/Blocks to sf.substreams.rpc.v2.Stream/Blocks. See release notes from github.com/streamingfast/substreams for details.
 
 ## v1.3.8
 

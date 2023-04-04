@@ -149,10 +149,6 @@ func init() {
 					opts = append(opts, substreamsService.WithRequestStats())
 				}
 
-				if viper.GetBool("substreams-partial-mode-enabled") {
-					opts = append(opts, substreamsService.WithPartialMode())
-				}
-
 				substreamsClientConfig := client.NewSubstreamsClientConfig(
 					viper.GetString("substreams-client-endpoint"),
 					os.ExpandEnv(viper.GetString("substreams-client-jwt")),
@@ -160,20 +156,29 @@ func init() {
 					viper.GetBool("substreams-client-plaintext"),
 				)
 
-				sss, err := substreamsService.New(
-					stateStore,
-					"sf.ethereum.type.v2.Block",
-					viper.GetUint64("substreams-sub-request-parallel-jobs"),
-					viper.GetUint64("substreams-sub-request-block-range-size"),
-					substreamsClientConfig,
-					opts...,
-				)
+				if viper.GetBool("substreams-partial-mode-enabled") {
+					tier2 := substreamsService.NewTier2(
+						stateStore,
+						"sf.ethereum.type.v2.Block",
+						opts...,
+					)
 
-				if err != nil {
-					return nil, fmt.Errorf("creating substreams service: %w", err)
+					registerServiceExt = tier2.Register
+				} else {
+					sss, err := substreamsService.NewTier1(
+						stateStore,
+						"sf.ethereum.type.v2.Block",
+						viper.GetUint64("substreams-sub-request-parallel-jobs"),
+						viper.GetUint64("substreams-sub-request-block-range-size"),
+						substreamsClientConfig,
+						opts...,
+					)
+
+					if err != nil {
+						return nil, fmt.Errorf("creating substreams service: %w", err)
+					}
+					registerServiceExt = sss.Register
 				}
-
-				registerServiceExt = sss.Register
 			}
 
 			registry := transform.NewRegistry()
