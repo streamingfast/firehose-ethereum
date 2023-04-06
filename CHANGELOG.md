@@ -14,9 +14,11 @@ This release fix this bogus behavior by simply ignoring `CANCEL_BLOCK` message w
 
 > **Note** There is no need to update the Firehose instrumented `geth` binary, only `fireeth` needs to be bumped if you already are at the latest `geth` version.
 
-### Changed
+### Fixed
 
 * Fixed a bug on console reader when seeing `CANCEL_BLOCK` on certain circumstances.
+
+### Changed
 
 * Now using Golang 1.20 for building releases.
 
