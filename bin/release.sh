@@ -72,8 +72,8 @@ main() {
 
   # It's important to work on trimmed content to determine end because `head -n$end_at`
   # below is applied to trimmed content and thus line number found must be relative to it
-  end_at=$(printf "$changelod_trimmed" | grep -n -m 1 -E '^## .+' | cut -f 1 -d :)
-  printf "$changelod_trimmed" | head -n$end_at | skip -2 > .release_notes.md
+  end_at=$(echo -n "$changelod_trimmed" | grep -n -m 1 -E '^## .+' | cut -f 1 -d :)
+  echo -n "$changelod_trimmed" | head -n$end_at | skip -2 > .release_notes.md
 
   args="--timeout=60m --rm-dist --release-notes=.release_notes.md"
   if [[ "$publish" == "false" ]]; then
