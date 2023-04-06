@@ -6,7 +6,17 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Highlights
+
+This is a bug fix release for node operators that are about to upgrade to Shanghai release. The Firehose instrumented `geth` compatible with Shanghai release introduced a new message `CANCEL_BLOCK`. It seems in some circumstances, we had a bug in the console reader that was actually panicking but the message was received but no block was actively being assembled.
+
+This release fix this bogus behavior by simply ignoring `CANCEL_BLOCK` message when there is no active block which is harmless. Every node operators that upgrade to https://github.com/streamingfast/go-ethereum/releases/tag/geth-v1.11.5-fh2.2 should upgrade to this version.
+
+> **Note** There is no need to update the Firehose instrumented `geth` binary, only `fireeth` needs to be bumped if you already are at the latest `geth` version.
+
 ### Changed
+
+* Fixed a bug on console reader when seeing `CANCEL_BLOCK` on certain circumstances.
 
 * Now using Golang 1.20 for building releases.
 
@@ -16,7 +26,7 @@ for instructions to keep up to date.
 
 ### Fixed
 
-* Fixed a bug in data normalization for Polygon chain which would cause panics on certain blocks
+* Fixed a bug in data normalization for Polygon chain which would cause panics on certain blocks.
 
 ### Added
 

@@ -19,7 +19,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -28,6 +27,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/golang/protobuf/proto"
 
 	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
@@ -44,6 +45,7 @@ func TestParseFromFile(t *testing.T) {
 		readTransaction  bool
 	}{
 		{"testdata/firehose-logs.dmlog", nil, nil, false},
+		{"testdata/block_failed_trx_then_cancel_block.dmlog", nil, nil, false},
 		{"testdata/normalize-r-and-s-curve-points.dmlog", nil, nil, false},
 		{"testdata/block_mining_rewards.dmlog", nil, nil, false},
 		{"testdata/block_unknown_balance_change.dmlog", nil, errors.New(`receive unknown balance change reason, received reason string is "something_that_will_never_match"`), false},

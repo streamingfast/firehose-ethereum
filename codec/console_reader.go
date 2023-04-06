@@ -873,7 +873,8 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 // FIRE CANCEL_BLOCK 123456 Something wrong happened, etc.
 func (ctx *parseCtx) readCancelBlock(line string) error {
 	if ctx.currentBlock == nil {
-		return fmt.Errorf("no block started")
+		ctx.logger.Debug("received CANCEL_BLOCK while no block is active, ignoring")
+		return nil
 	}
 
 	chunks, err := SplitInBoundedChunks(line, 3)
@@ -1483,7 +1484,7 @@ func SplitInChunks(line string, validCounts ...int) ([]string, error) {
 	return chunks[1:], nil
 }
 
-// splitInBoundedChunks split the line in `count` chunks and returns the slice `chunks[1:count]` (so exclusive end),
+// SplitInBoundedChunks splits the line in `count` chunks and returns the slice `chunks[1:count]` (so exclusive end),
 // but will accumulate all trailing chunks within the last (for free-form strings, or JSON objects)
 func SplitInBoundedChunks(line string, count int) ([]string, error) {
 	chunks := strings.SplitN(line, " ", count)
