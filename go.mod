@@ -14,7 +14,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20230406203654-ce7225ef14ef
+	github.com/streamingfast/bstream v0.0.2-0.20230407143220-06c919ae8476
 	github.com/streamingfast/cli v0.0.4-0.20230120202400-0357b9c6f2be
 	github.com/streamingfast/dauth v0.0.0-20221027185237-b209f25fa3ff
 	github.com/streamingfast/derr v0.0.0-20221125175206-82e01d420d45
@@ -36,7 +36,7 @@ require (
 	github.com/streamingfast/sf-tools v0.0.0-20230310203226-5fe04b74a5f6
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.0.1-0.20230406203806-f8a3f7672ee7
+	github.com/streamingfast/substreams v1.0.2-0.20230411151334-71504a09534f
 	github.com/stretchr/testify v1.8.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
