@@ -15,7 +15,7 @@ import (
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go/rpc"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
-	pbsubstreamsrpc "github.com/streamingfast/substreams/pb/sf/substreams/rpc/v2"
+	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/streamingfast/substreams/pipeline"
 	"github.com/streamingfast/substreams/wasm"
 	"go.uber.org/multierr"
@@ -99,12 +99,12 @@ func (e *RPCEngine) PipelineOptions(ctx context.Context, startBlockNum, stopBloc
 	pipelineCache := NewStoreBackedCache(ctx, e.rpcCacheStore, startBlockNum, e.cacheChunkSizeInBlock)
 	e.registerRequestCache(traceID, pipelineCache)
 
-	preBlock := func(ctx context.Context, clock *pbsubstreamsrpc.Clock) error {
+	preBlock := func(ctx context.Context, clock *pbsubstreams.Clock) error {
 		pipelineCache.UpdateCache(ctx, clock.Number)
 		return nil
 	}
 
-	postJob := func(ctx context.Context, clock *pbsubstreamsrpc.Clock) error {
+	postJob := func(ctx context.Context, clock *pbsubstreams.Clock) error {
 		if clock.Number < stopBlockNum {
 			return nil
 		}
@@ -132,13 +132,13 @@ func (e *RPCEngine) unregisterRequestCache(traceID string) {
 	delete(e.perRequestCache, traceID)
 }
 
-func (e *RPCEngine) ETHCall(ctx context.Context, traceID string, clock *pbsubstreamsrpc.Clock, in []byte) (out []byte, err error) {
+func (e *RPCEngine) ETHCall(ctx context.Context, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
 	// We set `alwaysRetry` parameter to `true` here so it means `deterministic` return value will always be `true` and we can safely ignore it
 	out, _, err = e.ethCall(ctx, true, traceID, clock, in)
 	return out, err
 }
 
-func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID string, clock *pbsubstreamsrpc.Clock, in []byte) (out []byte, deterministic bool, err error) {
+func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, deterministic bool, err error) {
 	calls := &pbethss.RpcCalls{}
 	if err := proto.Unmarshal(in, calls); err != nil {
 		return nil, false, fmt.Errorf("unmarshal rpc calls proto: %w", err)

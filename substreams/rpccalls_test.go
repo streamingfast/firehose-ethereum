@@ -10,13 +10,13 @@ import (
 
 	"github.com/streamingfast/eth-go"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
-	pbsubstreamsrpc "github.com/streamingfast/substreams/pb/sf/substreams/rpc/v2"
+	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
 
-var clockBlock1 = &pbsubstreamsrpc.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"}
+var clockBlock1 = &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"}
 
 func TestRPCEngine_rpcCalls(t *testing.T) {
 	localCache := t.TempDir()
@@ -62,7 +62,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 
 func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 	rpcCall := func(address string, data []byte) *pbethss.RpcCall {
-		ethAddress := eth.MustNewAddress(address)
+		ethAddress := eth.MustNewAddressLoose(address)
 
 		return &pbethss.RpcCall{ToAddr: ethAddress, Data: data}
 	}
