@@ -15,7 +15,7 @@ import (
 var logUpgrade sync.Once
 
 func init() {
-	UpgradeMergedBlocksCmd.Flags().String("variant", "", "shortname of the geth variant (polygon, bnb, geth), to apply specific upgrade logic")
+	UpgradeMergedBlocksCmd.Flags().String("variant", "", "Shortname of the geth variant (polygon, bnb, geth), to apply specific upgrade logic")
 	Cmd.AddCommand(UpgradeMergedBlocksCmd)
 }
 
