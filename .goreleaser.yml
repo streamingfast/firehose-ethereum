@@ -2,10 +2,8 @@ project_name: firehose-ethereum
 
 release:
   draft: true
-  github:
-    owner: streamingfast
-    name: firehose-ethereum
   name_template: '{{.Tag}}'
+  target_commitish: '{{ .Commit }}'
 
 builds:
   - id: darwin-amd64
