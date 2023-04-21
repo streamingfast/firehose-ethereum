@@ -63,7 +63,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 
 func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 	rpcCall := func(address string, data []byte) *pbethss.RpcCall {
-		ethAddress := eth.MustNewAddress(address)
+		ethAddress := eth.MustNewAddressLoose(address)
 
 		return &pbethss.RpcCall{ToAddr: ethAddress, Data: data}
 	}
