@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+* `firehose-client` tool now accepts `--limit` flag to only send that number of blocks. Get the latest block like this: `fireeth tools firehose-client <endpoint> --limit=1 -- -1 0`
+
 ## v1.3.8
 
 ### Highlights
