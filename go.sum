@@ -776,6 +776,8 @@ github.com/streamingfast/substreams v1.0.4-0.20230421110730-2b0b71e6d7ac h1:li3+
 github.com/streamingfast/substreams v1.0.4-0.20230421110730-2b0b71e6d7ac/go.mod h1:Q35WgPWYoUH6MjGfTvTn+u5lESHWi+V4KSy+KYTx60I=
 github.com/streamingfast/substreams v1.0.4-0.20230421143927-d8938fd72e34 h1:AiDEkWB93jgGEJsgE4pRIP0iDgjSMGrvHHGhZUxHTcs=
 github.com/streamingfast/substreams v1.0.4-0.20230421143927-d8938fd72e34/go.mod h1:Q35WgPWYoUH6MjGfTvTn+u5lESHWi+V4KSy+KYTx60I=
+github.com/streamingfast/substreams v1.0.4-0.20230428172816-e09437933b3e h1:3zHMHAtFa+rBKGIVL5ylYKca2Kf5UxvJXpMR0C+5JwM=
+github.com/streamingfast/substreams v1.0.4-0.20230428172816-e09437933b3e/go.mod h1:Q35WgPWYoUH6MjGfTvTn+u5lESHWi+V4KSy+KYTx60I=
 github.com/streamingfast/wasmtime-go/v4 v4.0.0-freemem3 h1:raJHR0JWgYiSyX0vZ3leRK/TkNcn4ZUGTf+d64g48KQ=
 github.com/streamingfast/wasmtime-go/v4 v4.0.0-freemem3/go.mod h1:rOffzhrBM87FuXgj23Ss35uFDahjAauERq60QpyCzpE=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
