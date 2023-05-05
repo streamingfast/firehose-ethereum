@@ -123,12 +123,15 @@ func (e *RPCEngine) registerRequestCache(traceID string, c Cache) {
 	e.perRequestCacheLock.Lock()
 	defer e.perRequestCacheLock.Unlock()
 	e.perRequestCache[traceID] = c
+	zlog.Debug("register request cache", zap.String("trace_id", traceID))
 }
 
 func (e *RPCEngine) unregisterRequestCache(traceID string) {
 	e.perRequestCacheLock.Lock()
 	defer e.perRequestCacheLock.Unlock()
-
+	if tracer.Enabled() {
+		zlog.Debug("unregister request cache", zap.String("trace_id", traceID))
+	}
 	delete(e.perRequestCache, traceID)
 }
 
@@ -149,7 +152,7 @@ func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID strin
 	e.perRequestCacheLock.RUnlock()
 
 	if !found {
-		panic("cache not found")
+		panic(fmt.Sprintf("cache not found for trace ID %s", traceID))
 	}
 
 	if cache == nil {
