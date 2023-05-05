@@ -4,12 +4,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v1.4.0
+
+### Substreams RPC protocol V2
+
+Substreams protocol changed from `sf.substreams.v1.Stream/Blocks` to `sf.substreams.rpc.v2.Stream/Blocks` for client-facing service. This changes the way that substreams clients are notified of chain reorgs.
+All substreams clients need to be upgraded to support this new protocol.
+
+See https://github.com/streamingfast/substreams/releases/tag/v1.1.1 for details.
 
 ### Added
 
 * `firehose-client` tool now accepts `--limit` flag to only send that number of blocks. Get the latest block like this: `fireeth tools firehose-client <endpoint> --limit=1 -- -1 0`
-* Bumps substreams from v1.0.x to v1.1.1 -> RPC protocol changed from sf.substreams.v1.Stream/Blocks to sf.substreams.rpc.v2.Stream/Blocks. See release notes from github.com/streamingfast/substreams for details.
 
 ## v1.3.8
 
