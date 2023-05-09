@@ -1,0 +1,4 @@
+global:
+  binary: fireeth
+  language: golang
+  variant: application
