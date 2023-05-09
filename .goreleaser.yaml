@@ -1,9 +1,5 @@
-project_name: firehose-ethereum
-
-release:
-  draft: true
-  name_template: '{{.Tag}}'
-  target_commitish: '{{ .Commit }}'
+env_files:
+  github_token: ~/.config/goreleaser/github_token
 
 builds:
   - id: darwin-amd64
@@ -14,9 +10,13 @@ builds:
     goarch:
       - amd64
     env:
+      - CGO_ENABLED=1
       - CC=o64-clang
       - CXX=o64-clang++
+      - C_INCLUDE_PATH=/usr/local/osxcross/include/amd64
+      - LIBRARY_PATH=/usr/local/osxcross/lib/amd64
     flags:
+      - -trimpath
       - -mod=readonly
     ldflags:
       - -s -w -X main.version={{.Version}}
@@ -29,9 +29,13 @@ builds:
     goarch:
       - arm64
     env:
+      - CGO_ENABLED=1
       - CC=oa64-clang
       - CXX=oa64-clang++
+      - C_INCLUDE_PATH=/usr/local/osxcross/include/arm64
+      - LIBRARY_PATH=/usr/local/osxcross/lib/arm64
     flags:
+      - -trimpath
       - -mod=readonly
     ldflags:
       - -s -w -X main.version={{.Version}}
@@ -44,9 +48,13 @@ builds:
     goarch:
       - amd64
     env:
+      - CGO_ENABLED=1
       - CC=x86_64-linux-gnu-gcc
       - CXX=x86_64-linux-gnu-g++
+      - C_INCLUDE_PATH=/usr/x86_64-linux-gnu/include
+      - LIBRARY_PATH=/usr/x86_64-linux-gnu/lib
     flags:
+      - -trimpath
       - -mod=readonly
     ldflags:
       - -s -w -X main.version={{.Version}}
@@ -58,7 +66,7 @@ archives:
       - darwin-arm64
       - linux-amd64
     name_template: >-
-      fireeth_
+      {{ .ProjectName }}_
       {{- tolower .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
@@ -68,13 +76,24 @@ archives:
     - LICENSE
     - README.md
 
-snapshot:
-  name_template: '{{ .Tag }}-next'
-
 checksum:
-  name_template: checksums.txt
+  name_template: 'checksums.txt'
 
-dist: dist
+snapshot:
+  name_template: "{{ .Tag }}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^GitBook:'
+
+release:
+  draft: true
+  name_template: '{{ .Tag }}'
+  target_commitish: '{{ .Commit }}'
 
 brews:
   - name: firehose-ethereum
@@ -87,5 +106,5 @@ brews:
       name: goreleaserbot
       email: goreleaser@streamingfast.io
     homepage: "https://github.com/streamingfast/firehose-ethereum"
-    description: "Firehose on Ethereum stack"
+    description: "StreamingFast CLI for 'firehose-ethereum'"
     license: "Apache-2.0"

@@ -4,16 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## UNRELEASED
+## v1.4.1
 
-### FIXED
+### Fixed
 
-* Substreams running without a specific tier2 (with default `substreams-client-endpoint=<empty>`)  will now expose tier2 service `sf.substreams.internal.v2.Substreams` so it can be used internally.
+* Substreams running without a specific tier2 `substreams-client-endpoint` will now expose tier2 service `sf.substreams.internal.v2.Substreams` so it can be used internally.
 
-### CHANGED
+> **Warning**
+> If you don't use dedicated tier2 nodes, make sure that you don't expose `sf.substreams.internal.v2.Substreams` to the public (from your load-balancer or using a firewall)
 
-* flag `substreams-client-endpoint` now defaults to empty string, which will make a 'tier1' service act also as a 'tier2', serving its own requests. Make sure that you don't expose `sf.substreams.internal.v2.Substreams` to the public, via an HTTP-aware firewall.
+
+### Breaking changes
+
 * flag `substreams-partial-mode-enabled` renamed to `substreams-tier2`
+* flag `substreams-client-endpoint` now defaults to empty string, which means it is its own client-endpoint (as it was before the change to protocol V2)
 
 ## v1.4.0
 
