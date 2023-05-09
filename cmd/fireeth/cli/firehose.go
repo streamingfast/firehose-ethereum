@@ -22,8 +22,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/streamingfast/bstream/hub"
 	"github.com/streamingfast/bstream/transform"
 	dauthAuthenticator "github.com/streamingfast/dauth/authenticator"
+	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	discoveryservice "github.com/streamingfast/dgrpc/server/discovery-service"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
@@ -36,6 +38,7 @@ import (
 	"github.com/streamingfast/logging"
 	"github.com/streamingfast/substreams/client"
 	substreamsService "github.com/streamingfast/substreams/service"
+	"go.uber.org/zap"
 )
 
 var metricset = dmetrics.NewSet()
@@ -57,13 +60,13 @@ func init() {
 			cmd.Flags().Duration("firehose-rate-limit-bucket-fill-rate", 10*time.Second, "Rate limit bucket refill rate (default: 10s)")
 
 			cmd.Flags().Bool("substreams-enabled", false, "Whether to enable substreams")
-			cmd.Flags().Bool("substreams-partial-mode-enabled", false, "Whether to enable partial stores generation support on this instance (usually for internal deployments only)")
+			cmd.Flags().Bool("substreams-tier2", false, "Whether this endpoint is serving tier2 requests (non-public-facing)")
 			cmd.Flags().Bool("substreams-request-stats-enabled", false, "Enables stats per request, like block rate. Should only be enabled in debugging instance not in production")
 			cmd.Flags().String("substreams-state-store-url", "{sf-data-dir}/localdata", "where substreams state data are stored")
 			cmd.Flags().Uint64("substreams-cache-save-interval", uint64(1_000), "Interval in blocks at which to save store snapshots and output caches")
 			cmd.Flags().Uint64("substreams-max-fuel-per-block-module", uint64(5_000_000_000_000), "Hard limit for the number of instructions within the execution of a single wasmtime module for a single block")
 			cmd.Flags().Int("substreams-parallel-subrequest-limit", 4, "number of parallel subrequests substream can make to synchronize its stores")
-			cmd.Flags().String("substreams-client-endpoint", FirehoseGRPCServingAddr, "firehose endpoint for substreams client.")
+			cmd.Flags().String("substreams-client-endpoint", "", "firehose endpoint for substreams client. If empty, this endpoint will also serve its own internal tier2 requests")
 			cmd.Flags().String("substreams-client-jwt", "", "JWT for substreams client authentication")
 			cmd.Flags().Bool("substreams-client-insecure", false, "substreams client in insecure mode")
 			cmd.Flags().Bool("substreams-client-plaintext", true, "substreams client in plaintext mode")
@@ -118,6 +121,7 @@ func init() {
 				}
 			}
 
+			firehoseGRPCListenAddr := viper.GetString("firehose-grpc-listen-addr")
 			if viper.GetBool("substreams-enabled") {
 				endpoints := viper.GetStringSlice("substreams-rpc-endpoints")
 				for i, endpoint := range endpoints {
@@ -149,23 +153,33 @@ func init() {
 					opts = append(opts, substreamsService.WithRequestStats())
 				}
 
+				substreamsClientEndpoint := viper.GetString("substreams-client-endpoint")
+
+				var runTier1, runTier2 bool
+				if viper.GetBool("substreams-tier2") {
+					runTier2 = true
+				} else {
+					runTier1 = true
+				}
+
+				if substreamsClientEndpoint == "" {
+					runTier2 = true // self-contained deployment: run tier2 for our own tier1
+					substreamsClientEndpoint = firehoseGRPCListenAddr
+				}
+
 				substreamsClientConfig := client.NewSubstreamsClientConfig(
-					viper.GetString("substreams-client-endpoint"),
+					substreamsClientEndpoint,
 					os.ExpandEnv(viper.GetString("substreams-client-jwt")),
 					viper.GetBool("substreams-client-insecure"),
 					viper.GetBool("substreams-client-plaintext"),
 				)
 
-				if viper.GetBool("substreams-partial-mode-enabled") {
-					tier2 := substreamsService.NewTier2(
-						stateStore,
-						"sf.ethereum.type.v2.Block",
-						opts...,
-					)
+				var tier1 *substreamsService.Tier1Service
+				var tier2 *substreamsService.Tier2Service
 
-					registerServiceExt = tier2.Register
-				} else {
-					sss, err := substreamsService.NewTier1(
+				if runTier1 {
+					var err error
+					tier1, err = substreamsService.NewTier1(
 						stateStore,
 						"sf.ethereum.type.v2.Block",
 						viper.GetUint64("substreams-sub-request-parallel-jobs"),
@@ -173,12 +187,34 @@ func init() {
 						substreamsClientConfig,
 						opts...,
 					)
-
 					if err != nil {
 						return nil, fmt.Errorf("creating substreams service: %w", err)
 					}
-					registerServiceExt = sss.Register
+
 				}
+				if runTier2 {
+					tier2 = substreamsService.NewTier2(
+						stateStore,
+						"sf.ethereum.type.v2.Block",
+						opts...,
+					)
+				}
+
+				registerServiceExt = func(server dgrpcserver.Server,
+					mergedBlocksStore dstore.Store,
+					forkedBlocksStore dstore.Store, // this can be nil here
+					forkableHub *hub.ForkableHub,
+					logger *zap.Logger) {
+
+					if tier1 != nil {
+						tier1.Register(server, mergedBlocksStore, forkedBlocksStore, forkableHub, logger)
+					}
+					if tier2 != nil {
+						tier2.Register(server, mergedBlocksStore, forkedBlocksStore, forkableHub, logger)
+					}
+
+				}
+
 			}
 
 			registry := transform.NewRegistry()
@@ -201,7 +237,7 @@ func init() {
 				OneBlocksStoreURL:       oneBlocksStoreURL,
 				ForkedBlocksStoreURL:    forkedBlocksStoreURL,
 				BlockStreamAddr:         blockstreamAddr,
-				GRPCListenAddr:          viper.GetString("firehose-grpc-listen-addr"),
+				GRPCListenAddr:          firehoseGRPCListenAddr,
 				GRPCShutdownGracePeriod: time.Second,
 				ServiceDiscoveryURL:     serviceDiscoveryURL,
 				ServerOptions:           serverOptions,
