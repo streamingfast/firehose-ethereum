@@ -122,6 +122,9 @@ func init() {
 			}
 
 			firehoseGRPCListenAddr := viper.GetString("firehose-grpc-listen-addr")
+			substreamsEnabled := viper.GetBool("substreams-enabled")
+
+			zlog.Debug("about to configure Substreams", zap.Bool("enabled", substreamsEnabled))
 			if viper.GetBool("substreams-enabled") {
 				endpoints := viper.GetStringSlice("substreams-rpc-endpoints")
 				for i, endpoint := range endpoints {
@@ -174,6 +177,11 @@ func init() {
 					viper.GetBool("substreams-client-plaintext"),
 				)
 
+				zlog.Debug("creating Substreams config",
+					zap.Bool("run_tier1", runTier1),
+					zap.Bool("run_tier2", runTier2),
+				)
+
 				var tier1 *substreamsService.Tier1Service
 				var tier2 *substreamsService.Tier2Service
 
@@ -190,7 +198,6 @@ func init() {
 					if err != nil {
 						return nil, fmt.Errorf("creating substreams service: %w", err)
 					}
-
 				}
 				if runTier2 {
 					tier2 = substreamsService.NewTier2(

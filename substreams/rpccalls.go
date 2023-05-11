@@ -42,6 +42,12 @@ type RPCEngine struct {
 }
 
 func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBlock uint64) (*RPCEngine, error) {
+	zlog.Debug("creating new Substreams RPC engine",
+		zap.String("rpc_cache_path", rpcCachePath),
+		zap.Strings("rpc_endpoints", rpcEndpoints),
+		zap.Uint64("cache_chunk_size_in_block", cacheChunkSizeInBlock),
+	)
+
 	rpcCacheStore, err := dstore.NewStore(rpcCachePath, "", "", false)
 	if err != nil {
 		return nil, fmt.Errorf("setting up rpc cache store: %w", err)

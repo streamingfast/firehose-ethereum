@@ -20,6 +20,20 @@ main() {
 
   set -e
 
+  if [[
+    -z "$FIREETH_COMMON_ONE_BLOCK_STORE_URL" ||
+    -z "$FIREETH_COMMON_FORKED_BLOCKS_STORE_URL" ||
+    -z "$FIREETH_COMMON_MERGED_BLOCKS_STORE_URL" ||
+    -z "$FIREETH_SUBSTREAMS_RPC_ENDPOINTS"
+  ]]; then
+    echo 'To use this config, you must define:'
+    echo '- FIREETH_COMMON_ONE_BLOCK_STORE_URL (defines common-one-block-store-url)'
+    echo '- FIREETH_COMMON_FORKED_BLOCKS_STORE_URL (defines common-forked-blocks-store-url)'
+    echo '- FIREETH_COMMON_MERGED_BLOCKS_STORE_URL (defines common-merged-blocks-store-url)'
+    echo '- FIREETH_SUBSTREAMS_RPC_ENDPOINTS (defines substreams-rpc-endpoint)'
+    exit 1
+  fi
+
   if [[ $clean == "true" ]]; then
     rm -rf sf-data &> /dev/null || true
   fi
