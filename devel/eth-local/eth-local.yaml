@@ -1,0 +1,13 @@
+start:
+  args:
+    - firehose
+  flags:
+    log-to-file: false
+    common-live-blocks-addr:
+    common-merged-blocks-store-url: gs://dfuseio-global-blocks-uscentral/eth-mainnet/v3?project=dfuseio-global
+    #common-merged-blocks-store-url: ./localblocks
+    firehose-grpc-listen-addr: ":9000"
+    substreams-enabled: true
+    substreams-rpc-endpoints: "$ETH_MAINNET_RPC"
+    substreams-sub-request-block-range-size: 1000
+    substreams-sub-request-parallel-jobs: 10
