@@ -13,6 +13,7 @@ start:
     firehose-grpc-listen-addr: :9000
     substreams-enabled: true
     substreams-client-endpoint: ""
-    substreams-cache-save-interval: 100
+    substreams-cache-save-interval: 1000
+    substreams-max-fuel-per-block-module: 5000000000000
     substreams-sub-request-block-range-size: 10000
     substreams-sub-request-parallel-jobs: 5
