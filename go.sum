@@ -716,8 +716,8 @@ github.com/streamingfast/derr v0.0.0-20210811180100-9138d738bcec/go.mod h1:ulVfu
 github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1 h1:xJB7rXnOHLesosMjfwWsEL2i/40mFSkzenEb3M0qTyM=
 github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1/go.mod h1:QSm/AfaDsE0k1xBYi0lW580YJ/WDV/FKZI628tkZR0Y=
 github.com/streamingfast/dgrpc v0.0.0-20220909121013-162e9305bbfc/go.mod h1:YlFJuFiB9rmglB5UfTfnsOTfKC1rFo+D0sRbTzLcqgc=
-github.com/streamingfast/dgrpc v0.0.0-20230323160028-75702708cf92 h1:YLkaJV3QGM3j2EnP6OD80KTq+cPL1+8DOsxFBcDVOJ0=
-github.com/streamingfast/dgrpc v0.0.0-20230323160028-75702708cf92/go.mod h1:/Hmb3/6m9q2qwr9JfO3O+ft+vgZ5m7yGVrIg94oMr1k=
+github.com/streamingfast/dgrpc v0.0.0-20230417152409-2ee737f143dd h1:nHSbYjBUwdyXGjh+g6IxPXNpNfcOiHT5I96YqjZ5xiM=
+github.com/streamingfast/dgrpc v0.0.0-20230417152409-2ee737f143dd/go.mod h1:/PG8nNBtUu1bNadeE72Meh6Ixz2JYUm9RMMyuHU3wxs=
 github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13 h1:B+sUDgOmOAPWhUcRIcuDitTGGiOCWDwhGWv+XIaeeNc=
 github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13/go.mod h1:xErlHEDd5+4NlR+Mg3ZtW7BTTLB0yZBxZAjHPrkk8X4=
 github.com/streamingfast/dmetering v0.0.0-20220301165106-a642bb6a21bd/go.mod h1:Eu1SH2HyBbDUmQqJV+f5oowCQ/c02HkAZyR5U2BKIT8=
@@ -774,8 +774,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 h1:Y15G1Z4fpEdm2b+/70owI7TLuXadlqBtGM7rk4Hxrzk=
 github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0/go.mod h1:/Rnz2TJvaShjUct0scZ9kKV2Jr9/+KBAoWy4UMYxgv4=
-github.com/streamingfast/substreams v1.1.2-0.20230515190915-7543a5182e17 h1:JX16Ze8chuPnXOPJwp/3JhblTQ8lIWCT7jieehzISlw=
-github.com/streamingfast/substreams v1.1.2-0.20230515190915-7543a5182e17/go.mod h1:ngrXMC+ioqPlABFYhPwy7NmbasdoS/MleM4G0kjTT8k=
+github.com/streamingfast/substreams v1.1.2-0.20230517131401-ee382adf91b5 h1:q88NefWS2d4KU3J1JEqd4SSjYo+CL/iqhgIUhNLV454=
+github.com/streamingfast/substreams v1.1.2-0.20230517131401-ee382adf91b5/go.mod h1:+PmvMpEbJ6KRBa01umCzujiERq4k9XGMknfzprZ3ltk=
 github.com/streamingfast/wasmtime-go/v4 v4.0.0-freemem3 h1:raJHR0JWgYiSyX0vZ3leRK/TkNcn4ZUGTf+d64g48KQ=
 github.com/streamingfast/wasmtime-go/v4 v4.0.0-freemem3/go.mod h1:rOffzhrBM87FuXgj23Ss35uFDahjAauERq60QpyCzpE=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -1446,8 +1446,8 @@ google.golang.org/grpc v1.46.2/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACu
 google.golang.org/grpc v1.47.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.48.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.49.0/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
-google.golang.org/grpc v1.53.0 h1:LAv2ds7cmFV/XTS3XG1NneeENYrXGmorPxsBbptIjNc=
-google.golang.org/grpc v1.53.0/go.mod h1:OnIrk0ipVdj4N5d9IUoFUx72/VlD7+jUsHwZgwSMQpw=
+google.golang.org/grpc v1.54.0 h1:EhTqbhiYeixwWQtAEZAxmV9MGqcjEU2mFx52xCzNyag=
+google.golang.org/grpc v1.54.0/go.mod h1:PUSEXI6iWghWaB6lXM4knEgpJNu2qUcKfDtNci3EC2g=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
