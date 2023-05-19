@@ -98,6 +98,7 @@ jobs:
       - name: Get Slack ID
         id: get-slack-id
         run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
           echo "SLACK_ID=$SLACK_ID"
 
@@ -189,6 +190,7 @@ jobs:
       - name: Get Slack ID
         id: get-slack-id
         run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
           echo "SLACK_ID=$SLACK_ID"
 
@@ -230,6 +232,7 @@ jobs:
       - name: Get Slack ID
         id: get-slack-id
         run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
       - name: Slack notification
@@ -250,6 +253,7 @@ jobs:
       - name: Get Slack ID
         id: get-slack-id
         run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
       - name: Slack notification
