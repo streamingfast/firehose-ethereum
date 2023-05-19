@@ -18,7 +18,7 @@ on:
         default: 'fh2'
         type: choice
         options:
-        - fh2
+          - fh2
 
 env:
   REGISTRY: ghcr.io
@@ -93,6 +93,15 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Notify build failure on Slack
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        uses: Ilshidur/action-slack@2.0.2
+        with:
+          args: |
+            :x: *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+
   bundle-docker-versions:
     needs: build-vanilla
     runs-on: ubuntu-20.04
@@ -110,6 +119,7 @@ jobs:
     strategy:
       matrix:
         binary: [geth, bsc, polygon]
+
     steps:
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
@@ -161,6 +171,15 @@ jobs:
             CHAIN_VERSION=${{ env.VERSION }}
             SF_VERSION=${{ env.SF_VERSION }}
 
+      - name: Notify build failure on Slack
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        uses: Ilshidur/action-slack@2.0.2
+        with:
+          args: |
+            :x: *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+
       - id: print
         run: |
           OUT="${{ steps.meta.outputs.tags }}"
@@ -171,7 +190,7 @@ jobs:
 
   slack-notifications-vanilla:
     if: ${{ !startsWith(github.ref, 'refs/tags/') && !contains(github.event.head_commit.message, 'build:all') && github.event_name != 'workflow_dispatch' }}
-    needs: [build-vanilla]
+    needs: [ build-vanilla ]
     runs-on: ubuntu-20.04
     steps:
       - name: Slack notification
@@ -182,8 +201,9 @@ jobs:
           args: |
             :done: *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
 
+
   slack-notifications:
-    needs: [build-vanilla, bundle-docker-versions]
+    needs: [ build-vanilla, bundle-docker-versions ]
     runs-on: ubuntu-20.04
     steps:
       - name: Slack notification
