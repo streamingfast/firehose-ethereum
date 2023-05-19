@@ -72,7 +72,6 @@ func init() {
 			cmd.Flags().Bool("substreams-client-plaintext", true, "substreams client in plaintext mode")
 			cmd.Flags().Uint64("substreams-sub-request-parallel-jobs", 5, "substreams subrequest parallel jobs for the scheduler")
 			cmd.Flags().Uint64("substreams-sub-request-block-range-size", 10000, "substreams subrequest block range size value for the scheduler")
-
 			cmd.Flags().StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			cmd.Flags().String("substreams-rpc-cache-store-url", "{sf-data-dir}/rpc-cache", "where rpc cache will be store call responses")
 			cmd.Flags().Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
@@ -150,6 +149,10 @@ func init() {
 					substreamsService.WithPipelineOptions(rpcEngine),
 					substreamsService.WithCacheSaveInterval(viper.GetUint64("substreams-cache-save-interval")),
 					substreamsService.WithMaxWasmFuelPerBlockModule(viper.GetUint64("substreams-max-fuel-per-block-module")),
+				}
+
+				if os.Getenv("SUBSTREAMS_TRACING") == "modules_exec" {
+					opts = append(opts, substreamsService.WithModuleExecutionTracing())
 				}
 
 				if viper.GetBool("substreams-request-stats-enabled") {

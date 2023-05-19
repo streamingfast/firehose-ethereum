@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## [Unreleased]
+
+### Added
+
+* Added substreams scheduler tracing support. Enable tracing by setting the ENV variables `SF_TRACING` to one of the following:
+  - stdout://
+  - cloudtrace://[host:port]?project_id=<project_id>&ratio=<0.25>
+  - jaeger://[host:port]?scheme=<http|https>
+  - zipkin://[host:port]?scheme=<http|https>
+  - otelcol://[host:port]
+
 ## v1.4.2
 
 ### Highlights

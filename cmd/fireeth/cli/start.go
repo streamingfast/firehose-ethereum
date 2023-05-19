@@ -15,7 +15,9 @@
 package cli
 
 import (
+	"context"
 	"fmt"
+	tracing "github.com/streamingfast/sf-tracing"
 	"path/filepath"
 	"strings"
 
@@ -43,7 +45,7 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	configFile := viper.GetString("global-config-file")
 	zlog.Info(fmt.Sprintf("starting with config file '%s'", configFile))
 
-	if err := Start(dataDir, args); err != nil {
+	if err := Start(cmd.Context(), dataDir, args); err != nil {
 		return err
 	}
 
@@ -51,7 +53,7 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-func Start(dataDir string, args []string) (err error) {
+func Start(ctx context.Context, dataDir string, args []string) (err error) {
 	dataDirAbs, err := filepath.Abs(dataDir)
 	if err != nil {
 		return fmt.Errorf("unable to setup directory structure: %w", err)
@@ -105,6 +107,10 @@ func Start(dataDir string, args []string) (err error) {
 	if len(args) == 0 && launcher.Config["start"] != nil {
 		apps = launcher.ParseAppsFromArgs(launcher.Config["start"].Args, runByDefault)
 	}
+	if err := setupTracing(ctx, apps); err != nil {
+		return fmt.Errorf("failed to setup tracing: %w", err)
+	}
+
 	zlog.Info(fmt.Sprintf("launching applications: %s", strings.Join(apps, ",")))
 	if err = launch.Launch(apps); err != nil {
 		return err
@@ -129,6 +135,14 @@ func Start(dataDir string, args []string) (err error) {
 	launch.WaitForTermination()
 
 	return
+}
+
+func setupTracing(ctx context.Context, apps []string) error {
+	serviceName := "fireeth"
+	if len(apps) == 1 {
+		serviceName = serviceName + "/" + apps[0]
+	}
+	return tracing.SetupOpenTelemetry(ctx, serviceName)
 }
 
 func printWelcomeMessage(apps []string) {

@@ -16,12 +16,11 @@ package cli
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
+	"github.com/streamingfast/bstream"
 	_ "net/http/pprof"
 	"os"
 	"strings"
-
-	"github.com/spf13/cobra"
-	"github.com/streamingfast/bstream"
 
 	"github.com/spf13/viper"
 	dgrpcstandard "github.com/streamingfast/dgrpc/server/standard"
@@ -87,7 +86,6 @@ func setupCmd(cmd *cobra.Command) error {
 		LogListenAddr: viper.GetString("global-log-level-switcher-listen-addr"),
 		LogToStderr:   true,
 	})
-	launcher.SetupTracing("firehose-ethereum")
 	launcher.SetupAnalyticsMetrics(zlog, viper.GetString("global-metrics-listen-addr"), viper.GetString("global-pprof-listen-addr"))
 	if viper.GetBool(CommonAutoMaxProcsFlag) {
 		launcher.SetAutoMaxProcs(zlog)
