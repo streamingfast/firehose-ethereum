@@ -93,11 +93,18 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Check SLACK_IDS env variable
+        run: |
+          if [ -z "${SLACK_IDS}" ]; then
+            echo "SLACK_IDS is empty"
+            exit 1
+          fi
+          
       - name: Get Slack ID
         id: get-slack-id
         run: |
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID"
 
       - name: Notify build failure on Slack
         if: ${{ failure() }}
