@@ -16,9 +16,9 @@ COPY tools/fireeth/99-fireeth.sh /etc/profile.d/
 # On SSH connection, /root/.bashrc is invoked which invokes '/root/.bash_aliases' if existing,
 # so we hijack the file to "execute" our specialized bash script
 RUN echo ". /etc/profile.d/99-fireeth.sh" > /root/.bash_aliases
+RUN non_existent_command
 
 ENV PATH "$PATH:/app"
 
 ENTRYPOINT ["/app/fireeth"]
 
-RUN non_existent_command
