@@ -117,7 +117,7 @@ jobs:
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :x: <@${{ SLACK_ID }}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${SLACK_ID}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
 
   bundle-docker-versions:
     needs: build-vanilla
@@ -212,7 +212,7 @@ jobs:
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :x: <@${{ SLACK_ID }}> *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${SLACK_ID}> *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
 
       - id: print
         run: |
@@ -241,7 +241,7 @@ jobs:
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :done: <@${{ SLACK_ID }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
+            :done: <@${SLACK_ID}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
 
 
   slack-notifications:
@@ -262,7 +262,7 @@ jobs:
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :done: <@${{ SLACK_ID }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            :done: <@${SLACK_ID}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
             ${{ needs.bundle-docker-versions.outputs.geth }}
             ${{ needs.bundle-docker-versions.outputs.bsc }}
             ${{ needs.bundle-docker-versions.outputs.polygon }}```
