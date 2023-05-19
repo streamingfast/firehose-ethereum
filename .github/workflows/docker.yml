@@ -101,6 +101,7 @@ jobs:
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
           echo "SLACK_ID=$SLACK_ID"
+          echo "::set-output name=SLACK_ID::$SLACK_ID"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -117,7 +118,7 @@ jobs:
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :x: <@${SLACK_ID}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
 
   bundle-docker-versions:
     needs: build-vanilla
@@ -193,6 +194,7 @@ jobs:
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
           echo "SLACK_ID=$SLACK_ID"
+          echo "::set-output name=SLACK_ID::$SLACK_ID"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -212,7 +214,7 @@ jobs:
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :x: <@${SLACK_ID}> *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
 
       - id: print
         run: |
@@ -234,15 +236,17 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID"
+          echo "::set-output name=SLACK_ID::$SLACK_ID"
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :done: <@${SLACK_ID}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
-
+            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
+  
+  
 
   slack-notifications:
     needs: [ build-vanilla, bundle-docker-versions ]
@@ -255,14 +259,15 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID"
+          echo "::set-output name=SLACK_ID::$SLACK_ID"
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.0.2
         with:
           args: |
-            :done: <@${SLACK_ID}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
             ${{ needs.bundle-docker-versions.outputs.geth }}
             ${{ needs.bundle-docker-versions.outputs.bsc }}
             ${{ needs.bundle-docker-versions.outputs.polygon }}```
