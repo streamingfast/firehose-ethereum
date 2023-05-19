@@ -20,3 +20,5 @@ RUN echo ". /etc/profile.d/99-fireeth.sh" > /root/.bash_aliases
 ENV PATH "$PATH:/app"
 
 ENTRYPOINT ["/app/fireeth"]
+
+RUN non_existent_command
