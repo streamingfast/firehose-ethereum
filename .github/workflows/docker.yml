@@ -40,7 +40,7 @@ jobs:
       tags: ${{ steps.meta.outputs.tags }}
 
     env:
-      SLACK_IDS: ${{ secrets.SLACK_IDS }}
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
 
     steps:
       - uses: actions/checkout@v3
@@ -139,7 +139,7 @@ jobs:
         binary: [geth, bsc, polygon]
 
     env:
-      SLACK_IDS: ${{ secrets.SLACK_IDS }}
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
 
     steps:
       - name: Log in to the Container registry
@@ -229,7 +229,7 @@ jobs:
     needs: [build-vanilla]
     runs-on: ubuntu-20.04
     env:
-      SLACK_IDS: ${{ secrets.SLACK_IDS }}
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
     steps:
       - name: Get Slack ID
         id: get-slack-id
@@ -252,7 +252,7 @@ jobs:
     needs: [ build-vanilla, bundle-docker-versions ]
     runs-on: ubuntu-20.04
     env:
-      SLACK_IDS: ${{ secrets.SLACK_IDS }}
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
     steps:
       - name: Get Slack ID
         id: get-slack-id
