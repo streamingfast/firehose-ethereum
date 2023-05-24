@@ -15,6 +15,10 @@ for instructions to keep up to date.
   - zipkin://[host:port]?scheme=<http|https>
   - otelcol://[host:port]
 
+### Fixed
+
+* Fixed Substreams memory leak when requests using RPC calls are interrupted
+
 ## v1.4.2
 
 ### Highlights
