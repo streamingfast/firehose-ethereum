@@ -112,7 +112,7 @@ func (e *RPCEngine) PipelineOptions(ctx context.Context, startBlockNum, stopBloc
 
 	postJob := func(ctx context.Context, clock *pbsubstreams.Clock) error {
 		e.unregisterRequestCache(traceID)
-		if clock.Number >= stopBlockNum {
+		if clock != nil && clock.Number >= stopBlockNum {
 			pipelineCache.Save(ctx)
 		}
 		return nil
