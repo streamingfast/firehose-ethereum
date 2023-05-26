@@ -4,7 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## [Unreleased]
+## v1.4.3
+
+### Highlights
+
+* This release brings an update to `substreams` to `v1.1.4` which includes the following:
+  - Changes the module hash computation implementation to allow reusing caches accross substreams that 'import' other substreams as a dependency.
+  - Faster shutdown of requests that fail deterministically
+  - Fixed memory leak in RPC calls
+
+### Note for Operators
+
+> **Note** This upgrade procedure is applies if your Substreams deployment topology includes both `tier1` and `tier2` processes. If you have defined somewhere the config value `substreams-tier2: true`, then this applies to you, otherwise, if you can ignore the upgrade procedure.
+
+The components should be deployed simultaneously to `tier1` and `tier2`, or users will end up with backend error(s) saying that some partial file are not found. These errors will be resolved when both tiers are upgraded.
 
 ### Added
 
