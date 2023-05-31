@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Substreams changes
+
+* Switch default engine from `wasmtime` to `wazero`
+* Prevent reusing memory between blocks in wasm engine to fix determinism
+* Switch our store operations from bigdecimal to fixed point decimal to fix determinism
+* Sort the store deltas from `DeletePrefixes()` to fix determinism
+* Implement staged module execution within a single block.
+* "Fail fast" on repeating requests with deterministic failures for a "blacklist period", preventing waste of resources
+
 ## v1.4.3
 
 ### Highlights
