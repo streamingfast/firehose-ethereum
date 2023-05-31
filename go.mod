@@ -37,7 +37,7 @@ require (
 	github.com/streamingfast/sf-tracing v0.0.0-20230519113358-f3dc5e582d12
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.1.5-0.20230531013450-90ee2ae8364a
+	github.com/streamingfast/substreams v1.1.4
 	github.com/stretchr/testify v1.8.2
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -142,7 +142,6 @@ require (
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sethvargo/go-retry v0.2.3 // indirect
-	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/someone1/gcp-jwt-go v2.0.1+incompatible // indirect
 	github.com/spf13/afero v1.9.2 // indirect
@@ -155,7 +154,6 @@ require (
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
-	github.com/tetratelabs/wazero v1.1.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869 // indirect
