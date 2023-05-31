@@ -14,6 +14,7 @@ for instructions to keep up to date.
 * Sort the store deltas from `DeletePrefixes()` to fix determinism
 * Implement staged module execution within a single block.
 * "Fail fast" on repeating requests with deterministic failures for a "blacklist period", preventing waste of resources
+* SessionInit protobuf message now includes resolvedStartBlock and MaxWorkers, sent back to the client
 
 ## v1.4.3
 
