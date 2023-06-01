@@ -36,7 +36,8 @@ type BlockHeader struct {
 	MixDigest       eth.Hash       `json:"mixHash"`
 	Nonce           eth.Uint64     `json:"nonce"`
 	BaseFeePerGas   eth.Hex        `json:"baseFeePerGas"`
-	WithdrawalsHash eth.Hex        `json:"withdrawalsRoot"`
+	WithdrawalsHash eth.Hash    `json:"withdrawalsRoot"`
+	ExcessDataGas   eth.Hex        `json:"excessDataGas"`
 	TxDependency    [][]eth.Uint64 `json:"txDependency"`
 }
 

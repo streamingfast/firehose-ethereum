@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Added support for EIP-4844 (upcoming with activation of Dencun fork). This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
+  - [BlockHeader.excess_data_gas](./proto/sf/ethereum/type/v2/type.proto#L147)
+  - [TransactionTrace.blob_data_gas_used](./proto/sf/ethereum/type/v2/type.proto#290)
+  - [TransactionTrace.max_fee_per_data_gas](./proto/sf/ethereum/type/v2/type.proto#298)
+  - [TransactionTrace.blob_versioned_hashes](./proto/sf/ethereum/type/v2/type.proto#308)
+  - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#243)
+
 ## v2.1.0
 
 * Bump to major release firehose-core v1.0.0
@@ -609,12 +618,12 @@ The components should be deployed simultaneously to `tier1` and `tier2`, or user
 
 ### Added
 
-* Added substreams scheduler tracing support. Enable tracing by setting the ENV variables `SF_TRACING` to one of the following:
-  - stdout://
-  - cloudtrace://[host:port]?project_id=<project_id>&ratio=<0.25>
-  - jaeger://[host:port]?scheme=<http|https>
-  - zipkin://[host:port]?scheme=<http|https>
-  - otelcol://[host:port]
+* Added Substreams scheduler tracing support. Enable tracing by setting the ENV variables `SF_TRACING` to one of the following:
+  - `stdout://`
+  - `cloudtrace://[host:port]?project_id=<project_id>&ratio=<0.25>`
+  - `jaeger://[host:port]?scheme=<http|https>`
+  - `zipkin://[host:port]?scheme=<http|https>`
+  - `otelcol://[host:port]`
 
 ## v1.4.2
 
