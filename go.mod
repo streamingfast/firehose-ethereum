@@ -37,7 +37,7 @@ require (
 	github.com/streamingfast/sf-tracing v0.0.0-20230519113358-f3dc5e582d12
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.1.5-0.20230531211117-d10294e97e11
+	github.com/streamingfast/substreams v1.1.5
 	github.com/stretchr/testify v1.8.2
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
