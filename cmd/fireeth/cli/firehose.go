@@ -25,6 +25,7 @@ import (
 	"github.com/streamingfast/bstream/hub"
 	"github.com/streamingfast/bstream/transform"
 	dauthAuthenticator "github.com/streamingfast/dauth/authenticator"
+	"github.com/streamingfast/derr"
 	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	discoveryservice "github.com/streamingfast/dgrpc/server/discovery-service"
 	"github.com/streamingfast/dlauncher/launcher"
@@ -257,6 +258,9 @@ func init() {
 				HeadBlockNumberMetric:    headBlockNumMetric,
 				TransformRegistry:        registry,
 				RegisterServiceExtension: registerServiceExt,
+				CheckPendingShutdown: func() bool {
+					return derr.IsShuttingDown()
+				},
 			}), nil
 		},
 	})
