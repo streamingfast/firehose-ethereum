@@ -58,6 +58,10 @@ func downloadFromFirehoseE(cmd *cobra.Command, args []string) error {
 			block := in.ToProtocol().(*pbeth.Block)
 			return types.BlockFromProto(block, in.LibNum)
 		}
+	} else {
+		fixerFunc = func(in *bstream.Block) (*bstream.Block, error) {
+			return in, nil
+		}
 	}
 
 	return sftools.DownloadFirehoseBlocks(
