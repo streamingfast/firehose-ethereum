@@ -778,8 +778,8 @@ github.com/streamingfast/dgrpc v0.0.0-20230417152409-2ee737f143dd/go.mod h1:/PG8
 github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13 h1:B+sUDgOmOAPWhUcRIcuDitTGGiOCWDwhGWv+XIaeeNc=
 github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13/go.mod h1:xErlHEDd5+4NlR+Mg3ZtW7BTTLB0yZBxZAjHPrkk8X4=
 github.com/streamingfast/dmetering v0.0.0-20220301165106-a642bb6a21bd/go.mod h1:Eu1SH2HyBbDUmQqJV+f5oowCQ/c02HkAZyR5U2BKIT8=
-github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9 h1:dy+xdXeyud8v6Zf3tUaZo57mAgpO33nUHlBxxypYhY0=
-github.com/streamingfast/dmetering v0.0.0-20220307162406-37261b4b3de9/go.mod h1:JwP515aKdtsbm8v4pRjd20Q+2u7GZ03jqIEpzTrtbMw=
+github.com/streamingfast/dmetering v0.0.0-20230607145118-69b464f20cc9 h1:8yNsBeXPI6nXzKPD6pJX0M2wsyLA5eQdlbpYktiK21o=
+github.com/streamingfast/dmetering v0.0.0-20230607145118-69b464f20cc9/go.mod h1:JwP515aKdtsbm8v4pRjd20Q+2u7GZ03jqIEpzTrtbMw=
 github.com/streamingfast/dmetrics v0.0.0-20210811180524-8494aeb34447/go.mod h1:VLdQY/FwczmC/flqWkcsBbqXO4BhU4zQDSK7GMrpcjY=
 github.com/streamingfast/dmetrics v0.0.0-20220811180000-3e513057d17c/go.mod h1:fWoyaD76fE7mXZfkfcAfNeU/Hv/y6yJ/RgEcInQLwSw=
 github.com/streamingfast/dmetrics v0.0.0-20221129121022-a1733eca1981 h1:t3cTj45mgC0TtUd8TnR5uzFhRxnLGiofHK9Vx52HtHA=
@@ -793,8 +793,8 @@ github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839/go.mod h1:h
 github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1 h1:CGU52NV9heyO2Wb4ImDBy+1bVCeCsrEuu7WN/o/JGy0=
 github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1/go.mod h1:UEm8dqibr3c3A1iIA3CHpkhN7j3X78prN7/55sXf3A0=
 github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d/go.mod h1:weGz9xDNJMBNmn03XiJZ/b5Ngw8UAUoLirarqG7OwQY=
-github.com/streamingfast/firehose v0.1.1-0.20230605191752-18edf783d176 h1:MQWsPmHO8pKRTLHK6jgmLLpbhP/+AyV2sJNV2QDaCfU=
-github.com/streamingfast/firehose v0.1.1-0.20230605191752-18edf783d176/go.mod h1:v6GEDVwpINlTNNoJUJCkP4jzfqIxDtUqghM4WnHqU2c=
+github.com/streamingfast/firehose v0.1.1-0.20230607152309-d0193f123162 h1:2eGqLyK3qI/Fsk6rW+PlOLROtHkWn/Z5o3AbFsS9bgo=
+github.com/streamingfast/firehose v0.1.1-0.20230607152309-d0193f123162/go.mod h1:VLM3H+8x/DnJ6RoAIq/mdvflEKWYtqjM9QE5GxNsnvM=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20230316134139-96b3c7a682b7 h1:qeTlbEySoDPs9NUpnE9xrymwwwwjmReEQm7oe6/dcmo=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20230316134139-96b3c7a682b7/go.mod h1:Kh5fptEEMKVw/QXrdfr49ldY3SP5+/MJoUPQfUtByUU=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 h1:dgYLhP3STiPi30fISAijFPEB11D4r1fQFc8D3cpgV5s=
