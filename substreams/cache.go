@@ -129,13 +129,13 @@ func load(ctx context.Context, store dstore.Store, filename string) (kv KV) {
 	kv = make(KV)
 
 	if store == nil {
-		zlog.Info("skipping rpcCache load: no read store is defined")
+		zlog.Debug("skipping rpcCache load: no read store is defined")
 		return
 	}
 
 	obj, err := store.OpenObject(ctx, filename)
 	if err != nil {
-		zlog.Info("rpc cache not found", zap.String("filename", filename), zap.String("read_store_url", store.BaseURL().Redacted()), zap.Error(err))
+		zlog.Debug("rpc cache not found", zap.String("filename", filename), zap.String("read_store_url", store.BaseURL().Redacted()), zap.Error(err))
 		return
 	}
 
@@ -156,7 +156,7 @@ func load(ctx context.Context, store dstore.Store, filename string) (kv KV) {
 
 func save(ctx context.Context, store dstore.Store, filename string, kv KV) {
 	if store == nil {
-		zlog.Info("skipping rpccache save: no store is defined")
+		zlog.Debug("skipping rpccache save: no store is defined")
 		return
 	}
 
