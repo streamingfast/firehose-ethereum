@@ -17,6 +17,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"github.com/streamingfast/dmetering"
 	tracing "github.com/streamingfast/sf-tracing"
 	"path/filepath"
 	"strings"
@@ -93,6 +94,13 @@ func Start(ctx context.Context, dataDir string, args []string) (err error) {
 		return fmt.Errorf("protocol specific hooks not configured correctly: %w", err)
 	}
 
+	// FIXME: That should be a shared dependencies across `Ethereum on StreamingFast`, it will avoid the need to call `dmetering.SetDefaultMeter`
+	metering, err := dmetering.New(viper.GetString("common-metering-plugin"))
+	if err != nil {
+		return fmt.Errorf("unable to initialize dmetering: %w", err)
+	}
+	dmetering.SetDefaultMeter(metering)
+
 	launch := launcher.NewLauncher(zlog, modules)
 	zlog.Debug("launcher created")
 	runByDefault := func(app string) bool {
@@ -133,6 +141,7 @@ func Start(ctx context.Context, dataDir string, args []string) (err error) {
 	}
 
 	launch.WaitForTermination()
+	dmetering.WaitToFlush()
 
 	return
 }

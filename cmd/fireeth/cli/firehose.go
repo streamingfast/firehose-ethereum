@@ -29,7 +29,6 @@ import (
 	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	discoveryservice "github.com/streamingfast/dgrpc/server/discovery-service"
 	"github.com/streamingfast/dlauncher/launcher"
-	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/dmetrics"
 	"github.com/streamingfast/dstore"
 	ethss "github.com/streamingfast/firehose-ethereum/substreams"
@@ -87,13 +86,6 @@ func init() {
 			if err != nil {
 				return nil, fmt.Errorf("unable to initialize dauth: %w", err)
 			}
-
-			// FIXME: That should be a shared dependencies across `Ethereum on StreamingFast`, it will avoid the need to call `dmetering.SetDefaultMeter`
-			metering, err := dmetering.New(viper.GetString("common-metering-plugin"))
-			if err != nil {
-				return nil, fmt.Errorf("unable to initialize dmetering: %w", err)
-			}
-			dmetering.SetDefaultMeter(metering)
 
 			mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL, err := getCommonStoresURLs(runtime.AbsDataDir)
 			if err != nil {
