@@ -17,8 +17,6 @@ package cli
 import (
 	"context"
 	"fmt"
-	"github.com/streamingfast/dmetering"
-	tracing "github.com/streamingfast/sf-tracing"
 	"path/filepath"
 	"strings"
 
@@ -27,7 +25,10 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dlauncher/launcher"
+	"github.com/streamingfast/dmetering"
+	_ "github.com/streamingfast/dmetering/gcp"
 	_ "github.com/streamingfast/firehose-ethereum/types"
+	tracing "github.com/streamingfast/sf-tracing"
 	"go.uber.org/zap"
 )
 
@@ -95,7 +96,7 @@ func Start(ctx context.Context, dataDir string, args []string) (err error) {
 	}
 
 	// FIXME: That should be a shared dependencies across `Ethereum on StreamingFast`, it will avoid the need to call `dmetering.SetDefaultMeter`
-	metering, err := dmetering.New(viper.GetString("common-metering-plugin"))
+	metering, err := dmetering.New(viper.GetString("common-metering-plugin"), zlog)
 	if err != nil {
 		return fmt.Errorf("unable to initialize dmetering: %w", err)
 	}
