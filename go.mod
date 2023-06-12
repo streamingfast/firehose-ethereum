@@ -20,11 +20,11 @@ require (
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
 	github.com/streamingfast/dgrpc v0.0.0-20230417152409-2ee737f143dd
 	github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13
-	github.com/streamingfast/dmetering v0.0.0-20230609181157-eca30079629f
+	github.com/streamingfast/dmetering v0.0.0-20230612145015-8e055b55c414
 	github.com/streamingfast/dmetrics v0.0.0-20221129121022-a1733eca1981
 	github.com/streamingfast/dstore v0.1.1-0.20230512204716-ca0e4973e4f4
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
-	github.com/streamingfast/firehose v0.1.1-0.20230609181702-636c58f4d1db
+	github.com/streamingfast/firehose v0.1.1-0.20230612145815-a9355cfe4f5f
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230316134139-96b3c7a682b7
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
