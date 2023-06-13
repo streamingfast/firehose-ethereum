@@ -138,6 +138,16 @@ message BlockHeader {
 
   // Withdrawals root hash according to EIP-4895 (e.g. Shangai Fork) rules, only set if Shangai is present/active on the chain.
   bytes withdrawals_root = 19;
+
+  Uint64NestedArray tx_dependency = 20;
+}
+
+message Uint64NestedArray {
+    repeated Uint64Array val = 1;
+}
+
+message Uint64Array {
+    repeated uint64 val = 1;
 }
 
 message BigInt {

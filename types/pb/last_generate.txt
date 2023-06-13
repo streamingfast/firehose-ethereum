@@ -1,3 +1,3 @@
-generate.sh - Wed Mar 15 10:35:54 EDT 2023 - maoueh
+generate.sh - Tue 13 Jun 2023 14:59:57 EDT - stepd
 streamingfast/proto revision: 086dc4643579c0102b2a198bc40b89854dc50111
-streamingfast/firehose-ethereum/proto revision: bf3721c
+streamingfast/firehose-ethereum/proto revision: f4d8559

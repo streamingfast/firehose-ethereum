@@ -167,6 +167,77 @@ func (m *BigInt) UnmarshalJSONPB(unmarshaler *jsonpb.Unmarshaler, in []byte) (er
 	return m.UnmarshalJSON(in)
 }
 
+func toUint64Array(in []eth.Uint64) []uint64 {
+	out := make([]uint64, len(in))
+
+	for i, el := range in {
+		out[i] = uint64(el)
+	}
+	return out
+}
+
+func Uint64NestedArrayFromEthUint(in [][]eth.Uint64) *Uint64NestedArray {
+	out := &Uint64NestedArray{}
+	for _, v := range in {
+		out.Val = append(out.Val, &Uint64Array{
+			Val: toUint64Array(v),
+		})
+	}
+	return out
+}
+
+func NewUint64NestedArray(in [][]uint64) *Uint64NestedArray {
+	out := &Uint64NestedArray{}
+	for _, v := range in {
+		out.Val = append(out.Val, &Uint64Array{
+			Val: v,
+		})
+	}
+	return out
+}
+
+func (a *Uint64NestedArray) ToNative() (out [][]uint64) {
+	if a == nil {
+		return nil
+	}
+
+	for _, v := range a.Val {
+		out = append(out, v.Val)
+	}
+	return
+}
+
+func (a *Uint64NestedArray) MarshalJSON() ([]byte, error) {
+	if a == nil {
+		// FIXME: What is the right behavior regarding JSON to output when there is no bytes? Usually I think it should be omitted
+		//        entirely but I'm not sure what a custom JSON marshaler can do here to convey that meaning of ok, omit this field.
+		return nil, nil
+	}
+
+	native := a.ToNative()
+	return json.Marshal(native)
+}
+
+func (a *Uint64NestedArray) UnmarshalJSON(in []byte) (err error) {
+	var out [][]uint64
+	err = json.Unmarshal(in, &out)
+	if err != nil {
+		return
+	}
+
+	dummy := NewUint64NestedArray(out)
+	a.Val = dummy.Val
+	return
+}
+
+func (a *Uint64NestedArray) MarshalJSONPB(marshaler *jsonpb.Marshaler) ([]byte, error) {
+	return a.MarshalJSON()
+}
+
+func (a *Uint64NestedArray) UnmarshalJSONPB(unmarshaler *jsonpb.Unmarshaler, in []byte) (err error) {
+	return a.UnmarshalJSON(in)
+}
+
 func BlockToBuffer(block *Block) ([]byte, error) {
 	buf, err := proto.Marshal(block)
 	if err != nil {
