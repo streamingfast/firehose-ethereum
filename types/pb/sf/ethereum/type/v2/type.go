@@ -177,6 +177,9 @@ func toUint64Array(in []eth.Uint64) []uint64 {
 }
 
 func Uint64NestedArrayFromEthUint(in [][]eth.Uint64) *Uint64NestedArray {
+	if in == nil {
+		return nil
+	}
 	out := &Uint64NestedArray{}
 	for _, v := range in {
 		out.Val = append(out.Val, &Uint64Array{
