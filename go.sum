@@ -230,6 +230,7 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/decred/dcrd/crypto/blake256 v1.0.0 h1:/8DMNYp9SGi5f0w7uCm6d6M4OU2rGFK09Y2A4Xv7EE0=
+github.com/decred/dcrd/crypto/blake256 v1.0.0/go.mod h1:sQl2p6Y26YV+ZOcSTP6thNdn47hh8kt6rqSlvmrXFAc=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 h1:HbphB4TFFXpv7MNrT52FGrrgVXF1owhMVTHFZIlnvd4=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0/go.mod h1:DZGJHZMqrU4JJqFAWUS2UO1+lbSKsdiOoYi9Zzey7Fc=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
@@ -572,6 +573,7 @@ github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=
 github.com/matttproud/golang_protobuf_extensions v1.0.4/go.mod h1:BSXmuO+STAnVfrANrmjBb36TMTDstsz7MSK+HVaYKv4=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
+github.com/minio/blake2b-simd v0.0.0-20160723061019-3f5f724cb5b1/go.mod h1:pD8RvIylQ358TN4wwqatJ8rNavkEINozVn9DtGI3dfQ=
 github.com/minio/sha256-simd v1.0.0 h1:v1ta+49hkWZyvaKwrQB8elexRqm6Y0aMLjCNsrYxo6g=
 github.com/minio/sha256-simd v1.0.0/go.mod h1:OuYzVNI5vcoYIAmbIvHPl3N3jUzVedXbKy5RFepssQM=
 github.com/mitchellh/cli v1.0.0/go.mod h1:hNIlj7HEI86fIcpObd7a0FcrxTWetlwJDGcceTlRvqc=
@@ -798,8 +800,10 @@ github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1/go.mod h1:UEm
 github.com/streamingfast/firehose v0.1.1-0.20221017171248-8fd3adbe7b4d/go.mod h1:weGz9xDNJMBNmn03XiJZ/b5Ngw8UAUoLirarqG7OwQY=
 github.com/streamingfast/firehose v0.1.1-0.20230612145815-a9355cfe4f5f h1:3+ct/RV8Ecz/ctsE/nOCLnQT+3HvCFH6oLn77UAOULU=
 github.com/streamingfast/firehose v0.1.1-0.20230612145815-a9355cfe4f5f/go.mod h1:PcfLahY2VHvkFu8bIVt+07sWOhtwCvDOr778oMidmnw=
-github.com/streamingfast/firehose-ethereum/types v0.0.0-20230613194607-57b82e74932f h1:KLpcCAgS8WvJzNnIT+iN1vJpZipzvBh6+4eiBaOQrII=
-github.com/streamingfast/firehose-ethereum/types v0.0.0-20230613194607-57b82e74932f/go.mod h1:Kh5fptEEMKVw/QXrdfr49ldY3SP5+/MJoUPQfUtByUU=
+github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614182531-833a676ee0f8 h1:tccl2pMjOu5KkHSEqAjIjj4914FI8T7g6HoR2XVhyhg=
+github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614182531-833a676ee0f8/go.mod h1:Kh5fptEEMKVw/QXrdfr49ldY3SP5+/MJoUPQfUtByUU=
+github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614183835-273c90784b08 h1:vOGSRjsf7A0E18PJoAZYtyRUWOevpzSPyrbvpwe5hMc=
+github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614183835-273c90784b08/go.mod h1:Kh5fptEEMKVw/QXrdfr49ldY3SP5+/MJoUPQfUtByUU=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 h1:dgYLhP3STiPi30fISAijFPEB11D4r1fQFc8D3cpgV5s=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2/go.mod h1:OYv1UX/kRsV9aP4SEwa9zpt34qGzdtJzOvdGn+n56as=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=

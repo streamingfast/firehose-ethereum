@@ -4,6 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+* Support for firehose protocol 2.3 (for parallel processing of transactions, added to polygon 'bor' v0.4.0 
+
+### Removed
+
+* Removed the `tools upgrade-merged-blocks` command. Normalization is now part of consolereader within 'codec', not 'types', and cannot be done a posteriori.
+
 ## v1.4.6
 
 * Updated metering to fix dependencies

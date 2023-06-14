@@ -55,6 +55,7 @@ func TestParseFromFile(t *testing.T) {
 		{"testdata/polygon_calls_after_finalize.dmlog", nil, nil, false},
 		{"testdata/polygon_add_log_0.dmlog", nil, nil, false},
 		{"testdata/polygon_tx_dependency.dmlog", nil, nil, false},
+		{"testdata/polygon_disordered.dmlog", nil, nil, false},
 		{"testdata/lachesis.dmlog", nil, nil, false},
 	}
 
@@ -229,7 +230,7 @@ func testReaderConsoleReader(helperFunc func(), lines chan string, closer func()
 	l := &ConsoleReader{
 		lines:  lines,
 		close:  closer,
-		ctx:    &parseCtx{logger: zlog, stats: newParsingStats(zlog, 0), globalStats: newConsoleReaderStats()},
+		ctx:    &parseCtx{logger: zlog, stats: newParsingStats(zlog, 0), globalStats: newConsoleReaderStats(), normalizationFeatures: &normalizationFeatures{UpgradeBlockV2ToV3: true}},
 		logger: zlog,
 	}
 

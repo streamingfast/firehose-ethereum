@@ -33,8 +33,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var BlockVersion = int32(0) // this will be set inside readInit()
-
 // ConsoleReader is what reads the `geth` output directly. It builds
 // up some LogEntry objects. See `LogReader to read those entries .
 type ConsoleReader struct {
@@ -56,7 +54,7 @@ func NewConsoleReader(logger *zap.Logger, lines chan string) (*ConsoleReader, er
 		lines: lines,
 		close: func() {},
 
-		ctx:   &parseCtx{logger: logger, globalStats: globalStats},
+		ctx:   &parseCtx{logger: logger, globalStats: globalStats, normalizationFeatures: &normalizationFeatures{}},
 		done:  make(chan interface{}),
 		stats: globalStats,
 
@@ -158,7 +156,9 @@ func (s *parsingStats) inc(key string) {
 }
 
 type parseCtx struct {
-	currentVariant       pbeth.Variant
+	blockVersion int32
+	fhVersion    string
+
 	currentBlock         *pbeth.Block
 	currentTrace         *pbeth.TransactionTrace
 	currentTraceLogCount int
@@ -166,6 +166,9 @@ type parseCtx struct {
 	// CreateAccount, BalanceChange, NonceChanges and append them in order in the first EVM call
 	currentRootCall *pbeth.Call
 	finalizing      bool
+
+	normalizationFeatures            *normalizationFeatures
+	highestOrdinalBeforeTransactions uint64
 
 	transactionTraces   []*pbeth.TransactionTrace
 	evmCallStackIndexes []int32
@@ -410,7 +413,7 @@ func (ctx *parseCtx) popCallIndexReturnParent() (int32, uint32, error) {
 // Formats
 // FIRE BEGIN_BLOCK <NUM>
 func (ctx *parseCtx) readBeginBlock(line string) error {
-	if BlockVersion == 0 {
+	if ctx.blockVersion == 0 {
 		return fmt.Errorf("cannot start reading block: INIT not done")
 	}
 	chunks, err := SplitInChunks(line, 2)
@@ -428,9 +431,10 @@ func (ctx *parseCtx) readBeginBlock(line string) error {
 	}
 
 	ctx.stats = newParsingStats(ctx.logger, blockNum)
+	ctx.highestOrdinalBeforeTransactions = 0
 	ctx.currentBlock = &pbeth.Block{
 		Number: blockNum,
-		Ver:    BlockVersion,
+		Ver:    ctx.blockVersion,
 	}
 
 	return nil
@@ -448,9 +452,22 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 
 	ctx.stats.trxStartAt = time.Now()
 
-	chunks, err := SplitInChunks(line, 16)
-	if err != nil {
-		return fmt.Errorf("split: %s", err)
+	var chunks []string
+	var err error
+	var index uint32
+
+	if ctx.fhVersion == "2.3" { // trx index provided now
+		chunks, err = SplitInChunks(line, 17)
+		if err != nil {
+			return fmt.Errorf("split: %s", err)
+		}
+		index = FromUint32(chunks[15], "provided transaction index")
+	} else {
+		chunks, err = SplitInChunks(line, 16)
+		if err != nil {
+			return fmt.Errorf("split: %s", err)
+		}
+		index = uint32(len(ctx.transactionTraces))
 	}
 
 	hash := FromHex(chunks[0], "BEGIN_APPLY_TRX txHash")
@@ -472,16 +489,16 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	maxFeePerGas := pbeth.BigIntFromBytes(FromHex(chunks[11], "BEGIN_APPLY_TRX maxFeePerGas"))
 	maxPriorityGasFee := pbeth.BigIntFromBytes(FromHex(chunks[12], "BEGIN_APPLY_TRX maxPriorityFeePerGas"))
 	trxType := pbeth.TransactionTrace_Type(FromInt32(chunks[13], "BEGIN_APPLY_TRX trxType"))
-	ordinal := FromUint64(chunks[14], "BEGIN_APPLY_TRX ordinal@12")
+	ordinal := FromUint64(chunks[14], "BEGIN_APPLY_TRX ordinal")
 
 	ctx.currentTraceLogCount = 0
 	ctx.currentTrace = &pbeth.TransactionTrace{
-		Index:                uint32(len(ctx.transactionTraces)),
+		Index:                index,
 		Hash:                 hash,
 		Value:                value,
 		V:                    v,
-		R:                    pbeth.NormalizeSignaturePoint(r),
-		S:                    pbeth.NormalizeSignaturePoint(s),
+		R:                    NormalizeSignaturePoint(r),
+		S:                    NormalizeSignaturePoint(s),
 		GasLimit:             gas,
 		GasPrice:             gasPrice,
 		Nonce:                nonce,
@@ -803,7 +820,7 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	}
 
 	trxTrace.Receipt.Logs = pbLogs
-	trxTrace.PopulateStateReverted()
+	populateStateReverted(trxTrace)
 
 	ctx.transactionTraces = append(ctx.transactionTraces, trxTrace)
 	ctx.currentTrace = nil
@@ -914,6 +931,9 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
 	callIndex := chunks[0]
 	account := FromHex(chunks[1], "CREATED_#")
 	ordinal := FromUint64(chunks[2], "CREATED_ACCOUNT ordinal")
+	if ctx.transactionTraces == nil {
+		ctx.highestOrdinalBeforeTransactions = ordinal
+	}
 
 	accountCreation := &pbeth.AccountCreation{
 		Account: account,
@@ -947,32 +967,32 @@ func (ctx *parseCtx) readInit(line string) error {
 		return fmt.Errorf("split: %s", err)
 	}
 
-	fhVersion := chunks[0]
-	nodeVariant := chunks[1]
+	ctx.fhVersion = chunks[0]
+	nodeVariant := strings.ToLower(chunks[1])
 	nodeVersion := chunks[2]
 
-	switch fhVersion {
+	switch ctx.fhVersion {
 	case "2.0":
-		BlockVersion = 2
-	case "2.1", "2.2":
-		BlockVersion = 3
+		ctx.blockVersion = 2
+		ctx.normalizationFeatures.UpgradeBlockV2ToV3 = true
+	case "2.1", "2.2", "2.3":
+		ctx.blockVersion = 3
 	default:
-		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", fhVersion)
+		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
 
-	switch strings.ToLower(nodeVariant) {
-	case "polygon":
-		ctx.currentVariant = pbeth.VariantPolygon
-	case "bsc", "bnb":
-		ctx.currentVariant = pbeth.VariantBNB
-	default:
-		ctx.currentVariant = pbeth.VariantGeth
+	if nodeVariant == "polygon" {
+		ctx.normalizationFeatures.CombinePolygonSystemTransactions = true
+		if ctx.fhVersion == "2.3" {
+			ctx.normalizationFeatures.ReorderPolygonTransactionsAndRenumberOrdinals = true
+		}
 	}
 
 	ctx.logger.Info("read firehose instrumentation init line",
-		zap.String("fh_version", fhVersion),
+		zap.String("fh_version", ctx.fhVersion),
 		zap.String("node_variant", nodeVariant),
 		zap.String("node_version", nodeVersion),
+		zap.Any("normalization_features", ctx.normalizationFeatures),
 	)
 
 	return nil
@@ -1030,6 +1050,9 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 		if ctx.currentTrace == nil {
 			if ctx.currentBlock != nil {
 				ctx.currentBlock.CodeChanges = append(ctx.currentBlock.CodeChanges, codeChange)
+				if ctx.transactionTraces == nil {
+					ctx.highestOrdinalBeforeTransactions = codeChange.Ordinal
+				}
 			}
 			return nil
 		}
@@ -1110,7 +1133,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	ctx.finalizing = false
 	ctx.stats.log()
 
-	block.NormalizeInPlace(ctx.currentVariant)
+	normalizeInPlace(block, ctx.normalizationFeatures, ctx.highestOrdinalBeforeTransactions+1)
 
 	var libNum uint64
 	if len(endBlockData.FinalizedBlockHash) > 0 {
@@ -1209,6 +1232,9 @@ func (ctx *parseCtx) readBalanceChange(line string) error {
 	if ctx.currentTrace == nil && ctx.currentBlock != nil {
 		// This is temporary until reason why the `callIndex != "0"` happens, should be fixed now, but quite possible we still have a problem
 		ctx.currentBlock.BalanceChanges = append(ctx.currentBlock.BalanceChanges, balanceChange)
+		if ctx.transactionTraces == nil {
+			ctx.highestOrdinalBeforeTransactions = balanceChange.Ordinal
+		}
 		return nil
 	}
 
