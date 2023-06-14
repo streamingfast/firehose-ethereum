@@ -254,15 +254,6 @@ func MustBlockToBuffer(block *Block) []byte {
 	return buf
 }
 
-func callAtIndex(idx uint32, calls []*Call) *Call {
-	for _, call := range calls {
-		if call.Index == idx {
-			return call
-		}
-	}
-	return nil
-}
-
 func (call *Call) Method() []byte {
 	if len(call.Input) >= 4 {
 		return call.Input[0:4]
