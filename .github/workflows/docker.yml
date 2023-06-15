@@ -222,8 +222,8 @@ jobs:
         run: |
           OUT="${{ steps.meta.outputs.tags }}"
           OUT="${OUT//'%'/'%25'}"
-          OUT="${OUT//$'\n'/'%0A'}"
-          OUT="${OUT//$'\r'/'%0D'}"
+          OUT="${OUT//$'\n'/' '}"
+          OUT="${OUT//$'\r'/' '}"
           echo "${{ matrix.binary }}=$OUT" >> $GITHUB_OUTPUT
 
   slack-notifications-vanilla:
