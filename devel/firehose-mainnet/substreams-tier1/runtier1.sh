@@ -3,6 +3,8 @@ go install -v ../../../cmd/fireeth && fireeth start firehose \
     --common-live-blocks-addr= \
     --common-merged-blocks-store-url="$COMMON_MERGED_BLOCKS" \
     --common-first-streamable-block=0 \
+    --common-metering-plugin=logger:// \
+    --common-auth-plugin=trust:// \
     --firehose-grpc-listen-addr=:9000 \
     --substreams-client-endpoint=:9001 \
     --substreams-client-insecure=false \

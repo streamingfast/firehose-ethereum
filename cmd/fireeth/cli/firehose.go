@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream/hub"
 	"github.com/streamingfast/bstream/transform"
-	dauthAuthenticator "github.com/streamingfast/dauth/authenticator"
+	dauthAuthenticator "github.com/streamingfast/dauth"
 	"github.com/streamingfast/derr"
 	dgrpcserver "github.com/streamingfast/dgrpc/server"
 	discoveryservice "github.com/streamingfast/dgrpc/server/discovery-service"
@@ -81,11 +81,12 @@ func init() {
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			blockstreamAddr := viper.GetString("common-live-blocks-addr")
 
-			// FIXME: That should be a shared dependencies across `Ethereum on StreamingFast`
 			authenticator, err := dauthAuthenticator.New(viper.GetString("common-auth-plugin"))
 			if err != nil {
-				return nil, fmt.Errorf("unable to initialize dauth: %w", err)
+				return nil, fmt.Errorf("unable to initialize authenticator: %w", err)
 			}
+			// FIXME: we cannot call this here.. it does not last the lifetime of the dauth.
+			//defer authenticator.Close()
 
 			mergedBlocksStoreURL, oneBlocksStoreURL, forkedBlocksStoreURL, err := getCommonStoresURLs(runtime.AbsDataDir)
 			if err != nil {

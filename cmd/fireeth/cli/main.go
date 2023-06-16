@@ -20,20 +20,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
-
-	// Needs to be in this file which is the main entry of wrapper binary
-	_ "github.com/streamingfast/dauth/authenticator/gcp"    // auth cloud-gcp plugin
-	_ "github.com/streamingfast/dauth/authenticator/null"   // auth null plugin
-	_ "github.com/streamingfast/dauth/authenticator/secret" // auth secret/hard-coded plugin
-	_ "github.com/streamingfast/dauth/ratelimiter/null"     // ratelimiter plugin
-	"github.com/streamingfast/node-manager/operator"
-
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dlauncher/flags"
 	"github.com/streamingfast/dlauncher/launcher"
+	"github.com/streamingfast/node-manager/operator"
+	"go.uber.org/zap"
 )
 
 var RootCmd = &cobra.Command{Use: "fireeth", Short: "Ethereum on StreamingFast"}
