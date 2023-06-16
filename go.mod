@@ -229,5 +229,3 @@ replace (
 )
 
 retract v1.4.5 //included private repositories
-
-replace github.com/streamingfast/dgrpc => ../dgrpc
