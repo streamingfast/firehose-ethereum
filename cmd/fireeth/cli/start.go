@@ -23,10 +23,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
+	dauthgrpc "github.com/streamingfast/dauth/grpc"
+	dauthtrust "github.com/streamingfast/dauth/trust"
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
-	_ "github.com/streamingfast/dmetering/gcp"
 	_ "github.com/streamingfast/firehose-ethereum/types"
 	tracing "github.com/streamingfast/sf-tracing"
 	"go.uber.org/zap"
@@ -36,6 +37,9 @@ var StartCmd = &cobra.Command{Use: "start", Short: "Starts Ethereum on Streaming
 
 func init() {
 	RootCmd.AddCommand(StartCmd)
+	dauthgrpc.Register()
+	dauthtrust.Register()
+	dmetering.RegisterDefault()
 }
 
 func sfStartE(cmd *cobra.Command, args []string) (err error) {
@@ -95,12 +99,16 @@ func Start(ctx context.Context, dataDir string, args []string) (err error) {
 		return fmt.Errorf("protocol specific hooks not configured correctly: %w", err)
 	}
 
-	// FIXME: That should be a shared dependencies across `Ethereum on StreamingFast`, it will avoid the need to call `dmetering.SetDefaultMeter`
-	metering, err := dmetering.New(viper.GetString("common-metering-plugin"), zlog)
+	eventEmitter, err := dmetering.New(viper.GetString("common-metering-plugin"), zlog)
 	if err != nil {
 		return fmt.Errorf("unable to initialize dmetering: %w", err)
 	}
-	dmetering.SetDefaultMeter(metering)
+	defer func() {
+		if err := eventEmitter.Close(); err != nil {
+			zlog.Warn("failed to properly close event emitter", zap.Error(err))
+		}
+	}()
+	dmetering.SetDefaultEmitter(eventEmitter)
 
 	launch := launcher.NewLauncher(zlog, modules)
 	zlog.Debug("launcher created")
@@ -142,7 +150,6 @@ func Start(ctx context.Context, dataDir string, args []string) (err error) {
 	}
 
 	launch.WaitForTermination()
-	dmetering.WaitToFlush()
 
 	return
 }
