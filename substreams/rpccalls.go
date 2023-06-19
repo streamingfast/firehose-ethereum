@@ -71,6 +71,7 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 	if len(rpcClients) == 1 {
 		zlog.Warn("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
 	}
+	rpcCacheStore.SetOverwrite(true)
 
 	return &RPCEngine{
 		perRequestCache:       map[string]Cache{},
