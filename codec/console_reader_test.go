@@ -57,6 +57,7 @@ func TestParseFromFile(t *testing.T) {
 		{"testdata/polygon_add_log_0.dmlog", nil, nil, false},
 		{"testdata/polygon_tx_dependency.dmlog", nil, nil, false},
 		{"testdata/polygon_disordered.dmlog", nil, nil, false},
+		{"testdata/polygon_reorder_ordinals.dmlog", nil, nil, false},
 		{"testdata/lachesis.dmlog", nil, nil, false},
 	}
 
