@@ -47,7 +47,6 @@ func NewStoreBackedCache(ctx context.Context, store dstore.Store, blockNum, cach
 		totalHits:   atomic.NewUint64(0),
 		totalMisses: atomic.NewUint64(0),
 	}
-	store.SetOverwrite(true) // cache has overwrite behavior as a requirement..
 
 	startBlock, endBlock := computeStartAndEndBlock(blockNum, cacheSize)
 
