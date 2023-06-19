@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/ShinyTrinkets/overseer v0.3.0
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.3
 	github.com/josephburnett/jd v1.7.1
 	github.com/klauspost/compress v1.15.12
 	github.com/lithammer/dedent v1.1.0
@@ -16,15 +16,15 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/streamingfast/bstream v0.0.2-0.20230510131449-6b591d74130d
 	github.com/streamingfast/cli v0.0.4-0.20230120202400-0357b9c6f2be
-	github.com/streamingfast/dauth v0.0.0-20230616153507-cb13d4ba0ea1
+	github.com/streamingfast/dauth v0.0.0-20230616203650-2cb108b40603
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
-	github.com/streamingfast/dgrpc v0.0.0-20230616153353-6bbf5534a79a
+	github.com/streamingfast/dgrpc v0.0.0-20230616195911-1a7e8a5c5ca4
 	github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13
 	github.com/streamingfast/dmetering v0.0.0-20230616153558-2b1c710b945f
 	github.com/streamingfast/dmetrics v0.0.0-20230516031116-28fcfeb4b9ed
 	github.com/streamingfast/dstore v0.1.1-0.20230512204716-ca0e4973e4f4
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
-	github.com/streamingfast/firehose v0.1.1-0.20230616144546-8c5807fe635f
+	github.com/streamingfast/firehose v0.1.1-0.20230616141805-03102fa779ce
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614183835-273c90784b08
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
@@ -34,11 +34,11 @@ require (
 	github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28
 	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9
 	github.com/streamingfast/sf-tools v0.0.0-20230607184109-6fff9dd0c7df
-	github.com/streamingfast/sf-tracing v0.0.0-20230519113358-f3dc5e582d12
+	github.com/streamingfast/sf-tracing v0.0.0-20230616174903-cd2ade641ca9
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.1.6-0.20230616161220-caa8a5a7476e
-	github.com/stretchr/testify v1.8.2
+	github.com/streamingfast/substreams v1.1.6-0.20230619121227-cf1eab8d7a5a
+	github.com/stretchr/testify v1.8.3
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
 	go.uber.org/multierr v1.9.0
@@ -60,8 +60,8 @@ require (
 	github.com/Azure/azure-pipeline-go v0.2.3 // indirect
 	github.com/Azure/azure-storage-blob-go v0.14.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.3 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.6 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.6 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.15.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.39.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.0.0-20221018185641-36f91511cfd7 // indirect
 	github.com/KimMachineGun/automemlimit v0.2.4 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
@@ -74,6 +74,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.3.1 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
+	github.com/bufbuild/connect-go v1.8.0 // indirect
 	github.com/bytecodealliance/wasmtime-go/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
@@ -151,10 +152,10 @@ require (
 	github.com/paulbellamy/ratecounter v0.2.0 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.14.0 // indirect
-	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.37.0 // indirect
-	github.com/prometheus/procfs v0.8.0 // indirect
+	github.com/prometheus/client_golang v1.16.0 // indirect
+	github.com/prometheus/client_model v0.4.0 // indirect
+	github.com/prometheus/common v0.44.0 // indirect
+	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sethvargo/go-retry v0.2.3 // indirect
@@ -179,26 +180,27 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.9.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.36.4 // indirect
-	go.opentelemetry.io/otel v1.15.1 // indirect
+	go.opentelemetry.io/otel v1.16.0 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.15.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.15.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.15.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.15.1 // indirect
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.15.1 // indirect
 	go.opentelemetry.io/otel/exporters/zipkin v1.15.1 // indirect
-	go.opentelemetry.io/otel/sdk v1.15.1 // indirect
-	go.opentelemetry.io/otel/trace v1.15.1 // indirect
+	go.opentelemetry.io/otel/metric v1.16.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.16.0 // indirect
+	go.opentelemetry.io/otel/trace v1.16.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/automaxprocs v1.5.1 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/oauth2 v0.6.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/oauth2 v0.8.0 // indirect
+	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/term v0.8.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.114.0 // indirect
