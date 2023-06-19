@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/streamingfast/dstore"
+	"go.uber.org/atomic"
 	"go.uber.org/zap"
 )
 
@@ -31,8 +32,8 @@ type StoreBackedCache struct {
 	startBlock uint64
 	endBlock   uint64
 
-	totalHits   int
-	totalMisses int
+	totalHits   *atomic.Uint64
+	totalMisses *atomic.Uint64
 
 	cacheSize uint64
 
@@ -41,8 +42,10 @@ type StoreBackedCache struct {
 
 func NewStoreBackedCache(ctx context.Context, store dstore.Store, blockNum, cacheSize uint64) *StoreBackedCache {
 	c := &StoreBackedCache{
-		store:     store,
-		cacheSize: cacheSize,
+		store:       store,
+		cacheSize:   cacheSize,
+		totalHits:   atomic.NewUint64(0),
+		totalMisses: atomic.NewUint64(0),
 	}
 	store.SetOverwrite(true) // cache has overwrite behavior as a requirement..
 
@@ -59,11 +62,11 @@ func (c *StoreBackedCache) Get(key string) ([]byte, bool) {
 	defer c.mu.RUnlock()
 
 	if d, found := c.kv[CacheKey(key)]; found {
-		c.totalHits++
+		c.totalHits.Inc()
 		return d, found
 	}
 
-	c.totalMisses++
+	c.totalMisses.Inc()
 	return nil, false
 }
 
@@ -106,10 +109,13 @@ func (c *StoreBackedCache) startTracking(ctx context.Context) {
 }
 
 func (c *StoreBackedCache) log() {
+	hits := c.totalHits.Load()
+	misses := c.totalMisses.Load()
+
 	zlog.Debug("rpc cache_performance",
-		zap.Int("hits", c.totalHits),
-		zap.Int("misses", c.totalMisses),
-		zap.Float64("hit_rate", float64(c.totalHits)/float64(c.totalHits+c.totalMisses)),
+		zap.Uint64("hits", hits),
+		zap.Uint64("misses", misses),
+		zap.Float64("hit_rate", float64(hits)/float64(hits+misses)),
 	)
 }
 
