@@ -14,15 +14,15 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.10.1
-	github.com/streamingfast/bstream v0.0.2-0.20230510131449-6b591d74130d
+	github.com/streamingfast/bstream v0.0.2-0.20230619183735-f8325d186119
 	github.com/streamingfast/cli v0.0.4-0.20230120202400-0357b9c6f2be
-	github.com/streamingfast/dauth v0.0.0-20230616203650-2cb108b40603
+	github.com/streamingfast/dauth v0.0.0-20230620150800-dfc654175331
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
-	github.com/streamingfast/dgrpc v0.0.0-20230616195911-1a7e8a5c5ca4
+	github.com/streamingfast/dgrpc v0.0.0-20230619155906-cd17cef469de
 	github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13
-	github.com/streamingfast/dmetering v0.0.0-20230616153558-2b1c710b945f
+	github.com/streamingfast/dmetering v0.0.0-20230620155208-31b97a817964
 	github.com/streamingfast/dmetrics v0.0.0-20230516031116-28fcfeb4b9ed
-	github.com/streamingfast/dstore v0.1.1-0.20230512204716-ca0e4973e4f4
+	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
 	github.com/streamingfast/firehose v0.1.1-0.20230616141805-03102fa779ce
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614183835-273c90784b08
@@ -37,10 +37,11 @@ require (
 	github.com/streamingfast/sf-tracing v0.0.0-20230616174903-cd2ade641ca9
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.1.6-0.20230619154236-f82e244de3dc
+	github.com/streamingfast/substreams v1.1.6-0.20230620155401-14fec7ec57ea
 	github.com/stretchr/testify v1.8.3
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
+	go.uber.org/atomic v1.10.0
 	go.uber.org/multierr v1.9.0
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.54.0
@@ -193,7 +194,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.16.0 // indirect
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
-	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/automaxprocs v1.5.1 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
