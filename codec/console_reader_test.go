@@ -16,7 +16,7 @@ package codec
 
 import (
 	"bytes"
-	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -24,12 +24,13 @@ import (
 	"math/big"
 	"os"
 	"os/exec"
+	"path"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-
 	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/jsonpb"
@@ -56,8 +57,11 @@ func TestParseFromFile(t *testing.T) {
 		{"testdata/polygon_add_log_0.dmlog", nil, nil, false},
 		{"testdata/polygon_tx_dependency.dmlog", nil, nil, false},
 		{"testdata/polygon_disordered.dmlog", nil, nil, false},
+		{"testdata/polygon_reorder_ordinals.dmlog", nil, nil, false},
 		{"testdata/lachesis.dmlog", nil, nil, false},
 	}
+
+	writeActualFileToTmp := os.Getenv("FIREETH_CONSOLE_READER_TEST_DEBUG") == "true"
 
 	for _, test := range tests {
 		t.Run(strings.Replace(test.deepMindFile, "testdata/", "", 1), func(t *testing.T) {
@@ -119,6 +123,21 @@ func TestParseFromFile(t *testing.T) {
 			}
 			buf.Write([]byte("]"))
 
+			var out interface{}
+			err := json.Unmarshal(buf.Bytes(), &out)
+			require.NoError(t, err)
+
+			reformatted, err := json.MarshalIndent(out, "", "  ")
+			require.NoError(t, err)
+
+			buf.Reset()
+			buf.Write(reformatted)
+
+			if writeActualFileToTmp {
+				err := os.WriteFile(path.Join(tempDir(), path.Base(test.deepMindFile)+".actual.json"), buf.Bytes(), os.ModePerm)
+				require.NoError(t, err)
+			}
+
 			goldenFile := test.deepMindFile + ".golden.json"
 			if os.Getenv("GOLDEN_UPDATE") == "true" {
 				ioutil.WriteFile(goldenFile, buf.Bytes(), os.ModePerm)
@@ -179,32 +198,13 @@ func TestGeneratePBBlocks(t *testing.T) {
 	}
 }
 
-func consumeBlock(t *testing.T, reader *ConsoleReader) *pbeth.Block {
-	t.Helper()
-
-	block, err := reader.ReadBlock()
-	if block == nil {
-		require.Fail(t, err.Error())
+// tempDir uses `/tmp` where it's available, otherwise it uses `os.TempDir()`
+func tempDir() string {
+	if runtime.GOOS == "darwin" {
+		return "/tmp"
 	}
 
-	return block.ToProtocol().(*pbeth.Block)
-}
-
-func consumeSingleBlock(t *testing.T, reader *ConsoleReader) *pbeth.Block {
-	t.Helper()
-
-	block := consumeBlock(t, reader)
-	consumeToEOF(t, reader)
-
-	return block
-}
-
-func consumeToEOF(t *testing.T, reader *ConsoleReader) {
-	block, err := reader.ReadBlock()
-	require.Nil(t, block)
-	require.Equal(t, err, io.EOF)
-
-	return
+	return os.TempDir()
 }
 
 func testFileConsoleReader(t *testing.T, filename string) *ConsoleReader {
@@ -219,12 +219,6 @@ func testFileConsoleReader(t *testing.T, filename string) *ConsoleReader {
 
 	return cr
 }
-
-//func testStringConsoleReader(t *testing.T, data string) *ConsoleReader {
-//	t.Helper()
-//
-//	return testReaderConsoleReader(t, bytes.NewBufferString(data), func() {})
-//}
 
 func testReaderConsoleReader(helperFunc func(), lines chan string, closer func()) *ConsoleReader {
 	l := &ConsoleReader{
@@ -245,15 +239,6 @@ func TestValueParsing(t *testing.T) {
 	value := pbeth.BigIntFromBytes(FromHex(testValue, "TESTING value"))
 	require.Equal(t, expectedValue, value)
 
-}
-
-func bytesListToHexList(bytesList [][]byte) []string {
-	hexes := make([]string, len(bytesList))
-	for i, bytes := range bytesList {
-		hexes[i] = hex.EncodeToString(bytes)
-	}
-
-	return hexes
 }
 
 func unifiedDiff(t *testing.T, cnt1, cnt2 []byte) string {
