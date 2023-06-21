@@ -168,7 +168,7 @@ type parseCtx struct {
 	finalizing      bool
 
 	normalizationFeatures            *normalizationFeatures
-	highestOrdinalBeforeTransactions int64
+	highestOrdinalBeforeTransactions uint64
 
 	transactionTraces   []*pbeth.TransactionTrace
 	evmCallStackIndexes []int32
@@ -431,7 +431,7 @@ func (ctx *parseCtx) readBeginBlock(line string) error {
 	}
 
 	ctx.stats = newParsingStats(ctx.logger, blockNum)
-	ctx.highestOrdinalBeforeTransactions = -1
+	ctx.highestOrdinalBeforeTransactions = 0
 	ctx.currentBlock = &pbeth.Block{
 		Number: blockNum,
 		Ver:    ctx.blockVersion,
@@ -931,9 +931,8 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
 	callIndex := chunks[0]
 	account := FromHex(chunks[1], "CREATED_#")
 	ordinal := FromUint64(chunks[2], "CREATED_ACCOUNT ordinal")
-
-	if ctx.currentTrace == nil && ctx.transactionTraces == nil {
-		ctx.highestOrdinalBeforeTransactions = int64(ordinal)
+	if ctx.transactionTraces == nil {
+		ctx.highestOrdinalBeforeTransactions = ordinal
 	}
 
 	accountCreation := &pbeth.AccountCreation{
@@ -1052,7 +1051,7 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 			if ctx.currentBlock != nil {
 				ctx.currentBlock.CodeChanges = append(ctx.currentBlock.CodeChanges, codeChange)
 				if ctx.transactionTraces == nil {
-					ctx.highestOrdinalBeforeTransactions = int64(codeChange.Ordinal)
+					ctx.highestOrdinalBeforeTransactions = codeChange.Ordinal
 				}
 			}
 			return nil
@@ -1134,7 +1133,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	ctx.finalizing = false
 	ctx.stats.log()
 
-	normalizeInPlace(block, ctx.normalizationFeatures, uint64(ctx.highestOrdinalBeforeTransactions+1))
+	normalizeInPlace(block, ctx.normalizationFeatures, ctx.highestOrdinalBeforeTransactions+1)
 
 	var libNum uint64
 	if len(endBlockData.FinalizedBlockHash) > 0 {
@@ -1234,7 +1233,7 @@ func (ctx *parseCtx) readBalanceChange(line string) error {
 		// This is temporary until reason why the `callIndex != "0"` happens, should be fixed now, but quite possible we still have a problem
 		ctx.currentBlock.BalanceChanges = append(ctx.currentBlock.BalanceChanges, balanceChange)
 		if ctx.transactionTraces == nil {
-			ctx.highestOrdinalBeforeTransactions = int64(balanceChange.Ordinal)
+			ctx.highestOrdinalBeforeTransactions = balanceChange.Ordinal
 		}
 		return nil
 	}

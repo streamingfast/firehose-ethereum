@@ -103,9 +103,7 @@ func reorderPolygonTransactionsAndRenumberOrdinals(block *pbeth.Block, firstTran
 	for _, trx := range block.TransactionTraces {
 		trx.BeginOrdinal += baseline
 		for _, call := range trx.Calls {
-			if call.BeginOrdinal != 0 {
-				call.BeginOrdinal += baseline // consistent with a known small bug: root call has beginOrdinal set to 0
-			}
+			call.BeginOrdinal += baseline
 			call.EndOrdinal += baseline
 			for _, log := range call.Logs {
 				log.Ordinal += baseline
@@ -134,7 +132,7 @@ func reorderPolygonTransactionsAndRenumberOrdinals(block *pbeth.Block, firstTran
 			log.Ordinal += baseline
 		}
 		trx.EndOrdinal += baseline
-		baseline = trx.EndOrdinal
+		baseline = trx.EndOrdinal + 1
 	}
 
 	for _, ch := range block.BalanceChanges {

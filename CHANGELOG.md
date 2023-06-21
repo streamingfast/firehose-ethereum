@@ -6,23 +6,13 @@ for instructions to keep up to date.
 
 ## Unreleased
 
-### Changed
-
-* Substreams is now out of the `firehose` app, and must be started using `substreams-tier1` and `substreams-tier2` apps!
-* Most substreams-related flags have been changed: 
-  * common: `--substreams-rpc-cache-chunk-size`,`--substreams-rpc-cache-store-url`,`--substreams-rpc-endpoints`,`--substreams-state-bundle-size`,`--substreams-state-store-url`
-  * tier1: `--substreams-tier1-debug-request-stats`,`--substreams-tier1-discovery-service-url`,`--substreams-tier1-grpc-listen-addr`,`--substreams-tier1-max-subrequests`,`--substreams-tier1-subrequests-endpoint`,`--substreams-tier1-subrequests-insecure`,`--substreams-tier1-subrequests-plaintext`,`--substreams-tier1-subrequests-size`
-  * tier2: `--substreams-tier2-discovery-service-url`,`--substreams-tier2-grpc-listen-addr`
-* Some auth plugins have been removed, the new available plugins for `--common-auth-plugins` are `trust://` and `grpc://`. See https://github.com/streamingfast/dauth for details
-* Metering features have been added, the available plugins for `--common-metering-plugin` are `null://`, `logger://`, `grpc://`. See https://github.com/streamingfast/dmetering for details
-
 ### Added
 
 * Support for firehose protocol 2.3 (for parallel processing of transactions, added to polygon 'bor' v0.4.0 
 
 ### Removed
 
-* Removed the `tools upgrade-merged-blocks` command. Normalization is now part of consolereader within 'codec', not the 'types' package, and cannot be done a posteriori.
+* Removed the `tools upgrade-merged-blocks` command. Normalization is now part of consolereader within 'codec', not 'types', and cannot be done a posteriori.
 
 ## v1.4.6
 
