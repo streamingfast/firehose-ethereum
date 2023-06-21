@@ -3635,7 +3635,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "9",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "out of gas",
             "gasChanges": [
               {
                 "newValue": "568",
@@ -4045,7 +4045,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "35",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "invalid opcode: INVALID",
             "gasChanges": [
               {
                 "newValue": "73936",
@@ -4674,7 +4674,7 @@
             "depth": 1,
             "endOrdinal": "91",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "67733",
@@ -4779,7 +4779,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "115",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "invalid opcode: INVALID",
             "gasChanges": [
               {
                 "newValue": "73568",
@@ -7000,7 +7000,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "51",
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasConsumed": "46",
             "gasLimit": "113359",
             "index": 7,
@@ -7044,7 +7044,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "63",
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasConsumed": "46",
             "gasLimit": "109770",
             "index": 10,
@@ -7060,7 +7060,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "67",
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasConsumed": "46",
             "gasLimit": "108735",
             "index": 11,
@@ -7100,7 +7100,7 @@
             "depth": 1,
             "endOrdinal": "82",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "bn256: malformed point",
             "gasChanges": [
               {
                 "newValue": "4000",
@@ -7653,7 +7653,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "175",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "278936",
@@ -7735,7 +7735,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "172",
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "242597",
@@ -7796,7 +7796,7 @@
             "caller": "65698c8d8d9e8780ba051dcdd4511a9961eb5f3a",
             "depth": 2,
             "endOrdinal": "170",
-            "failureReason": "(varying field)",
+            "failureReason": "invalid opcode: INVALID",
             "gasChanges": [
               {
                 "newValue": "207155",
@@ -7896,7 +7896,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "196",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "278936",
@@ -7972,7 +7972,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "194",
-            "failureReason": "(varying field)",
+            "failureReason": "invalid opcode: INVALID",
             "gasChanges": [
               {
                 "newValue": "242633",
@@ -8168,7 +8168,7 @@
             "depth": 1,
             "endOrdinal": "224",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "230775",
@@ -8251,7 +8251,7 @@
             "caller": "929bc44bbd41ca0e621dc50f7c7e3204ce026258",
             "depth": 2,
             "endOrdinal": "221",
-            "failureReason": "(varying field)",
+            "failureReason": "insufficient balance for transfer",
             "gasLimit": "2300",
             "index": 4,
             "parentIndex": 2,
@@ -8396,7 +8396,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "251",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "invalid opcode: INVALID",
             "gasChanges": [
               {
                 "newValue": "278936",
@@ -8584,7 +8584,7 @@
             "depth": 1,
             "endOrdinal": "264",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasConsumed": "21964",
             "gasLimit": "251577",
             "index": 2,
@@ -8887,7 +8887,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "305",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "278936",
@@ -8995,7 +8995,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "322",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "out of gas",
             "gasChanges": [
               {
                 "newValue": "278568",
@@ -9061,7 +9061,7 @@
             "depth": 1,
             "endOrdinal": "320",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "invalid opcode: INVALID",
             "gasChanges": [
               {
                 "oldValue": "229766",
@@ -9152,7 +9152,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "337",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "267884",
@@ -9222,7 +9222,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "335",
-            "failureReason": "(varying field)",
+            "failureReason": "insufficient balance for transfer",
             "gasLimit": "231251",
             "index": 2,
             "parentIndex": 1,
@@ -9363,7 +9363,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "351",
-            "failureReason": "(varying field)",
+            "failureReason": "insufficient balance for transfer",
             "gasLimit": "231263",
             "index": 2,
             "parentIndex": 1,
@@ -9624,7 +9624,7 @@
             "callType": "CREATE",
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "391",
-            "failureReason": "(varying field)",
+            "failureReason": "contract creation code storage out of gas",
             "gasChanges": [
               {
                 "newValue": "36233",
@@ -9860,7 +9860,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "12",
-            "failureReason": "(varying field)",
+            "failureReason": "contract address collision",
             "gasChanges": [
               {
                 "oldValue": "231381",
@@ -9947,7 +9947,7 @@
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "endOrdinal": "30",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "268004",
@@ -10011,7 +10011,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "29",
-            "failureReason": "(varying field)",
+            "failureReason": "contract address collision",
             "gasChanges": [
               {
                 "oldValue": "231369",
@@ -11890,7 +11890,7 @@
             "depth": 1,
             "endOrdinal": "122",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "4669225",
@@ -11927,7 +11927,7 @@
             "caller": "10c1a6de467ef019aa853847ebe5fab9c8916f4d",
             "depth": 2,
             "endOrdinal": "119",
-            "failureReason": "(varying field)",
+            "failureReason": "insufficient balance for transfer",
             "gasLimit": "2300",
             "index": 10,
             "parentIndex": 9,
@@ -11958,7 +11958,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "128",
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasConsumed": "46",
             "gasLimit": "4664215",
             "index": 11,
@@ -13521,7 +13521,7 @@
             "depth": 1,
             "endOrdinal": "121",
             "executedCode": true,
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasChanges": [
               {
                 "newValue": "4669225",
@@ -13558,7 +13558,7 @@
             "caller": "fed8d001c77fb0df967f6a65408e3a459c9878bd",
             "depth": 2,
             "endOrdinal": "118",
-            "failureReason": "(varying field)",
+            "failureReason": "insufficient balance for transfer",
             "gasLimit": "2300",
             "index": 10,
             "parentIndex": 9,
@@ -13589,7 +13589,7 @@
             "caller": "ec9c1fcee156bf34ba4fb5d38c9cf09df16723ef",
             "depth": 1,
             "endOrdinal": "127",
-            "failureReason": "(varying field)",
+            "failureReason": "execution reverted",
             "gasConsumed": "46",
             "gasLimit": "4664215",
             "index": 11,
