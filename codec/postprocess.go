@@ -25,7 +25,6 @@ type normalizationFeatures struct {
 }
 
 func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, firstTransactionOrdinal uint64) {
-	fmt.Println("HEY got firstTransactionOrdinal", firstTransactionOrdinal, "on block", block.Number)
 	for _, trx := range block.TransactionTraces {
 		populateStateReverted(trx) // this needs to run first
 	}

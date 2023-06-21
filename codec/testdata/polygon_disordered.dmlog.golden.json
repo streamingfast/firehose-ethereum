@@ -19,7 +19,7 @@
         "address": "5973918275c01f50555d44e92c9d9b353cadad54",
         "newValue": "3635c99aac6d15afec",
         "oldValue": "3635c99aac6d15b002",
-        "ordinal": "25",
+        "ordinal": "23",
         "reason": "REASON_TRANSFER"
       }
     ],
@@ -84,7 +84,6 @@
                 "reason": "REASON_REWARD_TRANSACTION_FEE"
               }
             ],
-            "beginOrdinal": "3",
             "callType": "CALL",
             "caller": "5973918275c01f50555d44e92c9d9b353cadad54",
             "endOrdinal": "11",
@@ -176,26 +175,25 @@
         "value": "15"
       },
       {
-        "beginOrdinal": "15",
+        "beginOrdinal": "14",
         "calls": [
           {
             "accountCreations": [
               {
                 "account": "fffffffffffffffffffffffffffffffffffffffe",
-                "ordinal": "17"
+                "ordinal": "16"
               }
             ],
             "address": "0000000000000000000000000000000000001000",
-            "beginOrdinal": "15",
             "callType": "CALL",
             "caller": "fffffffffffffffffffffffffffffffffffffffe",
-            "endOrdinal": "20",
+            "endOrdinal": "19",
             "executedCode": true,
             "gasChanges": [
               {
                 "newValue": "9223372036854773660",
                 "oldValue": "9223372036854773705",
-                "ordinal": "18",
+                "ordinal": "17",
                 "reason": "REASON_CODE_COPY"
               }
             ],
@@ -209,12 +207,12 @@
                 "key": "ac33ff75c19e70fe83507db0d683fd3465c996598dc972688b7ace676c89077d",
                 "newValue": "00000000000000000000000000000000000000000000000000000000000000ff",
                 "oldValue": "0000000000000000000000000000000000000000000000000000000000000000",
-                "ordinal": "19"
+                "ordinal": "18"
               }
             ]
           }
         ],
-        "endOrdinal": "21",
+        "endOrdinal": "20",
         "from": "fffffffffffffffffffffffffffffffffffffffe",
         "gasLimit": "9223372036854775807",
         "hash": "958e5726dd1fa45d3f56d56733d86edd09fefebd1a64efccd9b74de65f7a1de0",
