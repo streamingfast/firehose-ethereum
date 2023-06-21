@@ -73,7 +73,7 @@ func parseFilters(callFilters, logFilters string, sendAllBlockHeaders bool) (*pb
 			var addrs []eth.Address
 			for _, a := range strings.Split(parts[0], "+") {
 				if a != "" {
-					addr := eth.MustNewAddress(a)
+					addr := eth.MustNewAddressLoose(a)
 					addrs = append(addrs, addr)
 				}
 			}
