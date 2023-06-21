@@ -24,7 +24,7 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20230516031116-28fcfeb4b9ed
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
-	github.com/streamingfast/firehose v0.1.1-0.20230616141805-03102fa779ce
+	github.com/streamingfast/firehose v0.1.1-0.20230621155445-6ae2361eb2f9
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614183835-273c90784b08
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
