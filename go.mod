@@ -18,7 +18,7 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20230120202400-0357b9c6f2be
 	github.com/streamingfast/dauth v0.0.0-20230620204019-1ccc85cf767d
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
-	github.com/streamingfast/dgrpc v0.0.0-20230619155906-cd17cef469de
+	github.com/streamingfast/dgrpc v0.0.0-20230621153617-bc715cdb9fd1
 	github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13
 	github.com/streamingfast/dmetering v0.0.0-20230620155208-31b97a817964
 	github.com/streamingfast/dmetrics v0.0.0-20230516031116-28fcfeb4b9ed
@@ -37,7 +37,7 @@ require (
 	github.com/streamingfast/sf-tracing v0.0.0-20230616174903-cd2ade641ca9
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.1.6-0.20230620204222-9dde3ffd3dd4
+	github.com/streamingfast/substreams v1.1.6-0.20230621153753-844a4ed56581
 	github.com/stretchr/testify v1.8.3
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
