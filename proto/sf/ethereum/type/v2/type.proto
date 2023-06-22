@@ -240,11 +240,34 @@ message TransactionTrace {
   uint64 begin_ordinal = 25;
   uint64 end_ordinal = 26;
 
+  // TransactionTraceStatus is the status of the transaction execution and will let you know if the transaction
+  // was successful or not.
+  //
+  // A successful transaction has been recorded to the blockchain's state for calls in it that were successful.
+  // This means it's possible only a subset of the calls were properly recorded, refer to [calls[].state_reverted] field
+  // to determine which calls were reverted.
+  //
+  // A quirks of the Ethereum protocol is that a transaction `FAILED` or `REVERTED` still affects the blockchain's
+  // state for **some** of the state changes. Indeed, in those cases, the transactions fees are still paid to the miner
+  // which means there is a balance change for the transaction's emitter (e.g. `from`) to pay the gas fees, an optional
+  // balance change for gas refunded to the transaction's emitter (e.g. `from`) and a balance change for the miner who
+  // received the transaction fees. There is also a nonce change for the transaction's emitter (e.g. `from`).
+  //
+  // This means that to properly record the state changes for a transaction, you need to conditionally procees the
+  // transaction's status.
+  //
+  // For a `SUCCEEDED` transaction, you iterate over the `calls` array and record the state changes for each call for
+  // which `state_reverted == false` (if a transaction succeeded, the call at #0 will always `state_reverted == false`
+  // because it aligns with the transaction).
+  //
+  // For a `FAILED` or `REVERTED` transaction, you iterate over the root call (e.g. at #0, will always exist) for
+  // balance changes you process those where `reason` is either `REASON_GAS_BUY`, `REASON_GAS_REFUND` or
+  // `REASON_REWARD_TRANSACTION_FEE` and for nonce change, still on the root call, you pick the nonce change which the
+  // smallest ordinal (if more than one).
   TransactionTraceStatus status = 30;
   TransactionReceipt receipt = 31;
   repeated Call calls = 32;
 }
-
 
 // AccessTuple represents a list of storage keys for a given contract's address and is used
 // for AccessList construction.
@@ -374,7 +397,15 @@ message Call {
   // ```
   //
   // In the transaction above, while Call #2 and Call #3 would have the
-  // status `EXECUTED`
+  // status `EXECUTED`.
+  //
+  // If you check all calls and check only `state_reverted` flag, you might be missing
+  // some balance changes and nonce changes. This is because when a full transaction fails
+  // in ethereum (e.g. `calls.all(x.state_reverted == true)`), there is still the transaction
+  // fee that are recorded to the chain.
+  //
+  // Refer to [TransactionTrace#status] field for more details about the handling you must
+  // perform.
   bool state_reverted = 30;
 
   uint64 begin_ordinal = 31;
