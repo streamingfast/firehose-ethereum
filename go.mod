@@ -18,7 +18,7 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20230120202400-0357b9c6f2be
 	github.com/streamingfast/dauth v0.0.0-20230620204019-1ccc85cf767d
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
-	github.com/streamingfast/dgrpc v0.0.0-20230622131423-a0465f1eec3e
+	github.com/streamingfast/dgrpc v0.0.0-20230622133518-f9056105a5a5
 	github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13
 	github.com/streamingfast/dmetering v0.0.0-20230620155208-31b97a817964
 	github.com/streamingfast/dmetrics v0.0.0-20230516031116-28fcfeb4b9ed
