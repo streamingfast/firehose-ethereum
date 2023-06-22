@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v1.4.7
+## v1.4.6
 
 ### Changed
 
@@ -23,9 +23,6 @@ for instructions to keep up to date.
 ### Removed
 
 * Removed the `tools upgrade-merged-blocks` command. Normalization is now part of consolereader within 'codec', not the 'types' package, and cannot be done a posteriori.
-
-## v1.4.6
-
 * Updated metering to fix dependencies
 
 ## v1.4.5
