@@ -4,11 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v1.4.7
 
 ### Changed
 
-* Substreams is now out of the `firehose` app, and must be started using `substreams-tier1` and `substreams-tier2` apps!
+* Substreams (@v1.1.6) is now out of the `firehose` app, and must be started using `substreams-tier1` and `substreams-tier2` apps!
 * Most substreams-related flags have been changed: 
   * common: `--substreams-rpc-cache-chunk-size`,`--substreams-rpc-cache-store-url`,`--substreams-rpc-endpoints`,`--substreams-state-bundle-size`,`--substreams-state-store-url`
   * tier1: `--substreams-tier1-debug-request-stats`,`--substreams-tier1-discovery-service-url`,`--substreams-tier1-grpc-listen-addr`,`--substreams-tier1-max-subrequests`,`--substreams-tier1-subrequests-endpoint`,`--substreams-tier1-subrequests-insecure`,`--substreams-tier1-subrequests-plaintext`,`--substreams-tier1-subrequests-size`
