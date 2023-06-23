@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Fixed
+
+* Fixed an occasional panic in substreams-tier1 caused by a race condition
+* Fixed the grpc error codes for substreams tier1: Unauthenticated on bad auth, Canceled (endpoint is shutting down, please reconnect) on shutdown
+* Fixed the grpc healthcheck method on substreams-tier1 (regression)
+
 ## v1.4.6
 
 ### Changed
