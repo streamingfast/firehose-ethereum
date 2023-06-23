@@ -62,9 +62,8 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().String("common-deployment-id", DefaultDeploymentID, "[COMMON] Deployment ID, used for some billing functions by dgraphql")
 
 	//// Authentication, metering and rate limiter plugins
-	cmd.Flags().String("common-auth-plugin", "null://", "[COMMON] Auth plugin URI, see streamingfast/dauth repository")
+	cmd.Flags().String("common-auth-plugin", "trust://", "[COMMON] Auth plugin URI, see streamingfast/dauth repository")
 	cmd.Flags().String("common-metering-plugin", "null://", "[COMMON] Metering plugin URI, see streamingfast/dmetering repository")
-	cmd.Flags().String("common-ratelimiter-plugin", "null://", "[COMMON] Rate Limiter plugin URI, see streamingfast/dauth repository")
 
 	// System Behavior
 	cmd.Flags().Duration(CommonSystemShutdownSignalDelayFlag, 0, "[COMMON] Add a delay between receiving SIGTERM signal and shutting down apps. Apps will respond negatively to /healthz during this period")
