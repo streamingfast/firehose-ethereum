@@ -6,11 +6,12 @@ for instructions to keep up to date.
 
 ## Unreleased
 
-### Fixed
+### v1.4.7
 
 * Fixed an occasional panic in substreams-tier1 caused by a race condition
 * Fixed the grpc error codes for substreams tier1: Unauthenticated on bad auth, Canceled (endpoint is shutting down, please reconnect) on shutdown
 * Fixed the grpc healthcheck method on substreams-tier1 (regression)
+* Fixed the default value for flag `common-auth-plugin`: now set to 'trusted://' instead of panicking on removed 'null://'
 
 ## v1.4.6
 
