@@ -6,6 +6,10 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Fixed
+
+* Fixed a bug in `substreams-tier1` and `substreams-tier2` which caused "live" blocks to be sent while the stream previously received block(s) were historic.
+
 ### v1.4.7
 
 * Fixed an occasional panic in substreams-tier1 caused by a race condition
@@ -18,7 +22,7 @@ for instructions to keep up to date.
 ### Changed
 
 * Substreams (@v1.1.6) is now out of the `firehose` app, and must be started using `substreams-tier1` and `substreams-tier2` apps!
-* Most substreams-related flags have been changed: 
+* Most substreams-related flags have been changed:
   * common: `--substreams-rpc-cache-chunk-size`,`--substreams-rpc-cache-store-url`,`--substreams-rpc-endpoints`,`--substreams-state-bundle-size`,`--substreams-state-store-url`
   * tier1: `--substreams-tier1-debug-request-stats`,`--substreams-tier1-discovery-service-url`,`--substreams-tier1-grpc-listen-addr`,`--substreams-tier1-max-subrequests`,`--substreams-tier1-subrequests-endpoint`,`--substreams-tier1-subrequests-insecure`,`--substreams-tier1-subrequests-plaintext`,`--substreams-tier1-subrequests-size`
   * tier2: `--substreams-tier2-discovery-service-url`,`--substreams-tier2-grpc-listen-addr`
@@ -27,7 +31,7 @@ for instructions to keep up to date.
 
 ### Added
 
-* Support for firehose protocol 2.3 (for parallel processing of transactions, added to polygon 'bor' v0.4.0 
+* Support for firehose protocol 2.3 (for parallel processing of transactions, added to polygon 'bor' v0.4.0
 
 ### Removed
 
