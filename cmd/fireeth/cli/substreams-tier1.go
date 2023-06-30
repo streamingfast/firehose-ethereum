@@ -23,7 +23,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	dauthAuthenticator "github.com/streamingfast/dauth"
+	"github.com/streamingfast/dauth"
 	discoveryservice "github.com/streamingfast/dgrpc/server/discovery-service"
 	"github.com/streamingfast/dlauncher/launcher"
 	ethss "github.com/streamingfast/firehose-ethereum/substreams"
@@ -76,7 +76,7 @@ func init() {
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			blockstreamAddr := viper.GetString("common-live-blocks-addr")
 
-			authenticator, err := dauthAuthenticator.New(viper.GetString("common-auth-plugin"))
+			authenticator, err := dauth.New(viper.GetString("common-auth-plugin"))
 			if err != nil {
 				return nil, fmt.Errorf("unable to initialize dauth: %w", err)
 			}

@@ -10,6 +10,10 @@ for instructions to keep up to date.
 
 * Fixed a bug in `substreams-tier1` and `substreams-tier2` which caused "live" blocks to be sent while the stream previously received block(s) were historic.
 
+### Added
+
+* Added a check for readiness of the `dauth` provider when answering "/healthz" on firehose and substreams
+
 ### v1.4.7
 
 * Fixed an occasional panic in substreams-tier1 caused by a race condition
