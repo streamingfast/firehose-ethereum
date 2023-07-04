@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
 	dauthgrpc "github.com/streamingfast/dauth/grpc"
+	dauthnull "github.com/streamingfast/dauth/null"
 	dauthtrust "github.com/streamingfast/dauth/trust"
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dlauncher/launcher"
@@ -39,6 +40,7 @@ func init() {
 	RootCmd.AddCommand(StartCmd)
 	dauthgrpc.Register()
 	dauthtrust.Register()
+	dauthnull.Register()
 	dmetering.RegisterDefault()
 }
 
