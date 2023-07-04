@@ -56,7 +56,7 @@ func init() {
 		Title:       "Substreams tier1 server",
 		Description: "Provides a substreams grpc endpoint",
 		RegisterFlags: func(cmd *cobra.Command) error {
-			cmd.Flags().String("substreams-tier1-grpc-listen-addr", SubstreamsTier1GRPCServingAddr, "Address on which the substreams tier1 will listen. Default is plain-text, appending a '*' to the end to jkkkj")
+			cmd.Flags().String("substreams-tier1-grpc-listen-addr", SubstreamsTier1GRPCServingAddr, "Address on which the substreams tier1 will listen. Default is plain-text, appending a '*' to the end")
 			cmd.Flags().String("substreams-tier1-subrequests-endpoint", SubstreamsTier2GRPCServingAddr, "Address on which the tier1 can reach the tier2")
 
 			// communication with tier2
