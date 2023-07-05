@@ -1,0 +1,16 @@
+start:
+  args:
+    - substreams-tier2
+  flags:
+    config-file: 
+    common-live-blocks-addr: 
+    common-merged-blocks-store-url: $COMMON_MERGED_BLOCKS # replace with common merged blocks url
+    common-first-streamable-block: 0
+    common-one-block-store-url: $ONE_BLOCK_STORE_URL # replace with one block url
+    common-metering-plugin: logger://
+    common-auth-plugin: trust://
+    substreams-tier2-grpc-listen-addr: :9001*
+    substreams-state-store-url: sf-data/localdata
+    substreams-rpc-cache-chunk-size: 100
+    substreams-state-bundle-size: 10
+    substreams-rpc-endpoints: $ETH_MAINNET_RPC # replace with eth mainnet rpc endpoint
