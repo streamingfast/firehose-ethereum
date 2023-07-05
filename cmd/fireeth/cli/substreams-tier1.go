@@ -65,8 +65,7 @@ func init() {
 			cmd.Flags().Bool("substreams-tier1-subrequests-plaintext", true, "Connect to tier2 without client in plaintext mode")
 			cmd.Flags().Int("substreams-tier1-max-subrequests", 4, "number of parallel subrequests that the tier1 can make to the tier2 per request")
 			cmd.Flags().Uint64("substreams-tier1-subrequests-size", 10000, "substreams subrequest block range size value for the scheduler")
-
-			cmd.Flags().Bool("substreams-tier1-debug-request-stats", false, "Enables stats per request, like block rate. Should only be enabled in debugging instance, not in production")
+			cmd.Flags().Bool("substreams-tier1-request-stats", false, "Enables stats logging per request")
 
 			// all substreams
 			registerCommonSubstreamsFlags(cmd)
@@ -104,7 +103,7 @@ func init() {
 			maxSubrequests := viper.GetUint64("substreams-tier1-max-subrequests")
 			subrequestsSize := viper.GetUint64("substreams-tier1-subrequests-size")
 
-			debugRequestsStates := viper.GetBool("substreams-tier1-debug-request-stats")
+			substreamsRequestsStats := viper.GetBool("substreams-tier1-request-stats")
 
 			tracing := os.Getenv("SUBSTREAMS_TRACING") == "modules_exec"
 
@@ -152,8 +151,8 @@ func init() {
 					WASMExtensions:  []wasm.WASMExtensioner{rpcEngine},
 					PipelineOptions: []pipeline.PipelineOptioner{rpcEngine},
 
-					DebugRequestsStates: debugRequestsStates,
-					Tracing:             tracing,
+					RequestStats: substreamsRequestsStats,
+					Tracing:      tracing,
 
 					GRPCListenAddr:          grpcListenAddr,
 					GRPCShutdownGracePeriod: time.Second,

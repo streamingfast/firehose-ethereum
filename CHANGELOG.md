@@ -14,6 +14,12 @@ for instructions to keep up to date.
 
 * Added a check for readiness of the `dauth` provider when answering "/healthz" on firehose and substreams
 
+
+### Changed
+
+* Changed `--substreams-tier1-debug-request-stats` to `--substreams-tier1-request-stats` which enabled request stats logging on Substreams Tier1
+* Changed `--substreams-tier2-debug-request-stats` to `--substreams-tier2-request-stats` which enabled request stats logging on Substreams Tier2
+
 ### v1.4.7
 
 * Fixed an occasional panic in substreams-tier1 caused by a race condition
