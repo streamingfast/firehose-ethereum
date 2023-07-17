@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/streamingfast/bstream v0.0.2-0.20230619183735-f8325d186119
 	github.com/streamingfast/cli v0.0.4-0.20230120202400-0357b9c6f2be
-	github.com/streamingfast/dauth v0.0.0-20230630134904-f19ce9a5b859
+	github.com/streamingfast/dauth v0.0.0-20230711181128-22be70e6ca49
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
 	github.com/streamingfast/dgrpc v0.0.0-20230623191332-4ed02c06bc6f
 	github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13
@@ -24,7 +24,7 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20230516031116-28fcfeb4b9ed
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
-	github.com/streamingfast/firehose v0.1.1-0.20230706150258-7b499a314743
+	github.com/streamingfast/firehose v0.1.1-0.20230717162840-054eee8fbb86
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230614183835-273c90784b08
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
@@ -37,7 +37,7 @@ require (
 	github.com/streamingfast/sf-tracing v0.0.0-20230616174903-cd2ade641ca9
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.1.8
+	github.com/streamingfast/substreams v1.1.9-0.20230712201610-f3aae83da98c
 	github.com/stretchr/testify v1.8.3
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
