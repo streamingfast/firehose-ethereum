@@ -37,7 +37,7 @@ require (
 	github.com/streamingfast/sf-tracing v0.0.0-20230616174903-cd2ade641ca9
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0
-	github.com/streamingfast/substreams v1.1.9-0.20230712201610-f3aae83da98c
+	github.com/streamingfast/substreams v1.1.9-0.20230717180911-4960eaa1d409
 	github.com/stretchr/testify v1.8.3
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -79,7 +79,6 @@ require (
 	github.com/bufbuild/connect-grpchealth-go v1.1.1 // indirect
 	github.com/bufbuild/connect-grpcreflect-go v1.0.0 // indirect
 	github.com/bufbuild/connect-opentelemetry-go v0.3.0 // indirect
-	github.com/bytecodealliance/wasmtime-go/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
