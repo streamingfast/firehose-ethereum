@@ -21,7 +21,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	dauthAuthenticator "github.com/streamingfast/dauth"
 	discoveryservice "github.com/streamingfast/dgrpc/server/discovery-service"
 	"github.com/streamingfast/dlauncher/launcher"
 	ethss "github.com/streamingfast/firehose-ethereum/substreams"
@@ -52,10 +51,6 @@ func init() {
 		},
 
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
-			authenticator, err := dauthAuthenticator.New(viper.GetString("common-auth-plugin"))
-			if err != nil {
-				return nil, fmt.Errorf("unable to initialize dauth: %w", err)
-			}
 
 			mergedBlocksStoreURL, _, _, err := getCommonStoresURLs(runtime.AbsDataDir)
 			if err != nil {
@@ -72,6 +67,7 @@ func init() {
 			rpcCacheChunkSize := viper.GetUint64("substreams-rpc-cache-chunk-size")
 
 			stateStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("substreams-state-store-url"))
+			stateStoreDefaultTag := viper.GetString("substreams-state-store-default-tag")
 			stateBundleSize := viper.GetUint64("substreams-state-bundle-size")
 			substreamsRequestsStats := viper.GetBool("substreams-tier2-request-stats")
 
@@ -106,9 +102,10 @@ func init() {
 				&app.Tier2Config{
 					MergedBlocksStoreURL: mergedBlocksStoreURL,
 
-					StateStoreURL:   stateStoreURL,
-					StateBundleSize: stateBundleSize,
-					BlockType:       "sf.ethereum.type.v2.Block",
+					StateStoreURL:        stateStoreURL,
+					StateStoreDefaultTag: stateStoreDefaultTag,
+					StateBundleSize:      stateBundleSize,
+					BlockType:            "sf.ethereum.type.v2.Block",
 
 					WASMExtensions:  []wasm.WASMExtensioner{rpcEngine},
 					PipelineOptions: []pipeline.PipelineOptioner{rpcEngine},
@@ -118,10 +115,6 @@ func init() {
 
 					GRPCListenAddr:      grpcListenAddr,
 					ServiceDiscoveryURL: serviceDiscoveryURL,
-				}, &app.Modules{
-					Authenticator:         authenticator,
-					HeadTimeDriftMetric:   ss2HeadTimeDriftmetric,
-					HeadBlockNumberMetric: ss2HeadBlockNumMetric,
 				}), nil
 		},
 	})
