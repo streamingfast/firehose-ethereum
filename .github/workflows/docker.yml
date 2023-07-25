@@ -19,7 +19,7 @@ on:
       flavors:
         description: 'JSON-formatted list of flavors to build'
         required: true
-        default: '["geth","bsc","polygon"]'
+        default: '["geth","bsc","polygon"]' # careful, this value is not used in automatic triggers, this value is repeated in step bundle-docker-versions
         type: string
 
 env:
@@ -138,7 +138,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON(github.event.inputs.flavors) }}
+        binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon"]' ) }}
 
     env:
       SLACK_IDS: ${{ vars.SLACK_IDS }}
