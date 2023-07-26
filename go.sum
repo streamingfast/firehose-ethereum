@@ -772,6 +772,8 @@ github.com/streamingfast/dauth v0.0.0-20230719201351-ed7e87520891 h1:4zdqs+l7lB+
 github.com/streamingfast/dauth v0.0.0-20230719201351-ed7e87520891/go.mod h1:zfq+mtesfbaZnNeh1BF+vo+zEFP1sat4pm3lvt40nRw=
 github.com/streamingfast/dauth v0.0.0-20230726143832-97724f043aeb h1:4ABhpg+T6hDSJqO3gCmfF5ZjMmD+fsQEFT5D8LwuZ7I=
 github.com/streamingfast/dauth v0.0.0-20230726143832-97724f043aeb/go.mod h1:zfq+mtesfbaZnNeh1BF+vo+zEFP1sat4pm3lvt40nRw=
+github.com/streamingfast/dauth v0.0.0-20230726144756-90e0eafb8c72 h1:reYD70HU2kN4DE8iTn53YJw6vU6r9ajm7umlCZ64UE8=
+github.com/streamingfast/dauth v0.0.0-20230726144756-90e0eafb8c72/go.mod h1:zfq+mtesfbaZnNeh1BF+vo+zEFP1sat4pm3lvt40nRw=
 github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5 h1:m/3aIPNXCwZ9m/dfYdOs8ftrS7GJl82ipVr6K2aZiBs=
 github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5/go.mod h1:YStE7K5/GH47JsWpY7LMKsDaXXpMLU/M26vYFzXHYRk=
 github.com/streamingfast/derr v0.0.0-20210811180100-9138d738bcec/go.mod h1:ulVfui/yGXmPBbt9aAqCWdAjM7YxnZkYHzvQktLfw3M=
@@ -841,6 +843,8 @@ github.com/streamingfast/substreams v1.1.10-0.20230724185720-ccdbbf1f59b0 h1:iDD
 github.com/streamingfast/substreams v1.1.10-0.20230724185720-ccdbbf1f59b0/go.mod h1:U/wDfXapixXmpnBwzQRMGBXhXJGaLZe6XbFhyh5dF18=
 github.com/streamingfast/substreams v1.1.10-0.20230726144136-84b2a99b976f h1:auRH7UB0vyl6qz+HD1vlkkWHk80jEFKnAol5KYSwXRg=
 github.com/streamingfast/substreams v1.1.10-0.20230726144136-84b2a99b976f/go.mod h1:/sTD5vxviRETq/zVxtv1L/qUtIoDMrX2tk5RM1+1JzY=
+github.com/streamingfast/substreams v1.1.10-0.20230726144823-0516adeb3891 h1:mmAs4Bmxxlw3Oip+eHolV2ws8rkWSUcrmIKMp8z6nUs=
+github.com/streamingfast/substreams v1.1.10-0.20230726144823-0516adeb3891/go.mod h1:PM9ZqH21FGnWfGReVB/7hjdYhlIFsl2WwLkV+L0dquY=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
