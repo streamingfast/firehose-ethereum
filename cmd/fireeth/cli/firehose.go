@@ -56,7 +56,7 @@ func init() {
 		FactoryFunc: func(runtime *launcher.Runtime) (launcher.App, error) {
 			blockstreamAddr := viper.GetString("common-live-blocks-addr")
 
-			authenticator, err := dauth.New(viper.GetString("common-auth-plugin"))
+			authenticator, err := dauth.New(viper.GetString("common-auth-plugin"), appLogger)
 			if err != nil {
 				return nil, fmt.Errorf("unable to initialize authenticator: %w", err)
 			}
