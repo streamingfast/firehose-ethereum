@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+
+## v1.4.10
+
+### Fixes
+
+* Fixed: jobs would hang when flags `--substreams-state-bundle-size` and `--substreams-tier1-subrequests-size` had different values. The latter flag has been completely **removed**, subrequests will be bound to the state bundle size.
+
+### Added
+
+* Added support for *continuous authentication* via the grpc auth plugin (allowing cutoff triggered by the auth system).
+
 ## v1.4.9
 
 ### Highlights
