@@ -26,6 +26,9 @@ import (
 	dauthgrpc "github.com/streamingfast/dauth/grpc"
 	dauthnull "github.com/streamingfast/dauth/null"
 	dauthtrust "github.com/streamingfast/dauth/trust"
+	dmeteringgrpc "github.com/streamingfast/dmetering/grpc"
+	dmeteringlogger "github.com/streamingfast/dmetering/logger"
+
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
@@ -41,7 +44,9 @@ func init() {
 	dauthgrpc.Register()
 	dauthtrust.Register()
 	dauthnull.Register()
-	dmetering.RegisterDefault()
+	dmeteringgrpc.Register()
+	dmeteringlogger.Register()
+	dmetering.RegisterNull()
 }
 
 func sfStartE(cmd *cobra.Command, args []string) (err error) {
@@ -106,9 +111,7 @@ func Start(ctx context.Context, dataDir string, args []string) (err error) {
 		return fmt.Errorf("unable to initialize dmetering: %w", err)
 	}
 	defer func() {
-		if err := eventEmitter.Close(); err != nil {
-			zlog.Warn("failed to properly close event emitter", zap.Error(err))
-		}
+		eventEmitter.Shutdown(nil)
 	}()
 	dmetering.SetDefaultEmitter(eventEmitter)
 
