@@ -4,11 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Next
+## 1.4.11
 
 ### Fixes
 
-* Bumped `firehose` library to fix a bug where live blocks were not metered correctly.
+* Bumped `firehose` and `substreams` library to fix a bug where live blocks were not metered correctly.
 
 ## v1.4.10
 
