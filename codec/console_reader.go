@@ -16,7 +16,9 @@ package codec
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
@@ -28,9 +30,11 @@ import (
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dmetrics"
+	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 // ConsoleReader is what reads the `geth` output directly. It builds
@@ -234,6 +238,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		//
 		// It's a micro-optimization but's worth it.
 		switch {
+		case strings.HasPrefix(line, "BLOCK"):
+			ctx.stats.inc("BLOCK")
+			return ctx.readBlock(line)
+
 		case strings.HasPrefix(line, "GAS_CHANGE"):
 			ctx.stats.inc("GAS_CHANGE")
 			err = ctx.readGasChange(line)
@@ -1074,6 +1082,62 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 	evmCall.CodeChanges = append(evmCall.CodeChanges, codeChange)
 
 	return nil
+}
+
+// Formats
+// FIRE BLOCK <NUMBER (u64 string)> <HASH (hex string)> <proto (base64 string)>
+func (ctx *parseCtx) readBlock(line string) (*bstream.Block, error) {
+	start := time.Now()
+
+	chunks, err := SplitInBoundedChunks(line, 4)
+	if err != nil {
+		return nil, fmt.Errorf("split: %s", err)
+	}
+
+	blockNum, err := strconv.ParseUint(chunks[0], 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse blockNum: %s", err)
+	}
+
+	blockHash, err := eth.NewHash(chunks[1])
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse blockHash: %s", err)
+	}
+
+	data, err := base64.StdEncoding.DecodeString(chunks[2])
+	if err != nil {
+		return nil, fmt.Errorf("decode base64 bytes: %s", err)
+	}
+
+	block := &pbeth.Block{}
+	if err = proto.Unmarshal(data, block); err != nil {
+		return nil, fmt.Errorf("unmarshal block: %s", err)
+	}
+
+	if block.Number != blockNum || !bytes.Equal(blockHash.Bytes(), block.Hash) {
+		return nil, fmt.Errorf("decoced block number/hash (%d/%s) mistmatch firehose log line number/hash (%d/%s)", block.Number, eth.Hash(block.Hash), blockNum, blockHash)
+	}
+
+	// normalizeInPlace(block, ctx.normalizationFeatures, uint64(ctx.highestOrdinalBeforeTransactions+1))
+
+	var libNum uint64
+
+	// len(endBlockData.FinalizedBlockHash) > 0
+	if false {
+		// libNum = computeProofOfStakeLIBNum(blockNum, uint64(endBlockData.FinalizedBlockNum), bstream.GetProtocolFirstStreamableBlock)
+	} else {
+		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
+	}
+
+	bstreamBlock, err := types.BlockFromProto(block, libNum)
+	if err != nil {
+		return nil, err
+	}
+
+	BlockReadCount.Inc()
+	BlockTotalParseTime.AddInt64(int64(time.Since(start)))
+
+	return bstreamBlock, nil
 }
 
 // Formats
