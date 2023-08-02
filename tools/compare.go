@@ -218,7 +218,7 @@ func compareBlocksE(cmd *cobra.Command, args []string) error {
 				var isEqual bool
 				if existsInCurrent {
 					var differences []string
-					isEqual, differences = compare(referenceBlock, currentBlock, ignoreUnknown)
+					isEqual, differences = Compare(referenceBlock, currentBlock, ignoreUnknown)
 					if !isEqual {
 						fmt.Printf("- Block (%s) is different\n", referenceBlock.AsRef())
 						if displayDiff {
@@ -296,7 +296,7 @@ func (s *state) print() {
 	fmt.Printf("✖ Segment %d - %s has %d different blocks and %d missing blocks (%d blocks counted)\n", s.segments[s.currentSegmentIdx].StartBlock(), endBlock, s.differencesFound, s.missingBlocks, s.totalBlocksCounted)
 }
 
-func compare(reference, current *pbeth.Block, ignoreUnknown bool) (isEqual bool, differences []string) {
+func Compare(reference, current *pbeth.Block, ignoreUnknown bool) (isEqual bool, differences []string) {
 	if reference == nil && current == nil {
 		return true, nil
 	}
