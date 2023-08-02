@@ -3,6 +3,7 @@ package codec
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -368,7 +369,22 @@ func populateLogBlockIndices(block *pbeth.Block) error {
 			log.Ordinal = traceLog.Ordinal
 			log.Index = traceLog.Index
 			if !proto.Equal(log, traceLog) {
-				return fmt.Errorf("error in tweak function: log proto not equal")
+				// Will not error, worse case it fails and we end up with empty strings
+				actualLog, _ := json.Marshal(log)
+				remappedLog, _ := json.Marshal(traceLog)
+
+				receiptLogCount := 0
+				for _, trace := range block.TransactionTraces {
+					receiptLogCount += len(trace.Receipt.Logs)
+				}
+
+				return fmt.Errorf("error in tweak function for transaction %q (%d receipt logs, %d re-mapped logs): log %s proto not equal re-mapped log %s",
+					eth.Hex(trace.Hash),
+					receiptLogCount,
+					len(blockIndexToTraceLog),
+					string(actualLog),
+					string(remappedLog),
+				)
 			}
 		}
 	}
@@ -391,7 +407,6 @@ func populateTrxStatus(trace *pbeth.TransactionTrace) {
 			trace.Status = pbeth.TransactionTraceStatus_SUCCEEDED
 		}
 	}
-	return
 }
 
 func populateStateReverted(trace *pbeth.TransactionTrace) {
@@ -415,8 +430,6 @@ func populateStateReverted(trace *pbeth.TransactionTrace) {
 
 		call.StateReverted = (parent != nil && parent.StateReverted) || call.StatusFailed
 	}
-
-	return
 }
 
 func callAtIndex(idx uint32, calls []*pbeth.Call) *pbeth.Call {
