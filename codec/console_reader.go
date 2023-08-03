@@ -1085,46 +1085,47 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 }
 
 // Formats
-// FIRE BLOCK <NUMBER (u64 string)> <HASH (hex string)> <proto (base64 string)>
+// FIRE BLOCK <NUMBER (u64 string)> <HASH (hex string)> <LIB NUMBER (u64 string)> <LIB ID (hex string)> <proto (base64 string)>
 func (ctx *parseCtx) readBlock(line string) (*bstream.Block, error) {
 	start := time.Now()
 
-	chunks, err := SplitInBoundedChunks(line, 4)
+	chunks, err := SplitInBoundedChunks(line, 6)
 	if err != nil {
-		return nil, fmt.Errorf("split: %s", err)
+		return nil, fmt.Errorf("split: %w", err)
 	}
 
 	blockNum, err := strconv.ParseUint(chunks[0], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse blockNum: %s", err)
+		return nil, fmt.Errorf("failed to parse blockNum: %w", err)
 	}
 
 	blockHash, err := eth.NewHash(chunks[1])
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse blockHash: %s", err)
+		return nil, fmt.Errorf("failed to parse blockHash: %w", err)
 	}
 
-	data, err := base64.StdEncoding.DecodeString(chunks[2])
+	finalizedNum, finalizedHash, err := readFinalizedStatus(chunks[2], chunks[3])
 	if err != nil {
-		return nil, fmt.Errorf("decode base64 bytes: %s", err)
+		return nil, fmt.Errorf("failed to read finalized status: %w", err)
+	}
+
+	data, err := base64.StdEncoding.DecodeString(chunks[4])
+	if err != nil {
+		return nil, fmt.Errorf("decode base64 bytes: %w", err)
 	}
 
 	block := &pbeth.Block{}
 	if err = proto.Unmarshal(data, block); err != nil {
-		return nil, fmt.Errorf("unmarshal block: %s", err)
+		return nil, fmt.Errorf("unmarshal block: %w", err)
 	}
 
 	if block.Number != blockNum || !bytes.Equal(blockHash.Bytes(), block.Hash) {
 		return nil, fmt.Errorf("decoced block number/hash (%d/%s) mistmatch firehose log line number/hash (%d/%s)", block.Number, eth.Hash(block.Hash), blockNum, blockHash)
 	}
 
-	// normalizeInPlace(block, ctx.normalizationFeatures, uint64(ctx.highestOrdinalBeforeTransactions+1))
-
 	var libNum uint64
-
-	// len(endBlockData.FinalizedBlockHash) > 0
-	if false {
-		// libNum = computeProofOfStakeLIBNum(blockNum, uint64(endBlockData.FinalizedBlockNum), bstream.GetProtocolFirstStreamableBlock)
+	if len(finalizedHash) > 0 {
+		libNum = computeProofOfStakeLIBNum(blockNum, finalizedNum, bstream.GetProtocolFirstStreamableBlock)
 	} else {
 		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
 	}
@@ -1138,6 +1139,32 @@ func (ctx *parseCtx) readBlock(line string) (*bstream.Block, error) {
 	BlockTotalParseTime.AddInt64(int64(time.Since(start)))
 
 	return bstreamBlock, nil
+}
+
+func readFinalizedStatus(libNumInput, libHashInput string) (libNum uint64, libHash eth.Hash, err error) {
+	if libNumInput == "." {
+		libNum = 0
+	} else {
+		libNum, err = strconv.ParseUint(libNumInput, 10, 64)
+		if err != nil {
+			return 0, nil, fmt.Errorf("failed to parse libNum %q: %w", libNumInput, err)
+		}
+	}
+
+	if libHashInput == "." {
+		libHash = nil
+	} else {
+		libHash, err = eth.NewHash(libHashInput)
+		if err != nil {
+			return 0, nil, fmt.Errorf("failed to parse libID %q: %w", libHashInput, err)
+		}
+
+		if len(libHash) != 32 {
+			return 0, nil, fmt.Errorf("libID %q is not 32 bytes long, got %d", libHashInput, len(libHash))
+		}
+	}
+
+	return
 }
 
 // Formats
