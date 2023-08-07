@@ -209,6 +209,16 @@ message TransactionTrace {
     // max base gas gee and max priority gas fee to pay for this transaction. Transaction's of those type are
     // executed against EIP-1559 rules which dictates a dynamic gas cost based on the congestion of the network.
     TRX_TYPE_DYNAMIC_FEE = 2;
+
+    // Arbitrum-specific transactions
+    TRX_TYPE_ARBITRUM_DEPOSIT = 100;
+    TRX_TYPE_ARBITRUM_UNSIGNED	= 101;
+    TRX_TYPE_ARBITRUM_CONTRACT = 102;
+    TRX_TYPE_ARBITRUM_RETRY	= 104;
+    TRX_TYPE_ARBITRUM_SUBMIT_RETRYABLE	= 105;
+    TRX_TYPE_ARBITRUM_INTERNAL	= 106;
+    TRX_TYPE_ARBITRUM_LEGACY	= 120;
+
   }
 
   // AcccessList represents the storage access this transaction has agreed to do in which case those storage
