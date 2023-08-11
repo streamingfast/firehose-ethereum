@@ -1138,6 +1138,9 @@ func (ctx *parseCtx) readBlock(line string) (*bstream.Block, error) {
 	BlockReadCount.Inc()
 	BlockTotalParseTime.AddInt64(int64(time.Since(start)))
 
+	ctx.currentBlock = block
+	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
+
 	return bstreamBlock, nil
 }
 
