@@ -6,6 +6,10 @@ for instructions to keep up to date.
 
 ## Next
 
+### Fixed
+
+* `tools check merged-blocks` now correctly prints missing block gaps even without print-full or print-stats.
+
 ### Changed
 
 * Now requires Go 1.20+ to compile the project.

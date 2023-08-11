@@ -61,7 +61,7 @@ func checkMergedBlocksE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	printDetails := sftools.PrintNothing
+	printDetails := sftools.PrintNoDetails
 	if mustGetBool(cmd, "print-stats") {
 		printDetails = sftools.PrintStats
 	}
