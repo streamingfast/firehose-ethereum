@@ -22,6 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/blockstream"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/firehose-ethereum/codec"
@@ -109,6 +110,7 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 			appLogger,
 			nodeLogger,
 			logToZap,
+			isReader,
 			debugDeepMind,
 		)
 		if err != nil {
@@ -192,6 +194,13 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 		oneBlockFileSuffix := viper.GetString("reader-node-oneblock-suffix")
 		blocksChanCapacity := viper.GetInt("reader-node-blocks-chan-capacity")
 
+		updateMetricsAndSuperviser := func(block *bstream.Block) error {
+			if s, ok := superviser.(UpdatableSuperviser); ok {
+				s.UpdateLastBlockSeen(block.Number)
+			}
+			return metricsAndReadinessManager.UpdateHeadBlock(block)
+		}
+
 		readerPlugin, err := reader.NewMindReaderPlugin(
 			oneBlocksStoreURL,
 			workingDir,
@@ -201,7 +210,7 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 			batchStartBlockNum,
 			batchStopBlockNum,
 			blocksChanCapacity,
-			metricsAndReadinessManager.UpdateHeadBlock,
+			updateMetricsAndSuperviser,
 			func(error) {
 				chainOperator.Shutdown(nil)
 			},
@@ -419,6 +428,10 @@ func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPa
 	return strings.Fields(args), nil
 }
 
+type UpdatableSuperviser interface {
+	UpdateLastBlockSeen(blockNum uint64)
+}
+
 func buildSuperviser(
 	metricsAndReadinessManager *nodeManager.MetricsAndReadinessManager,
 	nodeType string,
@@ -427,9 +440,11 @@ func buildSuperviser(
 	nodeDataDir string,
 	nodeArguments []string,
 	enforcedPeers string,
-
-	appLogger, supervisedProcessLogger *zap.Logger,
-	logToZap, debugDeepMind bool,
+	appLogger,
+	supervisedProcessLogger *zap.Logger,
+	logToZap,
+	deepMind,
+	debugDeepMind bool,
 ) (nodeManager.ChainSuperviser, error) {
 
 	switch nodeType {
@@ -439,6 +454,7 @@ func buildSuperviser(
 			nodeDataDir,
 			nodeIPCPath,
 			nodeArguments,
+			deepMind,
 			debugDeepMind,
 			metricsAndReadinessManager.UpdateHeadBlock,
 			enforcedPeers,
@@ -457,6 +473,7 @@ func buildSuperviser(
 			nodeDataDir,
 			nodeIPCPath,
 			nodeArguments,
+			deepMind,
 			debugDeepMind,
 			metricsAndReadinessManager.UpdateHeadBlock,
 			enforcedPeers,

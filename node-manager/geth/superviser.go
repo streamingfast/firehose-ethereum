@@ -28,10 +28,10 @@ import (
 	"time"
 
 	"github.com/ShinyTrinkets/overseer"
+	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	nodeManager "github.com/streamingfast/node-manager"
 	logplugin "github.com/streamingfast/node-manager/log_plugin"
 	"github.com/streamingfast/node-manager/superviser"
-	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -63,6 +63,7 @@ func NewGethSuperviser(
 	dataDir string,
 	nodeIPCPath string,
 	arguments []string,
+	isReader bool,
 	debugDeepMind bool,
 	headBlockUpdateFunc nodeManager.HeadBlockUpdater,
 	enforcePeersStr string,
@@ -86,7 +87,9 @@ func NewGethSuperviser(
 		headBlockUpdateFunc: headBlockUpdateFunc,
 	}
 
-	gethSuperviser.RegisterLogPlugin(logplugin.LogPluginFunc(gethSuperviser.lastBlockSeenLogPlugin))
+	if !isReader {
+		gethSuperviser.RegisterLogPlugin(logplugin.LogPluginFunc(gethSuperviser.lastBlockSeenLogPlugin))
+	}
 
 	if logToZap {
 		gethSuperviser.RegisterLogPlugin(nodemanager.NewGethToZapLogPlugin(debugDeepMind, nodelogger))
@@ -129,6 +132,10 @@ func (s *Superviser) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("enode_str", s.enodeStr)
 
 	return nil
+}
+
+func (s *Superviser) UpdateLastBlockSeen(blockNum uint64) {
+	s.lastBlockSeen = blockNum
 }
 
 func (s *Superviser) lastBlockSeenLogPlugin(line string) {

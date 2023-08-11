@@ -32,10 +32,10 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/ShinyTrinkets/overseer"
+	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	nodeManager "github.com/streamingfast/node-manager"
 	logplugin "github.com/streamingfast/node-manager/log_plugin"
 	"github.com/streamingfast/node-manager/superviser"
-	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )
@@ -70,6 +70,7 @@ func NewSuperviser(
 	dataDir string,
 	ipcFilePath string,
 	arguments []string,
+	isReader bool,
 	debugDeepMind bool,
 	headBlockUpdateFunc nodeManager.HeadBlockUpdater,
 	enforcePeersStr string,
@@ -97,7 +98,9 @@ func NewSuperviser(
 		logger:              appLogger,
 	}
 
-	superviser.RegisterLogPlugin(logplugin.LogPluginFunc(superviser.lastBlockSeenLogPlugin))
+	if !isReader {
+		superviser.RegisterLogPlugin(logplugin.LogPluginFunc(superviser.lastBlockSeenLogPlugin))
+	}
 
 	if logToZap {
 		superviser.RegisterLogPlugin(nodemanager.NewGethToZapLogPlugin(debugDeepMind, nodelogger))
@@ -127,6 +130,10 @@ func (s *Superviser) GetCommand() string {
 func (s *Superviser) HasData() bool {
 	_, err := os.Stat(s.chaindataDir)
 	return err == nil
+}
+
+func (s *Superviser) UpdateLastBlockSeen(blockNum uint64) {
+	s.lastBlockSeen = blockNum
 }
 
 func (s *Superviser) LastSeenBlockNum() uint64 {
@@ -210,7 +217,6 @@ func (s *Superviser) setEnodeStr(enodeStr string) error {
 	return nil
 }
 
-//
 // EnsurePeersByDNS periodically checks IP addresses on the given FQDNs,
 // calls /v1/server_id on port 8080 and adds them as peers
 // wantedPeersHostnames can point to the headless service name in k8s
@@ -330,7 +336,6 @@ func getIPAddress() string {
 	return ""
 }
 
-//
 func httpGet(addr string) (string, error) {
 	resp, err := http.Get(addr)
 	if err != nil {
