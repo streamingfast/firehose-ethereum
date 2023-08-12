@@ -43,7 +43,6 @@ func init() {
 		RegisterFlags: func(cmd *cobra.Command) error {
 			cmd.Flags().String("substreams-tier2-grpc-listen-addr", SubstreamsTier2GRPCServingAddr, "Address on which the substreams tier2 will listen. Default is plain-text, appending a '*' to the end")
 			cmd.Flags().String("substreams-tier2-discovery-service-url", "", "URL to advertise presence to the grpc discovery service") //traffic-director://xds?vpc_network=vpc-global&use_xds_reds=true
-			cmd.Flags().Bool("substreams-tier2-request-stats", false, "Enables stats logging per sub-request")
 
 			// all substreams
 			registerCommonSubstreamsFlags(cmd)
@@ -69,7 +68,6 @@ func init() {
 			stateStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("substreams-state-store-url"))
 			stateStoreDefaultTag := viper.GetString("substreams-state-store-default-tag")
 			stateBundleSize := viper.GetUint64("substreams-state-bundle-size")
-			substreamsRequestsStats := viper.GetBool("substreams-tier2-request-stats")
 
 			tracing := os.Getenv("SUBSTREAMS_TRACING") == "modules_exec"
 
@@ -110,8 +108,7 @@ func init() {
 					WASMExtensions:  []wasm.WASMExtensioner{rpcEngine},
 					PipelineOptions: []pipeline.PipelineOptioner{rpcEngine},
 
-					RequestStats: substreamsRequestsStats,
-					Tracing:      tracing,
+					Tracing: tracing,
 
 					GRPCListenAddr:      grpcListenAddr,
 					ServiceDiscoveryURL: serviceDiscoveryURL,
