@@ -984,17 +984,17 @@ func (ctx *parseCtx) readInit(line string) error {
 	case "2.0":
 		ctx.blockVersion = 2
 		ctx.normalizationFeatures.UpgradeBlockV2ToV3 = true
-	case "2.1", "2.2", "2.3":
+	case "2.1", "2.2":
 		ctx.blockVersion = 3
+	case "2.3":
+		ctx.blockVersion = 3
+		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
 	default:
 		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
 
 	if nodeVariant == "polygon" {
 		ctx.normalizationFeatures.CombinePolygonSystemTransactions = true
-		if ctx.fhVersion == "2.3" {
-			ctx.normalizationFeatures.ReorderPolygonTransactionsAndRenumberOrdinals = true
-		}
 	}
 
 	ctx.logger.Info("read firehose instrumentation init line",

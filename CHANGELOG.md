@@ -4,7 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Next
+## v1.4.12
+
+### Highlights
+
+#### Operators
+
+This release mainly brings `reader-node` Firehose Protocol 2.3 support for all networks and not just Polygon. This is important for the upcoming release of Firehose-enabled `geth` version 1.2.11 and 1.2.12 that are going to be releases shortly.
+
+Golang `1.20+` is now also required to build the project.
+
+### Added
+
+* Support reader node Firehose Protocol 2.3 on all networks now (and not just Polygon).
 
 ### Fixed
 
@@ -14,7 +26,7 @@ for instructions to keep up to date.
 
 * Now requires Go 1.20+ to compile the project.
 
-## 1.4.11
+## v1.4.11
 
 ### Fixes
 
@@ -110,7 +122,7 @@ The app `substreams-tier1` and `substreams-tier2` should be upgraded concurrentl
 
 ### Added
 
-* Support for firehose protocol 2.3 (for parallel processing of transactions, added to polygon 'bor' v0.4.0
+* Support for reader node Firehose Protocol 2.3 (for parallel processing of transactions, added to polygon 'bor' v0.4.0)
 
 ### Removed
 

@@ -20,9 +20,9 @@ var nullAddress = eth.MustNewAddress("0x0000000000000000000000000000000000000000
 var bigIntZero = pbeth.BigIntFromBytes(nil)
 
 type normalizationFeatures struct {
-	CombinePolygonSystemTransactions              bool
-	ReorderPolygonTransactionsAndRenumberOrdinals bool
-	UpgradeBlockV2ToV3                            bool
+	CombinePolygonSystemTransactions       bool
+	ReorderTransactionsAndRenumberOrdinals bool
+	UpgradeBlockV2ToV3                     bool
 }
 
 func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, firstTransactionOrdinal uint64) {
@@ -30,8 +30,8 @@ func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, first
 		populateStateReverted(trx) // this needs to run first
 	}
 
-	if features.ReorderPolygonTransactionsAndRenumberOrdinals {
-		reorderPolygonTransactionsAndRenumberOrdinals(block, firstTransactionOrdinal)
+	if features.ReorderTransactionsAndRenumberOrdinals {
+		reorderTransactionsAndRenumberOrdinals(block, firstTransactionOrdinal)
 	}
 
 	if features.CombinePolygonSystemTransactions && hasPolygonSystemTransactions(block) {
@@ -95,7 +95,7 @@ func upgradeBlockV2ToV3(block *pbeth.Block) {
 	}
 }
 
-func reorderPolygonTransactionsAndRenumberOrdinals(block *pbeth.Block, firstTransactionOrdinal uint64) {
+func reorderTransactionsAndRenumberOrdinals(block *pbeth.Block, firstTransactionOrdinal uint64) {
 	sort.Slice(block.TransactionTraces, func(i, j int) bool {
 		return block.TransactionTraces[i].Index < block.TransactionTraces[j].Index // FIXME currently this is not a good value, the index is always the order in which it was received
 	})
