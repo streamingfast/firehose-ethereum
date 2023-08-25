@@ -25,6 +25,7 @@ Golang `1.20+` is now also required to build the project.
 ### Changed
 
 * Now requires Go 1.20+ to compile the project.
+* Substreams bumped: better "Progress" messages
 
 ## v1.4.11
 
