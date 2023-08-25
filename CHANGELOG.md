@@ -14,6 +14,8 @@ This release mainly brings `reader-node` Firehose Protocol 2.3 support for all n
 
 Golang `1.20+` is now also required to build the project.
 
+This release will prevent Substreams Clients prior to v1.1.12 from receiving progress messages, but the data will not be affected. Clients will need to be upgraded to properly decode the new progress messages.
+
 ### Added
 
 * Support reader node Firehose Protocol 2.3 on all networks now (and not just Polygon).
