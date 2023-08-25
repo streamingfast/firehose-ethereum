@@ -13,6 +13,7 @@ for instructions to keep up to date.
 ### Changed
 
 * Now requires Go 1.20+ to compile the project.
+* Substreams bumped: better "Progress" messages
 
 ## 1.4.11
 
