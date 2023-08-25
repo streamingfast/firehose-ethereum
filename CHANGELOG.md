@@ -20,6 +20,10 @@ This release will prevent Substreams Clients prior to v1.1.12 from receiving pro
 
 * Support reader node Firehose Protocol 2.3 on all networks now (and not just Polygon).
 
+### Removed
+
+* Removed `--substreams-tier1-request-stats` and `--substreams-tier1-request-stats` (substreams request-stats are now always sent to clients)
+
 ### Fixed
 
 * `tools check merged-blocks` now correctly prints missing block gaps even without print-full or print-stats.
