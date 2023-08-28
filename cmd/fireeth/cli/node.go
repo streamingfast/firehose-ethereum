@@ -29,10 +29,9 @@ import (
 	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/streamingfast/firehose-ethereum/node-manager/dev"
 	"github.com/streamingfast/firehose-ethereum/node-manager/geth"
-	"github.com/streamingfast/firehose-ethereum/node-manager/openeth"
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
-	nodeManagerApp "github.com/streamingfast/node-manager/app/node_manager2"
+	nodeManagerApp "github.com/streamingfast/node-manager/app/node_manager"
 	"github.com/streamingfast/node-manager/metrics"
 	reader "github.com/streamingfast/node-manager/mindreader"
 	"github.com/streamingfast/node-manager/operator"
@@ -44,11 +43,9 @@ import (
 
 var nodeLogger, nodeTracer = logging.PackageLogger("node", "github.com/streamingfast/firehose-ethereum/node")
 var nodeGethLogger, _ = logging.PackageLogger("node.geth", "github.com/streamingfast/firehose-ethereum/node/geth", DefaultLevelInfo)
-var nodeOpenEthereumLogger, _ = logging.PackageLogger("node.openethereum", "github.com/streamingfast/firehose-ethereum/node/open-ethereum", DefaultLevelInfo)
 
 var readerLogger, readerTracer = logging.PackageLogger("reader", "github.com/streamingfast/firehose-ethereum/mindreader")
 var readerGethLogger, _ = logging.PackageLogger("reader.geth", "github.com/streamingfast/firehose-ethereum/mindreader/geth", DefaultLevelInfo)
-var readerOpenEthereumLogger, _ = logging.PackageLogger("reader.open-ethereum", "github.com/streamingfast/firehose-ethereum/mindreader/open-ethereum", DefaultLevelInfo)
 
 func registerNodeApp(backupModuleFactories map[string]operator.BackupModuleFactory) {
 	launcher.RegisterApp(zlog, &launcher.AppDef{
@@ -259,12 +256,6 @@ func getSupervisedProcessLogger(isReader bool, nodeType string) *zap.Logger {
 			return readerGethLogger
 		} else {
 			return nodeGethLogger
-		}
-	case "openethereum":
-		if isReader {
-			return readerOpenEthereumLogger
-		} else {
-			return nodeOpenEthereumLogger
 		}
 	default:
 		panic(fmt.Errorf("unknown node type %q, only knows about %q, %q and %q", nodeType, "geth", "openethereum", "dev"))
@@ -487,24 +478,7 @@ func buildSuperviser(
 		}
 
 		return superviser, nil
-	case "openethereum":
-		superviser, err := openeth.NewSuperviser(
-			nodePath,
-			nodeDataDir,
-			nodeIPCPath,
-			nodeArguments,
-			deepMind,
-			debugDeepMind,
-			metricsAndReadinessManager.UpdateHeadBlock,
-			enforcedPeers,
-			logToZap,
-			appLogger, nodeGethLogger,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("unable to create chain superviser: %w", err)
-		}
 
-		return superviser, nil
 	default:
 		return nil, fmt.Errorf("unsupported node type: %s", nodeType)
 	}

@@ -14,25 +14,26 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.1.17
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/streamingfast/bstream v0.0.2-0.20230829131224-b9272048dc6a
 	github.com/streamingfast/cli v0.0.4-0.20230825151644-8cc84512cd80
 	github.com/streamingfast/dauth v0.0.0-20230929180355-921f9c9be330
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
 	github.com/streamingfast/dgrpc v0.0.0-20230929132851-893fc52687fa
-	github.com/streamingfast/dlauncher v0.0.0-20230201165548-2d1aa7607b13
+	github.com/streamingfast/dlauncher v0.0.0-20230607184145-76399faad89e
 	github.com/streamingfast/dmetering v0.0.0-20230731155453-e1df53e362aa
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
 	github.com/streamingfast/firehose v0.1.1-0.20230731171526-3428fc0ff8d9
-	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230911152856-ecc5a5edb14f
+	github.com/streamingfast/firehose-core v0.1.7-0.20230825192517-7bcda2c1d32a
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20230802141234-f0dd68e1f596
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
-	github.com/streamingfast/merger v0.0.3-0.20221123202507-445dfd357868
-	github.com/streamingfast/node-manager v0.0.2-0.20221115101723-d9823ffd7ad5
+	github.com/streamingfast/merger v0.0.3-0.20230413191947-fe3ce68cb9f8
+	github.com/streamingfast/node-manager v0.0.2-0.20230406142433-692298a8b8d2
 	github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28
 	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9
 	github.com/streamingfast/sf-tools v0.0.0-20230811131237-97a5d4afa459
@@ -75,7 +76,7 @@ require (
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.3.1 // indirect
-	github.com/blendle/zapdriver v1.3.2-0.20200203083823-9200777f8a3d // indirect
+	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/bobg/go-generics/v2 v2.1.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/bufbuild/connect-go v1.10.0 // indirect
@@ -128,6 +129,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.1.0 // indirect
@@ -172,9 +174,10 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680 // indirect
-	github.com/streamingfast/dbin v0.0.0-20210809205249-73d5eca35dc5 // indirect
+	github.com/streamingfast/dbin v0.9.1-0.20220513054835-1abebbb944ad // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
+	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tetratelabs/wazero v1.1.0 // indirect

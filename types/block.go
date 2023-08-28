@@ -18,10 +18,13 @@ import (
 	"fmt"
 
 	"github.com/streamingfast/bstream"
-	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
+	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	"google.golang.org/protobuf/proto"
 )
+
+var _ firecore.Block = (*pbeth.Block)(nil)
 
 func BlockFromProto(b *pbeth.Block, libNum uint64) (*bstream.Block, error) {
 	blockTime, err := b.Time()

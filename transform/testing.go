@@ -192,7 +192,7 @@ func testMockstoreWithFiles(t testing.T, blocks []*pbeth.Block, indexSize uint64
 	})
 
 	// spawn an indexer with our mock indexStore
-	indexer := NewEthCombinedIndexer(indexStore, indexSize)
+	indexer := NewEthCombinedIndexerLegacy(indexStore, indexSize)
 	for _, blk := range blocks {
 		// feed the indexer
 		indexer.ProcessBlock(blk)

@@ -59,7 +59,7 @@ func init() {
 			}
 			stopBlockNum := viper.GetUint64("combined-index-builder-stop-block")
 
-			combinedIndexer := transform.NewEthCombinedIndexer(indexStore, viper.GetUint64("combined-index-builder-index-size"))
+			combinedIndexer := transform.NewEthCombinedIndexerLegacy(indexStore, viper.GetUint64("combined-index-builder-index-size"))
 			handler := bstream.HandlerFunc(func(blk *bstream.Block, obj interface{}) error {
 				combinedIndexer.ProcessBlock(blk.ToProtocol().(*pbeth.Block))
 				return nil

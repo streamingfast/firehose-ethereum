@@ -29,7 +29,7 @@ import (
 	"go.uber.org/zap"
 )
 
-//GenesisBootstrapper needs to write genesis file, static node file, then run a command like 'geth init'
+// GenesisBootstrapper needs to write genesis file, static node file, then run a command like 'geth init'
 type GenesisBootstrapper struct {
 	dataDir        string
 	genesisFileURL string

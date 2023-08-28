@@ -4,6 +4,214 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.0.0
+
+### Highlights
+
+This releases refactor `firehose-ethereum` repository to use the common shared Firehose Core library (https://github.com/streamingfast/firehose-core) that every single Firehose supported chain should use and follow.
+
+At the data level and gRPC level, there is no changes in behavior to all core components which are `reader-node`, `merger`, `relayer`, `firehose`, `substreams-tier1` and `substreams-tier2`.
+
+A lot of changes happened at the operators level however and some superflous mode have been removed, especially around the `reader-node` application. The full changes is listed below, operators should review thoroughly the changelog.
+
+> **Important** It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.12 in case of a problem is quite easy and no special data migration is required.
+
+#### Operators
+
+You will find below the detailed upgrade procedure for the configuration file providers usually use. If you are using the flags based approach, simply update the corresponding flags.
+
+#### Reader Node changes
+
+In previous version of `firehose-ethereum`, it was possible to use the `node` app to launch managed "peering" node, this is not possible anymore. If you were using the `node` app previously:
+
+```yaml
+start:
+  args:
+  - ...
+  - node
+  - ...
+  flags:
+    ...
+    node-...
+```
+
+> **note* This is about `node` app, the `reader-node` app
+
+#### Reader Node changes
+
+In previous version of `firehose-ethereum`, it was possible to use the `node` app to launch managed "peering" node, this is not possible anymore. If you were using the `node` app previously:
+
+```yaml
+start:
+  args:
+  - ...
+  - node
+  - ...
+  flags:
+    ...
+    node-...
+```
+
+> **Note** This is about the `node` app and **not** the `reader-node`, we think usage of this app is minimal/inexistent.
+
+#### Rename of `combined-index-builder` to `index-builder`
+
+The app has been renamed to simply `index-builder` and the flags has been completely renamed removing the prefix `combined-` in front of them. So change:
+
+```yaml
+start:
+  args:
+  - ...
+  - combined-index-builder
+  - ...
+  flags:
+    ...
+    combined-index-builder-grpc-listen-addr: ":9999"
+    combined-index-builder-index-size: 10000
+    combined-index-builder-start-block: 0
+    combined-index-builder-stop-block: 0
+    ...
+```
+
+To
+
+```yaml
+start:
+  args:
+  - ...
+  - index-builder
+  - ...
+  flags:
+    ...
+    index-builder-grpc-listen-addr: ":9999"
+    index-builder-index-size: 10000
+    index-builder-start-block: 0
+    index-builder-stop-block: 0
+    ...
+```
+
+> **Note** Rename only configuration item you had previously defined, do not copy paste verbatim example aboe
+
+* Removed support for `archive-node` app, if you were using this, please use a standard NEAR Archive node to do the same job.
+
+* Flag `common-block-index-sizes` has been renamed to `common-index-block-sizes`.
+
+* String variable `{sf-data-dir}` which interpolates at runtime to Firehose data directory is now `{data-dir}`. If any of your parameter value has `{sf-data-dir}` in its value, change it to `{data-dir}`.
+
+  > **Note** This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
+
+* The default value for `config-file` changed from `sf.yaml` to `firehose.yaml`. If you didn't had this flag defined and wish to keep the old default, define `config-file: sf.yaml`.
+
+* The default value for `data-dir` changed from `sf-data` to `firehose-data`. If you didn't had this flag defined before, you should either move `sf-data` to `firehose-data` or define `data-dir: sf-data`.
+
+  > **Note** This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
+
+* The flag `verbose` has been renamed to `log-verbosity`.
+
+* The default value for `common-blocks-cache-dir` changed from `{sf-data-dir}/blocks-cache` to `file://{data-dir}/storage/blocks-cache`. If you didn't had this flag defined and you had `common-blocks-cache-enabled: true`, you should define `common-blocks-cache-dir: {data-dir}/blocks-cache`.
+
+* The default value for `common-live-blocks-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `common-live-blocks-addr: 15011` and ensure you also modify `relayer-grpc-listen-addr: :15011` (see next entry for details).
+
+* The default value for `relayer-grpc-listen-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `relayer-grpc-listen-addr: 15011` and ensure you also modify `common-live-blocks-addr: :15011` (see previous entry for details).
+
+* The default value for `relayer-source` changed from `:15010` to `:10010`. If you didn't had this flag defined and wish to keep the old default, define `relayer-source: 15010` and ensure you also modify `reader-node-grpc-listen-addr: :15010` (see next entry for details).
+
+* The default value for `reader-node-grpc-listen-addr` changed from `:15010` to `:10010`. If you didn't had this flag defined and wish to keep the old default, define `reader-node-grpc-listen-addr: :15010` and ensure you also modify `relayer-source: :15010` (see previous entry for details).
+
+* The default value for `reader-node-manager-api-addr` changed from `:15009` to `:10011`. If you didn't had this flag defined and wish to keep the old default, define `reader-node-manager-api-addr: :15010`.
+
+* The `reader-node-arguments` is not populated anymore with default `--home={node-data-dir} <extra-args> run` which means you must now specify those manually. The variables `{data-dir}`, `{node-data-dir}` and `{hostname}` are interpolated respectively to Firehose absolute `data-dir` value, to Firehose absolute `reader-node-data-dir` value and to current hostname. To upgrade, if you had no `reader-node-arguments` defined, you must now define `reader-node-arguments: --home="{node-data-dir}" run`, if you had a `+` in your `reader-node-arguments: +--some-flag`, you must now define it like `reader-node-arguments: --home="{node-data-dir}" --some-flag run`.
+
+  > **Note** This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
+
+* The `reader-node-boot-nodes` flag has been removed entirely, if you have boot nodes to specify, specify them in `reader-node-arguments` using `--boot-nodes=...` instead.
+
+* Removed unused flags `reader-node-merge-and-store-directly`, `reader-node-merge-threshold-block-age` and `reader-node-wait-upload-complete-on-shutdown`.
+
+* The flag `receipt-index-builder-index-size` has been renamed to `index-builder-index-size`.
+
+* The flag `receipt-index-builder-start-block` has been renamed to `index-builder-start-block`.
+
+* The flag `receipt-index-builder-stop-block` has been renamed to `index-builder-stop-block`.
+
+* The default value for `firehose-grpc-listen-addr` changed from `:15042` to `:10015`. If you didn't had this flag defined and wish to keep the old default, define `firehose-grpc-listen-addr: :15010`.
+
+* The default value for `merger-grpc-listen-addr` changed from `:15012` to `:10012`. If you didn't had this flag defined and wish to keep the old default, define `merger-grpc-listen-addr: :15012`.
+
+#### > **TODO**
+
+#### Lost of `common-network-id` (custom tags replacement? to be emitted in metrics, I proposed that in https://github.com/streamingfast/firehose-core/issues/5#issuecomment-1658573184)
+
+#### Lost of `reader-node-ipc-path` (show how to replace)
+
+#### Lost of `reader-node-enforce-peers` (how could we offer a replacement for that?)
+
+
+##### Document changes to node argument building
+
+We might want to port back some replacements within firehose-core directly (check with steph)
+
+```
+func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole, bootstrapDataURL string) ([]string, error) {
+	zlog.Info("building node arguments", zap.String("node-type", nodeType), zap.String("node-role", nodeRole))
+	typeRoles, ok := nodeArgsByTypeAndRole[nodeType]
+	if !ok {
+		return nil, fmt.Errorf("invalid node type: %s", nodeType)
+	}
+
+	args, ok := typeRoles[nodeRole]
+	if !ok {
+		return nil, fmt.Errorf("invalid node role: %s for type %s", nodeRole, nodeType)
+	}
+
+	// This sets `--firehose-genesis-file` if the node role is of type reader
+	// (for which case we are sure that Firehose patch is supported) and if the bootstrap data
+	// url is a `genesis.json` file.
+	if nodeRole == "reader" && isGenesisBootstrapper(bootstrapDataURL) {
+		args += fmt.Sprintf(" --firehose-genesis-file=%s", bootstrapDataURL)
+	}
+
+	if providedArgs != "" {
+		if strings.HasPrefix(providedArgs, "+") {
+			args += " " + strings.TrimLeft(providedArgs, "+")
+		} else {
+			args = providedArgs // discard info provided by node type / role
+		}
+	}
+
+	args = strings.Replace(args, "{node-data-dir}", nodeDataDir, -1)
+	args = strings.Replace(args, "{network-id}", networkID, -1)
+	args = strings.Replace(args, "{node-ipc-path}", nodeIPCPath, -1)
+
+	if strings.Contains(args, "{public-ip}") {
+		var foundPublicIP string
+		hostname := os.Getenv("HOSTNAME")
+		publicIPs := os.Getenv("PUBLIC_IPS") // format is PUBLIC_IPS="reader-v3-1:1.2.3.4 backup-node:5.6.7.8"
+		for _, pairStr := range strings.Fields(publicIPs) {
+			pair := strings.Split(pairStr, ":")
+			if len(pair) != 2 {
+				continue
+			}
+			if pair[0] == hostname {
+				foundPublicIP = pair[1]
+			}
+		}
+
+		if foundPublicIP == "" {
+			appLogger.Warn("cannot find public IP in environment variable PUBLIC_IPS (format: 'HOSTNAME:a.b.c.d HOSTNAME2:e.f.g.h'), using 127.0.0.1 as fallback", zap.String("hostname", hostname))
+			foundPublicIP = "127.0.0.1"
+		}
+		args = strings.Replace(args, "{public-ip}", foundPublicIP, -1)
+	}
+
+	return strings.Fields(args), nil
+}
+```
+
+### Removed
+
+* Transform `sf.ethereum.transform.v1.LightBlock` is not supported, this has been deprecated for a long time and should not be used anywhere.
+
 # v1.4.22
 
 * Fixed a regression where `reader-node-role` was changed to `dev` by default, putting back the default `geth` value.

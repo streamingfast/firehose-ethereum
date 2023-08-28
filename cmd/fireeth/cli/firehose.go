@@ -85,7 +85,6 @@ func init() {
 
 			firehoseGRPCListenAddr := viper.GetString("firehose-grpc-listen-addr")
 			registry := transform.NewRegistry()
-			registry.Register(ethtransform.LightBlockTransformFactory)
 			registry.Register(ethtransform.HeaderOnlyTransformFactory)
 			registry.Register(ethtransform.MultiLogFilterTransformFactory(indexStore, possibleIndexSizes))
 			registry.Register(ethtransform.MultiCallToFilterTransformFactory(indexStore, possibleIndexSizes))

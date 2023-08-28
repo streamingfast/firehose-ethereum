@@ -1,38 +1,75 @@
-// Copyright 2021 dfuse Platform Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package main
 
 import (
-	"github.com/streamingfast/firehose-ethereum/cmd/fireeth/cli"
-	"github.com/streamingfast/node-manager/operator"
-	"github.com/streamingfast/snapshotter"
+	"github.com/spf13/cobra"
+	firecore "github.com/streamingfast/firehose-core"
+	"github.com/streamingfast/firehose-ethereum/codec"
+	"github.com/streamingfast/firehose-ethereum/transform"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/logging"
+	"github.com/streamingfast/node-manager/mindreader"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-// Version value, injected via go build `ldflags` at build time
-var version = "dev"
-
 func init() {
-	cli.RootCmd.Version = cli.Version(version)
+	firecore.UnsafePayloadKind = pbbstream.Protocol_ETH
 }
 
 func main() {
-	cli.Main(cli.RegisterCommonFlags, nil, map[string]operator.BackupModuleFactory{
-		"gke-pvc-snapshot": gkeSnapshotterFactory,
+	firecore.Main(&firecore.Chain[*pbeth.Block]{
+		ShortName:            "eth",
+		LongName:             "Ethereum",
+		ExecutableName:       "geth",
+		FullyQualifiedModule: "github.com/streamingfast/firehose-ethereum",
+		Version:              version,
+
+		Protocol:        "ETH",
+		ProtocolVersion: 1,
+
+		BlockFactory: func() firecore.Block { return new(pbeth.Block) },
+
+		BlockIndexerFactories: map[string]firecore.BlockIndexerFactory[*pbeth.Block]{
+			transform.CombinedIndexerShortName: transform.NewEthCombinedIndexer,
+		},
+
+		BlockTransformerFactories: map[protoreflect.FullName]firecore.BlockTransformerFactory{
+			transform.HeaderOnlyMessageName:     transform.NewHeaderOnlyTransformFactory,
+			transform.CombinedFilterMessageName: transform.NewCombinedFilterTransformFactory,
+
+			// Still needed?
+			transform.MultiCallToFilterMessageName: transform.NewMultiCallToFilterTransformFactory,
+			transform.MultiLogFilterMessageName:    transform.NewMultiLogFilterTransformFactory,
+		},
+
+		ConsoleReaderFactory: func(lines chan string, blockEncoder firecore.BlockEncoder, logger *zap.Logger, tracer logging.Tracer) (mindreader.ConsolerReader, error) {
+			// FIXME: This was hardcoded also in the previouse firehose-near version, Firehose will break if this is not available
+			// blockEncoder
+			return codec.NewConsoleReader(logger, lines)
+		},
+
+		// ReaderNodeBootstrapperFactory: newReaderNodeBootstrapper,
+
+		Tools: &firecore.ToolsConfig[*pbeth.Block]{
+			BlockPrinter: printBlock,
+
+			RegisterExtraCmd: func(chain *firecore.Chain[*pbeth.Block], toolsCmd *cobra.Command, zlog *zap.Logger, tracer logging.Tracer) error {
+				// toolsCmd.AddCommand(newToolsGenerateNodeKeyCmd(chain))
+				// toolsCmd.AddCommand(newToolsBackfillCmd(zlog))
+
+				return nil
+			},
+
+			TransformFlags: map[string]*firecore.TransformFlag{
+				// "receipt-account-filters": {
+				// 	Description: "Comma-separated accounts to use as filter/index. If it contains a colon (:), it will be interpreted as <prefix>:<suffix> (each of which can be empty, ex: 'hello:' or ':world')",
+				// 	Parser:      parseReceiptAccountFilters,
+				// },
+			},
+		},
 	})
 }
 
-func gkeSnapshotterFactory(conf operator.BackupModuleConfig) (operator.BackupModule, error) {
-	return snapshotter.NewGKEPVCSnapshotter(conf)
-}
+// Version value, injected via go build `ldflags` at build time, **must** not be removed or inlined
+var version = "dev"

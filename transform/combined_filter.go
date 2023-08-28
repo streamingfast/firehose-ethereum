@@ -10,6 +10,7 @@ import (
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
+	firecore "github.com/streamingfast/firehose-core"
 	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/transform/v1"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"google.golang.org/protobuf/proto"
@@ -27,6 +28,10 @@ type Indexer interface {
 }
 
 var CombinedFilterMessageName = proto.MessageName(&pbtransform.CombinedFilter{})
+
+func NewCombinedFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes []uint64) (*transform.Factory, error) {
+	return CombinedFilterTransformFactory(indexStore, possibleIndexSizes), nil
+}
 
 func CombinedFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{
@@ -104,7 +109,11 @@ type EthCombinedIndexer struct {
 	BlockIndexer Indexer
 }
 
-func NewEthCombinedIndexer(indexStore dstore.Store, indexSize uint64) *EthCombinedIndexer {
+func NewEthCombinedIndexer(indexStore dstore.Store, indexSize uint64) (firecore.BlockIndexer[*pbeth.Block], error) {
+	return NewEthCombinedIndexerLegacy(indexStore, indexSize), nil
+}
+
+func NewEthCombinedIndexerLegacy(indexStore dstore.Store, indexSize uint64) *EthCombinedIndexer {
 	bi := transform.NewBlockIndexer(indexStore, indexSize, CombinedIndexerShortName)
 	return &EthCombinedIndexer{
 		BlockIndexer: bi,
@@ -112,7 +121,7 @@ func NewEthCombinedIndexer(indexStore dstore.Store, indexSize uint64) *EthCombin
 }
 
 // ProcessBlock implements chain-specific logic for Ethereum bstream.Block's
-func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) {
+func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) error {
 	keys := make(map[string]bool)
 	for _, trace := range blk.TransactionTraces {
 		for key := range callKeys(trace, IdxPrefixCall) {
@@ -128,7 +137,7 @@ func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) {
 	}
 
 	i.BlockIndexer.Add(keyArray, blk.Number)
-	return
+	return nil
 }
 
 func addSigString(in AddressSignatureFilter) string {
