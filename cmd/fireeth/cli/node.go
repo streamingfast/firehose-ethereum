@@ -128,7 +128,7 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 				bootstrapper = geth.NewTarballBootstrapper(bootstrapDataURL, nodeDataDir, nodeLogger)
 			case strings.HasSuffix(bootstrapDataURL, "json"):
 				// special bootstrap case
-				bootstrapArgs, err := buildNodeArguments(appLogger, networkID, nodeDataDir, nodeIPCPath, "", nodeType, "bootstrap", "")
+				bootstrapArgs, err := buildNodeArguments(appLogger, sfDataDir, networkID, nodeDataDir, nodeIPCPath, "", nodeType, "bootstrap", "")
 				if err != nil {
 					return nil, fmt.Errorf("cannot build node bootstrap arguments")
 				}
@@ -361,6 +361,7 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isReader bool
 
 	nodeArguments, err = buildNodeArguments(
 		appLogger,
+		sfDataDir,
 		networkID,
 		nodeDataDir,
 		nodeIPCPath,
@@ -373,7 +374,7 @@ func parseCommonNodeFlags(appLogger *zap.Logger, sfDataDir string, isReader bool
 	return
 }
 
-func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole, bootstrapDataURL string) ([]string, error) {
+func buildNodeArguments(appLogger *zap.Logger, dataDir, networkID, nodeDataDir, nodeIPCPath, providedArgs, nodeType, nodeRole, bootstrapDataURL string) ([]string, error) {
 	zlog.Info("building node arguments", zap.String("node-type", nodeType), zap.String("node-role", nodeRole))
 	typeRoles, ok := nodeArgsByTypeAndRole[nodeType]
 	if !ok {
@@ -403,6 +404,7 @@ func buildNodeArguments(appLogger *zap.Logger, networkID, nodeDataDir, nodeIPCPa
 	args = strings.Replace(args, "{node-data-dir}", nodeDataDir, -1)
 	args = strings.Replace(args, "{network-id}", networkID, -1)
 	args = strings.Replace(args, "{node-ipc-path}", nodeIPCPath, -1)
+	args = strings.Replace(args, "{data-dir}", dataDir, -1)
 
 	if strings.Contains(args, "{public-ip}") {
 		var foundPublicIP string
