@@ -10,6 +10,10 @@ for instructions to keep up to date.
 
 * added `tools compare-blocks-rpc` command to perform a validation between firehose blocks and blocks+trx+logs fetched from an RPC endpoint
 
+### Fixed
+
+* More tolerant retry/timeouts on filesource (prevent "Context Deadline Exceeded")
+
 ## v1.4.12
 
 ### Highlights
