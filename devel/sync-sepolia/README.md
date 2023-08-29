@@ -1,10 +1,10 @@
-## Syncing Goerli
+## Syncing Sepolia
 
-To sync Goerli, an Ethereum Beacon Chain client is required.
+To sync Sepolia, an Ethereum Beacon Chain client is required.
 
 This means that starting `firehose-ethereum` alone is not enough to sync a chain, you also need a Beacon Chain client also called an Ethereum Consensus Client. We use here https://github.com/sigp/lighthouse as our consensus client.
 
-In this folder, you will a script to run the consensus client [consensus.sh](./consensus.sh) and a config file [sync-goerli.yaml](./sync-goerli.yaml) that starts the full Firehose on Ethereum stack locally.
+In this folder, you will a script to run the consensus client [consensus.sh](./consensus.sh) and a config file [sync-sepolia.yaml](./sync-sepolia.yaml) that starts the full Firehose on Ethereum stack locally.
 
 The file [jwt.txt](./jwt.txt) is used by both end to communicate with each other, it's hard-coded right now to show case proper syncing.
 
@@ -39,10 +39,10 @@ Once downloaded, ensure it's available in your `PATH` environment variable.
 
 Once you have the consensus client synced and `geth` available, download latest release of `fireeth` binary at https://github.com/streamingfast/firehose-ethereum/releases. Again, once downloaded, ensure it's available in your `PATH` environment variable.
 
-The [sync-goerli.yaml](./sync-goerli.yaml) is already configured so the the consensus client can connect to it. Go in the folder where this readme is contained (so [here](.)) and run:
+The [sync-sepolia.yaml](./sync-sepolia.yaml) is already configured so the the consensus client can connect to it. Go in the folder where this readme is contained (so [here](.)) and run:
 
 ```bash
-fireeth -c sync-goerli.yaml start
+fireeth -c sync-sepolia.yaml start
 ```
 
 > **Note** If you want to start "fresh" again, stop current running instance, delete the folder `sf-data` and restart the command above.
@@ -59,8 +59,8 @@ This indicates that `geth` is still synchronizing and it's not ready to start sy
 
 #### `stdin` mode
 
-Firehose on Ethereum by default starts, supervises and manages the `geth` process required to sync with the Ethereum network. But `fireeth` also have a mode called `stdin` where data is actually received from the standard input pipe directly which means that you manage `geth` yourself. To switch to `stdin` mode, in the [sync-goerli.yaml](./sync-goerli.yaml), change the line `- reader-node` (within the `args` list) to `- reader-node-stdin` and also remove the `reader-node-arguments` parameter (so remove from line 11 to end of file) . Then instead of using `fireeth -c sync-goerli.yaml start` to start everything, use:
+Firehose on Ethereum by default starts, supervises and manages the `geth` process required to sync with the Ethereum network. But `fireeth` also have a mode called `stdin` where data is actually received from the standard input pipe directly which means that you manage `geth` yourself. To switch to `stdin` mode, in the [sync-sepolia.yaml](./sync-sepolia.yaml), change the line `- reader-node` (within the `args` list) to `- reader-node-stdin` and also remove the `reader-node-arguments` parameter (so remove from line 11 to end of file) . Then instead of using `fireeth -c sync-sepolia.yaml start` to start everything, use:
 
 ```bash
-geth --goerli --datadir=./sf-data/reader/data --ipcpath=./sf-data/reader/ipc --port=30305 --http --http.api=eth,net,web3 --http.port=8547 --http.addr=0.0.0.0 "--http.vhosts=*" --authrpc.jwtsecret=./jwt.txt --authrpc.addr=0.0.0.0 --authrpc.port=9551 "--authrpc.vhosts=*" --http.addr=0.0.0.0 --http.port=9545 "--http.vhosts=*" --ws.port=9546 --port=40303 --firehose-enabled | fireeth -c sync-goerli.yaml start
+geth --sepolia --datadir=./sf-data/reader/data --ipcpath=./sf-data/reader/ipc --port=30305 --http --http.api=eth,net,web3 --http.port=8547 --http.addr=0.0.0.0 "--http.vhosts=*" --authrpc.jwtsecret=./jwt.txt --authrpc.addr=0.0.0.0 --authrpc.port=9551 "--authrpc.vhosts=*" --http.addr=0.0.0.0 --http.port=9545 "--http.vhosts=*" --ws.port=9546 --port=40303 --firehose-enabled | fireeth -c sync-sepolia.yaml start
 ```

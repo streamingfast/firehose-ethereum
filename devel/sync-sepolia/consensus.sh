@@ -28,7 +28,7 @@ main() {
     beacon\
     --datadir="$ROOT/cs-data"\
     --debug-level=info\
-    --network=goerli\
+    --network=sepolia\
     --listen-address=0.0.0.0\
     --port=9090\
     --http\

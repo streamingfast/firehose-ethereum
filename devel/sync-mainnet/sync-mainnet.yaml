@@ -8,6 +8,7 @@ start:
   flags:
     common-chain-id: 1
     common-network-id: 1
+    reader-node-log-to-zap: false
     # We have set `authrpc.addr` and `http.addr` to `0.0.0.0` so that RPC listen on all interfaces, we also
     # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
     # to ensure foreign access to these connection are protected.
