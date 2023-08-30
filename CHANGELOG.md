@@ -4,7 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v1.4.13
+
+> [!IMPORTANT]
+> The Substreams service exposed from this version will send progress messages that cannot be decoded by substreams clients prior to v1.1.12.
+> Streaming of the actual data will not be affected. Clients will need to be upgraded to properly decode the new progress messages.
+
+### Changed
+
+* Bumped substreams to `v1.1.12` to support the new progress message format. Progression now relates to **stages** instead of modules. You can get stage information using the `substreams info` command starting at version `v1.1.12`.
 
 ### Added
 
@@ -23,8 +31,6 @@ for instructions to keep up to date.
 This release mainly brings `reader-node` Firehose Protocol 2.3 support for all networks and not just Polygon. This is important for the upcoming release of Firehose-enabled `geth` version 1.2.11 and 1.2.12 that are going to be releases shortly.
 
 Golang `1.20+` is now also required to build the project.
-
-This release will prevent Substreams Clients prior to v1.1.12 from receiving progress messages, but the data will not be affected. Clients will need to be upgraded to properly decode the new progress messages.
 
 ### Added
 
