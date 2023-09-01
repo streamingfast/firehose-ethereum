@@ -33,7 +33,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 	}
 	systemTrx := func(id string, beginOrdinal, endOrdinal uint64, calls []*pbeth.Call) *pbeth.TransactionTrace {
 		return &pbeth.TransactionTrace{
-			To:           polygonMergeableTrxAddress,
+			To:           polygonStateReceiverAddress,
 			From:         polygonSystemAddress,
 			Hash:         B(id),
 			Calls:        calls,
@@ -170,12 +170,12 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			out, outHash := CombinePolygonSystemTransactions(test.in, 0, nil)
+			out, outHashes := CombinePolygonSystemTransactions(test.in, 0, nil)
 
 			if test.expectedSystemTrx {
-				assert.Equal(t, systemTrxHash, H(outHash))
+				assert.Equal(t, systemTrxHash, H(outHashes[0]))
 			} else {
-				assert.Nil(t, outHash)
+				assert.Nil(t, outHashes)
 			}
 
 			var systemTrx *pbeth.TransactionTrace

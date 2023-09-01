@@ -15,7 +15,8 @@ import (
 var polygonSystemAddress = eth.MustNewAddress("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
 var polygonNeverRevertedTopic = eth.MustNewBytes("0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63")
 var polygonFeeSystemAddress = eth.MustNewAddress("0x0000000000000000000000000000000000001010")
-var polygonMergeableTrxAddress = eth.MustNewAddress("0x0000000000000000000000000000000000001001")
+var polygonStateReceiverAddress = eth.MustNewAddress("0x0000000000000000000000000000000000001001")
+var polygonValidatorContract = eth.MustNewAddress("0x0000000000000000000000000000000000001000")
 var nullAddress = eth.MustNewAddress("0x0000000000000000000000000000000000000000")
 var bigIntZero = pbeth.BigIntFromBytes(nil)
 
@@ -30,9 +31,9 @@ func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, first
 		populateStateReverted(trx) // this needs to run first
 	}
 
-	var systemTransactionHash []byte
+	var systemTransactionHashes hashes
 	if features.CombinePolygonSystemTransactions && hasPolygonSystemTransactions(block) {
-		block.TransactionTraces, systemTransactionHash = CombinePolygonSystemTransactions(block.TransactionTraces, block.Number, block.Hash)
+		block.TransactionTraces, systemTransactionHashes = CombinePolygonSystemTransactions(block.TransactionTraces, block.Number, block.Hash)
 	}
 
 	if features.ReorderTransactionsAndRenumberOrdinals {
@@ -57,7 +58,7 @@ func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, first
 	// We leverage StateReverted field inside the `PopulateLogBlockIndices`
 	// and as such, it must be invoked after the `PopulateStateReverted` has
 	// been executed.
-	if err := populateLogBlockIndices(block, systemTransactionHash); err != nil {
+	if err := populateLogBlockIndices(block, systemTransactionHashes); err != nil {
 		panic(fmt.Errorf("normalizing log block indices: %w", err))
 	}
 
@@ -152,27 +153,47 @@ func reorderTransactionsAndRenumberOrdinals(block *pbeth.Block, firstTransaction
 
 }
 
+type hashes [][]byte
+
+func (h hashes) Contains(in []byte) bool {
+	for _, hash := range h {
+		if bytes.Equal(hash, in) {
+			return true
+		}
+	}
+	return false
+}
+
 // CombinePolygonSystemTransactions will identify transactions that are "system transactions" and merge them into a single transaction with a predictive name, like the `bor` client does.
 // It reorders the calls and logs to match expected output from RPC API.
-func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum uint64, blockHash []byte) (out []*pbeth.TransactionTrace, systemTransactionHash []byte) {
+func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum uint64, blockHash []byte) (out []*pbeth.TransactionTrace, systemTransactionHashes hashes) {
 
-	var systemTransactions []*pbeth.TransactionTrace
+	var systemTransactionsToMerge []*pbeth.TransactionTrace
+	var unmergeableSystemTransactions []*pbeth.TransactionTrace
 	normalTransactions := make([]*pbeth.TransactionTrace, 0, len(traces))
 
 	var highestTrxIndex uint32
 	for _, trace := range traces {
-		if bytes.Equal(trace.From, polygonSystemAddress) &&
-			bytes.Equal(trace.To, polygonMergeableTrxAddress) {
-			systemTransactions = append(systemTransactions, trace)
-		} else {
-			if trace.Index > highestTrxIndex {
-				highestTrxIndex = trace.Index
+		if bytes.Equal(trace.From, polygonSystemAddress) {
+			if bytes.Equal(trace.To, polygonStateReceiverAddress) {
+				systemTransactionsToMerge = append(systemTransactionsToMerge, trace)
+				continue
 			}
-			normalTransactions = append(normalTransactions, trace)
+			if bytes.Equal(trace.To, polygonValidatorContract) {
+				unmergeableSystemTransactions = append(unmergeableSystemTransactions, trace)
+				continue
+			}
+			// no other know case for polygon
 		}
+		if trace.Index > highestTrxIndex {
+			highestTrxIndex = trace.Index
+		}
+		normalTransactions = append(normalTransactions, trace)
 	}
 
-	if systemTransactions != nil {
+	out = normalTransactions
+
+	if systemTransactionsToMerge != nil {
 		var allCalls []*pbeth.Call
 		var allLogs []*pbeth.Log
 		var beginOrdinal uint64
@@ -185,7 +206,7 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 		var endOrdinal uint64
 		var callIdxOffset = uint32(1) // initial offset for all calls because of artificial top level call
 
-		for _, trace := range systemTransactions {
+		for _, trace := range systemTransactionsToMerge {
 			var trxLogs []*pbeth.Log
 			if !seenFirstBeginOrdinal || trace.BeginOrdinal < beginOrdinal {
 				beginOrdinal = trace.BeginOrdinal
@@ -249,9 +270,9 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 		}
 		allCalls = append([]*pbeth.Call{artificialTopLevelCall}, allCalls...)
 
-		systemTransactionHash = computePolygonHash(blockNum, blockHash)
+		mergedHash := computePolygonHash(blockNum, blockHash)
 		mergedSystemTrx := &pbeth.TransactionTrace{
-			Hash:         systemTransactionHash,
+			Hash:         mergedHash,
 			From:         nullAddress,
 			To:           nullAddress,
 			Nonce:        0,
@@ -273,10 +294,15 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 				// StateRoot // Deprecated EIP 658
 			},
 		}
-		return append(normalTransactions, mergedSystemTrx), systemTransactionHash
+		systemTransactionHashes = append(systemTransactionHashes, mergedHash)
+		out = append(out, mergedSystemTrx)
+	}
+	for _, tx := range unmergeableSystemTransactions {
+		systemTransactionHashes = append(systemTransactionHashes, tx.Hash)
+		out = append(out, tx)
 	}
 
-	return normalTransactions, nil
+	return
 }
 
 func NormalizeSignaturePoint(value []byte) []byte {
@@ -298,7 +324,7 @@ func NormalizeSignaturePoint(value []byte) []byte {
 
 // populateLogBlockIndices fixes the `TransactionReceipt.Logs[].BlockIndex`
 // that is not properly populated by our deep mind instrumentation.
-func populateLogBlockIndices(block *pbeth.Block, systemTransaction []byte) error {
+func populateLogBlockIndices(block *pbeth.Block, systemTransactionHashes hashes) error {
 	// numbering receipts logs
 	receiptLogBlockIndex := uint32(0)
 	for _, trace := range block.TransactionTraces {
@@ -327,8 +353,10 @@ func populateLogBlockIndices(block *pbeth.Block, systemTransaction []byte) error
 		return nil
 	}
 	var callLogsToNumber []*pbeth.Log
+	var systemTransactionLogs []*pbeth.Log
 	for _, trace := range block.TransactionTraces {
-		if bytes.Equal(systemTransaction, trace.Hash) { // this system transaction must not have its logs reordered, we omit them for now
+		if systemTransactionHashes.Contains(trace.Hash) { // this system transaction must not have its logs reordered, we omit them for now
+			systemTransactionLogs = append(systemTransactionLogs, trace.Receipt.Logs...)
 			continue
 		}
 		for _, call := range trace.Calls {
@@ -343,15 +371,8 @@ func populateLogBlockIndices(block *pbeth.Block, systemTransaction []byte) error
 	}
 
 	sort.Slice(callLogsToNumber, func(i, j int) bool { return callLogsToNumber[i].Ordinal < callLogsToNumber[j].Ordinal })
-
 	// append the systemTransaction logs that were omitted
-	if systemTransaction != nil {
-		lastTransaction := block.TransactionTraces[len(block.TransactionTraces)-1]
-		if !bytes.Equal(systemTransaction, lastTransaction.Hash) {
-			return fmt.Errorf("expected system transaction to be at the end")
-		}
-		callLogsToNumber = append(callLogsToNumber, lastTransaction.Receipt.Logs...)
-	}
+	callLogsToNumber = append(callLogsToNumber, systemTransactionLogs...)
 
 	// also make a map of those logs
 	blockIndexToTraceLog := make(map[uint32]*pbeth.Log)
@@ -463,7 +484,7 @@ func hasPolygonSystemTransactions(block *pbeth.Block) bool {
 	}
 	// system transactions are always inserted last
 	last := block.TransactionTraces[len(block.TransactionTraces)-1]
-	return bytes.Equal(last.From, polygonSystemAddress) && bytes.Equal(last.To, polygonMergeableTrxAddress)
+	return bytes.Equal(last.From, polygonSystemAddress) && bytes.Equal(last.To, polygonStateReceiverAddress)
 }
 
 func computeLogsBloom(logs []*pbeth.Log) []byte {
