@@ -20,9 +20,34 @@ A lot of changes happened at the operators level however and some superflous mod
 
 You will find below the detailed upgrade procedure for the configuration file providers usually use. If you are using the flags based approach, simply update the corresponding flags.
 
-#### Reader Node changes
+#### App `reader-node` changes
 
-In previous version of `firehose-ethereum`, it was possible to use the `node` app to launch managed "peering" node, this is not possible anymore. If you were using the `node` app previously:
+This change will impact all operators currently running Firehose on Ethereum so it's important to pay attention to the upgrade procedure below, if you are unsure of something, reach to us on [Discord](https://discord.gg/jZwqxJAvRs).
+
+Before this release, the `reader-node` app was managing for you a portion of the `reader-node-arguments` configuration value, prepending some arguments that would be passed to `geth` when invoking it, the list of arguments that were automatically provided before:
+
+- `--networkid=<value of config value 'common-network-id'>`
+- `--datadir=<value of config value 'reader-node-data-dir'>`
+- `--ipcpath=<value of config value 'reader-node-ipc-path'>`
+- `--port=30305`
+- `--http`
+- `--http.api=eth,net,web3`
+- `--http.port=8547 `
+- `--http.addr=0.0.0.0 `
+- `--http.vhosts=* `
+- `--firehose-enabled`
+
+We have now removed those magical additions and operators are now responsible of providing the flags they required to properly run a Firehose-enabled native `geth` node. The `+` sign that was used to append/override the flags has been removed also since no default additions is performed, the `+` was now useless. We also removed the following `fireeth` configuration value:
+
+- `reader-node-type` (No replacement needed, just remove it)
+- `reader-node-ipc-path` (If you were using that, define it manually using `geth` flag `--ipcpath=...`)
+- `reader-node-enforce-peers` (If you were using that, use a `geth` config file to add static peers to your node, read about static peers for `geth` on the Web)
+
+Default listening addresses changed also to be the same on all `firehose-<...>` project, meaning consistent ports across all chains for operators. The `reader-node-grpc-listen-addr` default listen address went from `:13010` to `:10010` and `reader-node-manager-api-addr` from `:13009` to `:10011`. If you have no occurrences of `13010` or `13009` in your config file or your scripts, there is nothing to do. Otherwise, feel free to adjust the default port to fit your needs, if you do change `reader-node-grpc-listen-addr`, ensure `--relayer-source` is also updated as by default it points to `:10010`.
+
+#### App `node` removed
+
+In previous version of `firehose-ethereum`, it was possible to use the `node` app to launch managed "peering/backup/whatever" Ethereum node, this is not possible anymore. If you were using the `node` app previously, like in this config:
 
 ```yaml
 start:
@@ -35,22 +60,9 @@ start:
     node-...
 ```
 
-> **note* This is about `node` app, the `reader-node` app
+You must now remove the `node` app from `args` and any flags starting with `node-`. The migration path is to run those on your own without the use of `fireeth` and using whatever tools fits your desired needs.
 
-#### Reader Node changes
-
-In previous version of `firehose-ethereum`, it was possible to use the `node` app to launch managed "peering" node, this is not possible anymore. If you were using the `node` app previously:
-
-```yaml
-start:
-  args:
-  - ...
-  - node
-  - ...
-  flags:
-    ...
-    node-...
-```
+We have completely drop support to concentrate on the core mission of Firehose which is to run reader nodes to extract Firehose blocks from it.
 
 > **Note** This is about the `node` app and **not** the `reader-node`, we think usage of this app is minimal/inexistent.
 
