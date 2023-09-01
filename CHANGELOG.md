@@ -4,6 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+* added `tools compare-oneblock-rpc` command to perform a validation between a firehose 'one-block-file' blocks+trx+logs fetched from an RPC endpoint
+
+### Changed
+
+* The `tools print` subcommands now use hex to encode values instead of base64, making them easier to use
+
 ## v1.4.13
 
 > [!IMPORTANT]

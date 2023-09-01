@@ -16,7 +16,6 @@ package tools
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -265,6 +264,38 @@ func printBlockE(cmd *cobra.Command, args []string) error {
 	}
 }
 
+func getOneBlock(path string) (*pbeth.Block, error) {
+
+	// Check if it's a file and if it exists
+	if !cli.FileExists(path) {
+		return nil, os.ErrNotExist
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	uncompressedReader, err := zstd.NewReader(file)
+	if err != nil {
+		return nil, fmt.Errorf("new zstd reader: %w", err)
+	}
+	defer uncompressedReader.Close()
+
+	readerFactory, err := bstream.GetBlockReaderFactory.New(uncompressedReader)
+	if err != nil {
+		return nil, fmt.Errorf("new block reader: %w", err)
+	}
+
+	block, err := readerFactory.Read()
+	if err != nil {
+		return nil, fmt.Errorf("reading block: %w", err)
+	}
+
+	return block.ToProtocol().(*pbeth.Block), nil
+
+}
+
 func printOneBlockE(cmd *cobra.Command, args []string) error {
 	if integerRegex.MatchString(args[0]) {
 		blockNum, err := strconv.ParseUint(args[0], 10, 64)
@@ -360,7 +391,7 @@ func printBlockFromReader(identifier string, reader io.Reader) error {
 func printBlock(block *bstream.Block) error {
 	nativeBlock := block.ToProtocol().(*pbeth.Block)
 
-	data, err := json.MarshalIndent(nativeBlock, "", "  ")
+	data, err := jsonpb.MarshalIndentToString(nativeBlock, "  ")
 	if err != nil {
 		return fmt.Errorf("json marshall: %w", err)
 	}
