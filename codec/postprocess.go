@@ -32,7 +32,7 @@ func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, first
 	}
 
 	var systemTransactionHashes hashes
-	if features.CombinePolygonSystemTransactions && hasPolygonSystemTransactions(block) {
+	if features.CombinePolygonSystemTransactions {
 		block.TransactionTraces, systemTransactionHashes = CombinePolygonSystemTransactions(block.TransactionTraces, block.Number, block.Hash)
 	}
 
@@ -192,6 +192,9 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 	}
 
 	out = normalTransactions
+	if systemTransactionsToMerge == nil && unmergeableSystemTransactions == nil {
+		return
+	}
 
 	if systemTransactionsToMerge != nil {
 		var allCalls []*pbeth.Call
@@ -476,15 +479,6 @@ func callAtIndex(idx uint32, calls []*pbeth.Call) *pbeth.Call {
 // polygon has a fee log that will never be skipped even if call failed
 func isPolygonException(log *pbeth.Log) bool {
 	return bytes.Equal(log.Address, polygonFeeSystemAddress) && len(log.Topics) == 4 && bytes.Equal(log.Topics[0], polygonNeverRevertedTopic)
-}
-
-func hasPolygonSystemTransactions(block *pbeth.Block) bool {
-	if len(block.TransactionTraces) == 0 {
-		return false
-	}
-	// system transactions are always inserted last
-	last := block.TransactionTraces[len(block.TransactionTraces)-1]
-	return bytes.Equal(last.From, polygonSystemAddress) && bytes.Equal(last.To, polygonStateReceiverAddress)
 }
 
 func computeLogsBloom(logs []*pbeth.Log) []byte {
