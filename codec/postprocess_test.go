@@ -62,6 +62,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 		expectedTrxIDs                []string
 		expectedSystemTrxBeginOrdinal uint64
 		expectedSystemTrxEndOrdinal   uint64
+		expectedSystemTrx             bool
 		expectedCalls                 []*pbeth.Call
 	}{
 		{
@@ -73,6 +74,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			[]string{"aa", "bb"},
 			0,
 			0,
+			false,
 			nil,
 		},
 		{
@@ -87,6 +89,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			[]string{"aa", "bb", systemTrxHash},
 			1,
 			4,
+			true,
 			[]*pbeth.Call{
 				call(1, 0, 0, 2, 3),
 				call(2, 1, 1, 2, 3),
@@ -106,6 +109,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			[]string{"aa", systemTrxHash},
 			1,
 			10,
+			true,
 			[]*pbeth.Call{
 				call(1, 0, 0, 2, 9),
 				call(2, 1, 1, 2, 9),
@@ -141,6 +145,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			[]string{"aa", systemTrxHash},
 			1,
 			30,
+			true,
 			[]*pbeth.Call{
 				call(1, 0, 0, 2, 29),
 
@@ -165,7 +170,13 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			out := CombinePolygonSystemTransactions(test.in, 0, nil)
+			out, outHash := CombinePolygonSystemTransactions(test.in, 0, nil)
+
+			if test.expectedSystemTrx {
+				assert.Equal(t, systemTrxHash, H(outHash))
+			} else {
+				assert.Nil(t, outHash)
+			}
 
 			var systemTrx *pbeth.TransactionTrace
 			var trxIDs []string
