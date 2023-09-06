@@ -299,10 +299,13 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 		}
 		systemTransactionHashes = append(systemTransactionHashes, mergedHash)
 		out = append(out, mergedSystemTrx)
+		highestTrxIndex++
 	}
 	for _, tx := range unmergeableSystemTransactions {
+		tx.Index = highestTrxIndex + 1
 		systemTransactionHashes = append(systemTransactionHashes, tx.Hash)
 		out = append(out, tx)
+		highestTrxIndex++
 	}
 
 	return
