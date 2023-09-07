@@ -6,6 +6,15 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Operators
+
+If you are indexing Polygon or Mumbai chains, you will need to reprocess the chain from genesis, as your existing firehose blocks are missing some system transactions. 
+As always, this can be done with client nodes in parallel if you have snapshots.
+
+### Fixed
+
+* Fixed post-processing of polygon blocks: some system transactions were not "bundled" correctly.
+
 ### Added
 
 * added `tools compare-oneblock-rpc` command to perform a validation between a firehose 'one-block-file' blocks+trx+logs fetched from an RPC endpoint
