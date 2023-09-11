@@ -8,8 +8,11 @@ for instructions to keep up to date.
 
 ### Operators
 
-If you are indexing Polygon or Mumbai chains, you will need to reprocess the chain from genesis, as your existing firehose blocks are missing some system transactions. 
-As always, this can be done with client nodes in parallel if you have snapshots.
+If you are indexing Polygon or Mumbai chains, you will need to reprocess the chain from genesis, as your existing Firehose blocks are missing some system transactions.
+
+As always, this can be done with multiple client nodes working in parallel on different chain's segment if you have snapshots at various block heights.
+
+Golang `1.21+` is now also required to build the project.
 
 ### Fixed
 
@@ -17,7 +20,7 @@ As always, this can be done with client nodes in parallel if you have snapshots.
 
 ### Added
 
-* added `tools compare-oneblock-rpc` command to perform a validation between a firehose 'one-block-file' blocks+trx+logs fetched from an RPC endpoint
+* Added `tools compare-oneblock-rpc` command to perform a validation between a firehose 'one-block-file' blocks+trx+logs fetched from an RPC endpoint
 
 ### Changed
 
