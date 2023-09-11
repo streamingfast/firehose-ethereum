@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v1.4.14
 
 ### Operators
 
@@ -17,6 +17,7 @@ Golang `1.21+` is now also required to build the project.
 ### Fixed
 
 * Fixed post-processing of polygon blocks: some system transactions were not "bundled" correctly.
+* (Substreams) fixed validations for invalid start-blocks (see https://github.com/streamingfast/substreams/releases/tag/v1.1.13)
 
 ### Added
 
