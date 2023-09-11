@@ -85,7 +85,6 @@ func sanitizeBlock(block *pbeth.Block) *pbeth.Block {
 }
 
 func readBundle(ctx context.Context, filename string, store dstore.Store, fileStartBlock, stopBlock uint64) ([]string, map[string]*pbeth.Block, error) {
-
 	fileReader, err := store.OpenObject(ctx, filename)
 	if err != nil {
 		return nil, nil, fmt.Errorf("creating reader: %w", err)
