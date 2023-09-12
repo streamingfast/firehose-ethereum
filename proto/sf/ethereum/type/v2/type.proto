@@ -578,19 +578,22 @@ message GasChange {
     //
     // Added as new tracing reason in Geth, available only on some chains
     REASON_TX_REFUNDS = 22;
-    // REASON_TX_BUY_BACK is the amount of gas that will be bought back by the chain and returned in Wei to the caller at the very
-	  // end of the transaction's execution. There is only one such gas change per transaction.
+    // REASON_TX_LEFT_OVER_RETURNED is the amount of gas left over at the end of transaction's execution that will be returned
+    // to the chain. This change will always be a negative change as we "drain" left over gas towards 0. If there was no gas
+    // left at the end of execution, no such even will be emitted. The returned gas's value in Wei is returned to caller.
+    // There is at most one of such gas change per transaction.
     //
     // Added as new tracing reason in Geth, available only on some chains
-    REASON_TX_BUY_BACK = 23;
+    REASON_TX_LEFT_OVER_RETURNED = 23;
 
     // REASON_CALL_INITIAL_BALANCE is the initial balance for the call which will be equal to the gasLimit of the call. There is only
 	  // one such gas change per call.
     //
     // Added as new tracing reason in Geth, available only on some chains
     REASON_CALL_INITIAL_BALANCE = 24;
-    // REASON_CALL_LEFT_OVER_RETURNED is the amount of gas that will be refunded to the call after the child call execution it
-    // executed completed. This value is always positive as we are giving gas back to the you, the left over gas of the child.
+    // REASON_CALL_LEFT_OVER_RETURNED is the amount of gas left over that will be returned to the caller, this change will always
+    // be a negative change as we "drain" left over gas towards 0. If there was no gas left at the end of execution, no such even
+    // will be emitted.
     REASON_CALL_LEFT_OVER_RETURNED = 25;
   }
 
