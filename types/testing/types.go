@@ -82,6 +82,10 @@ func Block(t testing.T, blkHash string, components ...interface{}) *pbeth.Block 
 			pbblock.TransactionTraces = append(pbblock.TransactionTraces, v)
 		case previousHash:
 			pbblock.Header.ParentHash = hexString(v).bytes(t)
+		case *pbeth.BalanceChange:
+			pbblock.BalanceChanges = append(pbblock.BalanceChanges, v)
+		case *pbeth.CodeChange:
+			pbblock.CodeChanges = append(pbblock.CodeChanges, v)
 		default:
 			failInvalidComponent(t, "block", component)
 		}
@@ -241,6 +245,8 @@ func Call(t testing.T, components ...interface{}) *pbeth.Call {
 			call.NonceChanges = append(call.NonceChanges, v)
 		case *pbeth.StorageChange:
 			call.StorageChanges = append(call.StorageChanges, v)
+		case *pbeth.CodeChange:
+			call.CodeChanges = append(call.CodeChanges, v)
 		case *pbeth.Log:
 			call.Logs = append(call.Logs, v)
 		case CallComponent:
@@ -275,6 +281,8 @@ type CallComponent interface {
 	Apply(call *pbeth.Call)
 }
 
+type Ordinal uint64
+
 func BalanceChange(t testing.T, address address, values string, components ...interface{}) *pbeth.BalanceChange {
 	datas := strings.Split(values, "/")
 
@@ -295,6 +303,17 @@ func BalanceChange(t testing.T, address address, values string, components ...in
 
 	if datas[1] != "" {
 		balanceChange.NewValue = pbeth.BigIntFromBytes(toBigIntBytes(datas[1]))
+	}
+
+	for _, component := range components {
+		switch v := component.(type) {
+		case pbeth.BalanceChange_Reason:
+			balanceChange.Reason = v
+		case Ordinal:
+			balanceChange.Ordinal = uint64(v)
+		default:
+			failInvalidComponent(t, "balanceChange", component)
+		}
 	}
 
 	return balanceChange
@@ -322,6 +341,15 @@ func NonceChange(t testing.T, address address, values string, components ...inte
 		nonceChange.NewValue = toUint64(datas[1])
 	}
 
+	for _, component := range components {
+		switch v := component.(type) {
+		case Ordinal:
+			nonceChange.Ordinal = uint64(v)
+		default:
+			failInvalidComponent(t, "nonceChange", component)
+		}
+	}
+
 	return nonceChange
 }
 
@@ -341,7 +369,43 @@ func StorageChange(t testing.T, address address, key hash, data string, componen
 		storageChange.NewValue = toFilledBytes(t, datas[1], 32)
 	}
 
+	for _, component := range components {
+		switch v := component.(type) {
+		case Ordinal:
+			storageChange.Ordinal = uint64(v)
+		default:
+			failInvalidComponent(t, "storageChange", component)
+		}
+	}
+
 	return storageChange
+}
+
+func CodeChange(t testing.T, address address, old, new []byte, components ...interface{}) *pbeth.CodeChange {
+	codeChange := &pbeth.CodeChange{
+		Address: hexString(address).bytes(t),
+	}
+
+	if old != nil {
+		codeChange.OldHash = eth.Keccak256(old)
+		codeChange.OldCode = old
+	}
+
+	if new != nil {
+		codeChange.NewHash = eth.Keccak256(new)
+		codeChange.NewCode = new
+	}
+
+	for _, component := range components {
+		switch v := component.(type) {
+		case Ordinal:
+			codeChange.Ordinal = uint64(v)
+		default:
+			failInvalidComponent(t, "codeChange", component)
+		}
+	}
+
+	return codeChange
 }
 
 type logTopic hexString
