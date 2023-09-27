@@ -27,11 +27,11 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/eth-go"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/logging"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
-	"github.com/streamingfast/firehose-ethereum/types"
-	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -194,12 +194,28 @@ func TrxTrace(t testing.T, components ...interface{}) *pbeth.TransactionTrace {
 			trace.Nonce = uint64(v)
 		case *pbeth.Call:
 			trace.Calls = append(trace.Calls, v)
+		case TrxTraceComponent:
+			v.Apply(trace)
 		default:
 			failInvalidComponent(t, "trx_trace", component)
 		}
 	}
 
 	return trace
+}
+
+func TrxTraceConfig(fn func(trxTrace *pbeth.TransactionTrace)) TrxTraceComponent {
+	return trxTraceConfig(fn)
+}
+
+type trxTraceConfig func(trxTrace *pbeth.TransactionTrace)
+
+func (c trxTraceConfig) Apply(trxTrace *pbeth.TransactionTrace) {
+	c(trxTrace)
+}
+
+type TrxTraceComponent interface {
+	Apply(trxTrace *pbeth.TransactionTrace)
 }
 
 type caller hexString
@@ -227,6 +243,8 @@ func Call(t testing.T, components ...interface{}) *pbeth.Call {
 			call.StorageChanges = append(call.StorageChanges, v)
 		case *pbeth.Log:
 			call.Logs = append(call.Logs, v)
+		case CallComponent:
+			v.Apply(call)
 		default:
 			failInvalidComponent(t, "call", component)
 		}
@@ -241,6 +259,20 @@ func Call(t testing.T, components ...interface{}) *pbeth.Call {
 	}
 
 	return call
+}
+
+func CallConfig(fn func(call *pbeth.Call)) CallComponent {
+	return callConfig(fn)
+}
+
+type callConfig func(call *pbeth.Call)
+
+func (c callConfig) Apply(call *pbeth.Call) {
+	c(call)
+}
+
+type CallComponent interface {
+	Apply(call *pbeth.Call)
 }
 
 func BalanceChange(t testing.T, address address, values string, components ...interface{}) *pbeth.BalanceChange {
