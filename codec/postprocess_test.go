@@ -63,6 +63,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 		expectedSystemTrxBeginOrdinal uint64
 		expectedSystemTrxEndOrdinal   uint64
 		expectedSystemTrx             bool
+		expectedSystemTrxIndex        uint32
 		expectedCalls                 []*pbeth.Call
 	}{
 		{
@@ -75,6 +76,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			0,
 			0,
 			false,
+			0,
 			nil,
 		},
 		{
@@ -90,6 +92,24 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			1,
 			4,
 			true,
+			2,
+			[]*pbeth.Call{
+				call(1, 0, 0, 2, 3),
+				call(2, 1, 1, 2, 3),
+			},
+		},
+		{
+			"single system trx, no normal trx",
+			[]*pbeth.TransactionTrace{
+				systemTrx("cc", 1, 4, []*pbeth.Call{
+					call(1, 0, 0, 2, 3),
+				}),
+			},
+			[]string{systemTrxHash},
+			1,
+			4,
+			true,
+			0,
 			[]*pbeth.Call{
 				call(1, 0, 0, 2, 3),
 				call(2, 1, 1, 2, 3),
@@ -110,6 +130,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			1,
 			10,
 			true,
+			1,
 			[]*pbeth.Call{
 				call(1, 0, 0, 2, 9),
 				call(2, 1, 1, 2, 9),
@@ -146,6 +167,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 			1,
 			30,
 			true,
+			1,
 			[]*pbeth.Call{
 				call(1, 0, 0, 2, 29),
 
@@ -170,6 +192,11 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
+			// our test values have no index set, we set it here to check the combination index result
+			for i, tx := range test.in {
+				tx.Index = uint32(i)
+			}
+
 			out, outHashes := CombinePolygonSystemTransactions(test.in, 0, nil)
 
 			if test.expectedSystemTrx {
@@ -193,6 +220,7 @@ func TestCombinePolygonSystemTransactions(t *testing.T) {
 				return
 			}
 
+			assert.Equal(t, test.expectedSystemTrxIndex, systemTrx.Index)
 			assert.Equal(t, test.expectedSystemTrxBeginOrdinal, systemTrx.BeginOrdinal)
 			assert.Equal(t, test.expectedSystemTrxEndOrdinal, systemTrx.EndOrdinal)
 

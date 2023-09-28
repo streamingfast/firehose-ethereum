@@ -342,11 +342,6 @@ func stripFirehoseTransactionTraces(in []*pbeth.TransactionTrace, hashesWithoutT
 	idx := uint32(0)
 	for _, trace := range in {
 
-		if trace.Index != idx {
-			if idx == uint32(len(in)-1) {
-				trace.Index = idx // POLYGON BLOCK FIX
-			}
-		}
 		if hashesWithoutTo[eth.Hash(trace.Hash).String()] {
 			trace.To = nil // FIXME: we could compute this from nonce+address
 		}

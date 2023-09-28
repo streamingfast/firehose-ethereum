@@ -172,7 +172,7 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 	var unmergeableSystemTransactions []*pbeth.TransactionTrace
 	normalTransactions := make([]*pbeth.TransactionTrace, 0, len(traces))
 
-	var highestTrxIndex uint32
+	highestTrxIndex := int64(-1) // negative so that next one is 0 if no normal transaction is met
 	for _, trace := range traces {
 		if bytes.Equal(trace.From, polygonSystemAddress) {
 			if bytes.Equal(trace.To, polygonStateReceiverAddress) {
@@ -185,8 +185,8 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 			}
 			// no other know case for polygon
 		}
-		if trace.Index > highestTrxIndex {
-			highestTrxIndex = trace.Index
+		if int64(trace.Index) > highestTrxIndex {
+			highestTrxIndex = int64(trace.Index)
 		}
 		normalTransactions = append(normalTransactions, trace)
 	}
@@ -282,7 +282,7 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 			GasPrice:     bigIntZero,
 			GasLimit:     0,
 			Value:        bigIntZero,
-			Index:        highestTrxIndex + 1,
+			Index:        uint32(highestTrxIndex + 1),
 			Input:        nil,
 			GasUsed:      0,
 			Type:         pbeth.TransactionTrace_TRX_TYPE_LEGACY,
@@ -302,7 +302,7 @@ func CombinePolygonSystemTransactions(traces []*pbeth.TransactionTrace, blockNum
 		highestTrxIndex++
 	}
 	for _, tx := range unmergeableSystemTransactions {
-		tx.Index = highestTrxIndex + 1
+		tx.Index = uint32(highestTrxIndex + 1)
 		systemTransactionHashes = append(systemTransactionHashes, tx.Hash)
 		out = append(out, tx)
 		highestTrxIndex++
