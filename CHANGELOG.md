@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Operators of Polygon/Mumbai chains
+
+* If you started reprocessing the blockchain blocks using release v1.4.14 or v1.4.15, you will need to run the following command to fix the blocks affected by another bug:
+  `fireeth tools fix-polygon-index /your/merged/blocks /temporary/destination 0 48200000` (note that you can run multiple instances of this command in parallel to cover the range of blocks from 0 to current HEAD in smaller chunks)
+
+### Fixed 
+
+* Fix another data issue found in polygon blocks: blocks that contain a single "system" transaction have "Index=1" for that transaction instead of "Index=0"
+
 ## v1.4.15
 
 ### Fixed
