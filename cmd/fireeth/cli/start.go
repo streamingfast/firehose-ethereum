@@ -25,6 +25,7 @@ import (
 	"github.com/streamingfast/bstream"
 	dauthgrpc "github.com/streamingfast/dauth/grpc"
 	dauthnull "github.com/streamingfast/dauth/null"
+	dauthsecret "github.com/streamingfast/dauth/secret"
 	dauthtrust "github.com/streamingfast/dauth/trust"
 	dmeteringgrpc "github.com/streamingfast/dmetering/grpc"
 	dmeteringlogger "github.com/streamingfast/dmetering/logger"
@@ -44,6 +45,8 @@ func init() {
 	dauthgrpc.Register()
 	dauthtrust.Register()
 	dauthnull.Register()
+	dauthsecret.Register()
+
 	dmeteringgrpc.Register()
 	dmeteringlogger.Register()
 	dmetering.RegisterNull()

@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+The `--common-auth-plugin` got back the ability to use `secret://<expected_secret>?[user_id=<user_id>]&[api_key_id=<api_key_id>]` in which case request are authenticated based on the `Authorization: Bearer <actual_secret>` and continue only if `<actual_secret> == <expected_secret>`.
+
 ## v1.4.16
 
 ### Operators of Polygon/Mumbai chains
@@ -11,7 +17,7 @@ for instructions to keep up to date.
 * If you started reprocessing the blockchain blocks using release v1.4.14 or v1.4.15, you will need to run the following command to fix the blocks affected by another bug:
   `fireeth tools fix-polygon-index /your/merged/blocks /temporary/destination 0 48200000` (note that you can run multiple instances of this command in parallel to cover the range of blocks from 0 to current HEAD in smaller chunks)
 
-### Fixed 
+### Fixed
 
 * Fix another data issue found in polygon blocks: blocks that contain a single "system" transaction have "Index=1" for that transaction instead of "Index=0"
 
