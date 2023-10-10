@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v1.4.18
+* Bumped substreams to `v1.1.17` with fix `missing decrement on metrics `substreams_active_requests`
+
 ## v1.4.17
 
 ### Added
