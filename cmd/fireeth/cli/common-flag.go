@@ -33,6 +33,7 @@ func RegisterCommonFlags(_ *zap.Logger, cmd *cobra.Command) error {
 	cmd.Flags().String("common-forked-blocks-store-url", ForkedBlocksStoreURL, "[COMMON] Store URL (with prefix) to read/write forked block files that we want to keep")
 	cmd.Flags().String("common-index-store-url", IndexStoreURL, "[COMMON] Store URL (with prefix) to read/write index files.")
 	cmd.Flags().String("common-live-blocks-addr", RelayerServingAddr, "[COMMON] gRPC endpoint to get real-time blocks.")
+	cmd.Flags().Bool("dev", false, "[COMMON] Runs in local dev mode (remove 'node' app from defaults, overrides '--reader-node-path' to this program itself, overrides '--reader-node-arguments' to 'tools poll-rpc-blocks http://localhost:8545 0'")
 
 	cmd.Flags().IntSlice("common-block-index-sizes", []int{100000, 100000, 10000, 1000}, "index bundle sizes that that are considered valid when looking for block indexes")
 	cmd.Flags().Bool("common-blocks-cache-enabled", false, FlagDescription(`

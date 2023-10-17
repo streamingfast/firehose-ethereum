@@ -17,6 +17,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -70,6 +71,14 @@ func sfStartE(cmd *cobra.Command, args []string) (err error) {
 }
 
 func Start(ctx context.Context, dataDir string, args []string) (err error) {
+
+	devMode := viper.GetBool("dev")
+	if devMode {
+		viper.Set("reader-node-type", "dev")
+		viper.Set("reader-node-path", os.Args[0])
+		// viper.Set("reader-node-arguments", "tools poll-rpc-blocks http://localhost:8545 0") // set in node-type template 'dev'
+	}
+
 	dataDirAbs, err := filepath.Abs(dataDir)
 	if err != nil {
 		return fmt.Errorf("unable to setup directory structure: %w", err)
@@ -122,6 +131,8 @@ func Start(ctx context.Context, dataDir string, args []string) (err error) {
 	zlog.Debug("launcher created")
 	runByDefault := func(app string) bool {
 		switch app {
+		case "node":
+			return !devMode
 		case "reader-node-stdin":
 			return false
 		}
