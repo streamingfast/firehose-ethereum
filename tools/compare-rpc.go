@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/holiman/uint256"
 	jd "github.com/josephburnett/jd/lib"
@@ -34,6 +35,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var compareBlocksRPCCmd = &cobra.Command{
@@ -182,6 +184,7 @@ func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[str
 	out := &pbeth.Block{
 		Hash:              in.Hash.Bytes(),
 		Number:            uint64(in.Number),
+		Ver:               3,
 		Size:              uint64(in.BlockSize),
 		Uncles:            toFirehoseUncles(in.Uncles),
 		TransactionTraces: trx,
@@ -198,12 +201,12 @@ func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[str
 			Number:           uint64(in.Number),
 			GasLimit:         uint64(in.GasLimit),
 			GasUsed:          uint64(in.GasUsed),
-			// Timestamp: in.Timestamp, // FIXME
-			ExtraData:     in.ExtraData.Bytes(),
-			Nonce:         uint64(in.Nonce),
-			Hash:          in.Hash.Bytes(),
-			MixHash:       in.MixHash.Bytes(),
-			BaseFeePerGas: bigIntFromEthUint256(in.BaseFeePerGas),
+			Timestamp:        timestamppb.New(time.Time(in.Timestamp)),
+			ExtraData:        in.ExtraData.Bytes(),
+			Nonce:            uint64(in.Nonce),
+			Hash:             in.Hash.Bytes(),
+			MixHash:          in.MixHash.Bytes(),
+			BaseFeePerGas:    bigIntFromEthUint256(in.BaseFeePerGas),
 			// WithdrawalsRoot: in.WithdrawalsRoot, // FIXME
 			// TxDependency: in.TxDependency // FIXME
 		},
@@ -406,7 +409,6 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc
 		mustNoError(err)
 		r, err := jd.ReadJsonString(string(rpc))
 		mustNoError(err)
-		//
 		//		fmt.Println(string(fh))
 		//		fmt.Println("RPC")
 		//		fmt.Println(string(rpc))

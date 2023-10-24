@@ -1087,6 +1087,10 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 // Formats
 // FIRE BLOCK <NUMBER (u64 string)> <HASH (hex string)> <LIB NUMBER (u64 string)> <LIB ID (hex string)> <proto (base64 string)>
 func (ctx *parseCtx) readBlock(line string) (*bstream.Block, error) {
+	if ctx.blockVersion == 0 {
+		return nil, fmt.Errorf("cannot start reading block: INIT not done")
+	}
+
 	start := time.Now()
 
 	chunks, err := SplitInBoundedChunks(line, 6)

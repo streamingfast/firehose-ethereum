@@ -27,6 +27,7 @@ import (
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/firehose-ethereum/codec"
 	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
+	"github.com/streamingfast/firehose-ethereum/node-manager/dev"
 	"github.com/streamingfast/firehose-ethereum/node-manager/geth"
 	"github.com/streamingfast/firehose-ethereum/node-manager/openeth"
 	"github.com/streamingfast/logging"
@@ -253,7 +254,7 @@ func isGenesisBootstrapper(bootstrapDataURL string) bool {
 
 func getSupervisedProcessLogger(isReader bool, nodeType string) *zap.Logger {
 	switch nodeType {
-	case "geth":
+	case "geth", "dev":
 		if isReader {
 			return readerGethLogger
 		} else {
@@ -266,7 +267,7 @@ func getSupervisedProcessLogger(isReader bool, nodeType string) *zap.Logger {
 			return nodeOpenEthereumLogger
 		}
 	default:
-		panic(fmt.Errorf("unknown node type %q, only knows about %q and %q", nodeType, "geth", "openethereum"))
+		panic(fmt.Errorf("unknown node type %q, only knows about %q, %q and %q", nodeType, "geth", "openethereum", "dev"))
 	}
 }
 
@@ -283,6 +284,9 @@ var nodeArgsByTypeAndRole = map[string]nodeArgsByRole{
 		"peering": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + NodeP2PPort + " --jsonrpc-port=" + NodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-block-progress",
 		//"dev-miner": ...
 		"reader": "--network-id={network-id} --ipc-path={node-ipc-path} --base-path={node-data-dir} --port=" + ReaderNodeP2PPort + " --jsonrpc-port=" + ReaderNodeRPCPort + " --jsonrpc-apis=web3,net,eth,parity,parity,parity_pubsub,parity_accounts,parity_set --firehose-enabled --no-warp",
+	},
+	"dev": {
+		"reader": "tools poll-rpc-blocks http://localhost:8545 0",
 	},
 }
 
@@ -301,8 +305,8 @@ func registerCommonNodeFlags(cmd *cobra.Command, isReader bool) {
 		managerAPIAddr = ReaderNodeManagerAPIAddr
 	}
 
-	cmd.Flags().String(prefix+"path", "geth", "command that will be launched by the node manager")
-	cmd.Flags().String(prefix+"type", "geth", "one of: ['geth','openethereum']")
+	cmd.Flags().String(prefix+"path", "geth", "command that will be launched by the node manager (ignored on type 'dev')")
+	cmd.Flags().String(prefix+"type", "dev", "one of: ['dev', 'geth','openethereum']")
 	cmd.Flags().String(prefix+"arguments", "", "If not empty, overrides the list of default node arguments (computed from node type and role). Start with '+' to append to default args instead of replacing. You can use the {public-ip} token, that will be matched against space-separated hostname:IP pairs in PUBLIC_IPS env var, taking hostname from HOSTNAME env var.")
 	cmd.Flags().String(prefix+"data-dir", "{sf-data-dir}/{node-role}/data", "Directory for node data ({node-role} is either reader, peering or dev-miner)")
 	cmd.Flags().String(prefix+"ipc-path", "{sf-data-dir}/{node-role}/ipc", "IPC path cannot be more than 64chars on geth")
@@ -450,6 +454,20 @@ func buildSuperviser(
 ) (nodeManager.ChainSuperviser, error) {
 
 	switch nodeType {
+	case "dev":
+		superviser, err := dev.NewSuperviser(
+			nodePath,
+			nodeArguments,
+			metricsAndReadinessManager.UpdateHeadBlock,
+			appLogger,
+			supervisedProcessLogger,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("unable to create chain superviser: %w", err)
+		}
+
+		return superviser, nil
+
 	case "geth":
 		superviser, err := geth.NewGethSuperviser(
 			nodePath,
