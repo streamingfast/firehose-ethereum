@@ -15,6 +15,10 @@ for instructions to keep up to date.
     This node type has the following default `reader-node-arguments`: `tools poll-rpc-blocks http://localhost:8545 0`
   * It also removes `node` from the list of default apps
 
+## Fixed
+
+* Substreams: fixed metrics calculations (per-module processing-time and external calls were wrong)
+
 ## v1.4.19
 
 * Bumped substreams to `v1.1.18` with a regression fix for when a substreams has a start block in the reversible segment
