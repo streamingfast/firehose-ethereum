@@ -50,13 +50,13 @@ func pollRPCBlocksE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("unable to parse start block number %s: %w", startBlockNumStr, err)
 	}
-	cli := rpc.NewClient(rpcEndpoint)
+	client := rpc.NewClient(rpcEndpoint)
 
 	fmt.Println("FIRE INIT 2.3 local v1.0.0")
 
 	blockNum := startBlockNum
 	for {
-		latest, err := cli.LatestBlockNum(ctx)
+		latest, err := client.LatestBlockNum(ctx)
 		if err != nil {
 			delay(err)
 			continue
@@ -66,13 +66,13 @@ func pollRPCBlocksE(cmd *cobra.Command, args []string) error {
 			delay(nil)
 			continue
 		}
-		rpcBlock, err := cli.GetBlockByNumber(ctx, rpc.BlockNumber(blockNum), rpc.WithGetBlockFullTransaction())
+		rpcBlock, err := client.GetBlockByNumber(ctx, rpc.BlockNumber(blockNum), rpc.WithGetBlockFullTransaction())
 		if err != nil {
 			delay(err)
 			continue
 		}
 
-		logs, err := cli.Logs(ctx, rpc.LogsParams{
+		logs, err := client.Logs(ctx, rpc.LogsParams{
 			FromBlock: rpc.BlockNumber(blockNum),
 			ToBlock:   rpc.BlockNumber(blockNum),
 		})
