@@ -18,6 +18,7 @@ for instructions to keep up to date.
 ## Fixed
 
 * Substreams: fixed metrics calculations (per-module processing-time and external calls were wrong)
+* Substreams: fixed immediate EOF when streaming from block 0 to (unbounded) in dev mode
 
 ## v1.4.19
 
