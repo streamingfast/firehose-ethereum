@@ -36,6 +36,20 @@ message Block {
   // attached it to any transaction.
   repeated BalanceChange balance_changes = 11;
 
+  enum DetailLevel{
+    DETAILLEVEL_EXTENDED = 0;
+    DETAILLEVEL_TRACE = 1;
+    DETAILLEVEL_BASE = 2;
+  }
+
+  // DetailLevel affects the data available in this block.
+  //
+  // EXTENDED describes the most complete block, with traces, balance changes, storage changes. It is extracted during the execution of the block.
+  // TRACE describes a block that contains everything that can be extracted using both the base JSON-RPC interface (https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods) 
+  //       and the OpenEthereum trace module API (https://openethereum.github.io/JSONRPC-trace-module)
+  // BASE describes a block that contains only the header and events, everything that can be extracted using the base JSON-RPC interface (https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods) 
+  DetailLevel detail_level = 12;
+
   // CodeChanges here is the array of smart code change that happened that happened at the block level
   // outside of the normal transaction flow of a block. Some Ethereum's fork like BSC and Polygon
   // has some capabilities to upgrade internal smart contracts used usually to track the validator
