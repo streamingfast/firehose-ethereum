@@ -306,7 +306,7 @@ func registerCommonNodeFlags(cmd *cobra.Command, isReader bool) {
 	}
 
 	cmd.Flags().String(prefix+"path", "geth", "command that will be launched by the node manager (ignored on type 'dev')")
-	cmd.Flags().String(prefix+"type", "dev", "one of: ['dev', 'geth','openethereum']")
+	cmd.Flags().String(prefix+"type", "geth", "one of: ['dev', 'geth','openethereum']")
 	cmd.Flags().String(prefix+"arguments", "", "If not empty, overrides the list of default node arguments (computed from node type and role). Start with '+' to append to default args instead of replacing. You can use the {public-ip} token, that will be matched against space-separated hostname:IP pairs in PUBLIC_IPS env var, taking hostname from HOSTNAME env var.")
 	cmd.Flags().String(prefix+"data-dir", "{sf-data-dir}/{node-role}/data", "Directory for node data ({node-role} is either reader, peering or dev-miner)")
 	cmd.Flags().String(prefix+"ipc-path", "{sf-data-dir}/{node-role}/ipc", "IPC path cannot be more than 64chars on geth")
