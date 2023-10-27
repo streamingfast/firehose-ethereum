@@ -180,6 +180,19 @@ func bigIntFromEthUint256(in *eth.Uint256) *pbeth.BigInt {
 	return pbeth.BigIntFromBytes(slice)
 }
 
+func bigIntFromEthUint256Padded32(in *eth.Uint256) *pbeth.BigInt {
+	if in == nil {
+		return &pbeth.BigInt{}
+	}
+
+	in32 := (*uint256.Int)(in).Bytes32()
+
+	if in32 == [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} {
+		return &pbeth.BigInt{}
+	}
+	return pbeth.BigIntFromBytes(in32[:])
+}
+
 func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[string]bool) {
 
 	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, logs)
@@ -191,10 +204,12 @@ func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[str
 		Size:              uint64(in.BlockSize),
 		Uncles:            toFirehoseUncles(in.Uncles),
 		TransactionTraces: trx,
+		BalanceChanges:    nil, // not available
+		CodeChanges:       nil, // not available
 		Header: &pbeth.BlockHeader{
-			ParentHash: in.ParentHash.Bytes(),
-			// Coinbase:         nil, // FIXME
-			// UncleHash:        nil,
+			ParentHash:       in.ParentHash.Bytes(),
+			Coinbase:         in.Miner,
+			UncleHash:        in.UnclesSHA3,
 			StateRoot:        in.StateRoot.Bytes(),
 			TransactionsRoot: in.TransactionsRoot.Bytes(),
 			ReceiptRoot:      in.ReceiptsRoot.Bytes(),
@@ -210,8 +225,8 @@ func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[str
 			Hash:             in.Hash.Bytes(),
 			MixHash:          in.MixHash.Bytes(),
 			BaseFeePerGas:    bigIntFromEthUint256(in.BaseFeePerGas),
-			// WithdrawalsRoot: in.WithdrawalsRoot, // FIXME
-			// TxDependency: in.TxDependency // FIXME
+			WithdrawalsRoot:  nil, // not available
+			TxDependency:     nil, // not available
 		},
 	}
 	return out, hashesWithoutTo
@@ -227,7 +242,26 @@ func toFirehoseUncles(in []eth.Hash) []*pbeth.BlockHeader {
 	return out
 }
 
+func toAccessList(in rpc.AccessList) []*pbeth.AccessTuple {
+	out := make([]*pbeth.AccessTuple, len(in))
+	for i, v := range in {
+		out[i] = &pbeth.AccessTuple{
+			Address: v.Address,
+		}
+		if v.StorageKeys != nil {
+			out[i].StorageKeys = make([][]byte, len(v.StorageKeys))
+			for ii, vv := range v.StorageKeys {
+				out[i].StorageKeys[ii] = []byte(vv)
+			}
+		}
+	}
+
+	return out
+}
+
 func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces []*pbeth.TransactionTrace, hashesWithoutTo map[string]bool) {
+
+	ordinal := uint64(0)
 
 	receipts, _ := in.Receipts()
 	out := make([]*pbeth.TransactionTrace, len(receipts))
@@ -252,12 +286,27 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 			From:     receipts[i].From.Bytes(),
 			Index:    uint32(receipts[i].TransactionIndex),
 			Receipt:  &pbeth.TransactionReceipt{
-				// filled next
+				// Logs: ,            // filled below
+				// CumulativeGasUsed: // only available on getTransactionReceipt
+				// StateRoot:         // only available on getTransactionReceipt
+				// LogsBloom:         // only available on getTransactionReceipt
 			},
-			V: pbeth.NewBigInt(int64(receipts[i].V)).Bytes,
-			//R: bigIntFromEthUint256(receipts[i].R).Bytes,
-			//S: bigIntFromEthUint256(receipts[i].S).Bytes,
+			V:            pbeth.NewBigInt(int64(receipts[i].V)).Bytes,
+			R:            bigIntFromEthUint256Padded32(receipts[i].R).Bytes,
+			S:            bigIntFromEthUint256Padded32(receipts[i].S).Bytes,
+			AccessList:   toAccessList(receipts[i].AccessList),
+			BeginOrdinal: ordinal,
+
+			// Status:  // only available on getTransactionReceipt
+			// Type:    // only available on getTransactionReceipt
+			// GasUsed: // only available on getTransactionReceipt
+			// MaxFeePerGas:            // not available on RPC
+			// MaxPriorityFeePerGas:    // not available on RPC
+			// ReturnData:              // not available on RPC
+			// PublicKey:               // not available on RPC
+			// Calls:                   // not available on RPC
 		}
+		ordinal++
 
 		for _, log := range logs {
 			if eth.Hash(log.TransactionHash).String() == txHash {
@@ -266,9 +315,13 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 					Topics:     hashesToBytes(log.Topics),      //[][]byte `protobuf:"bytes,2,rep,name=topics,proto3" json:"topics,omitempty"`
 					Data:       log.Data.Bytes(),               //[]byte   `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 					BlockIndex: uint32(log.ToLog().BlockIndex), //uint32 `protobuf:"varint,6,opt,name=blockIndex,proto3" json:"blockIndex,omitempty"`
+					Ordinal:    ordinal,
 				})
+				ordinal++
 			}
 		}
+		out[i].EndOrdinal = ordinal
+		ordinal++
 
 	}
 	return out, hashesWithoutTo
@@ -308,10 +361,7 @@ func stripFirehoseUncles(in []*pbeth.BlockHeader) {
 }
 
 func stripFirehoseHeader(in *pbeth.BlockHeader) {
-	in.Coinbase = nil
-	in.Timestamp = nil
 	in.TxDependency = nil
-	in.UncleHash = nil
 	in.WithdrawalsRoot = nil
 
 	if in.BaseFeePerGas == nil {
@@ -329,17 +379,16 @@ func stripFirehoseBlock(in *pbeth.Block, hashesWithoutTo map[string]bool) {
 	msg.SetUnknown(nil)
 	in = msg.Interface().(*pbeth.Block)
 
-	in.Ver = 0
+	in.Ver = 3
 	stripFirehoseHeader(in.Header)
 	stripFirehoseUncles(in.Uncles)
 	stripFirehoseTransactionTraces(in.TransactionTraces, hashesWithoutTo)
 
 	// ARB-ONE FIX
-	if in.Header.TotalDifficulty.Uint64() == 2 {
+	if in.Header.TotalDifficulty.Uint64() == 2 { // arb-one-specific
 		in.Header.TotalDifficulty = pbeth.NewBigInt(int64(in.Number) - 22207816)
 	}
 
-	// FIXME temp
 	in.BalanceChanges = nil
 	in.CodeChanges = nil
 }
@@ -349,34 +398,26 @@ func stripFirehoseTransactionTraces(in []*pbeth.TransactionTrace, hashesWithoutT
 	for _, trace := range in {
 
 		if hashesWithoutTo[eth.Hash(trace.Hash).String()] {
-			trace.To = nil // FIXME: we could compute this from nonce+address
+			trace.To = nil // only available on getTransactionReceipt
 		}
-
 		trace.BeginOrdinal = 0
 		trace.EndOrdinal = 0
-		trace.AccessList = nil
 
-		trace.GasUsed = 0 // FIXME receipt?
-
+		trace.GasUsed = 0 // only available on getTransactionReceipt
 		if trace.GasPrice == nil {
 			trace.GasPrice = &pbeth.BigInt{}
 		}
 
-		// FIXME ...
-		trace.R = nil
-		trace.S = nil
+		trace.Type = 0 // only available on getTransactionReceipt
 
-		trace.Type = 0
-		trace.AccessList = nil
-		trace.MaxFeePerGas = nil
-		trace.MaxPriorityFeePerGas = nil
+		trace.MaxFeePerGas = nil         // not available on RPC
+		trace.MaxPriorityFeePerGas = nil // not available on RPC
+		trace.ReturnData = nil           // not available on RPC
+		trace.PublicKey = nil            // not available on RPC
 
-		trace.ReturnData = nil
-		trace.PublicKey = nil
-
-		trace.Status = 0
+		trace.Status = 0 // only available on getTransactionReceipt
 		stripFirehoseTrxReceipt(trace.Receipt)
-		trace.Calls = nil
+		trace.Calls = nil // not available on RPC
 
 		if trace.Value == nil {
 			trace.Value = &pbeth.BigInt{}
@@ -390,9 +431,9 @@ func stripFirehoseTrxReceipt(in *pbeth.TransactionReceipt) {
 		log.Ordinal = 0
 		log.Index = 0 // index inside transaction is a pbeth construct, it doesn't exist in RPC interface and we can't reconstruct exactly the same from RPC because the pbeth ones are increased even when a call is reverted.
 	}
-	in.LogsBloom = nil
-	in.StateRoot = nil
-	in.CumulativeGasUsed = 0
+	in.LogsBloom = nil       // only available on getTransactionReceipt
+	in.StateRoot = nil       // only available on getTransactionReceipt
+	in.CumulativeGasUsed = 0 // only available on getTransactionReceipt
 }
 
 func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc.LogEntry) (isEqual bool, differences []string) {
