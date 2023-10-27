@@ -63,8 +63,10 @@ var Chain = &firecore.Chain[*pbeth.Block]{
 		BlockPrinter: printBlock,
 
 		RegisterExtraCmd: func(chain *firecore.Chain[*pbeth.Block], toolsCmd *cobra.Command, zlog *zap.Logger, tracer logging.Tracer) error {
-			// toolsCmd.AddCommand(newToolsGenerateNodeKeyCmd(chain))
-			// toolsCmd.AddCommand(newToolsBackfillCmd(zlog))
+			toolsCmd.AddCommand(compareOneblockRPCCmd)
+			toolsCmd.AddCommand(newCompareBlocksRPCCmd(zlog))
+			toolsCmd.AddCommand(newFixPolygonIndexCmd(zlog))
+			toolsCmd.AddCommand(newPollRPCBlocksCmd(zlog))
 
 			return nil
 		},

@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/streamingfast/bstream"
+	"github.com/streamingfast/cli"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
 
@@ -30,4 +31,8 @@ func printBlock(blk *bstream.Block, alsoPrintTransactions bool, out io.Writer) e
 	}
 
 	return nil
+}
+
+func ExamplePrefixed(prefix, examples string) string {
+	return string(cli.ExamplePrefixed(prefix, examples))
 }

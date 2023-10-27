@@ -25,6 +25,7 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/blockstream"
 	"github.com/streamingfast/dlauncher/launcher"
+	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-ethereum/codec"
 	nodemanager "github.com/streamingfast/firehose-ethereum/node-manager"
 	"github.com/streamingfast/firehose-ethereum/node-manager/dev"
@@ -203,7 +204,7 @@ func nodeFactoryFunc(isReader bool, backupModuleFactories map[string]operator.Ba
 			oneBlocksStoreURL,
 			workingDir,
 			func(lines chan string) (reader.ConsolerReader, error) {
-				return codec.NewConsoleReader(appLogger, lines)
+				return codec.NewConsoleReader(lines, firecore.NewBlockEncoder(), appLogger, appTracer)
 			},
 			batchStartBlockNum,
 			batchStopBlockNum,

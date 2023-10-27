@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 	"io"
-
-	"go.uber.org/zap"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"go.uber.org/zap"
 )
 
 var fixPolygonIndexCmd = &cobra.Command{
@@ -120,7 +120,7 @@ func fixPolygonIndexE(cmd *cobra.Command, args []string) error {
 
 func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*bstream.Block) error {
 	file := filename(lowBlockNum)
-    fmt.Printf("writing merged file %s.dbin.zst\n", file)
+	fmt.Printf("writing merged file %s.dbin.zst\n", file)
 
 	if len(blocks) == 0 {
 		return fmt.Errorf("no blocks to write to bundle")
@@ -142,7 +142,7 @@ func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*bstream
 		for _, blk := range blocks {
 			err = blockWriter.Write(blk)
 			if err != nil {
-				return 
+				return
 			}
 		}
 	}()
@@ -152,4 +152,13 @@ func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*bstream
 
 func filename(num uint64) string {
 	return fmt.Sprintf("%010d", num)
+}
+
+func mustParseUint64(in string) uint64 {
+	out, err := strconv.ParseUint(in, 0, 64)
+	if err != nil {
+		panic(fmt.Errorf("unable to parse %q as uint64: %w", in, err))
+	}
+
+	return out
 }

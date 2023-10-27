@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/dlauncher/launcher"
+	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-ethereum/codec"
 	"github.com/streamingfast/logging"
 	nodeManager "github.com/streamingfast/node-manager"
@@ -41,7 +42,7 @@ func init() {
 			archiveStoreURL := MustReplaceDataDir(sfDataDir, viper.GetString("common-one-block-store-url"))
 
 			consoleReaderFactory := func(lines chan string) (mindreader.ConsolerReader, error) {
-				r, err := codec.NewConsoleReader(appLogger, lines)
+				r, err := codec.NewConsoleReader(lines, firecore.NewBlockEncoder(), appLogger, appTracer)
 				if err != nil {
 					return nil, fmt.Errorf("initiating console reader: %w", err)
 				}

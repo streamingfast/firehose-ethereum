@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/streamingfast/bstream"
+	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/test-go/testify/require"
 )
@@ -13,10 +14,11 @@ func Test_Encode_Decode_Block(t *testing.T) {
 	Chain.Validate()
 	Chain.Init()
 
-	original, err := Chain.BlockEncoder.Encode(&pbeth.Block{
+	original, err := Chain.BlockEncoder.Encode(firecore.BlockEnveloppe{Block: &pbeth.Block{
 		Number: 1,
 		Header: &pbeth.BlockHeader{},
-	})
+		Ver:    1,
+	}, LIBNum: 0})
 	require.NoError(t, err)
 
 	require.Equal(t, uint64(1), original.ToProtocol().(*pbeth.Block).Number)
