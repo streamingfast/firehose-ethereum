@@ -555,7 +555,3 @@ func failInvalidComponent(t testing.T, tag string, component interface{}, option
 
 	require.FailNowf(t, "invalid component", "Invalid %s component of type %T", tag, component)
 }
-
-func logInvalidComponent(tag string, component interface{}) {
-	zlog.Info(fmt.Sprintf("invalid %s component of type %T", tag, component))
-}

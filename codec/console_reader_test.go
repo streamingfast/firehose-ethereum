@@ -31,7 +31,7 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/streamingfast/firehose-ethereum/types"
+	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/jsonpb"
 	"github.com/stretchr/testify/assert"
@@ -167,13 +167,14 @@ func TestGeneratePBBlocks(t *testing.T) {
 	t.Skip("generate only when firehose-logs.dmlog changes")
 
 	cr := testFileConsoleReader(t, "testdata/firehose-logs.dmlog")
+	encoder := firecore.NewBlockEncoder()
 
 	for {
 		out, err := cr.ReadBlock()
 		if out != nil {
 			block := out.ToProtocol().(*pbeth.Block)
 
-			bstreamBlock, err := types.BlockFromProto(block, out.LibNum)
+			bstreamBlock, err := encoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: out.LibNum})
 			require.NoError(t, err)
 
 			pbBlock, err := bstreamBlock.ToProto()
@@ -222,10 +223,12 @@ func testFileConsoleReader(t *testing.T, filename string) *ConsoleReader {
 }
 
 func testReaderConsoleReader(helperFunc func(), lines chan string, closer func()) *ConsoleReader {
+	encoder := firecore.NewBlockEncoder()
+
 	l := &ConsoleReader{
 		lines:  lines,
 		close:  closer,
-		ctx:    &parseCtx{logger: zlog, stats: newParsingStats(zlog, 0), globalStats: newConsoleReaderStats(), normalizationFeatures: &normalizationFeatures{UpgradeBlockV2ToV3: true}},
+		ctx:    &parseCtx{logger: zlog, stats: newParsingStats(zlog, 0), globalStats: newConsoleReaderStats(), normalizationFeatures: &normalizationFeatures{UpgradeBlockV2ToV3: true}, encoder: encoder},
 		logger: zlog,
 	}
 

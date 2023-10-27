@@ -31,8 +31,10 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dmetrics"
 	"github.com/streamingfast/eth-go"
-	"github.com/streamingfast/firehose-ethereum/types"
+	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/logging"
+	"github.com/streamingfast/node-manager/mindreader"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
@@ -50,7 +52,7 @@ type ConsoleReader struct {
 	logger *zap.Logger
 }
 
-func NewConsoleReader(logger *zap.Logger, lines chan string) (*ConsoleReader, error) {
+func NewConsoleReader(lines chan string, blockEncoder firecore.BlockEncoder, logger *zap.Logger, tracer logging.Tracer) (mindreader.ConsolerReader, error) {
 	globalStats := newConsoleReaderStats()
 	globalStats.StartPeriodicLogToZap(context.Background(), logger, 30*time.Second)
 
@@ -58,7 +60,7 @@ func NewConsoleReader(logger *zap.Logger, lines chan string) (*ConsoleReader, er
 		lines: lines,
 		close: func() {},
 
-		ctx:   &parseCtx{logger: logger, globalStats: globalStats, normalizationFeatures: &normalizationFeatures{}},
+		ctx:   &parseCtx{logger: logger, globalStats: globalStats, normalizationFeatures: &normalizationFeatures{}, encoder: blockEncoder},
 		done:  make(chan interface{}),
 		stats: globalStats,
 
@@ -177,6 +179,7 @@ type parseCtx struct {
 	transactionTraces   []*pbeth.TransactionTrace
 	evmCallStackIndexes []int32
 
+	encoder     firecore.BlockEncoder
 	stats       *parsingStats
 	globalStats *consoleReaderStats
 
@@ -1134,7 +1137,7 @@ func (ctx *parseCtx) readBlock(line string) (*bstream.Block, error) {
 		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
 	}
 
-	bstreamBlock, err := types.BlockFromProto(block, libNum)
+	bstreamBlock, err := ctx.encoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: libNum})
 	if err != nil {
 		return nil, err
 	}
@@ -1241,7 +1244,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
 	}
 
-	bstreamBlock, err := types.BlockFromProto(block, libNum)
+	bstreamBlock, err := ctx.encoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: libNum})
 	if err != nil {
 		return nil, err
 	}

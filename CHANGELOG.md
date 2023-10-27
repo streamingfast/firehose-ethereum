@@ -10,15 +10,24 @@ for instructions to keep up to date.
 
 This releases refactor `firehose-ethereum` repository to use the common shared Firehose Core library (https://github.com/streamingfast/firehose-core) that every single Firehose supported chain should use and follow.
 
-At the data level and gRPC level, there is no changes in behavior to all core components which are `reader-node`, `merger`, `relayer`, `firehose`, `substreams-tier1` and `substreams-tier2`.
+Both at the data level and gRPC level, there is no changes in behavior to all core components which are `reader-node`, `merger`, `relayer`, `firehose`, `substreams-tier1` and `substreams-tier2`.
 
 A lot of changes happened at the operators level however and some superflous mode have been removed, especially around the `reader-node` application. The full changes is listed below, operators should review thoroughly the changelog.
 
-> **Important** It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.12 in case of a problem is quite easy and no special data migration is required.
+> [!IMPORTANT]
+> It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.19 in case of a problem is quite easy and no special data migration is required outside of changing back to the old set of flags that was used before.
 
 #### Operators
 
-You will find below the detailed upgrade procedure for the configuration file providers usually use. If you are using the flags based approach, simply update the corresponding flags.
+You will find below the detailed upgrade procedure for the configuration file operators usually use. If you are using the flags based approach, simply update the corresponding flags.
+
+#### Common Changes
+
+* The `{sf-data-dir}` templating argument used in various flags to resolve to the `--data-dir=<location>` value has been deprecated and should now be simply `{data-dir}`. The older replacement is still going to work but you should replace any occurrences of `{sf-data-dir}` in your flag definition by `{data-dir}`.
+
+* The default value for `common-blocks-cache-dir` changed from `{sf-data-dir}/blocks-cache` to `file://{data-dir}/storage/blocks-cache`. If you didn't had this flag defined and you had `common-blocks-cache-enabled: true`, you should define `common-blocks-cache-dir: file://{data-dir}/blocks-cache`.
+
+* The default value for `common-live-blocks-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `common-live-blocks-addr: 15011` and ensure you also modify `relayer-grpc-listen-addr: :15011` (see next entry for details).
 
 #### App `reader-node` changes
 
@@ -37,13 +46,75 @@ Before this release, the `reader-node` app was managing for you a portion of the
 - `--http.vhosts=* `
 - `--firehose-enabled`
 
-We have now removed those magical additions and operators are now responsible of providing the flags they required to properly run a Firehose-enabled native `geth` node. The `+` sign that was used to append/override the flags has been removed also since no default additions is performed, the `+` was now useless. We also removed the following `fireeth` configuration value:
+We have now removed those magical additions and operators are now responsible of providing the flags they required to properly run a Firehose-enabled native `geth` node. The `+` sign that was used to append/override the flags has been removed also since no default additions is performed, the `+` was now useless. To make some flag easier to define and avoid repetition, a few templating variable can be used within the `reader-node-arguments` value:
+
+- `{data-dir}`         The current data-dir path defined by the config value `data-dir`
+- `{node-data-dir}`    The node data dir path defined by the flag `reader-node-data-dir`
+- `{hostname}`         The machine's hostname
+- `{start-block-num}`  The resolved start block number defined by the flag `reader-node-start-block-num` (can be overwritten)
+- `{stop-block-num}`   The stop block number defined by the flag `reader-node-stop-block-num`
+
+As an example, if you provide the config value `reader-node-data-dir=/var/geth` for example, then you could use `reader-node-arguments: --datadir={node-data-dir}` and that would resolve to `reader-node-arguments: --datadir=/var/geth` for you.
+
+> [!NOTE]
+> The `reader-node-arguments` is a string that is parsed using Shell word splitting rules which means for example that double quotes are supported like `--datadir="/var/with space/path"` and the argument will be correctly accepted. We use https://github.com/kballard/go-shellquote as your parsing library.
+
+We also removed the following `reader-node` configuration value:
 
 - `reader-node-type` (No replacement needed, just remove it)
 - `reader-node-ipc-path` (If you were using that, define it manually using `geth` flag `--ipcpath=...`)
 - `reader-node-enforce-peers` (If you were using that, use a `geth` config file to add static peers to your node, read about static peers for `geth` on the Web)
 
 Default listening addresses changed also to be the same on all `firehose-<...>` project, meaning consistent ports across all chains for operators. The `reader-node-grpc-listen-addr` default listen address went from `:13010` to `:10010` and `reader-node-manager-api-addr` from `:13009` to `:10011`. If you have no occurrences of `13010` or `13009` in your config file or your scripts, there is nothing to do. Otherwise, feel free to adjust the default port to fit your needs, if you do change `reader-node-grpc-listen-addr`, ensure `--relayer-source` is also updated as by default it points to `:10010`.
+
+Here an example of the required changes.
+
+Change:
+
+```yaml
+start:
+  args:
+  - ...
+  - reader-node
+  - ...
+  flags:
+    ...
+    reader-node-bootstrap-data-url: ./reader/genesis.json
+    reader-node-enforce-peers: localhost:13041
+    reader-node-arguments: +--firehose-genesis-file=./reader/genesis.json --authrpc.port=8552
+    reader-node-log-to-zap: false
+    ...
+```
+
+To:
+
+```yaml
+start:
+  args:
+  - ...
+  - reader-node
+  - ...
+  flags:
+    ...
+    reader-node-bootstrap-data-url: ./reader/genesis.json
+    reader-node-arguments:
+      --networkid=1515
+      --datadir={node-data-dir}
+      --ipcpath={data-dir}/reader/ipc
+      --port=30305
+      --http
+      --http.api=eth,net,web3
+      --http.port=8547
+      --http.addr=0.0.0.0
+      --http.vhosts=*
+      --firehose-enabled
+      --firehose-genesis-file=./reader/genesis.json
+      --authrpc.port=8552
+    ...
+```
+
+> [!NOTE]
+> Adjust the `--networkid=1515` value to fit your targeted chain, see https://chainlist.org/ for a list of Ethereum chain and their `network-id` value.
 
 #### App `node` removed
 
@@ -68,7 +139,9 @@ We have completely drop support to concentrate on the core mission of Firehose w
 
 #### Rename of `combined-index-builder` to `index-builder`
 
-The app has been renamed to simply `index-builder` and the flags has been completely renamed removing the prefix `combined-` in front of them. So change:
+The app has been renamed to simply `index-builder` and the flags has been completely renamed removing the prefix `combined-` in front of them.
+
+Change:
 
 ```yaml
 start:
@@ -85,7 +158,7 @@ start:
     ...
 ```
 
-To
+To:
 
 ```yaml
 start:
@@ -102,7 +175,8 @@ start:
     ...
 ```
 
-> **Note** Rename only configuration item you had previously defined, do not copy paste verbatim example aboe
+> [!NOTE]
+> Rename only configuration item you had previously defined, do not copy paste verbatim example above.
 
 * Removed support for `archive-node` app, if you were using this, please use a standard NEAR Archive node to do the same job.
 
@@ -110,19 +184,18 @@ start:
 
 * String variable `{sf-data-dir}` which interpolates at runtime to Firehose data directory is now `{data-dir}`. If any of your parameter value has `{sf-data-dir}` in its value, change it to `{data-dir}`.
 
-  > **Note** This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
+  > [!NOTE]
+  > This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
 
 * The default value for `config-file` changed from `sf.yaml` to `firehose.yaml`. If you didn't had this flag defined and wish to keep the old default, define `config-file: sf.yaml`.
 
 * The default value for `data-dir` changed from `sf-data` to `firehose-data`. If you didn't had this flag defined before, you should either move `sf-data` to `firehose-data` or define `data-dir: sf-data`.
 
-  > **Note** This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
+  > [!NOTE]
+  > This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
 
 * The flag `verbose` has been renamed to `log-verbosity`.
 
-* The default value for `common-blocks-cache-dir` changed from `{sf-data-dir}/blocks-cache` to `file://{data-dir}/storage/blocks-cache`. If you didn't had this flag defined and you had `common-blocks-cache-enabled: true`, you should define `common-blocks-cache-dir: {data-dir}/blocks-cache`.
-
-* The default value for `common-live-blocks-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `common-live-blocks-addr: 15011` and ensure you also modify `relayer-grpc-listen-addr: :15011` (see next entry for details).
 
 * The default value for `relayer-grpc-listen-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `relayer-grpc-listen-addr: 15011` and ensure you also modify `common-live-blocks-addr: :15011` (see previous entry for details).
 
@@ -134,7 +207,8 @@ start:
 
 * The `reader-node-arguments` is not populated anymore with default `--home={node-data-dir} <extra-args> run` which means you must now specify those manually. The variables `{data-dir}`, `{node-data-dir}` and `{hostname}` are interpolated respectively to Firehose absolute `data-dir` value, to Firehose absolute `reader-node-data-dir` value and to current hostname. To upgrade, if you had no `reader-node-arguments` defined, you must now define `reader-node-arguments: --home="{node-data-dir}" run`, if you had a `+` in your `reader-node-arguments: +--some-flag`, you must now define it like `reader-node-arguments: --home="{node-data-dir}" --some-flag run`.
 
-  > **Note** This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
+  > [!NOTE]
+  > This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
 
 * The `reader-node-boot-nodes` flag has been removed entirely, if you have boot nodes to specify, specify them in `reader-node-arguments` using `--boot-nodes=...` instead.
 

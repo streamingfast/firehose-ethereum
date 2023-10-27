@@ -1,0 +1,4 @@
+[Node.P2P]
+StaticNodes = [
+    "enode://e4d5433fd9e84930cd38028f2fdb1ca8d55bdb7b6a749da57e8aa7fc5d3c146c44c0d129a14cecc7b0f13bb98700bf392dd4fd7c31bf2fe26038d4ba8f5a8e32@127.0.0.1:30303",
+]

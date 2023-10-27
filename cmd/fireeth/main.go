@@ -1,13 +1,17 @@
 package main
 
 import (
+	// Forced imported to convey they fact that this is a required import (for its side-effect!)
+	_ "github.com/streamingfast/firehose-ethereum/types"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-ethereum/codec"
 	"github.com/streamingfast/firehose-ethereum/transform"
+	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/logging"
-	"github.com/streamingfast/node-manager/mindreader"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -18,57 +22,64 @@ func init() {
 }
 
 func main() {
-	firecore.Main(&firecore.Chain[*pbeth.Block]{
-		ShortName:            "eth",
-		LongName:             "Ethereum",
-		ExecutableName:       "geth",
-		FullyQualifiedModule: "github.com/streamingfast/firehose-ethereum",
-		Version:              version,
+	firecore.Main(Chain)
+}
 
-		Protocol:        "ETH",
-		ProtocolVersion: 1,
+var Chain = &firecore.Chain[*pbeth.Block]{
+	ShortName:            "eth",
+	LongName:             "Ethereum",
+	ExecutableName:       "geth",
+	FullyQualifiedModule: "github.com/streamingfast/firehose-ethereum",
+	Version:              version,
 
-		BlockFactory: func() firecore.Block { return new(pbeth.Block) },
+	// Ensure that if you ever modify test, modify also `types/init.go#init` so that the `bstream.InitGeneric` there fits us
+	Protocol:        "ETH",
+	ProtocolVersion: 1,
 
-		BlockIndexerFactories: map[string]firecore.BlockIndexerFactory[*pbeth.Block]{
-			transform.CombinedIndexerShortName: transform.NewEthCombinedIndexer,
+	BlockFactory:          func() firecore.Block { return new(pbeth.Block) },
+	BlockAcceptedVersions: types.BlockAcceptedVersions,
+
+	BlockIndexerFactories: map[string]firecore.BlockIndexerFactory[*pbeth.Block]{
+		transform.CombinedIndexerShortName: transform.NewEthCombinedIndexer,
+	},
+
+	BlockTransformerFactories: map[protoreflect.FullName]firecore.BlockTransformerFactory{
+		transform.HeaderOnlyMessageName:     transform.NewHeaderOnlyTransformFactory,
+		transform.CombinedFilterMessageName: transform.NewCombinedFilterTransformFactory,
+
+		transform.MultiCallToFilterMessageName: transform.NewMultiCallToFilterTransformFactory,
+		transform.MultiLogFilterMessageName:    transform.NewMultiLogFilterTransformFactory,
+	},
+
+	ConsoleReaderFactory: codec.NewConsoleReader,
+
+	RegisterExtraStartFlags: func(flags *pflag.FlagSet) {
+		flags.String("reader-node-bootstrap-data-url", "", "URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)")
+	},
+
+	ReaderNodeBootstrapperFactory: newReaderNodeBootstrapper,
+
+	Tools: &firecore.ToolsConfig[*pbeth.Block]{
+		BlockPrinter: printBlock,
+
+		RegisterExtraCmd: func(chain *firecore.Chain[*pbeth.Block], toolsCmd *cobra.Command, zlog *zap.Logger, tracer logging.Tracer) error {
+			// toolsCmd.AddCommand(newToolsGenerateNodeKeyCmd(chain))
+			// toolsCmd.AddCommand(newToolsBackfillCmd(zlog))
+
+			return nil
 		},
 
-		BlockTransformerFactories: map[protoreflect.FullName]firecore.BlockTransformerFactory{
-			transform.HeaderOnlyMessageName:     transform.NewHeaderOnlyTransformFactory,
-			transform.CombinedFilterMessageName: transform.NewCombinedFilterTransformFactory,
-
-			// Still needed?
-			transform.MultiCallToFilterMessageName: transform.NewMultiCallToFilterTransformFactory,
-			transform.MultiLogFilterMessageName:    transform.NewMultiLogFilterTransformFactory,
-		},
-
-		ConsoleReaderFactory: func(lines chan string, blockEncoder firecore.BlockEncoder, logger *zap.Logger, tracer logging.Tracer) (mindreader.ConsolerReader, error) {
-			// FIXME: This was hardcoded also in the previouse firehose-near version, Firehose will break if this is not available
-			// blockEncoder
-			return codec.NewConsoleReader(logger, lines)
-		},
-
-		// ReaderNodeBootstrapperFactory: newReaderNodeBootstrapper,
-
-		Tools: &firecore.ToolsConfig[*pbeth.Block]{
-			BlockPrinter: printBlock,
-
-			RegisterExtraCmd: func(chain *firecore.Chain[*pbeth.Block], toolsCmd *cobra.Command, zlog *zap.Logger, tracer logging.Tracer) error {
-				// toolsCmd.AddCommand(newToolsGenerateNodeKeyCmd(chain))
-				// toolsCmd.AddCommand(newToolsBackfillCmd(zlog))
-
-				return nil
+		TransformFlags: &firecore.TransformFlags{
+			Register: func(flags *pflag.FlagSet) {
+				flags.Bool("header-only", false, "Apply the HeaderOnly transform sending back Block's header only (with few top-level fields), exclusive option")
+				flags.String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
+				flags.String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
+				flags.Bool("send-all-block-headers", false, "ask for all the blocks to be sent (header-only if there is no match)")
 			},
 
-			TransformFlags: map[string]*firecore.TransformFlag{
-				// "receipt-account-filters": {
-				// 	Description: "Comma-separated accounts to use as filter/index. If it contains a colon (:), it will be interpreted as <prefix>:<suffix> (each of which can be empty, ex: 'hello:' or ':world')",
-				// 	Parser:      parseReceiptAccountFilters,
-				// },
-			},
+			Parse: parseTransformFlags,
 		},
-	})
+	},
 }
 
 // Version value, injected via go build `ldflags` at build time, **must** not be removed or inlined

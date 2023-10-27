@@ -6,6 +6,7 @@
 .release_notes.md
 *.spkg
 /sf-data
+/firehose-data
 /sf.yaml
 /fireeth
 /dist
