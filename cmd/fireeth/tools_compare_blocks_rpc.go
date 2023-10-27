@@ -198,6 +198,7 @@ func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[str
 	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, logs)
 
 	out := &pbeth.Block{
+		DetailLevel:       pbeth.Block_DETAILLEVEL_BASE,
 		Hash:              in.Hash.Bytes(),
 		Number:            uint64(in.Number),
 		Ver:               3,
@@ -374,6 +375,7 @@ func stripFirehoseHeader(in *pbeth.BlockHeader) {
 }
 
 func stripFirehoseBlock(in *pbeth.Block, hashesWithoutTo map[string]bool) {
+	in.DetailLevel = pbeth.Block_DETAILLEVEL_BASE
 	// clean up internal values
 	msg := in.ProtoReflect()
 	msg.SetUnknown(nil)
@@ -443,6 +445,15 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc
 
 	rpcAsPBEth, hashesWithoutTo := toFirehoseBlock(rpcBlock, logs)
 	stripFirehoseBlock(fhBlock, hashesWithoutTo)
+
+	// tweak that new block for comparison
+	for _, tx := range rpcAsPBEth.TransactionTraces {
+		tx.BeginOrdinal = 0
+		tx.EndOrdinal = 0
+		for _, log := range tx.Receipt.Logs {
+			log.Ordinal = 0
+		}
+	}
 
 	if !proto.Equal(fhBlock, rpcAsPBEth) {
 		fh, err := rpc.MarshalJSONRPCIndent(fhBlock, "", " ")
