@@ -30,12 +30,23 @@ var encoder = firecore.NewBlockEncoder()
 
 var BlockAcceptedVersions = []int32{1, 2, 3}
 
+// init is kept for backward compatibility, `InitFireCore()` should be called directly instead in your
+// own `init()` function.
 func init() {
+	InitFireCore()
+}
+
+// InitFireCore initializes the firehose-core library and override some specific `bstream` element with the proper
+// values for the ETH chain.
+//
+// You should use this method explicitely in your `init()` function to make the dependency explicit.
+func InitFireCore() {
 	// Doing it in `types` ensure that does that depend only on us are properly initialized
 	firecore.UnsafePayloadKind = pbbstream.Protocol_ETH
 
 	// Must fit what is defined in `cmd/fireeth/main.go` in regards to `protocol` and `protocolVersion` and `blockAcceptedVersions`
-	bstream.InitGeneric("ETH", 1, BlockAcceptedVersions, func() proto.Message { return &pbeth.Block{} })
+	firecore.InitBstream("ETH", 1, BlockAcceptedVersions, func() proto.Message { return &pbeth.Block{} })
+
 	bstream.NormalizeBlockID = func(in string) string {
 		return strings.TrimPrefix(strings.ToLower(in), "0x")
 	}

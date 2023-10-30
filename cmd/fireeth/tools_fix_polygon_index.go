@@ -10,7 +10,6 @@ import (
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	firecore "github.com/streamingfast/firehose-core"
-	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
 )
@@ -87,7 +86,8 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 					fmt.Println("ERROR FOUND AT BLOCK", block.Number)
 					mustWrite = true
 					ethBlock.TransactionTraces[0].Index = 0
-					block, err = types.BlockFromProto(ethBlock, block.LibNum)
+
+					block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
 					if err != nil {
 						return fmt.Errorf("re-packing the block: %w", err)
 					}

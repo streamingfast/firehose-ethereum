@@ -32,7 +32,6 @@ import (
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
 	firecore "github.com/streamingfast/firehose-core"
-	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/firehose/client"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v2"
@@ -440,5 +439,5 @@ func decodeAnyPB(in *anypb.Any) (*bstream.Block, error) {
 	// We are downloading only final blocks from the Firehose connection which means the LIB for them
 	// can be set to themself (althought we use `- 1` to ensure problem would occur if codde don't like
 	// `LIBNum == self.BlockNum`).
-	return types.BlockFromProto(block, block.Number-1)
+	return blockEncoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: block.Number - 1})
 }

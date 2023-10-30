@@ -15,7 +15,7 @@ Both at the data level and gRPC level, there is no changes in behavior to all co
 A lot of changes happened at the operators level however and some superflous mode have been removed, especially around the `reader-node` application. The full changes is listed below, operators should review thoroughly the changelog.
 
 > [!IMPORTANT]
-> It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.19 in case of a problem is quite easy and no special data migration is required outside of changing back to the old set of flags that was used before.
+> It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.22 in case of a problem is quite easy and no special data migration is required outside of changing back to the old set of flags that was used before.
 
 #### Operators
 
@@ -23,11 +23,16 @@ You will find below the detailed upgrade procedure for the configuration file op
 
 #### Common Changes
 
-* The `{sf-data-dir}` templating argument used in various flags to resolve to the `--data-dir=<location>` value has been deprecated and should now be simply `{data-dir}`. The older replacement is still going to work but you should replace any occurrences of `{sf-data-dir}` in your flag definition by `{data-dir}`.
+* **Deprecated** The `{sf-data-dir}` templating argument used in various flags to resolve to the `--data-dir=<location>` value has been deprecated and should now be simply `{data-dir}`. The older replacement is still going to work but you should replace any occurrences of `{sf-data-dir}` in your flag definition by `{data-dir}`.
 
 * The default value for `common-blocks-cache-dir` changed from `{sf-data-dir}/blocks-cache` to `file://{data-dir}/storage/blocks-cache`. If you didn't had this flag defined and you had `common-blocks-cache-enabled: true`, you should define `common-blocks-cache-dir: file://{data-dir}/blocks-cache`.
 
 * The default value for `common-live-blocks-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `common-live-blocks-addr: 15011` and ensure you also modify `relayer-grpc-listen-addr: :15011` (see next entry for details).
+
+* The Go module `github.com/streamingfast/firehose-ethereum/types` has been removed, if you were depending on `github.com/streamingfast/firehose-ethereum/types` in your project before, depend directly on `github.com/streamingfast/firehose-ethereum` instead.
+
+  > [!NOTE]
+  > This will pull much more dependencies then before, if you're reluctant of such additions, talk to us on Discord and we can offer alternatives depending on what you were using.
 
 #### App `reader-node` changes
 

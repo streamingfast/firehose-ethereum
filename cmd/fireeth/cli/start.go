@@ -34,7 +34,6 @@ import (
 	"github.com/streamingfast/derr"
 	"github.com/streamingfast/dlauncher/launcher"
 	"github.com/streamingfast/dmetering"
-	_ "github.com/streamingfast/firehose-ethereum/types"
 	tracing "github.com/streamingfast/sf-tracing"
 	"go.uber.org/zap"
 )

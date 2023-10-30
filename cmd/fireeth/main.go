@@ -1,9 +1,6 @@
 package main
 
 import (
-	// Forced imported to convey they fact that this is a required import (for its side-effect!)
-	_ "github.com/streamingfast/firehose-ethereum/types"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	firecore "github.com/streamingfast/firehose-core"
@@ -62,7 +59,7 @@ var Chain = &firecore.Chain[*pbeth.Block]{
 	Tools: &firecore.ToolsConfig[*pbeth.Block]{
 		BlockPrinter: printBlock,
 
-		RegisterExtraCmd: func(chain *firecore.Chain[*pbeth.Block], toolsCmd *cobra.Command, zlog *zap.Logger, tracer logging.Tracer) error {
+		RegisterExtraCmd: func(_ *firecore.Chain[*pbeth.Block], toolsCmd *cobra.Command, zlog *zap.Logger, _ logging.Tracer) error {
 			toolsCmd.AddCommand(compareOneblockRPCCmd)
 			toolsCmd.AddCommand(newCompareBlocksRPCCmd(zlog))
 			toolsCmd.AddCommand(newFixPolygonIndexCmd(zlog))

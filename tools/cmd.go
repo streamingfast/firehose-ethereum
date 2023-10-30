@@ -19,7 +19,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/cli"
+	firecore "github.com/streamingfast/firehose-core"
 )
+
+var blockEncoder = firecore.NewBlockEncoder()
 
 var Cmd = &cobra.Command{Use: "tools", Short: "Developer tools related to fireeth"}
 

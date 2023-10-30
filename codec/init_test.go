@@ -1,14 +1,17 @@
 package codec
 
 import (
-	// Import for its side-effect (registering necessary bstream
+	// Imported for side-effects
+	"github.com/streamingfast/firehose-ethereum/types"
 	_ "github.com/streamingfast/firehose-ethereum/types"
+
 	"github.com/streamingfast/logging"
 )
 
 var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/firehose-ethereum/codec")
 
 func init() {
+	types.InitFireCore()
 	logging.InstantiateLoggers()
 }
 

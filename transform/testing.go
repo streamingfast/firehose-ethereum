@@ -5,11 +5,9 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-testing-interface"
-
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
-	_ "github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/jsonpb"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"

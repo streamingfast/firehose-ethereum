@@ -303,6 +303,11 @@ func (b *Block) GetFirehoseBlockParentID() string {
 	return hex.EncodeToString(b.Header.ParentHash)
 }
 
+// GetFirehoseBlockParentNumber implements firecore.Block.
+func (b *Block) GetFirehoseBlockParentNumber() uint64 {
+	return b.Number - 1
+}
+
 // GetFirehoseBlockTime implements firecore.Block.
 func (b *Block) GetFirehoseBlockTime() time.Time {
 	return b.Header.Timestamp.AsTime()

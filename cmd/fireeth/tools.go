@@ -7,8 +7,11 @@ import (
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
+	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
+
+var blockEncoder = firecore.NewBlockEncoder()
 
 func printBlock(blk *bstream.Block, alsoPrintTransactions bool, out io.Writer) error {
 	block := blk.ToProtocol().(*pbeth.Block)
