@@ -4,26 +4,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-# v1.4.22
+## v1.4.22
 
 * Fixed a regression where `reader-node-role` was changed to `dev` by default, putting back the default `geth` value.
 
-# v1.4.21
+## v1.4.21
 
-* bump substreams to `v1.1.20` with a fix for some minor bug fixes related to start block processing
+* Bump Substreams to `v1.1.20` with a fix for some minor bug fixes related to start block processing
 
-# v1.4.20
+## v1.4.20
 
-## Added
+### Added
 
-* added `tools poll-rpc-blocks` command to launch an RPC-based poller that acts as a firehose extractor node, printing base64-encoded protobuf blocks to stdout (used by the 'dev' node-type). It creates "light" blocks, without traces and ordinals.
-* added `--dev` flag to the `start` command to simplify running a local firehose+substreams stack from a development node (ex: Hardhat).
+* Added `tools poll-rpc-blocks` command to launch an RPC-based poller that acts as a firehose extractor node, printing base64-encoded protobuf blocks to stdout (used by the 'dev' node-type). It creates "light" blocks, without traces and ordinals.
+* Added `--dev` flag to the `start` command to simplify running a local firehose+substreams stack from a development node (ex: Hardhat).
   * This flag overrides the `--reader-node-path`, instead pointing to the fireeth binary itself.
   * This flag overrides the `--reader-node-type`, setting it to `dev` instead of `geth`.
     This node type has the following default `reader-node-arguments`: `tools poll-rpc-blocks http://localhost:8545 0`
   * It also removes `node` from the list of default apps
 
-## Fixed
+### Fixed
 
 * Substreams: fixed metrics calculations (per-module processing-time and external calls were wrong)
 * Substreams: fixed immediate EOF when streaming from block 0 to (unbounded) in dev mode
