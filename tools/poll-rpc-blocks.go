@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-
 	"github.com/streamingfast/eth-go/rpc"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
@@ -55,17 +54,23 @@ func pollRPCBlocksE(cmd *cobra.Command, args []string) error {
 	fmt.Println("FIRE INIT 2.3 local v1.0.0")
 
 	blockNum := startBlockNum
+	latestBlockNum := uint64(0)
 	for {
-		latest, err := client.LatestBlockNum(ctx)
-		if err != nil {
-			delay(err)
-			continue
+
+		if latestBlockNum < blockNum {
+			latestBlockNum, err = client.LatestBlockNum(ctx)
+			zlog.Info("fetched latest block num", zap.Uint64("latest_block_num", latestBlockNum), zap.Uint64("block_num", blockNum))
+			if err != nil {
+				delay(err)
+				continue
+			}
+
+			if latestBlockNum < blockNum {
+				delay(nil)
+				continue
+			}
 		}
 
-		if latest < blockNum {
-			delay(nil)
-			continue
-		}
 		rpcBlock, err := client.GetBlockByNumber(ctx, rpc.BlockNumber(blockNum), rpc.WithGetBlockFullTransaction())
 		if err != nil {
 			delay(err)
@@ -76,6 +81,7 @@ func pollRPCBlocksE(cmd *cobra.Command, args []string) error {
 			FromBlock: rpc.BlockNumber(blockNum),
 			ToBlock:   rpc.BlockNumber(blockNum),
 		})
+
 		if err != nil {
 			delay(err)
 			continue
