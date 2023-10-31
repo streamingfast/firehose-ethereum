@@ -20,9 +20,13 @@ import (
 	"go.uber.org/zap"
 )
 
-func newReaderNodeBootstrapper(ctx context.Context, logger *zap.Logger, cmd *cobra.Command, resolvedNodeArguments []string, resolver firecore.ReaderNodeArgumentResolver) (operator.Bootstrapper, error) {
-	nodePath := sflags.MustGetString(cmd, "reader-node-path")
+func newReaderNodeBootstrapper(_ context.Context, logger *zap.Logger, cmd *cobra.Command, resolvedNodeArguments []string, resolver firecore.ReaderNodeArgumentResolver) (operator.Bootstrapper, error) {
 	bootstrapDataURL := sflags.MustGetString(cmd, "reader-node-bootstrap-data-url")
+	if bootstrapDataURL == "" {
+		return nil, nil
+	}
+
+	nodePath := sflags.MustGetString(cmd, "reader-node-path")
 	nodeDataDir := resolver("{node-data-dir}")
 
 	switch {
