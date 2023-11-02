@@ -1,0 +1,15 @@
+[Eth]
+NetworkId = 1515
+SyncMode = "full"
+# Activate archive mode
+NoPruning = true
+
+[Node]
+HTTPHost = "localhost"
+HTTPPort = 8545
+HTTPModules = ["admin", "personal", "net", "web3", "eth"]
+AuthPort = 8551
+
+[Node.P2P]
+ListenAddr = ":30303"
+NoDiscovery = true

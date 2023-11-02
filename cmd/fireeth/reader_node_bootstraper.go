@@ -1,35 +1,72 @@
-// Copyright 2021 dfuse Platform Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-package geth
+package main
 
 import (
 	"archive/tar"
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/spf13/cobra"
+	"github.com/streamingfast/cli"
+	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/dstore"
+	firecore "github.com/streamingfast/firehose-core"
+	"github.com/streamingfast/node-manager/operator"
 	"go.uber.org/zap"
 )
 
-//GenesisBootstrapper needs to write genesis file, static node file, then run a command like 'geth init'
+func newReaderNodeBootstrapper(_ context.Context, logger *zap.Logger, cmd *cobra.Command, resolvedNodeArguments []string, resolver firecore.ReaderNodeArgumentResolver) (operator.Bootstrapper, error) {
+	bootstrapDataURL := sflags.MustGetString(cmd, "reader-node-bootstrap-data-url")
+	if bootstrapDataURL == "" {
+		return nil, nil
+	}
+
+	nodePath := sflags.MustGetString(cmd, "reader-node-path")
+	nodeDataDir := resolver("{node-data-dir}")
+
+	switch {
+	case strings.HasSuffix(bootstrapDataURL, "tar.zst") || strings.HasSuffix(bootstrapDataURL, "tar.zstd"):
+		// There could be a mistmatch here if the user override `--datadir` manually, we live it for now
+		return NewTarballBootstrapper(bootstrapDataURL, nodeDataDir, logger), nil
+
+	case strings.HasSuffix(bootstrapDataURL, "json"):
+		var args []string
+		if dataDirArgument := findDataDirArgument(resolvedNodeArguments); dataDirArgument != "" {
+			args = append(args, dataDirArgument)
+		}
+
+		return NewGenesisBootstrapper(nodeDataDir, bootstrapDataURL, nodePath, append(args, "init"), logger), nil
+	default:
+		return nil, fmt.Errorf("'reader-node-bootstrap-data-url' config should point to either an archive ending in '.tar.zstd' or a genesis file ending in '.json', not %s", bootstrapDataURL)
+	}
+}
+
+func findDataDirArgument(resolvedNodeArguments []string) string {
+	for i, arg := range resolvedNodeArguments {
+		if strings.HasPrefix(arg, "--datadir") {
+			// If the argument is in 2 parts (e.g. [--datadir, <value>]), we try to re-combine them
+			if arg == "--datadir" {
+				if len(resolvedNodeArguments) > i+1 {
+					return "--datadir=" + resolvedNodeArguments[i+1]
+				}
+
+				// The arguments are invalid, we'll let the node fail later on
+				return arg
+			}
+
+			return arg
+		}
+	}
+
+	return ""
+}
+
+// GenesisBootstrapper needs to write genesis file, static node file, then run a command like 'geth init'
 type GenesisBootstrapper struct {
 	dataDir        string
 	genesisFileURL string
@@ -58,12 +95,12 @@ func downloadDstoreObject(url string, destpath string) error {
 		return fmt.Errorf("cannot get file from store: %w", err)
 	}
 	defer reader.Close()
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(destpath, data, 0644)
+	return os.WriteFile(destpath, data, 0644)
 }
 
 func (b *GenesisBootstrapper) Bootstrap() error {
@@ -78,14 +115,14 @@ func (b *GenesisBootstrapper) Bootstrap() error {
 		return fmt.Errorf("cannot create folder %s to bootstrap node: %w", b.dataDir, err)
 	}
 
-	if !fileExists(genesisFilePath) {
+	if !cli.FileExists(genesisFilePath) {
 		b.logger.Info("fetching genesis file", zap.String("source_url", b.genesisFileURL))
 		if err := downloadDstoreObject(b.genesisFileURL, genesisFilePath); err != nil {
 			return err
 		}
 	}
 
-	cmd := exec.Command(b.nodePath, b.cmdArgs...)
+	cmd := exec.Command(b.nodePath, append(b.cmdArgs, genesisFilePath)...)
 	b.logger.Info("running node init command (creating genesis block from genesis.json)", zap.Stringer("cmd", cmd))
 	if output, err := runCmd(cmd); err != nil {
 		return fmt.Errorf("failed to init node (output %s): %w", output, err)
@@ -201,21 +238,6 @@ func (b *TarballBootstrapper) createChainData(reader io.Reader) error {
 	}
 }
 
-func dirExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return info.IsDir()
-}
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
 func runCmd(cmd *exec.Cmd) (string, error) {
 	// This runs (and wait) the command, combines both stdout and stderr in a single stream and return everything
 	out, err := cmd.CombinedOutput()

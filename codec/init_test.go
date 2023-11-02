@@ -1,10 +1,17 @@
 package codec
 
-import "github.com/streamingfast/logging"
+import (
+	// Imported for side-effects
+	"github.com/streamingfast/firehose-ethereum/types"
+	_ "github.com/streamingfast/firehose-ethereum/types"
 
-var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/firehose-ethereum/node-mananager/codec")
+	"github.com/streamingfast/logging"
+)
+
+var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/firehose-ethereum/codec")
 
 func init() {
+	types.InitFireCore()
 	logging.InstantiateLoggers()
 }
 

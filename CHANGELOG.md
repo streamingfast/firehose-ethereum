@@ -4,7 +4,213 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v1.4.22
+## v2.0.0
+
+### Highlights
+
+This releases refactor `firehose-ethereum` repository to use the common shared Firehose Core library (https://github.com/streamingfast/firehose-core) that every single Firehose supported chain should use and follow.
+
+Both at the data level and gRPC level, there is no changes in behavior to all core components which are `reader-node`, `merger`, `relayer`, `firehose`, `substreams-tier1` and `substreams-tier2`.
+
+A lot of changes happened at the operators level however and some superflous mode have been removed, especially around the `reader-node` application. The full changes is listed below, operators should review thoroughly the changelog.
+
+> [!IMPORTANT]
+> It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.22 in case of a problem is quite easy and no special data migration is required outside of changing back to the old set of flags that was used before.
+
+#### Operators
+
+You will find below the detailed upgrade procedure for the configuration file operators usually use. If you are using the flags based approach, simply update the corresponding flags.
+
+#### Common Changes
+
+* The default value for `config-file` changed from `sf.yaml` to `firehose.yaml`. If you didn't had this flag defined and wish to keep the old default, define `config-file: sf.yaml`.
+
+* The default value for `data-dir` changed from `sf-data` to `firehose-data`. If you didn't had this flag defined before, you should either move `sf-data` to `firehose-data` or define `data-dir: sf-data`.
+
+  > [!NOTE]
+  > This is an important change, forgetting to change it will change expected locations of data leading to errors or wrong data.
+
+* **Deprecated** The `{sf-data-dir}` templating argument used in various flags to resolve to the `--data-dir=<location>` value has been deprecated and should now be simply `{data-dir}`. The older replacement is still going to work but you should replace any occurrences of `{sf-data-dir}` in your flag definition by `{data-dir}`.
+
+* The default value for `common-blocks-cache-dir` changed from `{sf-data-dir}/blocks-cache` to `file://{data-dir}/storage/blocks-cache`. If you didn't had this flag defined and you had `common-blocks-cache-enabled: true`, you should define `common-blocks-cache-dir: file://{data-dir}/blocks-cache`.
+
+* The default value for `common-live-blocks-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `common-live-blocks-addr: 15011` and ensure you also modify `relayer-grpc-listen-addr: :15011` (see next entry for details).
+
+* The Go module `github.com/streamingfast/firehose-ethereum/types` has been removed, if you were depending on `github.com/streamingfast/firehose-ethereum/types` in your project before, depend directly on `github.com/streamingfast/firehose-ethereum` instead.
+
+  > [!NOTE]
+  > This will pull much more dependencies then before, if you're reluctant of such additions, talk to us on Discord and we can offer alternatives depending on what you were using.
+
+#### App `reader-node` changes
+
+This change will impact all operators currently running Firehose on Ethereum so it's important to pay attention to the upgrade procedure below, if you are unsure of something, reach to us on [Discord](https://discord.gg/jZwqxJAvRs).
+
+Before this release, the `reader-node` app was managing for you a portion of the `reader-node-arguments` configuration value, prepending some arguments that would be passed to `geth` when invoking it, the list of arguments that were automatically provided before:
+
+- `--networkid=<value of config value 'common-network-id'>`
+- `--datadir=<value of config value 'reader-node-data-dir'>`
+- `--ipcpath=<value of config value 'reader-node-ipc-path'>`
+- `--port=30305`
+- `--http`
+- `--http.api=eth,net,web3`
+- `--http.port=8547 `
+- `--http.addr=0.0.0.0 `
+- `--http.vhosts=* `
+- `--firehose-enabled`
+
+We have now removed those magical additions and operators are now responsible of providing the flags they required to properly run a Firehose-enabled native `geth` node. The `+` sign that was used to append/override the flags has been removed also since no default additions is performed, the `+` was now useless. To make some flag easier to define and avoid repetition, a few templating variable can be used within the `reader-node-arguments` value:
+
+- `{data-dir}`         The current data-dir path defined by the config value `data-dir`
+- `{node-data-dir}`    The node data dir path defined by the flag `reader-node-data-dir`
+- `{hostname}`         The machine's hostname
+- `{start-block-num}`  The resolved start block number defined by the flag `reader-node-start-block-num` (can be overwritten)
+- `{stop-block-num}`   The stop block number defined by the flag `reader-node-stop-block-num`
+
+As an example, if you provide the config value `reader-node-data-dir=/var/geth` for example, then you could use `reader-node-arguments: --datadir={node-data-dir}` and that would resolve to `reader-node-arguments: --datadir=/var/geth` for you.
+
+> [!NOTE]
+> The `reader-node-arguments` is a string that is parsed using Shell word splitting rules which means for example that double quotes are supported like `--datadir="/var/with space/path"` and the argument will be correctly accepted. We use https://github.com/kballard/go-shellquote as your parsing library.
+
+We also removed the following `reader-node` configuration value:
+
+- `reader-node-type` (No replacement needed, just remove it)
+- `reader-node-ipc-path` (If you were using that, define it manually using `geth` flag `--ipcpath=...`)
+- `reader-node-enforce-peers` (If you were using that, use a `geth` config file to add static peers to your node, read about static peers for `geth` on the Web)
+
+Default listening addresses changed also to be the same on all `firehose-<...>` project, meaning consistent ports across all chains for operators. The `reader-node-grpc-listen-addr` default listen address went from `:13010` to `:10010` and `reader-node-manager-api-addr` from `:13009` to `:10011`. If you have no occurrences of `13010` or `13009` in your config file or your scripts, there is nothing to do. Otherwise, feel free to adjust the default port to fit your needs, if you do change `reader-node-grpc-listen-addr`, ensure `--relayer-source` is also updated as by default it points to `:10010`.
+
+Here an example of the required changes.
+
+Change:
+
+```yaml
+start:
+  args:
+  - ...
+  - reader-node
+  - ...
+  flags:
+    ...
+    reader-node-bootstrap-data-url: ./reader/genesis.json
+    reader-node-enforce-peers: localhost:13041
+    reader-node-arguments: +--firehose-genesis-file=./reader/genesis.json --authrpc.port=8552
+    reader-node-log-to-zap: false
+    ...
+```
+
+To:
+
+```yaml
+start:
+  args:
+  - ...
+  - reader-node
+  - ...
+  flags:
+    ...
+    reader-node-bootstrap-data-url: ./reader/genesis.json
+    reader-node-arguments:
+      --networkid=1515
+      --datadir={node-data-dir}
+      --ipcpath={data-dir}/reader/ipc
+      --port=30305
+      --http
+      --http.api=eth,net,web3
+      --http.port=8547
+      --http.addr=0.0.0.0
+      --http.vhosts=*
+      --firehose-enabled
+      --firehose-genesis-file=./reader/genesis.json
+      --authrpc.port=8552
+    ...
+```
+
+> [!NOTE]
+> Adjust the `--networkid=1515` value to fit your targeted chain, see https://chainlist.org/ for a list of Ethereum chain and their `network-id` value.
+
+#### App `node` removed
+
+In previous version of `firehose-ethereum`, it was possible to use the `node` app to launch managed "peering/backup/whatever" Ethereum node, this is not possible anymore. If you were using the `node` app previously, like in this config:
+
+```yaml
+start:
+  args:
+  - ...
+  - node
+  - ...
+  flags:
+    ...
+    node-...
+```
+
+You must now remove the `node` app from `args` and any flags starting with `node-`. The migration path is to run those on your own without the use of `fireeth` and using whatever tools fits your desired needs.
+
+We have completely drop support to concentrate on the core mission of Firehose which is to run reader nodes to extract Firehose blocks from it.
+
+> **Note** This is about the `node` app and **not** the `reader-node`, we think usage of this app is minimal/inexistent.
+
+#### Rename of `combined-index-builder` to `index-builder`
+
+The app has been renamed to simply `index-builder` and the flags has been completely renamed removing the prefix `combined-` in front of them.
+
+Change:
+
+```yaml
+start:
+  args:
+  - ...
+  - combined-index-builder
+  - ...
+  flags:
+    ...
+    combined-index-builder-grpc-listen-addr: ":9999"
+    combined-index-builder-index-size: 10000
+    combined-index-builder-start-block: 0
+    combined-index-builder-stop-block: 0
+    ...
+```
+
+To:
+
+```yaml
+start:
+  args:
+  - ...
+  - index-builder
+  - ...
+  flags:
+    ...
+    index-builder-grpc-listen-addr: ":9999"
+    index-builder-index-size: 10000
+    index-builder-start-block: 0
+    index-builder-stop-block: 0
+    ...
+```
+
+* Flag `common-block-index-sizes` has been renamed to `common-index-block-sizes`.
+
+> [!NOTE]
+> Rename only configuration item you had previously defined, do not copy paste verbatim example above.
+
+#### App `relayer` changes
+
+* The default value for `relayer-grpc-listen-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `relayer-grpc-listen-addr: 15011` and ensure you also modify `common-live-blocks-addr: :15011` (see previous entry for details).
+
+* The default value for `relayer-source` changed from `:15010` to `:10010`. If you didn't had this flag defined and wish to keep the old default, define `relayer-source: 15010` and ensure you also modify `reader-node-grpc-listen-addr: :15010` (see next entry for details).
+
+#### App `firehose` changes
+
+* The default value for `firehose-grpc-listen-addr` changed from `:15042` to `:10015`. If you didn't had this flag defined and wish to keep the old default, define `firehose-grpc-listen-addr: :15010`.
+
+#### App `merger` changed
+
+* The default value for `merger-grpc-listen-addr` changed from `:15012` to `:10012`. If you didn't had this flag defined and wish to keep the old default, define `merger-grpc-listen-addr: :15012`.
+
+### Removed
+
+* Transform `sf.ethereum.transform.v1.LightBlock` is not supported, this has been deprecated for a long time and should not be used anywhere.
+
+# v1.4.22
 
 * Fixed a regression where `reader-node-role` was changed to `dev` by default, putting back the default `geth` value.
 

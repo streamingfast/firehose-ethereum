@@ -60,11 +60,6 @@ message CallToFilter {
   repeated bytes signatures = 2;
 }
 
-// Deprecated: LightBlock is deprecated, replaced by HeaderOnly, note however that the new transform
-// does not have any transactions traces returned, so it's not a direct replacement.
-message LightBlock {
-}
-
 // HeaderOnly returns only the block's header and few top-level core information for the block. Useful
 // for cases where no transactions information is required at all.
 //

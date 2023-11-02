@@ -5,11 +5,9 @@ import (
 	"os"
 
 	"github.com/mitchellh/go-testing-interface"
-
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
-	_ "github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/jsonpb"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
@@ -192,7 +190,7 @@ func testMockstoreWithFiles(t testing.T, blocks []*pbeth.Block, indexSize uint64
 	})
 
 	// spawn an indexer with our mock indexStore
-	indexer := NewEthCombinedIndexer(indexStore, indexSize)
+	indexer := NewEthCombinedIndexerLegacy(indexStore, indexSize)
 	for _, blk := range blocks {
 		// feed the indexer
 		indexer.ProcessBlock(blk)

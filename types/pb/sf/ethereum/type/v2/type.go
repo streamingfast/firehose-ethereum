@@ -287,3 +287,33 @@ func MustGasChangeReasonFromString(reason string) GasChange_Reason {
 
 	return GasChange_Reason(enumID)
 }
+
+// GetFirehoseBlockID implements firecore.Block.
+func (b *Block) GetFirehoseBlockID() string {
+	return hex.EncodeToString(b.Hash)
+}
+
+// GetFirehoseBlockNumber implements firecore.Block.
+func (b *Block) GetFirehoseBlockNumber() uint64 {
+	return b.Number
+}
+
+// GetFirehoseBlockParentID implements firecore.Block.
+func (b *Block) GetFirehoseBlockParentID() string {
+	return hex.EncodeToString(b.Header.ParentHash)
+}
+
+// GetFirehoseBlockParentNumber implements firecore.Block.
+func (b *Block) GetFirehoseBlockParentNumber() uint64 {
+	return b.Number - 1
+}
+
+// GetFirehoseBlockTime implements firecore.Block.
+func (b *Block) GetFirehoseBlockTime() time.Time {
+	return b.Header.Timestamp.AsTime()
+}
+
+// GetFirehoseBlockVersion implements firecore.Block.
+func (b *Block) GetFirehoseBlockVersion() int32 {
+	return b.Ver
+}

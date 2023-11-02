@@ -82,6 +82,10 @@ func (p *LogFilter) matches(trace *pbeth.TransactionTrace) bool {
 	return false
 }
 
+func NewMultiLogFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes []uint64) (*transform.Factory, error) {
+	return MultiLogFilterTransformFactory(indexStore, possibleIndexSizes), nil
+}
+
 // backwards compatibility, returns a combined filter now
 func MultiLogFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{

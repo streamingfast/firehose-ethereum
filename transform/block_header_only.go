@@ -6,6 +6,7 @@ import (
 
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/bstream/transform"
+	"github.com/streamingfast/dstore"
 	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/transform/v1"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
@@ -14,6 +15,10 @@ import (
 )
 
 var HeaderOnlyMessageName = proto.MessageName(&pbtransform.HeaderOnly{})
+
+func NewHeaderOnlyTransformFactory(_ dstore.Store, _ []uint64) (*transform.Factory, error) {
+	return HeaderOnlyTransformFactory, nil
+}
 
 var HeaderOnlyTransformFactory = &transform.Factory{
 	Obj: &pbtransform.HeaderOnly{},

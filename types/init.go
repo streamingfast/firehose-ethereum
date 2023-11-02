@@ -15,38 +15,43 @@
 package types
 
 import (
-	"fmt"
-	"io"
 	"strings"
-	"time"
 
 	"github.com/streamingfast/bstream"
+	firecore "github.com/streamingfast/firehose-core"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
+	"google.golang.org/protobuf/proto"
 )
 
+var _ firecore.Block = (*pbeth.Block)(nil)
+
+var encoder = firecore.NewBlockEncoder()
+
+var BlockAcceptedVersions = []int32{1, 2, 3}
+
+// init is kept for backward compatibility, `InitFireCore()` should be called directly instead in your
+// own `init()` function.
 func init() {
-	bstream.GetBlockWriterFactory = bstream.BlockWriterFactoryFunc(blockWriterFactory)
-	bstream.GetBlockReaderFactory = bstream.BlockReaderFactoryFunc(blockReaderFactory)
-	bstream.GetBlockDecoder = bstream.BlockDecoderFunc(BlockDecoder)
-	bstream.GetBlockWriterHeaderLen = 10
-	bstream.GetBlockPayloadSetter = bstream.MemoryBlockPayloadSetter
-	bstream.GetMemoizeMaxAge = 20 * time.Second
+	InitFireCore()
+}
+
+// InitFireCore initializes the firehose-core library and override some specific `bstream` element with the proper
+// values for the ETH chain.
+//
+// You should use this method explicitely in your `init()` function to make the dependency explicit.
+func InitFireCore() {
+	// Doing it in `types` ensure that does that depend only on us are properly initialized
+	firecore.UnsafePayloadKind = pbbstream.Protocol_ETH
+
+	// Must fit what is defined in `cmd/fireeth/main.go` in regards to `protocol` and `protocolVersion` and `blockAcceptedVersions`
+	firecore.InitBstream("ETH", 1, BlockAcceptedVersions, func() proto.Message { return &pbeth.Block{} })
+
 	bstream.NormalizeBlockID = func(in string) string {
 		return strings.TrimPrefix(strings.ToLower(in), "0x")
 	}
 }
 
-func blockReaderFactory(reader io.Reader) (bstream.BlockReader, error) {
-	return bstream.NewDBinBlockReader(reader, func(contentType string, version int32) error {
-		protocol := pbbstream.Protocol(pbbstream.Protocol_value[contentType])
-		if protocol != pbbstream.Protocol_ETH && version != 1 {
-			return fmt.Errorf("reader only knows about %s block kind at version 1, got %s at version %d", protocol, contentType, version)
-		}
-
-		return nil
-	})
-}
-
-func blockWriterFactory(writer io.Writer) (bstream.BlockWriter, error) {
-	return bstream.NewDBinBlockWriter(writer, pbbstream.Protocol_ETH.String(), 1)
+func BlockFromProto(b *pbeth.Block, libNum uint64) (*bstream.Block, error) {
+	return encoder.Encode(firecore.BlockEnveloppe{Block: b, LIBNum: libNum})
 }

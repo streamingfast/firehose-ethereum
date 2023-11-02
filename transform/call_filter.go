@@ -81,6 +81,10 @@ func (p *CallToFilter) matches(trace *pbeth.TransactionTrace) bool {
 	return false
 }
 
+func NewMultiCallToFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes []uint64) (*transform.Factory, error) {
+	return MultiCallToFilterTransformFactory(indexStore, possibleIndexSizes), nil
+}
+
 // backwards compatibility, returns a combined filter now
 func MultiCallToFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes []uint64) *transform.Factory {
 	return &transform.Factory{

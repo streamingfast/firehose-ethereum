@@ -12,14 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tools
+package main
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/DataDog/zstd"
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
 	"github.com/streamingfast/eth-go/rpc"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
 
 var compareOneblockRPCCmd = &cobra.Command{
@@ -30,17 +34,12 @@ var compareOneblockRPCCmd = &cobra.Command{
 	`),
 	Args: cobra.ExactArgs(2),
 	RunE: compareOneblockRPCE,
-	Example: ExamplePrefixed("fireeth tools compare-oneblock-rpc", `
+	Example: examplePrefixed("fireeth tools compare-oneblock-rpc", `
 		/path/to/oneblocks/0046904064-0061a308bf12bc2e-5b6ef5eed4e06d5b-46903864-default.dbin.zst http://localhost:8545
 	`),
 }
 
-func init() {
-	Cmd.AddCommand(compareOneblockRPCCmd)
-}
-
 func compareOneblockRPCE(cmd *cobra.Command, args []string) error {
-
 	ctx := cmd.Context()
 	filepath := args[0]
 	rpcEndpoint := args[1]
@@ -72,4 +71,31 @@ func compareOneblockRPCE(cmd *cobra.Command, args []string) error {
 		fmt.Println(fhBlock.Number, "identical")
 	}
 	return nil
+}
+
+func getOneBlock(path string) (*pbeth.Block, error) {
+	// Check if it's a file and if it exists
+	if !cli.FileExists(path) {
+		return nil, os.ErrNotExist
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	uncompressedReader := zstd.NewReader(file)
+	defer uncompressedReader.Close()
+
+	readerFactory, err := bstream.GetBlockReaderFactory.New(uncompressedReader)
+	if err != nil {
+		return nil, fmt.Errorf("new block reader: %w", err)
+	}
+
+	block, err := readerFactory.Read()
+	if err != nil {
+		return nil, fmt.Errorf("reading block: %w", err)
+	}
+
+	return block.ToProtocol().(*pbeth.Block), nil
 }

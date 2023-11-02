@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tools
+package main
 
 import (
 	"bytes"
@@ -26,142 +26,145 @@ import (
 	jd "github.com/josephburnett/jd/lib"
 	"github.com/mostynb/go-grpc-compression/zstd"
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
+	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
+	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/firehose/client"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v2"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-var compareBlocksRPCCmd = &cobra.Command{
-	Use:   "compare-blocks-rpc <firehose-endpoint> <rpc-endpoint> <start-block> <stop-block>",
-	Short: "Checks for any differences between a Firehose and RPC endpoint (get_block) for a specified range.",
-	Long: cli.Dedent(`
-		The 'compare-blocks-rpc' takes in a firehose URL, an RPC endpoint URL and inclusive start/stop block numbers.
-	`),
-	Args: cobra.ExactArgs(4),
-	RunE: compareBlocksRPCE,
-	Example: ExamplePrefixed("fireeth tools compare-blocks-rpc", `
-		# Run over full block range
-		mainnet.eth.streamingfast.io:443 http://localhost:8545 1000000 1001000
-	`),
+func newCompareBlocksRPCCmd(logger *zap.Logger) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "compare-blocks-rpc <firehose-endpoint> <rpc-endpoint> <start-block> <stop-block>",
+		Short: "Checks for any differences between a Firehose and RPC endpoint (get_block) for a specified range.",
+		Long: cli.Dedent(`
+			The 'compare-blocks-rpc' takes in a firehose URL, an RPC endpoint URL and inclusive start/stop block numbers.
+		`),
+		Args: cobra.ExactArgs(4),
+		RunE: createCompareBlocksRPCE(logger),
+		Example: examplePrefixed("fireeth tools compare-blocks-rpc", `
+			# Run over full block range
+			mainnet.eth.streamingfast.io:443 http://localhost:8545 1000000 1001000
+		`),
+	}
+
+	cmd.PersistentFlags().Bool("diff", false, "When activated, difference is displayed for each block with a difference")
+	cmd.Flags().BoolP("plaintext", "p", false, "Use plaintext connection to Firehose")
+	cmd.Flags().BoolP("insecure", "k", false, "Use SSL connection to Firehose but skip SSL certificate validation")
+
+	cmd.Flags().StringP("api-token-env-var", "a", "FIREHOSE_API_TOKEN", "Look for a JWT in this environment variable to authenticate against endpoint")
+
+	return cmd
 }
 
-func init() {
-	Cmd.AddCommand(compareBlocksRPCCmd)
-	compareBlocksRPCCmd.PersistentFlags().Bool("diff", false, "When activated, difference is displayed for each block with a difference")
-	compareBlocksRPCCmd.Flags().BoolP("plaintext", "p", false, "Use plaintext connection to Firehose")
-	compareBlocksRPCCmd.Flags().BoolP("insecure", "k", false, "Use SSL connection to Firehose but skip SSL certificate validation")
+func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
+	return func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
 
-	compareBlocksRPCCmd.Flags().StringP("api-token-env-var", "a", "FIREHOSE_API_TOKEN", "Look for a JWT in this environment variable to authenticate against endpoint")
-
-	//compareBlocksRPCCmd.PersistentFlags().String("write-rpc-cache", "compared-rpc-blocks.jsonl", "When non-empty, the results of the RPC calls will be appended to this JSONL file")
-	//compareBlocksRPCCmd.PersistentFlags().String("read-rpc-cache", "compared-rpc-blocks.jsonl", "When non-empty, this file will be parsed before doing any RPC calls")
-}
-
-func compareBlocksRPCE(cmd *cobra.Command, args []string) error {
-
-	ctx := cmd.Context()
-
-	firehoseEndpoint := args[0]
-	rpcEndpoint := args[1]
-	cli := rpc.NewClient(rpcEndpoint)
-	start, err := strconv.ParseInt(args[2], 10, 64)
-	if err != nil {
-		return fmt.Errorf("parsing start block num: %w", err)
-	}
-	stop, err := strconv.ParseUint(args[3], 10, 64)
-	if err != nil {
-		return fmt.Errorf("parsing stop block num: %w", err)
-	}
-	apiTokenEnvVar := mustGetString(cmd, "api-token-env-var")
-	jwt := os.Getenv(apiTokenEnvVar)
-
-	plaintext := mustGetBool(cmd, "plaintext")
-	insecure := mustGetBool(cmd, "insecure")
-
-	firehoseClient, connClose, grpcCallOpts, err := client.NewFirehoseClient(firehoseEndpoint, jwt, insecure, plaintext)
-	if err != nil {
-		return err
-	}
-	defer connClose()
-
-	grpcCallOpts = append(grpcCallOpts, grpc.UseCompressor(zstd.Name))
-
-	request := &pbfirehose.Request{
-		StartBlockNum:   start,
-		StopBlockNum:    stop,
-		FinalBlocksOnly: true,
-	}
-
-	stream, err := firehoseClient.Blocks(ctx, request, grpcCallOpts...)
-	if err != nil {
-		return fmt.Errorf("unable to start blocks stream: %w", err)
-	}
-
-	meta, err := stream.Header()
-	if err != nil {
-		zlog.Warn("cannot read header")
-	} else {
-		if hosts := meta.Get("hostname"); len(hosts) != 0 {
-			zlog = zlog.With(zap.String("remote_hostname", hosts[0]))
-		}
-	}
-	zlog.Info("connected")
-
-	respChan := make(chan *pbeth.Block, 100)
-
-	allDone := make(chan struct{})
-	go func() {
-
-		for fhBlock := range respChan {
-
-			rpcBlock, err := cli.GetBlockByNumber(ctx, rpc.BlockNumber(fhBlock.Number), rpc.WithGetBlockFullTransaction())
-			if err != nil {
-				panic(err)
-			}
-
-			logs, err := cli.Logs(ctx, rpc.LogsParams{
-				FromBlock: rpc.BlockNumber(fhBlock.Number),
-				ToBlock:   rpc.BlockNumber(fhBlock.Number),
-			})
-			if err != nil {
-				panic(err)
-			}
-
-			identical, diffs := CompareFirehoseToRPC(fhBlock, rpcBlock, logs)
-			if !identical {
-				fmt.Println("different", diffs)
-			} else {
-				fmt.Println(fhBlock.Number, "identical")
-			}
-		}
-		close(allDone)
-	}()
-
-	for {
-		response, err := stream.Recv()
+		firehoseEndpoint := args[0]
+		rpcEndpoint := args[1]
+		cli := rpc.NewClient(rpcEndpoint)
+		start, err := strconv.ParseInt(args[2], 10, 64)
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return fmt.Errorf("stream error while receiving: %w", err)
+			return fmt.Errorf("parsing start block num: %w", err)
 		}
-		blk, err := decodeAnyPB(response.Block)
+		stop, err := strconv.ParseUint(args[3], 10, 64)
 		if err != nil {
-			return fmt.Errorf("error while decoding block: %w", err)
+			return fmt.Errorf("parsing stop block num: %w", err)
 		}
-		respChan <- blk.ToProtocol().(*pbeth.Block)
-	}
-	close(respChan)
-	<-allDone
+		apiTokenEnvVar := sflags.MustGetString(cmd, "api-token-env-var")
+		jwt := os.Getenv(apiTokenEnvVar)
 
-	return nil
+		plaintext := sflags.MustGetBool(cmd, "plaintext")
+		insecure := sflags.MustGetBool(cmd, "insecure")
+
+		firehoseClient, connClose, grpcCallOpts, err := client.NewFirehoseClient(firehoseEndpoint, jwt, insecure, plaintext)
+		if err != nil {
+			return err
+		}
+		defer connClose()
+
+		grpcCallOpts = append(grpcCallOpts, grpc.UseCompressor(zstd.Name))
+
+		request := &pbfirehose.Request{
+			StartBlockNum:   start,
+			StopBlockNum:    stop,
+			FinalBlocksOnly: true,
+		}
+
+		stream, err := firehoseClient.Blocks(ctx, request, grpcCallOpts...)
+		if err != nil {
+			return fmt.Errorf("unable to start blocks stream: %w", err)
+		}
+
+		meta, err := stream.Header()
+		if err != nil {
+			logger.Warn("cannot read header")
+		} else {
+			if hosts := meta.Get("hostname"); len(hosts) != 0 {
+				logger = logger.With(zap.String("remote_hostname", hosts[0]))
+			}
+		}
+		logger.Info("connected")
+
+		respChan := make(chan *pbeth.Block, 100)
+
+		allDone := make(chan struct{})
+		go func() {
+
+			for fhBlock := range respChan {
+
+				rpcBlock, err := cli.GetBlockByNumber(ctx, rpc.BlockNumber(fhBlock.Number), rpc.WithGetBlockFullTransaction())
+				if err != nil {
+					panic(err)
+				}
+
+				logs, err := cli.Logs(ctx, rpc.LogsParams{
+					FromBlock: rpc.BlockNumber(fhBlock.Number),
+					ToBlock:   rpc.BlockNumber(fhBlock.Number),
+				})
+				if err != nil {
+					panic(err)
+				}
+
+				identical, diffs := CompareFirehoseToRPC(fhBlock, rpcBlock, logs)
+				if !identical {
+					fmt.Println("different", diffs)
+				} else {
+					fmt.Println(fhBlock.Number, "identical")
+				}
+			}
+			close(allDone)
+		}()
+
+		for {
+			response, err := stream.Recv()
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				return fmt.Errorf("stream error while receiving: %w", err)
+			}
+			blk, err := decodeAnyPB(response.Block)
+			if err != nil {
+				return fmt.Errorf("error while decoding block: %w", err)
+			}
+			respChan <- blk.ToProtocol().(*pbeth.Block)
+		}
+		close(respChan)
+		<-allDone
+
+		return nil
+	}
 }
 
 func bigIntFromEthUint256(in *eth.Uint256) *pbeth.BigInt {
@@ -402,13 +405,13 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc
 
 	if !proto.Equal(fhBlock, rpcAsPBEth) {
 		fh, err := rpc.MarshalJSONRPCIndent(fhBlock, "", " ")
-		mustNoError(err)
+		cli.NoError(err, "cannot marshal Firehose block to JSON")
 		rpc, err := rpc.MarshalJSONRPCIndent(rpcAsPBEth, "", " ")
-		mustNoError(err)
+		cli.NoError(err, "cannot marshal RPC block to JSON")
 		f, err := jd.ReadJsonString(string(fh))
-		mustNoError(err)
+		cli.NoError(err, "cannot read Firehose block JSON")
 		r, err := jd.ReadJsonString(string(rpc))
-		mustNoError(err)
+		cli.NoError(err, "cannot read RPC block JSON")
 		//		fmt.Println(string(fh))
 		//		fmt.Println("RPC")
 		//		fmt.Println(string(rpc))
@@ -419,4 +422,16 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc
 		return false, differences
 	}
 	return true, nil
+}
+
+func decodeAnyPB(in *anypb.Any) (*bstream.Block, error) {
+	block := &pbeth.Block{}
+	if err := anypb.UnmarshalTo(in, block, proto.UnmarshalOptions{}); err != nil {
+		return nil, fmt.Errorf("unmarshal anypb: %w", err)
+	}
+
+	// We are downloading only final blocks from the Firehose connection which means the LIB for them
+	// can be set to themself (althought we use `- 1` to ensure problem would occur if codde don't like
+	// `LIBNum == self.BlockNum`).
+	return blockEncoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: block.Number - 1})
 }

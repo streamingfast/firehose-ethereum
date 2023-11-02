@@ -1,35 +1,24 @@
-package tools
+package main
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/eth-go"
 	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/transform/v1"
-	sftools "github.com/streamingfast/sf-tools"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-func init() {
-	firehoseClientCmd := sftools.GetFirehoseClientCmd(zlog, tracer, transformsSetter)
-	firehoseClientCmd.Flags().Bool("header-only", false, "Apply the HeaderOnly transform sending back Block's header only (with few top-level fields), exclusive option")
-	firehoseClientCmd.Flags().String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
-	firehoseClientCmd.Flags().String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
-	firehoseClientCmd.Flags().Bool("send-all-block-headers", false, "ask for all the blocks to be sent (header-only if there is no match)")
-	Cmd.AddCommand(firehoseClientCmd)
-
-	firehoseSingleBlockClientCmd := sftools.GetFirehoseSingleBlockClientCmd(zlog, tracer)
-	Cmd.AddCommand(firehoseSingleBlockClientCmd)
-}
-
-var transformsSetter = func(cmd *cobra.Command) (transforms []*anypb.Any, err error) {
-	filters, err := parseFilters(mustGetString(cmd, "call-filters"), mustGetString(cmd, "log-filters"), mustGetBool(cmd, "send-all-block-headers"))
+func parseTransformFlags(cmd *cobra.Command, logger *zap.Logger) (transforms []*anypb.Any, err error) {
+	filters, err := parseFilters(sflags.MustGetString(cmd, "call-filters"), sflags.MustGetString(cmd, "log-filters"), sflags.MustGetBool(cmd, "send-all-block-headers"))
 	if err != nil {
 		return nil, err
 	}
 
-	headerOnly := mustGetBool(cmd, "header-only")
+	headerOnly := sflags.MustGetBool(cmd, "header-only")
 	if filters != nil && headerOnly {
 		return nil, fmt.Errorf("'header-only' flag is exclusive with 'call-filters', 'log-filters' and 'send-all-block-headers' choose either 'header-only' or a combination of the others")
 	}

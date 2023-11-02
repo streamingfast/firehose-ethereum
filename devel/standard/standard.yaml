@@ -1,23 +1,31 @@
 start:
   args:
-  - node
   - reader-node
   - merger
   - relayer
-  - combined-index-builder
+  - index-builder
   - firehose
   - substreams-tier1
   - substreams-tier2
   flags:
-    node-role: dev-miner
-    node-bootstrap-data-url: ./miner/bootstrap.tar.zst
-    node-log-to-zap: false
-    reader-node-bootstrap-data-url: ./reader/genesis.json
-    reader-node-enforce-peers: localhost:13041 # App `node` manager API port
-    reader-node-arguments: +--firehose-genesis-file=./reader/genesis.json --authrpc.port=8552
-    reader-node-log-to-zap: false
-    merger-time-between-store-pruning: 10s
     firehose-grpc-listen-addr: :8089
+    merger-time-between-store-pruning: 10s
+    reader-node-bootstrap-data-url: ./reader/genesis.json
+    reader-node-arguments:
+      --config=./reader/config.toml
+      --networkid=1515
+      --datadir={node-data-dir}
+      --ipcpath={data-dir}/reader/ipc
+      --port=30305
+      --nodiscover
+      --authrpc.port=8552
+      --http
+      --http.api=admin,eth,net,web3
+      --http.port=8547
+      --http.addr=0.0.0.0
+      --http.vhosts=*
+      --firehose-enabled
+      --firehose-genesis-file=./reader/genesis.json
     #substreams-rpc-endpoints: $ETH_MAINNET_RPC # replace with eth mainnet rpc endpoint
     substreams-rpc-cache-chunk-size: 100
     substreams-state-bundle-size: 100

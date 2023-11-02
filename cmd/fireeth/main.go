@@ -1,38 +1,87 @@
-// Copyright 2021 dfuse Platform Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package main
 
 import (
-	"github.com/streamingfast/firehose-ethereum/cmd/fireeth/cli"
-	"github.com/streamingfast/node-manager/operator"
-	"github.com/streamingfast/snapshotter"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	firecore "github.com/streamingfast/firehose-core"
+	"github.com/streamingfast/firehose-ethereum/codec"
+	"github.com/streamingfast/firehose-ethereum/transform"
+	"github.com/streamingfast/firehose-ethereum/types"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"github.com/streamingfast/logging"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-// Version value, injected via go build `ldflags` at build time
-var version = "dev"
-
 func init() {
-	cli.RootCmd.Version = cli.Version(version)
+	firecore.UnsafePayloadKind = pbbstream.Protocol_ETH
 }
 
 func main() {
-	cli.Main(cli.RegisterCommonFlags, nil, map[string]operator.BackupModuleFactory{
-		"gke-pvc-snapshot": gkeSnapshotterFactory,
-	})
+	firecore.Main(Chain)
 }
 
-func gkeSnapshotterFactory(conf operator.BackupModuleConfig) (operator.BackupModule, error) {
-	return snapshotter.NewGKEPVCSnapshotter(conf)
+var Chain = &firecore.Chain[*pbeth.Block]{
+	ShortName:            "eth",
+	LongName:             "Ethereum",
+	ExecutableName:       "geth",
+	FullyQualifiedModule: "github.com/streamingfast/firehose-ethereum",
+	Version:              version,
+
+	// Ensure that if you ever modify test, modify also `types/init.go#init` so that the `bstream.InitGeneric` there fits us
+	Protocol:        "ETH",
+	ProtocolVersion: 1,
+
+	BlockFactory:          func() firecore.Block { return new(pbeth.Block) },
+	BlockAcceptedVersions: types.BlockAcceptedVersions,
+
+	BlockIndexerFactories: map[string]firecore.BlockIndexerFactory[*pbeth.Block]{
+		transform.CombinedIndexerShortName: transform.NewEthCombinedIndexer,
+	},
+
+	BlockTransformerFactories: map[protoreflect.FullName]firecore.BlockTransformerFactory{
+		transform.HeaderOnlyMessageName:     transform.NewHeaderOnlyTransformFactory,
+		transform.CombinedFilterMessageName: transform.NewCombinedFilterTransformFactory,
+
+		transform.MultiCallToFilterMessageName: transform.NewMultiCallToFilterTransformFactory,
+		transform.MultiLogFilterMessageName:    transform.NewMultiLogFilterTransformFactory,
+	},
+
+	ConsoleReaderFactory: codec.NewConsoleReader,
+
+	RegisterExtraStartFlags: func(flags *pflag.FlagSet) {
+		flags.String("reader-node-bootstrap-data-url", "", "URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)")
+	},
+
+	ReaderNodeBootstrapperFactory: newReaderNodeBootstrapper,
+
+	Tools: &firecore.ToolsConfig[*pbeth.Block]{
+		BlockPrinter: printBlock,
+
+		RegisterExtraCmd: func(chain *firecore.Chain[*pbeth.Block], parent *cobra.Command, zlog *zap.Logger, tracer logging.Tracer) error {
+			parent.AddCommand(compareOneblockRPCCmd)
+			parent.AddCommand(newCompareBlocksRPCCmd(zlog))
+			parent.AddCommand(newFixPolygonIndexCmd(zlog))
+			parent.AddCommand(newPollRPCBlocksCmd(zlog))
+
+			registerGethEnforcePeersCmd(parent, chain.BinaryName(), zlog, tracer)
+
+			return nil
+		},
+
+		TransformFlags: &firecore.TransformFlags{
+			Register: func(flags *pflag.FlagSet) {
+				flags.Bool("header-only", false, "Apply the HeaderOnly transform sending back Block's header only (with few top-level fields), exclusive option")
+				flags.String("call-filters", "", "call filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
+				flags.String("log-filters", "", "log filters (format: '[address1[+address2[+...]]]:[eventsig1[+eventsig2[+...]]]")
+				flags.Bool("send-all-block-headers", false, "ask for all the blocks to be sent (header-only if there is no match)")
+			},
+
+			Parse: parseTransformFlags,
+		},
+	},
 }
+
+// Version value, injected via go build `ldflags` at build time, **must** not be removed or inlined
+var version = "dev"

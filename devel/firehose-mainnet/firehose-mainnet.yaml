@@ -7,6 +7,10 @@ start:
     # - $FIREETH_COMMON_FORKED_BLOCKS_STORE_URL (defines common-forked-blocks-store-url)
     # - $FIREETH_COMMON_MERGED_BLOCKS_STORE_URL (defines common-merged-blocks-store-url)
     # - $FIREETH_SUBSTREAMS_RPC_ENDPOINTS (defines substreams-rpc-endpoint)
+    #
+    # Assuming `BLOCK_STORE_URL` is defined, someone can use those config
+    # - Mainnet: ./devel/firehose-mainnet/start.sh -c -- --common-one-block-store-url="${BLOCK_STORE_URL}/eth-mainnet/v4-oneblock" --common-forked-blocks-store-url="${BLOCK_STORE_URL}/eth-mainnet/v4-forked" --common-merged-blocks-store-url="${BLOCK_STORE_URL}/eth-mainnet/v4" --common-live-blocks-addr=""
+    #
 
     # Comment out 'common-live-blocks-addr' to only use historical which improves the start up speed of 'fireeth'
     common-live-blocks-addr: localhost:9001

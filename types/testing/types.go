@@ -27,7 +27,7 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/eth-go"
-	"github.com/streamingfast/firehose-ethereum/types"
+	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/jsonpb"
 	"github.com/streamingfast/logging"
@@ -440,7 +440,7 @@ func ToTimestamp(t time.Time) *timestamppb.Timestamp {
 }
 
 func ToBstreamBlock(t testing.T, block *pbeth.Block, libNum uint64) *bstream.Block {
-	blk, err := types.BlockFromProto(block, libNum)
+	blk, err := firecore.NewBlockEncoder().Encode(firecore.BlockEnveloppe{Block: block, LIBNum: libNum})
 	require.NoError(t, err)
 
 	return blk
@@ -554,8 +554,4 @@ func failInvalidComponent(t testing.T, tag string, component interface{}, option
 	}
 
 	require.FailNowf(t, "invalid component", "Invalid %s component of type %T", tag, component)
-}
-
-func logInvalidComponent(tag string, component interface{}) {
-	zlog.Info(fmt.Sprintf("invalid %s component of type %T", tag, component))
 }
