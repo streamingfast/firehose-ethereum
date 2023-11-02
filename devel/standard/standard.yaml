@@ -20,7 +20,7 @@ start:
       --nodiscover
       --authrpc.port=8552
       --http
-      --http.api=eth,net,web3
+      --http.api=admin,eth,net,web3
       --http.port=8547
       --http.addr=0.0.0.0
       --http.vhosts=*

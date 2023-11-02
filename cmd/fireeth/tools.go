@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
 	firecore "github.com/streamingfast/firehose-core"
@@ -36,6 +37,10 @@ func printBlock(blk *bstream.Block, alsoPrintTransactions bool, out io.Writer) e
 	return nil
 }
 
-func ExamplePrefixed(prefix, examples string) string {
+func examplePrefixed(prefix, examples string) string {
 	return string(cli.ExamplePrefixed(prefix, examples))
+}
+
+func registerGroup(parent *cobra.Command, group cli.CommandOption) {
+	group.Apply(parent)
 }

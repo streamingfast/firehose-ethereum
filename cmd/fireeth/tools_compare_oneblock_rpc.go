@@ -34,13 +34,12 @@ var compareOneblockRPCCmd = &cobra.Command{
 	`),
 	Args: cobra.ExactArgs(2),
 	RunE: compareOneblockRPCE,
-	Example: ExamplePrefixed("fireeth tools compare-oneblock-rpc", `
+	Example: examplePrefixed("fireeth tools compare-oneblock-rpc", `
 		/path/to/oneblocks/0046904064-0061a308bf12bc2e-5b6ef5eed4e06d5b-46903864-default.dbin.zst http://localhost:8545
 	`),
 }
 
 func compareOneblockRPCE(cmd *cobra.Command, args []string) error {
-
 	ctx := cmd.Context()
 	filepath := args[0]
 	rpcEndpoint := args[1]

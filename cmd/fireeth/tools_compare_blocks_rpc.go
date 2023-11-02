@@ -42,12 +42,6 @@ import (
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func init() {
-
-	//compareBlocksRPCCmd.PersistentFlags().String("write-rpc-cache", "compared-rpc-blocks.jsonl", "When non-empty, the results of the RPC calls will be appended to this JSONL file")
-	//compareBlocksRPCCmd.PersistentFlags().String("read-rpc-cache", "compared-rpc-blocks.jsonl", "When non-empty, this file will be parsed before doing any RPC calls")
-}
-
 func newCompareBlocksRPCCmd(logger *zap.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "compare-blocks-rpc <firehose-endpoint> <rpc-endpoint> <start-block> <stop-block>",
@@ -57,7 +51,7 @@ func newCompareBlocksRPCCmd(logger *zap.Logger) *cobra.Command {
 		`),
 		Args: cobra.ExactArgs(4),
 		RunE: createCompareBlocksRPCE(logger),
-		Example: ExamplePrefixed("fireeth tools compare-blocks-rpc", `
+		Example: examplePrefixed("fireeth tools compare-blocks-rpc", `
 			# Run over full block range
 			mainnet.eth.streamingfast.io:443 http://localhost:8545 1000000 1001000
 		`),
