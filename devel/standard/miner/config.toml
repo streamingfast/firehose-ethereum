@@ -5,9 +5,9 @@ SyncMode = "full"
 NoPruning = true
 
 [Node]
-HTTPHost = ""
+HTTPHost = "localhost"
 HTTPPort = 8545
-HTTPModules = ["personal", "net", "web3", "eth"]
+HTTPModules = ["admin", "personal", "net", "web3", "eth"]
 AuthPort = 8551
 
 [Node.P2P]
