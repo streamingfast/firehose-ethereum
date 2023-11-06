@@ -34,7 +34,22 @@ message Block {
   // reward for the block mined, the transfer of ETH to the miner happens outside the normal
   // transaction flow of the chain and is recorded as a `BalanceChange` here since we cannot
   // attached it to any transaction.
+  //
+  // Only available in DetailLevel: EXTENDED
   repeated BalanceChange balance_changes = 11;
+
+  enum DetailLevel{
+    DETAILLEVEL_EXTENDED = 0;
+    // DETAILLEVEL_TRACE = 1; // TBD
+    DETAILLEVEL_BASE = 2;
+  }
+
+  // DetailLevel affects the data available in this block.
+  //
+  // EXTENDED describes the most complete block, with traces, balance changes, storage changes. It is extracted during the execution of the block.
+  // BASE describes a block that contains only the block header, transaction receipts and event logs: everything that can be extracted using the base JSON-RPC interface (https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods) 
+  //      Furthermore, the eth_getTransactionReceipt call has been avoided because it brings only minimal improvements at the cost of requiring an archive node or a full node with complete transaction index.
+  DetailLevel detail_level = 12;
 
   // CodeChanges here is the array of smart code change that happened that happened at the block level
   // outside of the normal transaction flow of a block. Some Ethereum's fork like BSC and Polygon
@@ -44,6 +59,7 @@ message Block {
   // On hard fork, some procedure runs to upgrade the smart contract code to a new version. In those
   // network, a `CodeChange` for each modified smart contract on upgrade would be present here. Note
   // that this happen rarely, so the vast majority of block will have an empty list here.
+  // Only available in DetailLevel: EXTENDED
   repeated CodeChange code_changes = 20;
 
   reserved 40; // bool filtering_applied = 40 [deprecated = true];
@@ -137,8 +153,11 @@ message BlockHeader {
   BigInt base_fee_per_gas = 18;
 
   // Withdrawals root hash according to EIP-4895 (e.g. Shangai Fork) rules, only set if Shangai is present/active on the chain.
+  //
+  // Only available in DetailLevel: EXTENDED
   bytes withdrawals_root = 19;
 
+  // Only available in DetailLevel: EXTENDED
   Uint64NestedArray tx_dependency = 20;
 }
 
@@ -189,10 +208,14 @@ message TransactionTrace {
   bytes s = 9;
 
   // GasUsed is the total amount of gas unit used for the whole execution of the transaction.
+  //
+  // Only available in DetailLevel: EXTENDED
   uint64 gas_used = 10;
 
   // Type represents the Ethereum transaction type, available only since EIP-2718 & EIP-2930 activation which happened on Berlin fork.
   // The value is always set even for transaction before Berlin fork because those before the fork are still legacy transactions.
+  //
+  // Only available in DetailLevel: EXTENDED
   Type type = 12;
 
   enum Type {
@@ -232,20 +255,26 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_DYNAMIC_FEE` which is possible only
   // if Londong fork is active on the chain.
+  //
+  // Only available in DetailLevel: EXTENDED
   BigInt max_fee_per_gas = 11;
 
   // MaxPriorityFeePerGas is priority fee per gas the user to pay in extra to the miner on top of the block's
   // base fee.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_DYNAMIC_FEE` which is possible only
-  // if Londong fork is active on the chain.
+  // if London fork is active on the chain.
+  //
+  // Only available in DetailLevel: EXTENDED
   BigInt max_priority_fee_per_gas = 13;
 
   // meta
   uint32 index = 20;
   bytes hash = 21;
   bytes from = 22;
+  // Only available in DetailLevel: EXTENDED
   bytes return_data = 23;
+  // Only available in DetailLevel: EXTENDED
   bytes public_key = 24;
   uint64 begin_ordinal = 25;
   uint64 end_ordinal = 26;
@@ -274,8 +303,13 @@ message TransactionTrace {
   // balance changes you process those where `reason` is either `REASON_GAS_BUY`, `REASON_GAS_REFUND` or
   // `REASON_REWARD_TRANSACTION_FEE` and for nonce change, still on the root call, you pick the nonce change which the
   // smallest ordinal (if more than one).
+  //
+  // Only available in DetailLevel: EXTENDED
   TransactionTraceStatus status = 30;
+
   TransactionReceipt receipt = 31;
+
+  // Only available in DetailLevel: EXTENDED
   repeated Call calls = 32;
 }
 
@@ -305,8 +339,14 @@ message TransactionReceipt {
   // field, following `EIP-658`.
   //
   // Before Byzantinium hard fork, this field is always empty.
+  //
+  // Only available in DetailLevel: EXTENDED
   bytes state_root = 1;
+  //
+  // Only available in DetailLevel: EXTENDED
   uint64 cumulative_gas_used = 2;
+  //
+  // Only available in DetailLevel: EXTENDED
   bytes logs_bloom = 3;
   repeated Log logs = 4;
 }
@@ -319,6 +359,8 @@ message Log {
   // Index is the index of the log relative to the transaction. This index
   // is always populated regardless of the state revertion of the the call
   // that emitted this log.
+  //
+  // Only available in DetailLevel: EXTENDED
   uint32 index = 4;
 
   // BlockIndex represents the index of the log relative to the Block.
