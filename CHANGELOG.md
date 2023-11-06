@@ -206,6 +206,10 @@ start:
 
 * The default value for `merger-grpc-listen-addr` changed from `:15012` to `:10012`. If you didn't had this flag defined and wish to keep the old default, define `merger-grpc-listen-addr: :15012`.
 
+### Protobuf model changes
+
+* Added field `DetailLevel` (Base, Extended(default)) to `sf.ethereum.type.v2.Block` to distinguish the new blocks produced from polling RPC (base) from the blocks normally produced with firehose instrumentation (extended)
+
 ### Removed
 
 * Transform `sf.ethereum.transform.v1.LightBlock` is not supported, this has been deprecated for a long time and should not be used anywhere.
