@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-ethereum/codec"
+	ethss "github.com/streamingfast/firehose-ethereum/substreams"
 	"github.com/streamingfast/firehose-ethereum/transform"
 	"github.com/streamingfast/firehose-ethereum/types"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
@@ -52,6 +56,26 @@ var Chain = &firecore.Chain[*pbeth.Block]{
 
 	RegisterExtraStartFlags: func(flags *pflag.FlagSet) {
 		flags.String("reader-node-bootstrap-data-url", "", "URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)")
+	},
+
+	RegisterSubstreamsExtensions: func(chain *firecore.Chain[*pbeth.Block]) ([]firecore.SubstreamsExtension, error) {
+		rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
+		rpcCacheStoreURL := viper.GetString("substreams-rpc-cache-store-url")
+		rpcCacheChunkSize := viper.GetUint64("substreams-rpc-cache-chunk-size")
+		rpcEngine, err := ethss.NewRPCEngine(
+			rpcCacheStoreURL,
+			rpcEndpoints,
+			rpcCacheChunkSize,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("creating rpc engine: %w", err)
+		}
+		return []firecore.SubstreamsExtension{
+			{
+				PipelineOptioner: rpcEngine,
+				WASMExtensioner:  rpcEngine,
+			},
+		}, nil
 	},
 
 	ReaderNodeBootstrapperFactory: newReaderNodeBootstrapper,

@@ -13,6 +13,7 @@ require (
 	github.com/mostynb/go-grpc-compression v1.1.17
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
+	github.com/spf13/viper v1.15.0
 	github.com/streamingfast/bstream v0.0.2-0.20230829131224-b9272048dc6a
 	github.com/streamingfast/cli v0.0.4-0.20230825151644-8cc84512cd80
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
@@ -161,7 +162,6 @@ require (
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.15.0 // indirect
 	github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680 // indirect
 	github.com/streamingfast/dauth v0.0.0-20230929180355-921f9c9be330 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20220513054835-1abebbb944ad // indirect
