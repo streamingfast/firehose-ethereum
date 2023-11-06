@@ -26,7 +26,7 @@ require (
 	github.com/streamingfast/node-manager v0.0.2-0.20230406142433-692298a8b8d2
 	github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.1.20
+	github.com/streamingfast/substreams v1.1.21-0.20231106175033-0f47206f0724
 	github.com/stretchr/testify v1.8.4
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
