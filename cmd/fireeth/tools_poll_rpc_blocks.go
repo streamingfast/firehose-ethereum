@@ -65,6 +65,7 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				delay(nil)
 				continue
 			}
+
 			rpcBlock, err := client.GetBlockByNumber(ctx, rpc.BlockNumber(blockNum), rpc.WithGetBlockFullTransaction())
 			if err != nil {
 				delay(err)

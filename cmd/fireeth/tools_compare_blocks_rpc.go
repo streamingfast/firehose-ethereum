@@ -201,7 +201,7 @@ func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[str
 		DetailLevel:       pbeth.Block_DETAILLEVEL_BASE,
 		Hash:              in.Hash.Bytes(),
 		Number:            uint64(in.Number),
-		Ver:               3,
+		Ver:               1,
 		Size:              uint64(in.BlockSize),
 		Uncles:            toFirehoseUncles(in.Uncles),
 		TransactionTraces: trx,
