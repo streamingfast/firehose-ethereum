@@ -317,6 +317,7 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 					Data:       log.Data.Bytes(),               //[]byte   `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 					BlockIndex: uint32(log.ToLog().BlockIndex), //uint32 `protobuf:"varint,6,opt,name=blockIndex,proto3" json:"blockIndex,omitempty"`
 					Ordinal:    ordinal,
+					Index:      uint32(i),
 				})
 				ordinal++
 			}

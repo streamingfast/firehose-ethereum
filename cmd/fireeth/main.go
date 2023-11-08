@@ -20,6 +20,7 @@ import (
 
 func init() {
 	firecore.UnsafePayloadKind = pbbstream.Protocol_ETH
+	firecore.UnsafeJsonBytesEncoder = "hex"
 }
 
 func main() {

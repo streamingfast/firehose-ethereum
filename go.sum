@@ -240,6 +240,8 @@ github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeME
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
+github.com/go-json-experiment/json v0.0.0-20231013223334-54c864be5b8d h1:zqfo2jECgX5eYQseB/X+uV4Y5ocGOG/vG/LTztUCyPA=
+github.com/go-json-experiment/json v0.0.0-20231013223334-54c864be5b8d/go.mod h1:6daplAwHHGbUGib4990V3Il26O0OC4aRyvewaaAihaA=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-logr/logr v0.1.0/go.mod h1:ixOQHD9gLJUVQQ2ZOR7zLEifBX6tGkNJF4QyIY7sIas=
@@ -609,8 +611,8 @@ github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1 h1:CGU52NV9he
 github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1/go.mod h1:UEm8dqibr3c3A1iIA3CHpkhN7j3X78prN7/55sXf3A0=
 github.com/streamingfast/firehose v0.1.1-0.20230731171526-3428fc0ff8d9 h1:SybLEPFkJk8EINJGDlijSWxEZGNXDul4zqlDpttQUCI=
 github.com/streamingfast/firehose v0.1.1-0.20230731171526-3428fc0ff8d9/go.mod h1:lGC1T6mpAAApjBQNF5COSXb3SbrYRI3dBR1f6/PZE54=
-github.com/streamingfast/firehose-core v0.1.13-0.20231102161517-3bc681ef5fc3 h1:HSxvhLx5ft23rmNp9tNqDVYejJPTmhrlEGQoVe8aL0A=
-github.com/streamingfast/firehose-core v0.1.13-0.20231102161517-3bc681ef5fc3/go.mod h1:QS4D/7sgtxQLBtaMBVmJP0Q0NyXx6Wdcwj4a0gVQFVY=
+github.com/streamingfast/firehose-core v0.1.13-0.20231103152927-1a592bb43d57 h1:Xi6Yp+4Qto2+dH/8WQKK6/jUo83iDMpaaTwCvReUm9g=
+github.com/streamingfast/firehose-core v0.1.13-0.20231103152927-1a592bb43d57/go.mod h1:7+Ob16HG0AkBPkgI46ELxdV+E1/FGwK1r/6nFd7retM=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 h1:dgYLhP3STiPi30fISAijFPEB11D4r1fQFc8D3cpgV5s=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2/go.mod h1:OYv1UX/kRsV9aP4SEwa9zpt34qGzdtJzOvdGn+n56as=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
