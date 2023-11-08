@@ -309,7 +309,7 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 		}
 		ordinal++
 
-		for _, log := range logs {
+		for li, log := range logs {
 			if eth.Hash(log.TransactionHash).String() == txHash {
 				out[i].Receipt.Logs = append(out[i].Receipt.Logs, &pbeth.Log{
 					Address:    log.Address.Bytes(),            //[]byte   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
@@ -317,7 +317,7 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 					Data:       log.Data.Bytes(),               //[]byte   `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 					BlockIndex: uint32(log.ToLog().BlockIndex), //uint32 `protobuf:"varint,6,opt,name=blockIndex,proto3" json:"blockIndex,omitempty"`
 					Ordinal:    ordinal,
-					Index:      uint32(i),
+					Index:      uint32(li),
 				})
 				ordinal++
 			}
