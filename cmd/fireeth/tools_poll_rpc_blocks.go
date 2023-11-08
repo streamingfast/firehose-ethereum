@@ -77,7 +77,7 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				ToBlock:   rpc.BlockHash(rpcBlock.Hash.Pretty()),
 			})
 			if err != nil {
-				delay(err)
+				delay(fmt.Errorf("fetching logs for block %q: %w", rpcBlock.Hash.Pretty(), err))
 				continue
 			}
 
