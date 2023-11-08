@@ -210,6 +210,10 @@ start:
 
 * Added field `DetailLevel` (Base, Extended(default)) to `sf.ethereum.type.v2.Block` to distinguish the new blocks produced from polling RPC (base) from the blocks normally produced with firehose instrumentation (extended)
 
+### Tools changes
+
+* Added command `tools fix-bloated-merged-blocks` to go through a range of possibly corrupted merged-blocks (with duplicates and out-of-range blocks) and try to fix them, writing the fixed merged-blocks files to another destination.
+
 ### Removed
 
 * Transform `sf.ethereum.transform.v1.LightBlock` is not supported, this has been deprecated for a long time and should not be used anywhere.
