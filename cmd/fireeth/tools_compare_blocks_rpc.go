@@ -293,8 +293,8 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 				// LogsBloom:         // only available on getTransactionReceipt
 			},
 			V:            pbeth.NewBigInt(int64(receipts[i].V)).Bytes,
-			R:            bigIntFromEthUint256Padded32(receipts[i].R).Bytes,
-			S:            bigIntFromEthUint256Padded32(receipts[i].S).Bytes,
+			R:            bigIntFromEthUint256(receipts[i].R).Bytes,
+			S:            bigIntFromEthUint256(receipts[i].S).Bytes,
 			AccessList:   toAccessList(receipts[i].AccessList),
 			BeginOrdinal: ordinal,
 
