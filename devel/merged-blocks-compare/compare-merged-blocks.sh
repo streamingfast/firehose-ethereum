@@ -30,11 +30,22 @@ function process_block_range() {
     echo "$output_file"
 }
 
+rm -f /tmp/merged-blocks-compare/*
 mkdir -p /tmp/merged-blocks-compare
 
-v1File=$(process_block_range v1 22208500 22208600)
-vPollerFile=$(process_block_range vPoller 22208500 22208600)
+start_block=22207900
+stop_block=22208000
+
+v1File=$(process_block_range v1 $start_block $stop_block)
+vPollerFile=$(process_block_range vPoller $start_block $stop_block)
 
 echo "Diffing $v1File and $vPollerFile"
 
-diff -C0 "/tmp/merged-blocks-compare/$v1File" "/tmp/merged-blocks-compare/$vPollerFile"
+d=$(diff -C5 "/tmp/merged-blocks-compare/$v1File" "/tmp/merged-blocks-compare/$vPollerFile")
+
+if [ -z "$d" ]; then
+  echo "No diff found!"
+else
+  echo "Diff found!"
+  echo "$d" > "/tmp/merged-blocks-compare/$start_block-$stop_block.diff"
+fi
