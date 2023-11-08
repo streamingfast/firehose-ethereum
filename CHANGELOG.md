@@ -15,11 +15,35 @@ Both at the data level and gRPC level, there is no changes in behavior to all co
 A lot of changes happened at the operators level however and some superflous mode have been removed, especially around the `reader-node` application. The full changes is listed below, operators should review thoroughly the changelog.
 
 > [!IMPORTANT]
+> We have had reports of older versions of this software creating corrupted merged-blocks-files (with duplicate or out-of-bound blocks)
+> This release adds additional validation of merged-blocks to prevent serving duplicate blocks from the firehose or substreams service. 
+> This may cause service outage if you have produced those blocks or downloaded them from another party who was affected by this bug.
+> See the **Finding and fixing corrupted merged-blocks-files** to see how you can prevent service outage.
+
+> [!IMPORTANT]
 > It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.22 in case of a problem is quite easy and no special data migration is required outside of changing back to the old set of flags that was used before.
 
 #### Operators
 
 You will find below the detailed upgrade procedure for the configuration file operators usually use. If you are using the flags based approach, simply update the corresponding flags.
+
+#### Finding and fixing corrupted merged-blocks files
+
+You may have certain merged-blocks files (most likely OLD blocks) that contain more than 100 blocks (with duplicate or extra out-of-bound blocks)
+
+* Find the affected files by running the following command (can be run multiple times in parallel, over smaller ranges) 
+
+```
+tools check merged-blocks-batch <merged-blocks-store> <start> <stop>
+```
+
+* If you see any affected range, produce fixed merged-blocks files with the following command, on each range:
+
+```
+tools fix-bloated-merged-blocks <merged-blocks-store> <output-store> <start>:<stop>
+```
+
+* Copy the merged-blocks files created in output-store over to the your merged-blocks-store, replacing the corrupted files.
 
 #### Common Changes
 
