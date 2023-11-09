@@ -15,35 +15,59 @@ Both at the data level and gRPC level, there is no changes in behavior to all co
 A lot of changes happened at the operators level however and some superflous mode have been removed, especially around the `reader-node` application. The full changes is listed below, operators should review thoroughly the changelog.
 
 > [!IMPORTANT]
-> We have had reports of older versions of this software creating corrupted merged-blocks-files (with duplicate or out-of-bound blocks)
-> This release adds additional validation of merged-blocks to prevent serving duplicate blocks from the firehose or substreams service. 
-> This may cause service outage if you have produced those blocks or downloaded them from another party who was affected by this bug.
-> See the **Finding and fixing corrupted merged-blocks-files** to see how you can prevent service outage.
-
-> [!IMPORTANT]
 > It's important to emphasis that at the data level, nothing changed, so reverting to 1.4.22 in case of a problem is quite easy and no special data migration is required outside of changing back to the old set of flags that was used before.
 
 #### Operators
 
 You will find below the detailed upgrade procedure for the configuration file operators usually use. If you are using the flags based approach, simply update the corresponding flags.
 
-#### Finding and fixing corrupted merged-blocks files
+> [!IMPORTANT]
+> We have had reports of older versions of this software creating corrupted merged-blocks-files (with duplicate or out-of-bound blocks)
+> This release adds additional validation of merged-blocks to prevent serving duplicate blocks from the firehose or substreams service.
+> This may cause service outage if you have produced those blocks or downloaded them from another party who was affected by this bug.
+> See the **Finding and fixing corrupted merged-blocks-files** to see how you can prevent service outage.
 
-You may have certain merged-blocks files (most likely OLD blocks) that contain more than 100 blocks (with duplicate or extra out-of-bound blocks)
+##### Quick Upgrade
 
-* Find the affected files by running the following command (can be run multiple times in parallel, over smaller ranges) 
+Here a bullet list for upgrading your instance, we still recommend to fully read each section below, the list here can serve as a check list. The list below is done in such way that you get back the same "instance" as before. The listening addresses changes can be omitted as long as you update other tools to account for the port changes list your load balancer.
 
-```
-tools check merged-blocks-batch <merged-blocks-store> <start> <stop>
-```
+- Add config `config-file: ./sf.yaml` if not present already
+- Add config `data-dir: ./sf-data` if not present already
+- Add config `common-blocks-cache-dir: ./sf-data/blocks-cache` if not present already
+- Remove config `common-chain-id` if present
+- Remove config `common-deployment-id` if present
+- Remove config `common-network-id` if present
+- Add config `common-live-blocks-addr: :13011` if not present already
+- Add config `relayer-grpc-listen-addr: :13011` if `common-live-blocks-addr` has been added in previous step
+- Add config `reader-node-grpc-listen-addr: :13010` if not present already
+- Add config `relayer-source: :13010` if `reader-node-grpc-listen-addr` has been added in previous step
+- Remove config `reader-node-enforce-peers` if present
+- Remove config `reader-node-log-to-zap` if present
+- Remove config `reader-node-ipc-path` if present
+- Remove config `reader-node-type` if present
+- Replace config `reader-node-arguments: +--<flag1> --<flag2> ...` by `reader-node-arguments: --networkid=<network-id> --datadir={node-data-dir} --port=30305 --http --http.api=eth,net,web3 --http.port=8547 --http.addr=0.0.0.0 --http.vhosts=* --firehose-enabled --<flag1> --<flag2> ...`
 
-* If you see any affected range, produce fixed merged-blocks files with the following command, on each range:
+  > [!NOTE]
+  > The `<network-id>` is dynamic and should be replace with a literal value like `1` for Ethereum Mainnet. The `{node-data-dir}` value is actually a templating value that is going o be resolved for you (resolves to value of config `reader-node-data-dir`).!
 
-```
-tools fix-bloated-merged-blocks <merged-blocks-store> <output-store> <start>:<stop>
-```
+  > [!IMPORTANT]
+  > Ensure that `--firehose-enabled` is part of the flag! Moreover, tweak flags to avoid repetitions if your were overriding some of them.
 
-* Copy the merged-blocks files created in output-store over to the your merged-blocks-store, replacing the corrupted files.
+- Remove `node` under `start: args:` list
+- Add config `merger-grpc-listen-addr: :13012` if not present already
+- Add config `firehose-grpc-listen-addr: :13042` if not present already
+- Add config `substreams-tier1-grpc-listen-addr: :13044` if not present already
+- Add config `substreams-tier1-grpc-listen-addr: :13044` if not present already
+- Add config `substreams-tier2-grpc-listen-addr: :13045` if not present already
+- Add config `substreams-tier1-subrequests-endpoint: :13045` if `substreams-tier1-grpc-listen-addr` has been added in previous step
+- Replace config `combined-index-builder` to `index-builder` under `start: args:` list
+- Rename config `common-block-index-sizes` to `common-index-block-sizes` if present
+- Rename config `combined-index-builder-grpc-listen-addr` to `index-builder-grpc-listen-addr` if present
+- Add config `index-builder-grpc-listen-addr: :13043` if you didn't have `combined-index-builder-grpc-listen-addr` previously
+- Rename config `combined-index-builder-index-size` to `index-builder-index-size` if present
+- Rename config `combined-index-builder-start-block` to `index-builder-start-block` if present
+- Rename config `combined-index-builder-stop-block` to `index-builder-stop-block` if present
+- Replace any occurrences of `{sf-data-dir}` to `{data-dir}` in any of your configuration values if present
 
 #### Common Changes
 
@@ -58,7 +82,7 @@ tools fix-bloated-merged-blocks <merged-blocks-store> <output-store> <start>:<st
 
 * The default value for `common-blocks-cache-dir` changed from `{sf-data-dir}/blocks-cache` to `file://{data-dir}/storage/blocks-cache`. If you didn't had this flag defined and you had `common-blocks-cache-enabled: true`, you should define `common-blocks-cache-dir: file://{data-dir}/blocks-cache`.
 
-* The default value for `common-live-blocks-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `common-live-blocks-addr: 15011` and ensure you also modify `relayer-grpc-listen-addr: :15011` (see next entry for details).
+* The default value for `common-live-blocks-addr` changed from `:13011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `common-live-blocks-addr: 13011` and ensure you also modify `relayer-grpc-listen-addr: :13011` (see next entry for details).
 
 * The Go module `github.com/streamingfast/firehose-ethereum/types` has been removed, if you were depending on `github.com/streamingfast/firehose-ethereum/types` in your project before, depend directly on `github.com/streamingfast/firehose-ethereum` instead.
 
@@ -77,9 +101,9 @@ Before this release, the `reader-node` app was managing for you a portion of the
 - `--port=30305`
 - `--http`
 - `--http.api=eth,net,web3`
-- `--http.port=8547 `
-- `--http.addr=0.0.0.0 `
-- `--http.vhosts=* `
+- `--http.port=8547`
+- `--http.addr=0.0.0.0`
+- `--http.vhosts=*`
 - `--firehose-enabled`
 
 We have now removed those magical additions and operators are now responsible of providing the flags they required to properly run a Firehose-enabled native `geth` node. The `+` sign that was used to append/override the flags has been removed also since no default additions is performed, the `+` was now useless. To make some flag easier to define and avoid repetition, a few templating variable can be used within the `reader-node-arguments` value:
@@ -218,29 +242,61 @@ start:
 
 #### App `relayer` changes
 
-* The default value for `relayer-grpc-listen-addr` changed from `:15011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `relayer-grpc-listen-addr: 15011` and ensure you also modify `common-live-blocks-addr: :15011` (see previous entry for details).
+* The default value for `relayer-grpc-listen-addr` changed from `:13011` to `:10014`. If you didn't had this flag defined and wish to keep the old default, define `relayer-grpc-listen-addr: 13011` and ensure you also modify `common-live-blocks-addr: :13011` (see previous entry for details).
 
-* The default value for `relayer-source` changed from `:15010` to `:10010`. If you didn't had this flag defined and wish to keep the old default, define `relayer-source: 15010` and ensure you also modify `reader-node-grpc-listen-addr: :15010` (see next entry for details).
+* The default value for `relayer-source` changed from `:13010` to `:10010`. If you didn't had this flag defined and wish to keep the old default, define `relayer-source: 13010` and ensure you also modify `reader-node-grpc-listen-addr: :13010`.
+
+  > [!NOTE]
+  > Must align with `reader-node-grpc-listen-addr`!
 
 #### App `firehose` changes
 
-* The default value for `firehose-grpc-listen-addr` changed from `:15042` to `:10015`. If you didn't had this flag defined and wish to keep the old default, define `firehose-grpc-listen-addr: :15010`.
+* The default value for `firehose-grpc-listen-addr` changed from `:13042` to `:10015`. If you didn't had this flag defined and wish to keep the old default, define `firehose-grpc-listen-addr: :13042`.
 
 #### App `merger` changed
 
-* The default value for `merger-grpc-listen-addr` changed from `:15012` to `:10012`. If you didn't had this flag defined and wish to keep the old default, define `merger-grpc-listen-addr: :15012`.
+* The default value for `merger-grpc-listen-addr` changed from `:13012` to `:10012`. If you didn't had this flag defined and wish to keep the old default, define `merger-grpc-listen-addr: :13012`.
 
-### Protobuf model changes
+#### App `substreams-tier1` and `substreams-tier2` changed
+
+* The default value for `substreams-tier1-grpc-listen-addr` changed from `:13044` to `:10016`. If you didn't had this flag defined and wish to keep the old default, define `substreams-tier1-grpc-listen-addr: :13044`.
+
+* The default value for `substreams-tier1-subrequests-endpoint` changed from `:13045` to `:10017`. If you didn't had this flag defined and wish to keep the old default, define `substreams-tier1-subrequests-endpoint: :13044`.
+
+  > [!NOTE]
+  > Must align with `substreams-tier1-grpc-listen-addr`!
+
+* The default value for `substreams-tier2-grpc-listen-addr` changed from `:13045` to `:10017`. If you didn't had this flag defined and wish to keep the old default, define `substreams-tier2-grpc-listen-addr: :13045`.
+
+#### Protobuf model changes
 
 * Added field `DetailLevel` (Base, Extended(default)) to `sf.ethereum.type.v2.Block` to distinguish the new blocks produced from polling RPC (base) from the blocks normally produced with firehose instrumentation (extended)
 
-### Tools changes
+#### Tools changes
 
 * Added command `tools fix-bloated-merged-blocks` to go through a range of possibly corrupted merged-blocks (with duplicates and out-of-range blocks) and try to fix them, writing the fixed merged-blocks files to another destination.
 
-### Removed
+#### Removed
 
 * Transform `sf.ethereum.transform.v1.LightBlock` is not supported, this has been deprecated for a long time and should not be used anywhere.
+
+#### Finding and fixing corrupted merged-blocks files
+
+You may have certain merged-blocks files (most likely OLD blocks) that contain more than 100 blocks (with duplicate or extra out-of-bound blocks)
+
+* Find the affected files by running the following command (can be run multiple times in parallel, over smaller ranges)
+
+```
+tools check merged-blocks-batch <merged-blocks-store> <start> <stop>
+```
+
+* If you see any affected range, produce fixed merged-blocks files with the following command, on each range:
+
+```
+tools fix-bloated-merged-blocks <merged-blocks-store> <output-store> <start>:<stop>
+```
+
+* Copy the merged-blocks files created in output-store over to the your merged-blocks-store, replacing the corrupted files.
 
 # v1.4.22
 
