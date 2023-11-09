@@ -34,18 +34,28 @@ rm -f /tmp/merged-blocks-compare/*
 mkdir -p /tmp/merged-blocks-compare
 
 start_block=22207900
-stop_block=22208000
 
-v1File=$(process_block_range v1 $start_block $stop_block)
-vPollerFile=$(process_block_range vPoller $start_block $stop_block)
+current_block=$start_block
+for i in $(seq 1 1000); do
+  current_stop_block=$((current_block + 100))
 
-echo "Diffing $v1File and $vPollerFile"
+  echo "Processing block range $current_block:$current_stop_block"
 
-d=$(diff -C0 "/tmp/merged-blocks-compare/$v1File" "/tmp/merged-blocks-compare/$vPollerFile")
+  v1File=$(process_block_range v1 $current_block $current_stop_block)
+  vPollerFile=$(process_block_range vPoller $current_block $current_stop_block)
 
-if [ -z "$d" ]; then
-  echo "No diff found!"
-else
-  echo "Diff found!"
-  echo "$d" > "/tmp/merged-blocks-compare/$start_block-$stop_block.diff"
-fi
+  echo "Diffing $v1File and $vPollerFile"
+
+  d=$(diff -C0 "/tmp/merged-blocks-compare/$v1File" "/tmp/merged-blocks-compare/$vPollerFile")
+
+  if [ -z "$d" ]; then
+    echo "No diff found!"
+    rm "/tmp/merged-blocks-compare/$v1File" "/tmp/merged-blocks-compare/$vPollerFile"
+  else
+    echo "Diff found!"
+    echo "$d" > "/tmp/merged-blocks-compare/$current_block-$current_stop_block.diff"
+  fi
+
+  current_block=$current_stop_block
+done
+
