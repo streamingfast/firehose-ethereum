@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -57,20 +58,32 @@ var Chain = &firecore.Chain[*pbeth.Block]{
 
 	RegisterExtraStartFlags: func(flags *pflag.FlagSet) {
 		flags.String("reader-node-bootstrap-data-url", "", "URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)")
+
+		flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
+		flags.String("substreams-rpc-cache-store-url", "{data-dir}/rpc-cache", "where rpc cache will be store call responses")
+		flags.Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
 	},
 
 	RegisterSubstreamsExtensions: func(chain *firecore.Chain[*pbeth.Block]) ([]firecore.SubstreamsExtension, error) {
+		dataDir := viper.GetString("global-data-dir")
+		dataDirAbs, err := filepath.Abs(dataDir)
+		if err != nil {
+			return nil, fmt.Errorf("unable to setup directory structure: %w", err)
+		}
+
 		rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
-		rpcCacheStoreURL := viper.GetString("substreams-rpc-cache-store-url")
+		rpcCacheStoreURL := firecore.MustReplaceDataDir(dataDirAbs, viper.GetString("substreams-rpc-cache-store-url"))
 		rpcCacheChunkSize := viper.GetUint64("substreams-rpc-cache-chunk-size")
 		rpcEngine, err := ethss.NewRPCEngine(
 			rpcCacheStoreURL,
 			rpcEndpoints,
 			rpcCacheChunkSize,
 		)
+
 		if err != nil {
 			return nil, fmt.Errorf("creating rpc engine: %w", err)
 		}
+
 		return []firecore.SubstreamsExtension{
 			{
 				PipelineOptioner: rpcEngine,
