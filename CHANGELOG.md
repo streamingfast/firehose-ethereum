@@ -33,6 +33,7 @@ Here a bullet list for upgrading your instance, we still recommend to fully read
 
 - Add config `config-file: ./sf.yaml` if not present already
 - Add config `data-dir: ./sf-data` if not present already
+- Rename config `verbose` to `log-verbosity` if present
 - Add config `common-blocks-cache-dir: ./sf-data/blocks-cache` if not present already
 - Remove config `common-chain-id` if present
 - Remove config `common-deployment-id` if present
@@ -88,6 +89,11 @@ Here a bullet list for upgrading your instance, we still recommend to fully read
 
   > [!NOTE]
   > This will pull much more dependencies then before, if you're reluctant of such additions, talk to us on Discord and we can offer alternatives depending on what you were using.
+
+* The config value `verbose` has been renamed to `log-verbosity` keeping the same semantic and default value as before
+
+  > [!NOTE]
+  > The short flag version is still `-v` and can still be provided multiple times like `-vvvv`.
 
 #### App `reader-node` changes
 
