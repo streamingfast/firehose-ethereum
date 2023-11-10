@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v2.0.0
+## v2.0.0-rc.1
 
 ### Highlights
 
@@ -258,6 +258,7 @@ start:
 #### App `firehose` changes
 
 * The default value for `firehose-grpc-listen-addr` changed from `:13042` to `:10015`. If you didn't had this flag defined and wish to keep the old default, define `firehose-grpc-listen-addr: :13042`.
+* Firehose logs now include auth information (userID, keyID, realIP) along with blocks + egress bytes sent.
 
 #### App `merger` changed
 
