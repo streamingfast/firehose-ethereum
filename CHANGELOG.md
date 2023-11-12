@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Fixed
+
+* Fixed the `fix-polygon-index` tool (parsing error made it unusable in v2.0.0-rc.1)
+
 ## v2.0.0-rc.1
 
 ### Highlights

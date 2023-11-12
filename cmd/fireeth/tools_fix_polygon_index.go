@@ -44,6 +44,7 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 			return fmt.Errorf("stop block must be greater than start block")
 		}
 
+		lastFileProcessed := ""
 		startWalkFrom := fmt.Sprintf("%010d", start-(start%100))
 		err = srcStore.WalkFrom(ctx, "", startWalkFrom, func(filename string) error {
 			logger.Debug("checking merged block file", zap.String("filename", filename))
@@ -51,12 +52,12 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 			startBlock := mustParseUint64(filename)
 
 			if startBlock > stop {
-				logger.Debug("skipping merged block file", zap.String("reason", "past stop block"), zap.String("filename", filename))
+				logger.Debug("stopping at merged block file above stop block", zap.String("filename", filename), zap.Uint64("stop", stop))
 				return io.EOF
 			}
 
 			if startBlock+100 < start {
-				logger.Debug("skipping merged block file", zap.String("reason", "before start block"), zap.String("filename", filename))
+				logger.Debug("skipping merged block file below start block", zap.String("filename", filename))
 				return nil
 			}
 
@@ -104,8 +105,11 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 				}
 			}
 
+			lastFileProcessed = filename
+
 			return nil
 		})
+		fmt.Printf("Last file processed: %s.dbin.zst\n", lastFileProcessed)
 
 		if err == io.EOF {
 			return nil
@@ -156,7 +160,7 @@ func filename(num uint64) string {
 }
 
 func mustParseUint64(in string) uint64 {
-	out, err := strconv.ParseUint(in, 0, 64)
+	out, err := strconv.ParseUint(in, 10, 64)
 	if err != nil {
 		panic(fmt.Errorf("unable to parse %q as uint64: %w", in, err))
 	}
