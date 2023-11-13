@@ -19,7 +19,7 @@ on:
       flavors:
         description: 'JSON-formatted list of flavors to build'
         required: true
-        default: '["geth","bsc","polygon"]' # careful, this value is not used in automatic triggers, this value is repeated in step bundle-docker-versions
+        default: '["geth","bsc","polygon","nitro"]' # careful, this value is not used in automatic triggers, this value is repeated in step bundle-docker-versions
         type: string
 
 env:
@@ -122,6 +122,100 @@ jobs:
           args: |
             :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
 
+
+  bundle-docker-version-nitro:
+    needs: build-vanilla
+    runs-on: ubuntu-20.04
+    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && contains(github.event.inputs.flavors, 'nitro') }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
+
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Branch name
+        id: extract_branch
+        shell: bash
+        run: |
+          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          echo "##[set-output name=release_train;]$(echo ${GITHUB_REF#refs/heads/release/})"
+
+      - run: |
+          docker pull ghcr.io/streamingfast/nitro:latest
+          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/nitro:latest') >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+
+      - name: Generate docker tags/labels from github build context
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag,suffix=-${{ env.VERSION }}
+            type=ref,event=tag,suffix=-nitro
+            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=true
+            type=sha,prefix=,suffix=-nitro,enable=true
+            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-nitro,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
+            type=raw,prefix=,suffix=-nitro,enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
+            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
+            type=raw,prefix=,suffix=-nitro,enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
+          flavor: latest=false
+
+      - name: Check SLACK_IDS env variable
+        run: |
+          if [ -z "${SLACK_IDS}" ]; then
+            echo "SLACK_IDS is empty"
+            exit 1
+          fi
+
+      - name: Get Slack ID
+        id: get-slack-id
+        run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          echo "SLACK_ID=$SLACK_ID"
+          echo "::set-output name=SLACK_ID::$SLACK_ID"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: ./Dockerfile.bundle
+          build-args: |
+            CHAIN_VERSION=${{ env.VERSION }}
+            SF_VERSION=${{ env.SF_VERSION }}
+
+      - name: Notify build failure on Slack
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        uses: Ilshidur/action-slack@2.1.0
+        with:
+          args: |
+            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+
+      - id: print
+        run: |
+          OUT="${{ steps.meta.outputs.tags }}"
+          OUT="${OUT//'%'/'%25'}"
+          OUT="${OUT//$'\n'/' '}"
+          OUT="${OUT//$'\r'/' '}"
+          echo "nitro=$OUT" >> $GITHUB_OUTPUT
+
   bundle-docker-versions:
     needs: build-vanilla
     runs-on: ubuntu-20.04
@@ -138,7 +232,8 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon"]' ) }}
+        binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon","nitro"]' ) }}
+        exclude: binary: nitro
 
     env:
       SLACK_IDS: ${{ vars.SLACK_IDS }}
