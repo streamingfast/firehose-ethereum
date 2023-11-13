@@ -161,15 +161,15 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=tag,suffix=-${{ env.VERSION }}
+            type=ref,event=tag,suffix=-nitro-${{ env.VERSION }}
             type=ref,event=tag,suffix=-nitro
-            type=sha,prefix=,suffix=-${{ env.VERSION }},enable=true
+            type=sha,prefix=,suffix=-nitro-${{ env.VERSION }},enable=true
             type=sha,prefix=,suffix=-nitro,enable=true
-            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-nitro-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,prefix=,suffix=-nitro,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
-            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
+            type=raw,prefix=,suffix=-nitro-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
             type=raw,prefix=,suffix=-nitro,enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
-            type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
+            type=raw,prefix=,suffix=-nitro-${{ env.VERSION }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
             type=raw,prefix=,suffix=-nitro,enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: latest=false
 
@@ -219,7 +219,7 @@ jobs:
   bundle-docker-versions:
     needs: build-vanilla
     runs-on: ubuntu-20.04
-    if: ${{ startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch' }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bsc')) }}
 
     permissions:
       contents: read
@@ -369,3 +369,25 @@ jobs:
             ${{ needs.bundle-docker-versions.outputs.geth }}
             ${{ needs.bundle-docker-versions.outputs.bsc }}
             ${{ needs.bundle-docker-versions.outputs.polygon }}```
+
+  slack-notification-nitro:
+    needs: [ bundle-docker-version-nitro ]
+    runs-on: ubuntu-20.04
+    env:
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
+    steps:
+      - name: Get Slack ID
+        id: get-slack-id
+        run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          echo "SLACK_ID=$SLACK_ID"
+          echo "::set-output name=SLACK_ID::$SLACK_ID"
+      - name: Slack notification
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        uses: Ilshidur/action-slack@2.1.0
+        with:
+          args: |
+            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            ${{ needs.bundle-docker-version-nitro.outputs.nitro }}
