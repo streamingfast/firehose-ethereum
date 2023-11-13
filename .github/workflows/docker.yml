@@ -233,7 +233,8 @@ jobs:
     strategy:
       matrix:
         binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon","nitro"]' ) }}
-        exclude: binary: nitro
+        exclude: 
+          - binary: nitro
 
     env:
       SLACK_IDS: ${{ vars.SLACK_IDS }}
