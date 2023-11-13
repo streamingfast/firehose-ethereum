@@ -126,7 +126,7 @@ jobs:
   bundle-docker-version-nitro:
     needs: build-vanilla
     runs-on: ubuntu-20.04
-    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && contains(github.event.inputs.flavors, 'nitro') }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors = '' || contains(github.event.inputs.flavors, 'nitro')) }}
 
     permissions:
       contents: read
