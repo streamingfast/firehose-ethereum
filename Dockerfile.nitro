@@ -1,0 +1,10 @@
+ARG CHAIN_VERSION=geth-latest
+ARG SF_VERSION=latest
+
+FROM ghcr.io/streamingfast/nitro:$CHAIN_VERSION as chain
+FROM ghcr.io/streamingfast/firehose-ethereum:$SF_VERSION
+
+COPY --from=chain /usr/local/bin/nitro /app/nitro
+
+COPY tools/fireeth/motd_node_manager /etc/motd
+COPY tools/fireeth/scripts/. /usr/local/bin/

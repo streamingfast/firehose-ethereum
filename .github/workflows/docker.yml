@@ -194,7 +194,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          file: ./Dockerfile.bundle
+          file: ./Dockerfile.nitro
           build-args: |
             CHAIN_VERSION=${{ env.VERSION }}
             SF_VERSION=${{ env.SF_VERSION }}
