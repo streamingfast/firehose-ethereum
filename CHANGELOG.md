@@ -9,6 +9,7 @@ for instructions to keep up to date.
 ### Fixed
 
 * Fixed the `fix-polygon-index` tool (parsing error made it unusable in v2.0.0-rc.1)
+* Fixed some false positives in `compare-blocks-rpc`
 
 ## v2.0.0-rc.1
 

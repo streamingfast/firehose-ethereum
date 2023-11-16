@@ -413,6 +413,10 @@ func stripFirehoseTransactionTraces(in []*pbeth.TransactionTrace, hashesWithoutT
 		trace.BeginOrdinal = 0
 		trace.EndOrdinal = 0
 
+		// some transformations may remove 32-bytes-padding, prefixed 0s don't count
+		trace.S = bytes.TrimLeft(trace.S, string([]byte{0}))
+		trace.R = bytes.TrimLeft(trace.R, string([]byte{0}))
+
 		trace.GasUsed = 0 // only available on getTransactionReceipt
 		if trace.GasPrice == nil {
 			trace.GasPrice = &pbeth.BigInt{}
@@ -458,8 +462,11 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc
 	for _, tx := range rpcAsPBEth.TransactionTraces {
 		tx.BeginOrdinal = 0
 		tx.EndOrdinal = 0
+		tx.S = bytes.TrimLeft(tx.S, string([]byte{0}))
+		tx.R = bytes.TrimLeft(tx.R, string([]byte{0}))
 		for _, log := range tx.Receipt.Logs {
-			log.Ordinal = 0
+			log.Ordinal = 0 // that value is firehose-specific, cannot be reconstructed in an identical way from RPC
+			log.Index = 0   // that value is firehose-specific, cannot be reconstructed in an identical way from RPC
 		}
 	}
 
