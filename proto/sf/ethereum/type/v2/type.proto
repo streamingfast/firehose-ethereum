@@ -208,14 +208,10 @@ message TransactionTrace {
   bytes s = 9;
 
   // GasUsed is the total amount of gas unit used for the whole execution of the transaction.
-  //
-  // Only available in DetailLevel: EXTENDED
   uint64 gas_used = 10;
 
   // Type represents the Ethereum transaction type, available only since EIP-2718 & EIP-2930 activation which happened on Berlin fork.
   // The value is always set even for transaction before Berlin fork because those before the fork are still legacy transactions.
-  //
-  // Only available in DetailLevel: EXTENDED
   Type type = 12;
 
   enum Type {
@@ -303,8 +299,6 @@ message TransactionTrace {
   // balance changes you process those where `reason` is either `REASON_GAS_BUY`, `REASON_GAS_REFUND` or
   // `REASON_REWARD_TRANSACTION_FEE` and for nonce change, still on the root call, you pick the nonce change which the
   // smallest ordinal (if more than one).
-  //
-  // Only available in DetailLevel: EXTENDED
   TransactionTraceStatus status = 30;
 
   TransactionReceipt receipt = 31;
@@ -339,14 +333,8 @@ message TransactionReceipt {
   // field, following `EIP-658`.
   //
   // Before Byzantinium hard fork, this field is always empty.
-  //
-  // Only available in DetailLevel: EXTENDED
   bytes state_root = 1;
-  //
-  // Only available in DetailLevel: EXTENDED
   uint64 cumulative_gas_used = 2;
-  //
-  // Only available in DetailLevel: EXTENDED
   bytes logs_bloom = 3;
   repeated Log logs = 4;
 }

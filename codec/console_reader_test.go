@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -77,10 +76,17 @@ func TestParseFromFile(t *testing.T) {
 			var reader ObjectReader = func() (interface{}, error) {
 				out, err := cr.ReadBlock()
 				if err != nil {
-					return nil, err
+					if err == io.EOF {
+						return nil, err
+					}
+					require.NoError(t, err)
 				}
 
-				return out.ToProtocol().(*pbeth.Block), nil
+				ethBlock := &pbeth.Block{}
+				err = out.Payload.UnmarshalTo(ethBlock)
+				require.NoError(t, err)
+
+				return ethBlock, nil
 			}
 
 			if test.readTransaction {
@@ -161,43 +167,6 @@ func isNil(v interface{}) bool {
 
 	rv := reflect.ValueOf(v)
 	return rv.Kind() == reflect.Ptr && rv.IsNil()
-}
-
-func TestGeneratePBBlocks(t *testing.T) {
-	t.Skip("generate only when firehose-logs.dmlog changes")
-
-	cr := testFileConsoleReader(t, "testdata/firehose-logs.dmlog")
-	encoder := firecore.NewBlockEncoder()
-
-	for {
-		out, err := cr.ReadBlock()
-		if out != nil {
-			block := out.ToProtocol().(*pbeth.Block)
-
-			bstreamBlock, err := encoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: out.LibNum})
-			require.NoError(t, err)
-
-			pbBlock, err := bstreamBlock.ToProto()
-			require.NoError(t, err)
-
-			outputFile, err := os.Create(fmt.Sprintf("testdata/pbblocks/battlefield-block.%d.pb", block.Number))
-			require.NoError(t, err)
-
-			bytes, err := proto.Marshal(pbBlock)
-			require.NoError(t, err)
-
-			_, err = outputFile.Write(bytes)
-			require.NoError(t, err)
-
-			outputFile.Close()
-		}
-
-		if err == io.EOF {
-			break
-		}
-
-		require.NoError(t, err)
-	}
 }
 
 // tempDir uses `/tmp` where it's available, otherwise it uses `os.TempDir()`

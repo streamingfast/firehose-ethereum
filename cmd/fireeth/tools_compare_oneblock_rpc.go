@@ -18,7 +18,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DataDog/zstd"
+	"github.com/streamingfast/firehose-ethereum/blockfetcher"
+
+	"github.com/klauspost/compress/zstd"
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
@@ -56,15 +58,12 @@ func compareOneblockRPCE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	logs, err := cli.Logs(ctx, rpc.LogsParams{
-		FromBlock: rpc.BlockNumber(fhBlock.Number),
-		ToBlock:   rpc.BlockNumber(fhBlock.Number),
-	})
+	receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, cli)
 	if err != nil {
 		return err
 	}
 
-	identical, diffs := CompareFirehoseToRPC(fhBlock, rpcBlock, logs)
+	identical, diffs := CompareFirehoseToRPC(fhBlock, rpcBlock, receipts)
 	if !identical {
 		fmt.Println("different", diffs)
 	} else {
@@ -84,10 +83,13 @@ func getOneBlock(path string) (*pbeth.Block, error) {
 		return nil, err
 	}
 
-	uncompressedReader := zstd.NewReader(file)
+	uncompressedReader, err := zstd.NewReader(file)
+	if err != nil {
+		return nil, err
+	}
 	defer uncompressedReader.Close()
 
-	readerFactory, err := bstream.GetBlockReaderFactory.New(uncompressedReader)
+	readerFactory, err := bstream.NewDBinBlockReader(uncompressedReader)
 	if err != nil {
 		return nil, fmt.Errorf("new block reader: %w", err)
 	}
@@ -97,5 +99,11 @@ func getOneBlock(path string) (*pbeth.Block, error) {
 		return nil, fmt.Errorf("reading block: %w", err)
 	}
 
-	return block.ToProtocol().(*pbeth.Block), nil
+	ethBlock := &pbeth.Block{}
+	err = block.Payload.UnmarshalTo(ethBlock)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshalling ethblock: %w", err)
+	}
+
+	return ethBlock, nil
 }

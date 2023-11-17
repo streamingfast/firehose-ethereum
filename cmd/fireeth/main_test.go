@@ -11,29 +11,29 @@ import (
 )
 
 func Test_Encode_Decode_Block(t *testing.T) {
-	Chain.Validate()
-	Chain.Init()
+	Chain().Validate()
+	Chain().Init()
 
-	original, err := Chain.BlockEncoder.Encode(firecore.BlockEnveloppe{Block: &pbeth.Block{
+	pbBlock, err := Chain().BlockEncoder.Encode(firecore.BlockEnveloppe{Block: &pbeth.Block{
 		Number: 1,
 		Header: &pbeth.BlockHeader{},
 		Ver:    1,
 	}, LIBNum: 0})
 	require.NoError(t, err)
 
-	require.Equal(t, uint64(1), original.ToProtocol().(*pbeth.Block).Number)
+	require.Equal(t, uint64(1), pbBlock.Number)
 
 	buffer := bytes.NewBuffer(nil)
-	writer, err := bstream.GetBlockWriterFactory.New(buffer)
+	writer, err := bstream.NewDBinBlockWriter(buffer)
 	require.NoError(t, err)
 
-	require.NoError(t, writer.Write(original))
+	require.NoError(t, writer.Write(pbBlock))
 
-	reader, err := bstream.GetBlockReaderFactory.New(buffer)
+	reader, err := bstream.NewDBinBlockReader(buffer)
 	require.NoError(t, err)
 
 	hydrated, err := reader.Read()
 	require.NoError(t, err)
 
-	require.Equal(t, uint64(1), hydrated.ToProtocol().(*pbeth.Block).Number)
+	require.Equal(t, uint64(1), hydrated.Number)
 }

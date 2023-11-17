@@ -1105,13 +1105,9 @@ type TransactionTrace struct {
 	// S is the signature's Y point on the elliptic curve (32 bytes).
 	S []byte `protobuf:"bytes,9,opt,name=s,proto3" json:"s,omitempty"`
 	// GasUsed is the total amount of gas unit used for the whole execution of the transaction.
-	//
-	// Only available in DetailLevel: EXTENDED
 	GasUsed uint64 `protobuf:"varint,10,opt,name=gas_used,json=gasUsed,proto3" json:"gas_used,omitempty"`
 	// Type represents the Ethereum transaction type, available only since EIP-2718 & EIP-2930 activation which happened on Berlin fork.
 	// The value is always set even for transaction before Berlin fork because those before the fork are still legacy transactions.
-	//
-	// Only available in DetailLevel: EXTENDED
 	Type TransactionTrace_Type `protobuf:"varint,12,opt,name=type,proto3,enum=sf.ethereum.type.v2.TransactionTrace_Type" json:"type,omitempty"`
 	// AcccessList represents the storage access this transaction has agreed to do in which case those storage
 	// access cost less gas unit per access.
@@ -1168,8 +1164,6 @@ type TransactionTrace struct {
 	// balance changes you process those where `reason` is either `REASON_GAS_BUY`, `REASON_GAS_REFUND` or
 	// `REASON_REWARD_TRANSACTION_FEE` and for nonce change, still on the root call, you pick the nonce change which the
 	// smallest ordinal (if more than one).
-	//
-	// Only available in DetailLevel: EXTENDED
 	Status  TransactionTraceStatus `protobuf:"varint,30,opt,name=status,proto3,enum=sf.ethereum.type.v2.TransactionTraceStatus" json:"status,omitempty"`
 	Receipt *TransactionReceipt    `protobuf:"bytes,31,opt,name=receipt,proto3" json:"receipt,omitempty"`
 	// Only available in DetailLevel: EXTENDED
@@ -1449,14 +1443,10 @@ type TransactionReceipt struct {
 	// field, following `EIP-658`.
 	//
 	// Before Byzantinium hard fork, this field is always empty.
-	//
-	// Only available in DetailLevel: EXTENDED
-	StateRoot []byte `protobuf:"bytes,1,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
-	// Only available in DetailLevel: EXTENDED
+	StateRoot         []byte `protobuf:"bytes,1,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
 	CumulativeGasUsed uint64 `protobuf:"varint,2,opt,name=cumulative_gas_used,json=cumulativeGasUsed,proto3" json:"cumulative_gas_used,omitempty"`
-	// Only available in DetailLevel: EXTENDED
-	LogsBloom []byte `protobuf:"bytes,3,opt,name=logs_bloom,json=logsBloom,proto3" json:"logs_bloom,omitempty"`
-	Logs      []*Log `protobuf:"bytes,4,rep,name=logs,proto3" json:"logs,omitempty"`
+	LogsBloom         []byte `protobuf:"bytes,3,opt,name=logs_bloom,json=logsBloom,proto3" json:"logs_bloom,omitempty"`
+	Logs              []*Log `protobuf:"bytes,4,rep,name=logs,proto3" json:"logs,omitempty"`
 }
 
 func (x *TransactionReceipt) Reset() {

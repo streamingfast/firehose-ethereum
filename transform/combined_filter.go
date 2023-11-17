@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/streamingfast/bstream"
+
+	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+
+	"github.com/RoaringBitmap/roaring/roaring64"
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
@@ -120,7 +123,7 @@ func NewEthCombinedIndexerLegacy(indexStore dstore.Store, indexSize uint64) *Eth
 	}
 }
 
-// ProcessBlock implements chain-specific logic for Ethereum bstream.Block's
+// ProcessBlock implements chain-specific logic for Ethereum pbbstream.Block's
 func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) error {
 	keys := make(map[string]bool)
 	for _, trace := range blk.TransactionTraces {
@@ -190,8 +193,13 @@ func (f *CombinedFilter) matches(trace *pbeth.TransactionTrace) bool {
 	return false
 }
 
-func (f *CombinedFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
-	ethBlock := readOnlyBlk.ToProtocol().(*pbeth.Block)
+func (f *CombinedFilter) Transform(readOnlyBlk *pbbstream.Block, in transform.Input) (transform.Output, error) {
+	ethBlock := &pbeth.Block{}
+	err := readOnlyBlk.Payload.UnmarshalTo(ethBlock)
+	if err != nil {
+		return nil, fmt.Errorf("mashalling block: %w", err)
+	}
+
 	traces := []*pbeth.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
 		if f.matches(trace) {
@@ -202,7 +210,7 @@ func (f *CombinedFilter) Transform(readOnlyBlk *bstream.Block, in transform.Inpu
 	return ethBlock, nil
 }
 
-// GetIndexProvider will instantiate a new index conforming to the bstream.BlockIndexProvider interface
+// GetIndexProvider will instantiate a new index conforming to the pbbstream.BlockIndexProvider interface
 func (f *CombinedFilter) GetIndexProvider() bstream.BlockIndexProvider {
 	if f.indexStore == nil {
 		return nil
