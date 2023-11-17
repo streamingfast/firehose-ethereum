@@ -54,16 +54,20 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 		fmt.Println("FIRE INIT 2.3 local v1.0.0")
 
 		blockNum := startBlockNum
+		latest := uint64(0)
 		for {
-			latest, err := client.LatestBlockNum(ctx)
-			if err != nil {
-				delay(err)
-				continue
-			}
 
-			if latest < blockNum {
-				delay(nil)
-				continue
+			if latest <= blockNum {
+				latest, err := client.LatestBlockNum(ctx)
+				if err != nil {
+					delay(err)
+					continue
+				}
+
+				if latest <= blockNum {
+					delay(nil)
+					continue
+				}
 			}
 
 			rpcBlock, err := client.GetBlockByNumber(ctx, rpc.BlockNumber(blockNum), rpc.WithGetBlockFullTransaction())
