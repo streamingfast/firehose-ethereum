@@ -87,7 +87,7 @@ func getOneBlock(path string) (*pbeth.Block, error) {
 	uncompressedReader := zstd.NewReader(file)
 	defer uncompressedReader.Close()
 
-	readerFactory, err := bstream.GetBlockReaderFactory.New(uncompressedReader)
+	readerFactory, err := bstream.NewDBinBlockReader(uncompressedReader)
 	if err != nil {
 		return nil, fmt.Errorf("new block reader: %w", err)
 	}
@@ -97,5 +97,11 @@ func getOneBlock(path string) (*pbeth.Block, error) {
 		return nil, fmt.Errorf("reading block: %w", err)
 	}
 
-	return block.ToProtocol().(*pbeth.Block), nil
+	ethBlock := &pbeth.Block{}
+	err = block.Payload.UnmarshalTo(ethBlock)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshalling ethblock: %w", err)
+	}
+
+	return ethBlock, nil
 }

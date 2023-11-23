@@ -20,18 +20,18 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"time"
 
-	"github.com/holiman/uint256"
+	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+
 	jd "github.com/josephburnett/jd/lib"
 	"github.com/mostynb/go-grpc-compression/zstd"
 	"github.com/spf13/cobra"
-	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
 	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
 	firecore "github.com/streamingfast/firehose-core"
+	"github.com/streamingfast/firehose-ethereum/block"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/firehose/client"
 	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v2"
@@ -39,7 +39,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func newCompareBlocksRPCCmd(logger *zap.Logger) *cobra.Command {
@@ -121,26 +120,25 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 		allDone := make(chan struct{})
 		go func() {
 
-			for fhBlock := range respChan {
-
-				rpcBlock, err := cli.GetBlockByNumber(ctx, rpc.BlockNumber(fhBlock.Number), rpc.WithGetBlockFullTransaction())
+			for firehoseBlock := range respChan {
+				rpcBlock, err := cli.GetBlockByNumber(ctx, rpc.BlockNumber(firehoseBlock.Number), rpc.WithGetBlockFullTransaction())
 				if err != nil {
 					panic(err)
 				}
 
 				logs, err := cli.Logs(ctx, rpc.LogsParams{
-					FromBlock: rpc.BlockNumber(fhBlock.Number),
-					ToBlock:   rpc.BlockNumber(fhBlock.Number),
+					FromBlock: rpc.BlockNumber(firehoseBlock.Number),
+					ToBlock:   rpc.BlockNumber(firehoseBlock.Number),
 				})
 				if err != nil {
 					panic(err)
 				}
 
-				identical, diffs := CompareFirehoseToRPC(fhBlock, rpcBlock, logs)
+				identical, diffs := CompareFirehoseToRPC(firehoseBlock, rpcBlock, logs)
 				if !identical {
 					fmt.Println("different", diffs)
 				} else {
-					fmt.Println(fhBlock.Number, "identical")
+					fmt.Println(firehoseBlock.Number, "identical")
 				}
 			}
 			close(allDone)
@@ -154,83 +152,18 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 				}
 				return fmt.Errorf("stream error while receiving: %w", err)
 			}
-			blk, err := decodeAnyPB(response.Block)
-			if err != nil {
-				return fmt.Errorf("error while decoding block: %w", err)
+
+			ethBlock := &pbeth.Block{}
+			if err := anypb.UnmarshalTo(response.Block, ethBlock, proto.UnmarshalOptions{}); err != nil {
+				return fmt.Errorf("unmarshalling anypb: %w", err)
 			}
-			respChan <- blk.ToProtocol().(*pbeth.Block)
+			respChan <- ethBlock
 		}
 		close(respChan)
 		<-allDone
 
 		return nil
 	}
-}
-
-func bigIntFromEthUint256(in *eth.Uint256) *pbeth.BigInt {
-	if in == nil {
-		return &pbeth.BigInt{}
-	}
-
-	in32 := (*uint256.Int)(in).Bytes32()
-	slice := bytes.TrimLeft(in32[:], string([]byte{0}))
-	if len(slice) == 0 {
-		return &pbeth.BigInt{}
-	}
-	return pbeth.BigIntFromBytes(slice)
-}
-
-func bigIntFromEthUint256Padded32(in *eth.Uint256) *pbeth.BigInt {
-	if in == nil {
-		return &pbeth.BigInt{}
-	}
-
-	in32 := (*uint256.Int)(in).Bytes32()
-
-	if in32 == [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} {
-		return &pbeth.BigInt{}
-	}
-	return pbeth.BigIntFromBytes(in32[:])
-}
-
-func toFirehoseBlock(in *rpc.Block, logs []*rpc.LogEntry) (*pbeth.Block, map[string]bool) {
-
-	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, logs)
-
-	out := &pbeth.Block{
-		DetailLevel:       pbeth.Block_DETAILLEVEL_BASE,
-		Hash:              in.Hash.Bytes(),
-		Number:            uint64(in.Number),
-		Ver:               3,
-		Size:              uint64(in.BlockSize),
-		Uncles:            toFirehoseUncles(in.Uncles),
-		TransactionTraces: trx,
-		BalanceChanges:    nil, // not available
-		CodeChanges:       nil, // not available
-		Header: &pbeth.BlockHeader{
-			ParentHash:       in.ParentHash.Bytes(),
-			Coinbase:         in.Miner,
-			UncleHash:        in.UnclesSHA3,
-			StateRoot:        in.StateRoot.Bytes(),
-			TransactionsRoot: in.TransactionsRoot.Bytes(),
-			ReceiptRoot:      in.ReceiptsRoot.Bytes(),
-			LogsBloom:        in.LogsBloom.Bytes(),
-			Difficulty:       bigIntFromEthUint256(in.Difficulty),
-			TotalDifficulty:  bigIntFromEthUint256(in.TotalDifficulty),
-			Number:           uint64(in.Number),
-			GasLimit:         uint64(in.GasLimit),
-			GasUsed:          uint64(in.GasUsed),
-			Timestamp:        timestamppb.New(time.Time(in.Timestamp)),
-			ExtraData:        in.ExtraData.Bytes(),
-			Nonce:            uint64(in.Nonce),
-			Hash:             in.Hash.Bytes(),
-			MixHash:          in.MixHash.Bytes(),
-			BaseFeePerGas:    bigIntFromEthUint256(in.BaseFeePerGas),
-			WithdrawalsRoot:  nil, // not available
-			TxDependency:     nil, // not available
-		},
-	}
-	return out, hashesWithoutTo
 }
 
 func toFirehoseUncles(in []eth.Hash) []*pbeth.BlockHeader {
@@ -281,9 +214,9 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 			To:       toBytes,
 			Nonce:    uint64(receipts[i].Nonce),
 			GasLimit: uint64(receipts[i].Gas),
-			GasPrice: bigIntFromEthUint256(receipts[i].GasPrice),
+			GasPrice: block.BigIntFromEthUint256(receipts[i].GasPrice),
 			Input:    receipts[i].Input.Bytes(),
-			Value:    bigIntFromEthUint256(receipts[i].Value),
+			Value:    block.BigIntFromEthUint256(receipts[i].Value),
 			From:     receipts[i].From.Bytes(),
 			Index:    uint32(receipts[i].TransactionIndex),
 			Receipt:  &pbeth.TransactionReceipt{
@@ -293,8 +226,8 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 				// LogsBloom:         // only available on getTransactionReceipt
 			},
 			V:            pbeth.NewBigInt(int64(receipts[i].V)).Bytes,
-			R:            bigIntFromEthUint256(receipts[i].R).Bytes,
-			S:            bigIntFromEthUint256(receipts[i].S).Bytes,
+			R:            block.BigIntFromEthUint256(receipts[i].R).Bytes,
+			S:            block.BigIntFromEthUint256(receipts[i].S).Bytes,
 			AccessList:   toAccessList(receipts[i].AccessList),
 			BeginOrdinal: ordinal,
 
@@ -314,10 +247,10 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 			currentBlockIndex := log.ToLog().BlockIndex
 			if log.TransactionHash.String() == txHash {
 				out[i].Receipt.Logs = append(out[i].Receipt.Logs, &pbeth.Log{
-					Address:    log.Address.Bytes(),       //[]byte   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-					Topics:     hashesToBytes(log.Topics), //[][]byte `protobuf:"bytes,2,rep,name=topics,proto3" json:"topics,omitempty"`
-					Data:       log.Data.Bytes(),          //[]byte   `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
-					BlockIndex: currentBlockIndex,         //uint32 `protobuf:"varint,6,opt,name=blockIndex,proto3" json:"blockIndex,omitempty"`
+					Address:    log.Address.Bytes(),             //[]byte   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+					Topics:     block.HashesToBytes(log.Topics), //[][]byte `protobuf:"bytes,2,rep,name=topics,proto3" json:"topics,omitempty"`
+					Data:       log.Data.Bytes(),                //[]byte   `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+					BlockIndex: currentBlockIndex,               //uint32 `protobuf:"varint,6,opt,name=blockIndex,proto3" json:"blockIndex,omitempty"`
 					Ordinal:    ordinal,
 					Index:      uint32(li),
 				})
@@ -334,14 +267,6 @@ func toFirehoseTraces(in *rpc.BlockTransactions, logs []*rpc.LogEntry) (traces [
 
 	}
 	return out, hashesWithoutTo
-}
-
-func hashesToBytes(in []eth.Hash) [][]byte {
-	out := make([][]byte, len(in))
-	for i := range in {
-		out[i] = in[i].Bytes()
-	}
-	return out
 }
 
 // only keep hash
@@ -455,7 +380,7 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc
 		return true, nil
 	}
 
-	rpcAsPBEth, hashesWithoutTo := toFirehoseBlock(rpcBlock, logs)
+	rpcAsPBEth, hashesWithoutTo := block.RpcToEthBlock(rpcBlock, logs)
 	stripFirehoseBlock(fhBlock, hashesWithoutTo)
 
 	// tweak that new block for comparison
@@ -491,7 +416,7 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, logs []*rpc
 	return true, nil
 }
 
-func decodeAnyPB(in *anypb.Any) (*bstream.Block, error) {
+func decodeAnyPB(in *anypb.Any) (*pbbstream.Block, error) {
 	block := &pbeth.Block{}
 	if err := anypb.UnmarshalTo(in, block, proto.UnmarshalOptions{}); err != nil {
 		return nil, fmt.Errorf("unmarshal anypb: %w", err)

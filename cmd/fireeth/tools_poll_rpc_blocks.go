@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/eth-go/rpc"
 	firecore "github.com/streamingfast/firehose-core"
+	"github.com/streamingfast/firehose-ethereum/block"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
@@ -85,8 +86,8 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				continue
 			}
 
-			block, _ := toFirehoseBlock(rpcBlock, logs)
-			cnt, err := proto.Marshal(block)
+			ethBlock, _ := block.RpcToEthBlock(rpcBlock, logs)
+			cnt, err := proto.Marshal(ethBlock)
 			if err != nil {
 				return fmt.Errorf("failed to proto  marshal pb sol block: %w", err)
 			}
@@ -96,7 +97,7 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				libNum = blockNum - 1
 			}
 			b64Cnt := base64.StdEncoding.EncodeToString(cnt)
-			lineCnt := fmt.Sprintf("FIRE BLOCK %d %s %d %s %s", blockNum, hex.EncodeToString(block.Hash), libNum, hex.EncodeToString(block.Header.ParentHash), b64Cnt)
+			lineCnt := fmt.Sprintf("FIRE BLOCK %d %s %d %s %s", blockNum, hex.EncodeToString(ethBlock.Hash), libNum, hex.EncodeToString(ethBlock.Header.ParentHash), b64Cnt)
 			if _, err := fmt.Println(lineCnt); err != nil {
 				return fmt.Errorf("failed to write log line (char lenght %d): %w", len(lineCnt), err)
 			}
