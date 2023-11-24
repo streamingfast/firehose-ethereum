@@ -1,4 +1,4 @@
-name: Build docker image
+name: fireeth poller docker image
 
 on:
   push:
