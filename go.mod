@@ -3,12 +3,12 @@ module github.com/streamingfast/firehose-ethereum
 go 1.21
 
 require (
-	github.com/DataDog/zstd v1.5.5
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/bobg/go-generics/v2 v2.1.1
 	github.com/golang/protobuf v1.5.3
 	github.com/holiman/uint256 v1.2.0
 	github.com/josephburnett/jd v1.7.1
+	github.com/klauspost/compress v1.16.5
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.1.17
 	github.com/spf13/cobra v1.7.0
@@ -116,7 +116,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.1.0 // indirect
