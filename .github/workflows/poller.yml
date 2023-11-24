@@ -5,7 +5,7 @@ on:
     tags:
       - "v*"
     branches:
-      - "block_any"
+      - "develop"
   workflow_dispatch:
 
 env:
