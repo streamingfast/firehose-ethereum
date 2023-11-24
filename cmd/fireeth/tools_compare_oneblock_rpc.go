@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/klauspost/compress/zstd"
+	"github.com/DataDog/zstd"
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
@@ -84,10 +84,7 @@ func getOneBlock(path string) (*pbeth.Block, error) {
 		return nil, err
 	}
 
-	uncompressedReader, err := zstd.NewReader(file)
-	if err != nil {
-		return nil, err
-	}
+	uncompressedReader := zstd.NewReader(file)
 	defer uncompressedReader.Close()
 
 	readerFactory, err := bstream.NewDBinBlockReader(uncompressedReader)
