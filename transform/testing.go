@@ -1,20 +1,21 @@
 package transform
 
 import (
-	"google.golang.org/protobuf/types/known/anypb"
 	"io"
 	"os"
 
 	"github.com/mitchellh/go-testing-interface"
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/jsonpb"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 )
 
-func testBlockFromFiles(t testing.T, filename string) *pbbstream.Block {
+func testBlockFromFiles(t testing.T, filename string) *bstream.Block {
 	file, err := os.Open("./testdata/" + filename)
 	require.NoError(t, err)
 
@@ -22,19 +23,20 @@ func testBlockFromFiles(t testing.T, filename string) *pbbstream.Block {
 	err = jsonpb.Unmarshal(file, b)
 	require.NoError(t, err)
 
-	anyBlock, err := anypb.New(b)
-	require.NoError(t, err)
-
-	blk := &pbbstream.Block{
+	blk := &bstream.Block{
 		Id:             b.ID(),
 		Number:         b.Number,
-		ParentId:       b.PreviousID(),
+		PreviousId:     b.PreviousID(),
 		LibNum:         1,
 		PayloadKind:    pbbstream.Protocol_ETH,
 		PayloadVersion: 2,
-		Payload:        anyBlock,
 	}
 
+	protoCnt, err := proto.Marshal(b)
+	require.NoError(t, err)
+
+	blk, err = bstream.GetBlockPayloadSetter(blk, protoCnt)
+	require.NoError(t, err)
 	return blk
 }
 

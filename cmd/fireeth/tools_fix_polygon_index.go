@@ -6,8 +6,6 @@ import (
 	"io"
 	"strconv"
 
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
@@ -69,13 +67,13 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 			}
 			defer rc.Close()
 
-			br, err := bstream.NewDBinBlockReader(rc)
+			br, err := bstream.GetBlockReaderFactory.New(rc)
 			if err != nil {
 				return fmt.Errorf("creating block reader: %w", err)
 			}
 
 			var mustWrite bool
-			blocks := make([]*pbbstream.Block, 100)
+			blocks := make([]*bstream.Block, 100)
 			i := 0
 			for {
 				block, err := br.Read()
@@ -83,12 +81,7 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 					break
 				}
 
-				ethBlock := &pbeth.Block{}
-				err = block.Payload.UnmarshalTo(ethBlock)
-				if err != nil {
-					return fmt.Errorf("unmarshaling eth block: %w", err)
-				}
-
+				ethBlock := block.ToProtocol().(*pbeth.Block)
 				if len(ethBlock.TransactionTraces) == 1 &&
 					ethBlock.TransactionTraces[0].Index == 1 {
 					fmt.Println("ERROR FOUND AT BLOCK", block.Number)
@@ -130,7 +123,7 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 	}
 }
 
-func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*pbbstream.Block) error {
+func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*bstream.Block) error {
 	file := filename(lowBlockNum)
 	fmt.Printf("writing merged file %s.dbin.zst\n", file)
 
@@ -146,7 +139,7 @@ func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*pbbstre
 			pw.CloseWithError(err)
 		}()
 
-		blockWriter, err := bstream.NewDBinBlockWriter(pw)
+		blockWriter, err := bstream.GetBlockWriterFactory.New(pw)
 		if err != nil {
 			return
 		}

@@ -14,18 +14,19 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
-	github.com/streamingfast/bstream v0.0.2-0.20231123130020-ad84cce9666d
+	github.com/streamingfast/bstream v0.0.2-0.20231109200242-92c3eea7aaba
 	github.com/streamingfast/cli v0.0.4-0.20230825151644-8cc84512cd80
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
 	github.com/streamingfast/firehose v0.1.1-0.20231109192301-ebfed7417cf6
-	github.com/streamingfast/firehose-core v0.2.4-0.20231123130335-3f07b24b6efe
+	github.com/streamingfast/firehose-core v0.2.3-0.20231113161950-582afcfc9c9b
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
-	github.com/streamingfast/pbgo v0.0.6-0.20231120172814-537d034aad5e
+	github.com/streamingfast/node-manager v0.0.2-0.20230406142433-692298a8b8d2
+	github.com/streamingfast/pbgo v0.0.6-0.20221020131607-255008258d28
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.1.21-0.20231122013157-938ec26b0ef6
+	github.com/streamingfast/substreams v1.1.21-0.20231106175033-0f47206f0724
 	github.com/stretchr/testify v1.8.4
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -162,14 +163,18 @@ require (
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
+	github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680 // indirect
 	github.com/streamingfast/dauth v0.0.0-20230929180355-921f9c9be330 // indirect
-	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
+	github.com/streamingfast/dbin v0.9.1-0.20220513054835-1abebbb944ad // indirect
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1 // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20230929132851-893fc52687fa // indirect
 	github.com/streamingfast/dlauncher v0.0.0-20230607184145-76399faad89e // indirect
 	github.com/streamingfast/dmetering v0.0.0-20230731155453-e1df53e362aa // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
+	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 // indirect
+	github.com/streamingfast/merger v0.0.3-0.20231027161314-209c2ddd8d96 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
+	github.com/streamingfast/relayer v0.0.2-0.20220909122435-e67fbc964fd9 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20230616174903-cd2ade641ca9 // indirect
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect

@@ -16,7 +16,7 @@ import (
 	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/dstore"
 	firecore "github.com/streamingfast/firehose-core"
-	"github.com/streamingfast/firehose-core/node-manager/operator"
+	"github.com/streamingfast/node-manager/operator"
 	"go.uber.org/zap"
 )
 

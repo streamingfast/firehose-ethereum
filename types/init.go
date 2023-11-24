@@ -17,11 +17,11 @@ package types
 import (
 	"strings"
 
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-
 	"github.com/streamingfast/bstream"
 	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	pbbstream "github.com/streamingfast/pbgo/sf/bstream/v1"
+	"google.golang.org/protobuf/proto"
 )
 
 var _ firecore.Block = (*pbeth.Block)(nil)
@@ -43,11 +43,15 @@ func init() {
 func InitFireCore() {
 	// Doing it in `types` ensure that does that depend only on us are properly initialized
 	firecore.UnsafePayloadKind = pbbstream.Protocol_ETH
+
+	// Must fit what is defined in `cmd/fireeth/main.go` in regards to `protocol` and `protocolVersion` and `blockAcceptedVersions`
+	firecore.InitBstream("ETH", 1, BlockAcceptedVersions, func() proto.Message { return &pbeth.Block{} })
+
 	bstream.NormalizeBlockID = func(in string) string {
 		return strings.TrimPrefix(strings.ToLower(in), "0x")
 	}
 }
 
-func BlockFromProto(b *pbeth.Block, libNum uint64) (*pbbstream.Block, error) {
+func BlockFromProto(b *pbeth.Block, libNum uint64) (*bstream.Block, error) {
 	return encoder.Encode(firecore.BlockEnveloppe{Block: b, LIBNum: libNum})
 }

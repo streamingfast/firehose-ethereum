@@ -27,12 +27,10 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	"github.com/bobg/go-generics/v2/slices"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
 	. "github.com/streamingfast/cli"
 	"github.com/streamingfast/cli/sflags"
@@ -157,7 +155,8 @@ type GethNode struct {
 	connectedPeers []string
 	enodeStr       string
 	peerMutex      sync.RWMutex
-	lastBlock      *pbbstream.Block
+
+	lastBlock      *bstream.Block
 	lastBlockMutex sync.RWMutex
 }
 
@@ -436,10 +435,10 @@ func (s *GethMonitor) runOnce() error {
 	hash := hex2string(gjson.Get(resp, "result.hash").String())
 
 	s.node.lastBlockMutex.Lock()
-	s.node.lastBlock = &pbbstream.Block{
+	s.node.lastBlock = &bstream.Block{
 		Id:        hash,
-		Number:    lastBlockNum,
-		Timestamp: timestamppb.New(timestamp),
+		Number:    uint64(lastBlockNum),
+		Timestamp: timestamp,
 	}
 	s.node.lastBlockMutex.Unlock()
 

@@ -29,13 +29,12 @@ import (
 	"time"
 
 	"github.com/streamingfast/bstream"
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/dmetrics"
 	"github.com/streamingfast/eth-go"
 	firecore "github.com/streamingfast/firehose-core"
-	"github.com/streamingfast/firehose-core/node-manager/mindreader"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/logging"
+	"github.com/streamingfast/node-manager/mindreader"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
@@ -82,7 +81,7 @@ func (c *ConsoleReader) Close() {
 }
 
 type consoleReaderStats struct {
-	lastBlock       pbbstream.BlockRef
+	lastBlock       bstream.BlockRef
 	blockRate       *dmetrics.AvgRatePromCounter
 	transactionRate *dmetrics.AvgRatePromCounter
 
@@ -91,7 +90,7 @@ type consoleReaderStats struct {
 
 func newConsoleReaderStats() *consoleReaderStats {
 	return &consoleReaderStats{
-		lastBlock:       pbbstream.BlockRef{},
+		lastBlock:       bstream.BlockRefEmpty,
 		blockRate:       dmetrics.MustNewAvgRateFromPromCounter(BlockReadCount, 1*time.Second, 30*time.Second, "blocks"),
 		transactionRate: dmetrics.MustNewAvgRateFromPromCounter(TransactionReadCount, 1*time.Second, 30*time.Second, "trxs"),
 	}
@@ -123,8 +122,7 @@ func (s *consoleReaderStats) ZapFields() []zap.Field {
 	return []zap.Field{
 		zap.Stringer("block_rate", s.blockRate),
 		zap.Stringer("trx_rate", s.transactionRate),
-		zap.Uint64("last_block_num", s.lastBlock.Num),
-		zap.String("last_block_id", s.lastBlock.Id),
+		zap.Stringer("last_block", s.lastBlock),
 	}
 }
 
@@ -188,17 +186,17 @@ type parseCtx struct {
 	logger *zap.Logger
 }
 
-func (c *ConsoleReader) ReadBlock() (out *pbbstream.Block, err error) {
+func (c *ConsoleReader) ReadBlock() (out *bstream.Block, err error) {
 	v, err := c.next(readBlock)
 	if err != nil {
 		return nil, err
 	}
 
 	if v == nil {
-		return nil, fmt.Errorf("console reader read a nil *pbbstream.Block, this is invalid")
+		return nil, fmt.Errorf("console reader read a nil *bstream.Block, this is invalid")
 	}
 
-	return v.(*pbbstream.Block), nil
+	return v.(*bstream.Block), nil
 }
 
 func (c ConsoleReader) ReadTransaction() (trace *pbeth.TransactionTrace, err error) {
@@ -1091,7 +1089,7 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 
 // Formats
 // FIRE BLOCK <NUMBER (u64 string)> <HASH (hex string)> <LIB NUMBER (u64 string)> <LIB ID (hex string)> <proto (base64 string)>
-func (ctx *parseCtx) readBlock(line string) (*pbbstream.Block, error) {
+func (ctx *parseCtx) readBlock(line string) (*bstream.Block, error) {
 	if ctx.blockVersion == 0 {
 		return nil, fmt.Errorf("cannot start reading block: INIT not done")
 	}
@@ -1148,10 +1146,7 @@ func (ctx *parseCtx) readBlock(line string) (*pbbstream.Block, error) {
 	BlockTotalParseTime.AddInt64(int64(time.Since(start)))
 
 	ctx.currentBlock = block
-	ctx.globalStats.lastBlock = pbbstream.BlockRef{
-		Num: ctx.currentBlock.Number,
-		Id:  ctx.currentBlock.ID(),
-	}
+	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
 
 	return bstreamBlock, nil
 }
@@ -1184,7 +1179,7 @@ func readFinalizedStatus(libNumInput, libHashInput string) (libNum uint64, libHa
 
 // Formats
 // FIRE END_BLOCK <NUM> <SIZE> { header: <BlockHeader>, uncles: []<BlockHeader> }
-func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
+func (ctx *parseCtx) readEndBlock(line string) (*bstream.Block, error) {
 	if ctx.currentBlock == nil {
 		return nil, fmt.Errorf("no block started")
 	}
@@ -1232,10 +1227,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 
 	ctx.currentBlock.TransactionTraces = ctx.transactionTraces
 
-	ctx.globalStats.lastBlock = pbbstream.BlockRef{
-		Num: ctx.currentBlock.Number,
-		Id:  ctx.currentBlock.ID(),
-	}
+	ctx.globalStats.lastBlock = ctx.currentBlock.AsRef()
 
 	block := ctx.currentBlock
 	ctx.transactionTraces = nil
