@@ -2,8 +2,6 @@ module github.com/streamingfast/firehose-ethereum
 
 go 1.21
 
-replace github.com/streamingfast/firehose-core => ../firehose-core
-
 require (
 	github.com/DataDog/zstd v1.5.5
 	github.com/RoaringBitmap/roaring v0.9.4
@@ -20,9 +18,9 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20230825151644-8cc84512cd80
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
-	github.com/streamingfast/eth-go v0.0.0-20231123190800-9a523ad6eaf0
+	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
 	github.com/streamingfast/firehose v0.1.1-0.20231109192301-ebfed7417cf6
-	github.com/streamingfast/firehose-core v0.2.4-0.20231123185821-80ea795cc6bf
+	github.com/streamingfast/firehose-core v0.2.4-0.20231123130335-3f07b24b6efe
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20231120172814-537d034aad5e

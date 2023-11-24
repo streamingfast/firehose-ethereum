@@ -104,7 +104,6 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				parent.AddCommand(newFixPolygonIndexCmd(zlog))
 				parent.AddCommand(newPollRPCBlocksCmd(zlog))
 				parent.AddCommand(newPollerCmd(zlog, tracer))
-				parent.AddCommand(newOptimismPollerCmd(zlog, tracer))
 
 				registerGethEnforcePeersCmd(parent, chain.BinaryName(), zlog, tracer)
 
