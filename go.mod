@@ -2,6 +2,8 @@ module github.com/streamingfast/firehose-ethereum
 
 go 1.21
 
+replace github.com/streamingfast/firehose-core => ../firehose-core
+
 require (
 	github.com/DataDog/zstd v1.5.5
 	github.com/RoaringBitmap/roaring v0.9.4
