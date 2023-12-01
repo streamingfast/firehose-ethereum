@@ -20,7 +20,7 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1
 	github.com/streamingfast/firehose v0.1.1-0.20231109192301-ebfed7417cf6
-	github.com/streamingfast/firehose-core v0.2.3-0.20231113161950-582afcfc9c9b
+	github.com/streamingfast/firehose-core v0.2.4-0.20231201173723-306e2b2ee075
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/node-manager v0.0.2-0.20230406142433-692298a8b8d2
@@ -164,12 +164,12 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/streamingfast/atm v0.0.0-20220131151839-18c87005e680 // indirect
-	github.com/streamingfast/dauth v0.0.0-20230929180355-921f9c9be330 // indirect
+	github.com/streamingfast/dauth v0.0.0-20231120142446-843f4e045cc2 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20220513054835-1abebbb944ad // indirect
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1 // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20230929132851-893fc52687fa // indirect
 	github.com/streamingfast/dlauncher v0.0.0-20230607184145-76399faad89e // indirect
-	github.com/streamingfast/dmetering v0.0.0-20230731155453-e1df53e362aa // indirect
+	github.com/streamingfast/dmetering v0.0.0-20231120142327-a3405f0eed83 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 // indirect
 	github.com/streamingfast/merger v0.0.3-0.20231027161314-209c2ddd8d96 // indirect
