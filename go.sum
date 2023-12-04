@@ -609,10 +609,10 @@ github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 h1:K6mJPvh1
 github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839/go.mod h1:huOJyjMYS6K8upTuxDxaNd+emD65RrXoVBvh8f1/7Ns=
 github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1 h1:CGU52NV9heyO2Wb4ImDBy+1bVCeCsrEuu7WN/o/JGy0=
 github.com/streamingfast/eth-go v0.0.0-20230410173454-433bd8803da1/go.mod h1:UEm8dqibr3c3A1iIA3CHpkhN7j3X78prN7/55sXf3A0=
-github.com/streamingfast/firehose v0.1.1-0.20231109192301-ebfed7417cf6 h1:hcSx7R9f1y+wWoAkJc3XBUXi2p9bYlc2dbt+mZUwdbQ=
-github.com/streamingfast/firehose v0.1.1-0.20231109192301-ebfed7417cf6/go.mod h1:lGC1T6mpAAApjBQNF5COSXb3SbrYRI3dBR1f6/PZE54=
-github.com/streamingfast/firehose-core v0.2.4-0.20231201173723-306e2b2ee075 h1:+cTSbsJUvKhu86m7Kg1R9sS3mAxEbsQLUd2CwT03au0=
-github.com/streamingfast/firehose-core v0.2.4-0.20231201173723-306e2b2ee075/go.mod h1:uiq2p555smbIEPyqMQQ9062bz66s1L36Egny+Xa7jBA=
+github.com/streamingfast/firehose v0.1.1-0.20231204192037-7b23ef908c0c h1:7IL3b2yJGR1oSNkwNEDOiQIpQL2JEhFIakLSx8ko+1k=
+github.com/streamingfast/firehose v0.1.1-0.20231204192037-7b23ef908c0c/go.mod h1:C9PRebvf8BZaqeHbRJmvC4hP9wF2vBlL8EvR8lcSsSI=
+github.com/streamingfast/firehose-core v0.2.4-0.20231204192228-7a8ff97587ec h1:shrt1croDP50QV3eW1umaLhXVbSqZ/c/pQ4eGmcYspU=
+github.com/streamingfast/firehose-core v0.2.4-0.20231204192228-7a8ff97587ec/go.mod h1:/KmE5bNeg2wHhwDRv4Mo1eSlOAbPVlyKP8aiJzxt7wg=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2 h1:dgYLhP3STiPi30fISAijFPEB11D4r1fQFc8D3cpgV5s=
 github.com/streamingfast/index-builder v0.0.0-20221031203737-fa2e70f09dc2/go.mod h1:OYv1UX/kRsV9aP4SEwa9zpt34qGzdtJzOvdGn+n56as=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
