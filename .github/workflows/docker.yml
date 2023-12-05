@@ -389,5 +389,5 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
-            ${{ needs.bundle-docker-version-nitro.outputs.nitro }}
+            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building nitro docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            ${{ needs.bundle-docker-version-nitro.outputs.nitro }}```
