@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.0.1
+
+* Fixed SF_TRACING feature (regression broke the ability to specify a tracing endpoint)
+* Fixed substreams GRPC/Connect error codes not propagating correctly
+* Firehose connections rate-limiting will now force an (increased) delay of between 1 and 4 seconds (random value)  before refusing a connection when under heavy load
+
 ## v2.0.0
 
 ### Fixed
