@@ -4,7 +4,7 @@ ARG SF_VERSION=latest
 FROM ghcr.io/streamingfast/go-ethereum:$CHAIN_VERSION as chain
 FROM ghcr.io/streamingfast/firehose-ethereum:$SF_VERSION
 
-COPY --from=chain /app/geth /app/geth
+COPY --from=chain /usr/local/bin/geth /app/geth
 
 COPY tools/fireeth/motd_node_manager /etc/motd
 COPY tools/fireeth/scripts/. /usr/local/bin/
