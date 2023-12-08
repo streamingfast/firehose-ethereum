@@ -4,6 +4,7 @@ ARG VERSION=dev
 ####
 
 FROM golang:1.20-bullseye as builder
+WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . ./
@@ -17,7 +18,7 @@ FROM ghcr.io/streamingfast/nitro:${CHAIN_VERSION} as chain
 
 FROM ubuntu:20.04
 
-COPY --from=builder /usr/local/bin/nitro /app/nitro
+COPY --from=builder /work/fireeth /app/fireeth
 COPY --from=chain /usr/local/bin/nitro /app/nitro
 
 COPY tools/fireeth/motd_node_manager /etc/motd

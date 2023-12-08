@@ -110,6 +110,9 @@ jobs:
     runs-on: ubuntu-20.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'nitro')) }}
 
+    outputs:
+      nitro: ${{ steps.print.outputs.nitro }}
+
     permissions:
       contents: read
       packages: write
@@ -188,7 +191,7 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed building bundle for nitro from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
 
       - id: print
         run: |
