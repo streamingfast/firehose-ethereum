@@ -1,9 +1,23 @@
-ARG CHAIN_VERSION=geth-latest
-ARG SF_VERSION=latest
+ARG CHAIN_VERSION="latest"
+ARG VERSION=dev
 
-FROM ghcr.io/streamingfast/nitro:$CHAIN_VERSION as chain
-FROM ghcr.io/streamingfast/firehose-ethereum:$SF_VERSION
+####
 
+FROM golang:1.20-bullseye as builder
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . ./
+RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
+
+####
+
+FROM ghcr.io/streamingfast/nitro:${CHAIN_VERSION} as chain
+
+####
+
+FROM ubuntu:20.04
+
+COPY --from=builder /usr/local/bin/nitro /app/nitro
 COPY --from=chain /usr/local/bin/nitro /app/nitro
 
 COPY tools/fireeth/motd_node_manager /etc/motd
