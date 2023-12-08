@@ -18,6 +18,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math/big"
 	"strings"
 	"time"
@@ -29,22 +30,6 @@ import (
 )
 
 var b0 = big.NewInt(0)
-
-func MustBlockRefAsProto(ref bstream.BlockRef) *BlockRef {
-	if ref == nil || bstream.EqualsBlockRefs(ref, bstream.BlockRefEmpty) {
-		return nil
-	}
-
-	hash, err := hex.DecodeString(ref.ID())
-	if err != nil {
-		panic(fmt.Errorf("invalid block hash %q: %w", ref.ID(), err))
-	}
-
-	return &BlockRef{
-		Hash:   hash,
-		Number: ref.Num(),
-	}
-}
 
 func (b *BlockRef) AsBstreamBlockRef() bstream.BlockRef {
 	return bstream.NewBlockRef(hex.EncodeToString(b.Hash), b.Number)
@@ -316,4 +301,25 @@ func (b *Block) GetFirehoseBlockTime() time.Time {
 // GetFirehoseBlockVersion implements firecore.Block.
 func (b *Block) GetFirehoseBlockVersion() int32 {
 	return b.Ver
+}
+
+func (b *Block) PrintBlock(printTransactions bool, out io.Writer) error {
+	if _, err := fmt.Fprintf(out, "Block #%d (%s) (prev: %s): %d transactions\n",
+		b.Number,
+		b.Hash,
+		b.Header.ParentHash,
+		len(b.TransactionTraces),
+	); err != nil {
+		return err
+	}
+
+	if printTransactions {
+		for _, trx := range b.TransactionTraces {
+			if _, err := fmt.Fprintf(out, "  - Transaction %s\n", hex.EncodeToString(trx.Hash)); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

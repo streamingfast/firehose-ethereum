@@ -6,6 +6,8 @@ import (
 	"io"
 	"strconv"
 
+	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/dstore"
@@ -14,16 +16,16 @@ import (
 	"go.uber.org/zap"
 )
 
-func newFixPolygonIndexCmd(logger *zap.Logger) *cobra.Command {
+func newFixOrdinalsCmd(logger *zap.Logger) *cobra.Command {
 	return &cobra.Command{
-		Use:   "fix-polygon-index <src-blocks-store> <dest-blocks-store> <start-block> <stop-block>",
+		Use:   "fix-ordinals <src-blocks-store> <dest-blocks-store> <start-block> <stop-block>",
 		Short: "look for blocks containing a single transaction with index==1 (where it should be index==0) and rewrite the affected 100-block-files to dest. it does not rewrite correct merged-files-bundles",
 		Args:  cobra.ExactArgs(4),
-		RunE:  createFixPolygonIndexE(logger),
+		RunE:  createFixOrdinalsE(logger),
 	}
 }
 
-func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
+func createFixOrdinalsE(logger *zap.Logger) firecore.CommandExecutor {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
 
@@ -67,13 +69,12 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 			}
 			defer rc.Close()
 
-			br, err := bstream.GetBlockReaderFactory.New(rc)
+			br, err := bstream.NewDBinBlockReader(rc)
 			if err != nil {
 				return fmt.Errorf("creating block reader: %w", err)
 			}
 
-			var mustWrite bool
-			blocks := make([]*bstream.Block, 100)
+			blocks := make([]*pbbstream.Block, 100)
 			i := 0
 			for {
 				block, err := br.Read()
@@ -81,17 +82,27 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 					break
 				}
 
-				ethBlock := block.ToProtocol().(*pbeth.Block)
-				if len(ethBlock.TransactionTraces) == 1 &&
-					ethBlock.TransactionTraces[0].Index == 1 {
-					fmt.Println("ERROR FOUND AT BLOCK", block.Number)
-					mustWrite = true
-					ethBlock.TransactionTraces[0].Index = 0
+				ethBlock := &pbeth.Block{}
+				err = block.Payload.UnmarshalTo(ethBlock)
+				if err != nil {
+					return fmt.Errorf("unmarshaling eth block: %w", err)
+				}
 
-					block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
-					if err != nil {
-						return fmt.Errorf("re-packing the block: %w", err)
+				ordinal := uint64(0)
+				for _, trace := range ethBlock.TransactionTraces {
+					trace.BeginOrdinal = ordinal
+					ordinal++
+					for _, log := range trace.Receipt.Logs {
+						log.Ordinal = ordinal
+						ordinal++
 					}
+					trace.EndOrdinal = ordinal
+					ordinal++
+				}
+
+				block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
+				if err != nil {
+					return fmt.Errorf("re-packing the block: %w", err)
 				}
 				blocks[i] = block
 				i++
@@ -99,10 +110,8 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 			if i != 100 {
 				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", i)
 			}
-			if mustWrite {
-				if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
-					return fmt.Errorf("writing merged block %d: %w", startBlock, err)
-				}
+			if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
+				return fmt.Errorf("writing merged block %d: %w", startBlock, err)
 			}
 
 			lastFileProcessed = filename
@@ -123,7 +132,7 @@ func createFixPolygonIndexE(logger *zap.Logger) firecore.CommandExecutor {
 	}
 }
 
-func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*bstream.Block) error {
+func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*pbbstream.Block) error {
 	file := filename(lowBlockNum)
 	fmt.Printf("writing merged file %s.dbin.zst\n", file)
 
@@ -139,7 +148,7 @@ func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*bstream
 			pw.CloseWithError(err)
 		}()
 
-		blockWriter, err := bstream.GetBlockWriterFactory.New(pw)
+		blockWriter, err := bstream.NewDBinBlockWriter(pw)
 		if err != nil {
 			return
 		}

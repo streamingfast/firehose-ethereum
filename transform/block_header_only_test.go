@@ -28,10 +28,12 @@ func TestHeaderOnly_Transform(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, x)
 
-	blk := testBlockFromFiles(t, "block.json")
-	block := blk.ToProtocol().(*pbeth.Block)
+	testBlock := testBlockFromFiles(t, "block.json")
+	block := &pbeth.Block{}
+	err = testBlock.Payload.UnmarshalTo(block)
+	require.NoError(t, err)
 
-	output, err := preprocFunc(blk)
+	output, err := preprocFunc(testBlock)
 	require.NoError(t, err)
 
 	pbcodecBlock := output.(*pbeth.Block)

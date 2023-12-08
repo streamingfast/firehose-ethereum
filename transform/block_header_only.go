@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/streamingfast/bstream"
+	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/bstream/transform"
 	"github.com/streamingfast/dstore"
 	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/transform/v1"
@@ -43,8 +43,14 @@ func (p *HeaderOnlyFilter) String() string {
 	return "light block filter"
 }
 
-func (p *HeaderOnlyFilter) Transform(readOnlyBlk *bstream.Block, in transform.Input) (transform.Output, error) {
-	ethFullBlock := readOnlyBlk.ToProtocol().(*pbeth.Block)
+func (p *HeaderOnlyFilter) Transform(readOnlyBlk *pbbstream.Block, in transform.Input) (transform.Output, error) {
+
+	ethFullBlock := &pbeth.Block{}
+	err := readOnlyBlk.Payload.UnmarshalTo(ethFullBlock)
+	if err != nil {
+		return nil, fmt.Errorf("mashalling block: %w", err)
+	}
+
 	zlog.Debug("running header only transformer",
 		zap.String("hash", hex.EncodeToString(ethFullBlock.Hash)),
 		zap.Uint64("num", ethFullBlock.Num()),
