@@ -6,7 +6,8 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build ./cmd/fireeth
+ARG VERSION
+RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
 
 ####
 
