@@ -50,7 +50,7 @@ jobs:
         run: |
           echo "branch=$(echo ${GITHUB_REF#refs/heads/})" > $GITHUB_OUTPUT
           echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" > $GITHUB_OUTPUT
-          echo "COREVERSION=$(awk '/github.com.streamingfast.firehose-core/ {print $$2}' go.mod)" > $GITHUB_ENV
+          echo "core_version=$(awk '/github.com.streamingfast.firehose-core/ {print $$2}' go.mod)" > $GITHUB_ENV
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -93,6 +93,7 @@ jobs:
           push: true
           build-args: |
             VERSION=${{ github.event.ref }}
+            COREVERSION=${{ steps.extract_branch.outputs.core_version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
