@@ -1,3 +1,6 @@
+ARG VERSION="dev"
+ARG COREVERSION="latest"
+
 FROM golang:1.21-alpine as build
 WORKDIR /app
 
@@ -6,8 +9,11 @@ RUN go mod download
 
 COPY . ./
 
-ARG VERSION
 RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
+
+####
+
+FROM ghcr.io/streamingfast/firehose-core:${COREVERSION} as core
 
 ####
 
@@ -28,5 +34,6 @@ RUN mkdir -p /app/ && curl -Lo /app/grpc_health_probe https://github.com/grpc-ec
 WORKDIR /app
 
 COPY --from=build /app/fireeth /app/fireeth
+COPY --from=core /app/firecore /app/firecore
 
 ENTRYPOINT ["/app/fireeth"]

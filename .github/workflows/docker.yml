@@ -8,6 +8,7 @@ on:
     branches:
       - "dockerbuild"
       - "develop"
+      - "stepdtest"
       - "release/v*"
       - "feature/*"
   workflow_dispatch:
@@ -47,8 +48,9 @@ jobs:
         id: extract_branch
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          echo "##[set-output name=release_train;]$(echo ${GITHUB_REF#refs/heads/release/})"
+          echo "branch=$(echo ${GITHUB_REF#refs/heads/})" > $GITHUB_OUTPUT
+          echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" > $GITHUB_OUTPUT
+          echo "COREVERSION=$(awk '/github.com.streamingfast.firehose-core/ {print $$2}' go.mod)" > $GITHUB_ENV
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -82,8 +84,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID"
-          echo "::set-output name=SLACK_ID::$SLACK_ID"
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -132,8 +133,8 @@ jobs:
         id: extract_branch
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          echo "##[set-output name=release_train;]$(echo ${GITHUB_REF#refs/heads/release/})"
+          echo "branch=$(echo ${GITHUB_REF#refs/heads/})" > $GITHUB_OUTPUT
+          echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" > $GITHUB_OUTPUT
 
       - run: |
           docker pull ghcr.io/streamingfast/nitro:latest
@@ -170,8 +171,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID"
-          echo "::set-output name=SLACK_ID::$SLACK_ID"
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -236,8 +236,8 @@ jobs:
         id: extract_branch
         shell: bash
         run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          echo "##[set-output name=release_train;]$(echo ${GITHUB_REF#refs/heads/release/})"
+          echo "branch=$(echo ${GITHUB_REF#refs/heads/})" > $GITHUB_OUTPUT
+          echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" > $GITHUB_OUTPUT
 
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-${GETH_VERSION:-latest-fh2}
@@ -276,8 +276,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID"
-          echo "::set-output name=SLACK_ID::$SLACK_ID"
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -319,8 +318,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID"
-          echo "::set-output name=SLACK_ID::$SLACK_ID"
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -342,8 +340,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID"
-          echo "::set-output name=SLACK_ID::$SLACK_ID"
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -366,8 +363,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID"
-          echo "::set-output name=SLACK_ID::$SLACK_ID"
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
