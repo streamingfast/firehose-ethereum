@@ -72,6 +72,7 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 			}
 
 			blocks := make([]*pbbstream.Block, 100)
+			fixed := false
 			i := 0
 			for {
 				block, err := br.Read()
@@ -80,6 +81,7 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 				}
 				if !strings.HasPrefix(block.Payload.TypeUrl, "type.googleapis.com/") {
 					block.Payload.TypeUrl = "type.googleapis.com/" + block.Payload.TypeUrl
+					fixed = true
 				}
 				blocks[i] = block
 				i++
@@ -87,8 +89,11 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 			if i != 100 {
 				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", i)
 			}
-			if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
-				return fmt.Errorf("writing merged block %d: %w", startBlock, err)
+
+			if fixed {
+				if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
+					return fmt.Errorf("writing merged block %d: %w", startBlock, err)
+				}
 			}
 
 			lastFileProcessed = filename
