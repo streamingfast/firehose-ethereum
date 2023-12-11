@@ -1,4 +1,3 @@
-ARG VERSION="dev"
 ARG COREVERSION="latest"
 
 FROM golang:1.21-alpine as build
@@ -9,6 +8,7 @@ RUN go mod download
 
 COPY . ./
 
+ARG VERSION="dev"
 RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
 
 ####
