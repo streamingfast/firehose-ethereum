@@ -73,6 +73,9 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 
 			blocks := make([]*pbbstream.Block, 100)
 			needReWrite := false
+			if br.Header.Version == 0 {
+				needReWrite = true
+			}
 			i := 0
 			for {
 				block, err := br.Read()
@@ -80,15 +83,14 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 					break
 				}
 				if !strings.HasPrefix(block.Payload.TypeUrl, "type.googleapis.com/") {
+					fmt.Println("found block with missing type url prefix", block.Payload.TypeUrl)
 					block.Payload.TypeUrl = "type.googleapis.com/" + block.Payload.TypeUrl
-					needReWrite = true
-				}
-				if block.PayloadVersion == 0 {
 					needReWrite = true
 				}
 				blocks[i] = block
 				i++
 			}
+
 			if i != 100 {
 				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", i)
 			}
