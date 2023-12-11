@@ -72,7 +72,7 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 			}
 
 			blocks := make([]*pbbstream.Block, 100)
-			fixed := false
+			needReWrite := false
 			i := 0
 			for {
 				block, err := br.Read()
@@ -81,7 +81,10 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 				}
 				if !strings.HasPrefix(block.Payload.TypeUrl, "type.googleapis.com/") {
 					block.Payload.TypeUrl = "type.googleapis.com/" + block.Payload.TypeUrl
-					fixed = true
+					needReWrite = true
+				}
+				if block.PayloadVersion == 0 {
+					needReWrite = true
 				}
 				blocks[i] = block
 				i++
@@ -90,7 +93,7 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", i)
 			}
 
-			if fixed {
+			if needReWrite {
 				if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
 					return fmt.Errorf("writing merged block %d: %w", startBlock, err)
 				}
