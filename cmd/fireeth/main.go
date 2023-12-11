@@ -99,6 +99,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				parent.AddCommand(compareOneblockRPCCmd)
 				parent.AddCommand(newCompareBlocksRPCCmd(zlog))
 				parent.AddCommand(newFixOrdinalsCmd(zlog))
+				parent.AddCommand(newFixAnyTypeCmd(zlog))
 				parent.AddCommand(newPollRPCBlocksCmd(zlog))
 				parent.AddCommand(newPollerCmd(zlog, tracer))
 				parent.AddCommand(newOptimismPollerCmd(zlog, tracer))
