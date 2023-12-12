@@ -18,6 +18,12 @@ FROM ghcr.io/streamingfast/nitro:${CHAIN_VERSION} as chain
 
 FROM ubuntu:20.04
 
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+       apt-get -y install -y \
+       ca-certificates libssl1.1 \
+       curl jq && \
+       rm -rf /var/cache/apt /var/lib/apt/lists/*
+
 COPY --from=builder /work/fireeth /app/fireeth
 COPY --from=chain /usr/local/bin/nitro /app/nitro
 
