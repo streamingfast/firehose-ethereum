@@ -4,6 +4,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.1.0
+
+* Bump to major release firehose-core v1.0.0
+
+### Operators
+
+> [!IMPORTANT]
+> When upgrading your stack to this release, be sure to upgrade all components simultaneously because the block encapsulation format has changed.
+> Blocks that are merged using the new merger will not be readable by previous versions.
+> There is no simple way to revert, except by deleting the all the one-blocks and merged-blocks that were produced with this version.
+
+### Changed
+
+* Blocks files (one-blocks and merged) are now stored with a new format using `google.protobuf.any` format. Previous blocks can still by read and processed.
+
+### Added
+
+* Added RPC pollers for Optimism and Arb-one: These can be used from [firecore](https://github.com/streamingfast/firehose-core) reader-node
+  by pointing its `--reader-node-path` to `fireeth` and setting its `--reader-node-arguments` to `tools poller {optimism|arb-one} (...)`
+* Added `tools fix-any-type` to rewrite the previous merged-blocks (OPTIONAL)
+
 ## v2.0.2
 
 * Fixed grpc error code when shutting down: changed from Canceled to Unavailable

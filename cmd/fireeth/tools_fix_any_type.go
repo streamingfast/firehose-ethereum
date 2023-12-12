@@ -16,7 +16,7 @@ import (
 func newFixAnyTypeCmd(logger *zap.Logger) *cobra.Command {
 	return &cobra.Command{
 		Use:   "fix-any-type <src-blocks-store> <dest-blocks-store> <start-block> <stop-block>",
-		Short: "look for blocks with missing type url prefix 'type.googleapis.com' and add it.",
+		Short: "look for merged blocks stored with version 0 (or missing 'type.googleapis.com/' prefix) and rewrite them.",
 		Args:  cobra.ExactArgs(4),
 		RunE:  createFixAnyTypeE(logger),
 	}
