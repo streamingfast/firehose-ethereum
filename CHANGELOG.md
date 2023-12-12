@@ -17,12 +17,11 @@ for instructions to keep up to date.
 
 ### Changed
 
-* Blocks files (one-blocks and merged) are now stored with a new format using `google.protobuf.any` format. Previous blocks can still by read and processed.
+* Blocks files (one-blocks and merged) are now stored with a new format using `google.protobuf.any` format. Previous blocks can still be read and processed.
 
 ### Added
 
-* Added RPC pollers for Optimism and Arb-one: These can be used from [firecore](https://github.com/streamingfast/firehose-core) reader-node
-  by pointing its `--reader-node-path` to `fireeth` and setting its `--reader-node-arguments` to `tools poller {optimism|arb-one} (...)`
+* Added RPC pollers for Optimism and Arb-one: These can be used from by running the reader-node with `--reader-node-path=/path/to/fireeth` and `--reader-node-arguments="tools poller {optimism|arb-one} [more flags...]"`
 * Added `tools fix-any-type` to rewrite the previous merged-blocks (OPTIONAL)
 
 ## v2.0.2
