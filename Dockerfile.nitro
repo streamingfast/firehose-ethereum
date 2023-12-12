@@ -1,5 +1,4 @@
 ARG CHAIN_VERSION="latest"
-ARG VERSION=dev
 
 ####
 
@@ -8,6 +7,7 @@ WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . ./
+ARG VERSION=dev
 RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
 
 ####
