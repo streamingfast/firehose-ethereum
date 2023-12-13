@@ -181,6 +181,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           file: ./Dockerfile.nitro
           build-args: |
+            VERSION=${{ github.event.ref }}
             CHAIN_VERSION=${{ env.VERSION }}
             SF_VERSION=${{ env.SF_VERSION }}
 

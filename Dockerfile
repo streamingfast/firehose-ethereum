@@ -8,6 +8,8 @@ RUN go mod download
 
 COPY . ./
 
+# to get buildinfo in golang
+RUN apk add git
 ARG VERSION="dev"
 RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
 
