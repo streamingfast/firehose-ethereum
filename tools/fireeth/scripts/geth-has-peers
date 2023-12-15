@@ -2,7 +2,7 @@
 # description: show the number of currently valid connected peers
 
 if command -v geth &> /dev/null; then
-    ipc_path=`printf /sf-data/*/ipc`
+    ipc_path=`printf /firehose-data/*/ipc`
     result=`/app/geth attach --exec 'admin.peers.length > 0' "$ipc_path" 2> /tmp/geth_error`
     if [[ $? != 0 ]]; then
         echo "Unable to get admin peers length correctly"

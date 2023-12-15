@@ -7,7 +7,7 @@ if command -v geth &> /dev/null; then
         exit 1
     fi
 
-    ipc_path=`printf /sf-data/*/ipc`
+    ipc_path=`printf /firehose-data/*/ipc`
     result=`/app/geth attach -datadir /data --exec "debug.verbosity($1)" "$ipc_path" 2> /tmp/geth_error`
     if [[ $? != 0 ]]; then
         echo "Unable to set debug verbosity correctly"

@@ -45,7 +45,7 @@ The [sync-sepolia.yaml](./sync-sepolia.yaml) is already configured so the the co
 fireeth -c sync-sepolia.yaml start
 ```
 
-> **Note** If you want to start "fresh" again, stop current running instance, delete the folder `sf-data` and restart the command above.
+> **Note** If you want to start "fresh" again, stop current running instance, delete the folder `firehose-data` and restart the command above.
 
 It will take some time initially to properly synchronize the execution client and the consensus client, you should see in the logs line like:
 
@@ -62,5 +62,5 @@ This indicates that `geth` is still synchronizing and it's not ready to start sy
 Firehose on Ethereum by default starts, supervises and manages the `geth` process required to sync with the Ethereum network. But `fireeth` also have a mode called `stdin` where data is actually received from the standard input pipe directly which means that you manage `geth` yourself. To switch to `stdin` mode, in the [sync-sepolia.yaml](./sync-sepolia.yaml), change the line `- reader-node` (within the `args` list) to `- reader-node-stdin` and also remove the `reader-node-arguments` parameter (so remove from line 11 to end of file) . Then instead of using `fireeth -c sync-sepolia.yaml start` to start everything, use:
 
 ```bash
-geth --sepolia --datadir=./sf-data/reader/data --ipcpath=./sf-data/reader/ipc --port=30305 --http --http.api=eth,net,web3 --http.port=8547 --http.addr=0.0.0.0 "--http.vhosts=*" --authrpc.jwtsecret=./jwt.txt --authrpc.addr=0.0.0.0 --authrpc.port=9551 "--authrpc.vhosts=*" --http.addr=0.0.0.0 --http.port=9545 "--http.vhosts=*" --ws.port=9546 --port=40303 --firehose-enabled | fireeth -c sync-sepolia.yaml start
+geth --sepolia --datadir=./firehose-data/reader/data --ipcpath=./firehose-data/reader/ipc --port=30305 --http --http.api=eth,net,web3 --http.port=8547 --http.addr=0.0.0.0 "--http.vhosts=*" --authrpc.jwtsecret=./jwt.txt --authrpc.addr=0.0.0.0 --authrpc.port=9551 "--authrpc.vhosts=*" --http.addr=0.0.0.0 --http.port=9545 "--http.vhosts=*" --ws.port=9546 --port=40303 --firehose-enabled | fireeth -c sync-sepolia.yaml start
 ```

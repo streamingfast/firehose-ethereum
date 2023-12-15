@@ -33,6 +33,7 @@ main() {
     --http\
     --http-address=0.0.0.0\
     --http-port=5052\
+    --metrics\
     --metrics-address=0.0.0.0\
     --metrics-port=9102\
     --execution-jwt-id=\

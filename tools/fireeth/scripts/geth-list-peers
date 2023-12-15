@@ -2,7 +2,7 @@
 # description: list all currently known peers
 
 if command -v geth &> /dev/null; then
-    ipc_path="`printf /sf-data/*/ipc`"
+    ipc_path="`printf /firehose-data/*/ipc`"
     /app/geth attach -exec "admin.peers.forEach(function (peer) { console.log(peer.name + ' (' + peer.enode + ')') })" "$ipc_path" 2> /tmp/geth_error
     if [[ $? != 0 ]]; then
         echo "Unable to list peers correctly"

@@ -16,4 +16,4 @@ start:
     substreams-state-bundle-size: 100
     substreams-tier1-subrequests-size: 100
     substreams-rpc-endpoints: $ETH_MAINNET_RPC # replace with eth mainnet rpc endpoint
-    substreams-state-store-url: ../substreams-tier2/sf-data/localdata
+    substreams-state-store-url: ../substreams-tier2/firehose-data/localdata

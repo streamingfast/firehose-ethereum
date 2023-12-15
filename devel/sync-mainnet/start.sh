@@ -21,7 +21,7 @@ main() {
   set -e
 
   if [[ $clean == "true" ]]; then
-    rm -rf sf-data &> /dev/null || true
+    rm -rf firehose-data &> /dev/null || true
   fi
 
   exec $fireeth -c $(basename $ROOT).yaml start "$@"

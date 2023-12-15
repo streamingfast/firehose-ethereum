@@ -4,16 +4,18 @@ start:
   - reader-node
   - relayer
   - firehose
-  - combined-index-builder
+  - index-builder
   flags:
-    common-chain-id: 11155111
-    common-network-id: 11155111
-    reader-node-log-to-zap: false
     # We have set `authrpc.addr` and `http.addr` to `0.0.0.0` so that RPC listen on all interfaces, we also
     # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
     # to ensure foreign access to these connection are protected.
     reader-node-arguments:
       --sepolia
+      --networkid=11155111
+      --datadir={node-data-dir}
+      --firehose-enabled
+      --syncmode=full
+      --port=30305
       --authrpc.jwtsecret=jwt.txt
       --authrpc.addr=0.0.0.0
       --authrpc.port=9551
@@ -24,5 +26,4 @@ start:
       --http.port=9545
       --http.vhosts=*
       --port=40303
-      --syncmode=full
       --ws.port=9546
