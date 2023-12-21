@@ -24,11 +24,13 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	}
 
 	cmd.AddCommand(newOptimismPollerCmd(logger, tracer))
-	cmd.AddCommand(newAbrOnePollerCmd(logger, tracer))
+	cmd.AddCommand(newArbOnePollerCmd(logger, tracer))
+	cmd.AddCommand(newGenericEVMPollerCmd(logger, tracer))
 	return cmd
 }
 
 func newOptimismPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
+	// identical as generic-evm for now
 	cmd := &cobra.Command{
 		Use:   "optimism <rpc-endpoint> <first-streamable-block>",
 		Short: "poll blocks from optimism rpc",
@@ -39,10 +41,22 @@ func newOptimismPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Comm
 
 	return cmd
 }
-func newAbrOnePollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
+func newArbOnePollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
+	// identical as generic-evm for now
 	cmd := &cobra.Command{
 		Use:   "arb-one <rpc-endpoint> <first-streamable-block>",
 		Short: "poll blocks from arb-one rpc",
+		Args:  cobra.ExactArgs(2),
+		RunE:  pollerRunE(logger, tracer),
+	}
+	cmd.Flags().Duration("interval-between-fetch", 0, "interval between fetch")
+
+	return cmd
+}
+func newGenericEVMPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "generic-evm <rpc-endpoint> <first-streamable-block>",
+		Short: "poll blocks from a generic EVM RPC endpoint",
 		Args:  cobra.ExactArgs(2),
 		RunE:  pollerRunE(logger, tracer),
 	}
