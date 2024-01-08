@@ -9,9 +9,20 @@ start:
     # We have set `authrpc.addr` and `http.addr` to `0.0.0.0` so that RPC listen on all interfaces, we also
     # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
     # to ensure foreign access to these connection are protected.
-    reader-node-arguments:
-      --mainnet
+    #
+    # A consensus node is required to sync `geth` nowadays. For testing purposes, you can define a
+    # --synctarget=0x0b692ccc4b7281392da18b9b368bc4982b036c0a706a064eb029a7e0f4c6271f
+    # to sync from a specific block.
+    #
+    # Change the example above to the block you want to sync to initially. You can then start
+    # `geth` right away and it will start syncing up to that block without requiring
+    # a consensus node.
+    #
+    # Meanwhile, you sync a consensus node and when it's ready, you can change the `--synctarget`
+    # to the consensus node's address and restart `geth` to sync from the consensus node.
+    reader-node-arguments: ->
       --firehose-enabled
+      --mainnet
       --syncmode=full
       --networkid=1
       --datadir={node-data-dir}
@@ -29,6 +40,5 @@ start:
       --metrics.addr 0.0.0.0
       --metrics.port 6061
       --port=40303
-      --snapshot=false
       --txlookuplimit=128
       --ws.port=9546
