@@ -178,11 +178,13 @@ type parseCtx struct {
 	// CreateAccount, BalanceChange, NonceChanges and append them in order in the first EVM call
 	currentRootCall *pbeth.Call
 	finalizing      bool
+	inSystemCall    bool
 
 	normalizationFeatures            *normalizationFeatures
 	highestOrdinalBeforeTransactions int64
 
 	transactionTraces   []*pbeth.TransactionTrace
+	systemCalls         []*pbeth.Call
 	evmCallStackIndexes []int32
 
 	encoder     firecore.BlockEncoder
@@ -274,6 +276,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 			ctx.stats.inc("EVM_RUN_CALL")
 			err = ctx.readEVMRunCall(line)
 
+		case strings.HasPrefix(line, "SYSTEM_CALL_START"):
+			ctx.stats.inc("SYSTEM_CALL_START")
+			err = ctx.readSystemCallStart(line)
+
 		case strings.HasPrefix(line, "EVM_PARAM"):
 			ctx.stats.inc("EVM_PARAM")
 			err = ctx.readEVMParamCall(line)
@@ -281,6 +287,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		case strings.HasPrefix(line, "EVM_END_CALL"):
 			ctx.stats.inc("EVM_END_CALL")
 			err = ctx.readEVMEndCall(line)
+
+		case strings.HasPrefix(line, "SYSTEM_CALL_END"):
+			ctx.stats.inc("SYSTEM_CALL_END")
+			err = ctx.readSystemCallEnd(line)
 
 		case strings.HasPrefix(line, "ADD_LOG"):
 			ctx.stats.inc("ADD_LOG")
@@ -628,6 +638,47 @@ func decodeBlobHashes(in string, tag string) (out [][]byte) {
 }
 
 // Formats
+// SYSTEM_CALL_START
+func (ctx *parseCtx) readSystemCallStart(_ string) error {
+	if ctx.currentTrace != nil {
+		return fmt.Errorf("cannot start system call start when currentTrace isn't nil")
+	}
+	// fake a transaction trace to contain the system call
+	ctx.currentTrace = &pbeth.TransactionTrace{}
+	ctx.currentTraceLogCount = 0
+	ctx.inSystemCall = true
+
+	ctx.currentRootCall = &pbeth.Call{
+		// We don't know yet its real type, so put CALL and it will be resolved to its final value later on.
+		// Using CALL is important because genesis block generates a dummy transaction without a call and
+		// it must be of type CALL.
+		CallType: pbeth.CallType_CALL,
+		Index:    1,
+	}
+	ctx.currentTrace.Calls = append(ctx.currentTrace.Calls, ctx.currentRootCall)
+
+	return nil
+}
+
+// Formats
+// SYSTEM_CALL_END
+func (ctx *parseCtx) readSystemCallEnd(_ string) error {
+	if ctx.currentTrace == nil {
+		return fmt.Errorf("cannot end system call: currentTrace is nil")
+	}
+	if len(ctx.currentTrace.Calls) != 1 {
+		return fmt.Errorf("system calls cannot be nested: unsupported")
+	}
+
+	ctx.systemCalls = append(ctx.systemCalls, ctx.currentTrace.Calls[0])
+	ctx.currentTrace = nil
+	ctx.currentTraceLogCount = 0
+	ctx.currentRootCall = nil
+	ctx.inSystemCall = false
+	return nil
+}
+
+// Formats
 // EVM_RUN_CALL CALL 4 6
 func (ctx *parseCtx) readEVMRunCall(line string) error {
 	if ctx.currentTrace == nil {
@@ -652,6 +703,9 @@ func (ctx *parseCtx) readEVMRunCall(line string) error {
 
 	if index == 1 {
 		ctx.currentRootCall.CallType = callType
+		if ctx.inSystemCall {
+			ctx.currentRootCall.BeginOrdinal = ordinal // don't change behavior before system calls
+		}
 		return nil
 	}
 
@@ -800,6 +854,9 @@ func (ctx *parseCtx) readSkippedTrx(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
 	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
+	}
 
 	// TODO: handle reason?
 
@@ -812,6 +869,9 @@ func (ctx *parseCtx) readSkippedTrx(line string) error {
 func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no matching BEGIN_APPLY_TRX")
+	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
 	}
 
 	trxTrace := ctx.currentTrace
@@ -886,6 +946,9 @@ func (ctx *parseCtx) readFinalizeBlock(line string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
 	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
+	}
 
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -913,6 +976,9 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 	}
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
+	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
 	}
 
 	chunks, err := SplitInBoundedChunks(line, 2)
@@ -960,6 +1026,8 @@ func (ctx *parseCtx) readCancelBlock(line string) error {
 	ctx.currentTrace = nil
 	ctx.currentTraceLogCount = 0
 	ctx.currentRootCall = nil
+	ctx.inSystemCall = false
+	ctx.systemCalls = nil
 	ctx.finalizing = false
 
 	return nil
@@ -1036,7 +1104,7 @@ func (ctx *parseCtx) readInit(line string) error {
 		ctx.normalizationFeatures.UpgradeBlockV2ToV3 = true
 	case "2.1", "2.2":
 		ctx.blockVersion = 3
-	case "2.3":
+	case "2.3", "2.4":
 		ctx.blockVersion = 3
 		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
 		ctx.readTransactionIndex = true
@@ -1044,7 +1112,7 @@ func (ctx *parseCtx) readInit(line string) error {
 		ctx.blockVersion = 3
 		ctx.useReadBlock2 = true
 	default:
-		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
+		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
 
 	if nodeVariant == "polygon" {
@@ -1334,6 +1402,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 	}
 
 	ctx.currentBlock.TransactionTraces = ctx.transactionTraces
+	ctx.currentBlock.SystemCalls = ctx.systemCalls
 
 	ctx.globalStats.lastBlock = pbbstream.BlockRef{
 		Num: ctx.currentBlock.Number,
@@ -1342,6 +1411,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 
 	block := ctx.currentBlock
 	ctx.transactionTraces = nil
+	ctx.systemCalls = nil
 	ctx.currentBlock = nil
 	ctx.finalizing = false
 	ctx.stats.log()

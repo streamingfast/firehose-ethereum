@@ -64,6 +64,10 @@ message Block {
   // Only available in DetailLevel: EXTENDED
   repeated CodeChange code_changes = 20;
 
+  // System calls are introduced in Dencun, along with blobs. They are executed outside of transactions but affect the state.
+  // Only available in DetailLevel: EXTENDED
+  repeated Call system_calls = 21;
+
   reserved 40; // bool filtering_applied = 40 [deprecated = true];
   reserved 41; // string filtering_include_filter_expr = 41 [deprecated = true];
   reserved 42; // string filtering_exclude_filter_expr = 42 [deprecated = true];

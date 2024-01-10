@@ -7,11 +7,12 @@ for instructions to keep up to date.
 ## Unreleased
 
 * Added support for EIP-4844 (upcoming with activation of Dencun fork). This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
-  - [BlockHeader.excess_data_gas](./proto/sf/ethereum/type/v2/type.proto#L147)
-  - [TransactionTrace.blob_data_gas_used](./proto/sf/ethereum/type/v2/type.proto#290)
-  - [TransactionTrace.max_fee_per_data_gas](./proto/sf/ethereum/type/v2/type.proto#298)
-  - [TransactionTrace.blob_versioned_hashes](./proto/sf/ethereum/type/v2/type.proto#308)
-  - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#243)
+  - [Block.system_calls](./proto/sf/ethereum/type/v2/type.proto#69)
+  - [BlockHeader.excess_data_gas](./proto/sf/ethereum/type/v2/type.proto#L172)
+  - [TransactionTrace.blob_data_gas_used](./proto/sf/ethereum/type/v2/type.proto#366)
+  - [TransactionTrace.max_fee_per_data_gas](./proto/sf/ethereum/type/v2/type.proto#374)
+  - [TransactionTrace.blob_versioned_hashes](./proto/sf/ethereum/type/v2/type.proto#384)
+  - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#276)
 
 ## v2.1.0
 
