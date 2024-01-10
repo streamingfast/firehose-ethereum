@@ -20,18 +20,18 @@ start:
     #
     # Meanwhile, you sync a consensus node and when it's ready, you can change the `--synctarget`
     # to the consensus node's address and restart `geth` to sync from the consensus node.
-    reader-node-arguments: ->
+    reader-node-arguments:
       --firehose-enabled
-      --mainnet
       --syncmode=full
+      --mainnet
       --networkid=1
       --datadir={node-data-dir}
+      --db.engine=pebble
       --authrpc.addr=0.0.0.0
       --authrpc.jwtsecret=jwt.txt
       --authrpc.port=9551
       --authrpc.vhosts=*
       --cache 8192
-      --cache.snapshot=0
       --http.addr=0.0.0.0
       --http.port=9545
       --http.vhosts=*

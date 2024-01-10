@@ -10,11 +10,12 @@ start:
     # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
     # to ensure foreign access to these connection are protected.
     reader-node-arguments:
+      --firehose-enabled
+      --syncmode=full
       --sepolia
       --networkid=11155111
       --datadir={node-data-dir}
-      --firehose-enabled
-      --syncmode=full
+      --db.engine=pebble
       --port=30305
       --authrpc.jwtsecret=jwt.txt
       --authrpc.addr=0.0.0.0
