@@ -317,6 +317,9 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 			err = ctx.readApplyTrxEnd(line)
 
 			if readType == readTransaction {
+				if err != nil {
+					return nil, err
+				}
 				if len(ctx.transactionTraces) != 1 {
 					return nil, fmt.Errorf("expecting to have a single transaction trace, got %d", len(ctx.transactionTraces))
 				}
