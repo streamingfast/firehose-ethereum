@@ -170,6 +170,7 @@ type parseCtx struct {
 	fhVersion            string
 	useReadBlock2        bool
 	readTransactionIndex bool
+	readBlobGasUsed      bool
 
 	currentBlock         *pbeth.Block
 	currentTrace         *pbeth.TransactionTrace
@@ -546,9 +547,9 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 		MaxPriorityFeePerGas: maxPriorityGasFee,
 		Type:                 trxType,
 		BeginOrdinal:         ordinal,
-		BlobDataGasUsed:      blobDataGasUsed,
-		MaxFeePerDataGas:     maxFeePerDataGas,
-		BlobVersionedHashes:  blobVersionedHashes,
+		BlobGas:              blobDataGasUsed,
+		BlobGasFeeCap:        maxFeePerDataGas,
+		BlobHashes:           blobVersionedHashes,
 	}
 
 	// A contract creation will have the `to` being null. In such case,
@@ -865,7 +866,8 @@ func (ctx *parseCtx) readSkippedTrx(line string) error {
 }
 
 // Formats
-// END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> { []<deth.Log> }
+// END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> { []<deth.Log> } //fh2.3
+// END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> <BLOB_GAS_USED> <BLOB_GAS_PRICE> { []<deth.Log> } // readBlobGasUsed==true
 func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no matching BEGIN_APPLY_TRX")
@@ -876,7 +878,11 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 
 	trxTrace := ctx.currentTrace
 
-	chunks, err := SplitInBoundedChunks(line, 7)
+	chunkNum := 7
+	if ctx.readBlobGasUsed {
+		chunkNum = 9
+	}
+	chunks, err := SplitInBoundedChunks(line, chunkNum)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -887,8 +893,17 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	logsBloom := FromHex(chunks[3], "END_APPLY_TRX logsBloom")
 	ordinal := FromUint64(chunks[4], "END_APPLY_TRX ordinal")
 
+	logChunkNum := 5
+	var blobGasUsed uint64
+	var blobGasPrice *pbeth.BigInt
+	if ctx.readBlobGasUsed {
+		logChunkNum = 7
+		blobGasUsed = FromUint64(chunks[5], "END_APPLY_TRX blobGasUsed")
+		blobGasPrice = pbeth.BigIntFromBytes(FromHex(chunks[6], "END_APPLY_TRX blogGasPrice"))
+	}
+
 	var logs []*Log
-	if err := json.Unmarshal([]byte(chunks[5]), &logs); err != nil {
+	if err := json.Unmarshal([]byte(chunks[logChunkNum]), &logs); err != nil {
 		return err
 	}
 
@@ -897,6 +912,8 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 		StateRoot:         stateRoot,
 		CumulativeGasUsed: cumulativeGasUsed,
 		LogsBloom:         logsBloom,
+		BlobGasUsed:       blobGasUsed,
+		BlobGasPrice:      blobGasPrice,
 	}
 
 	trxTrace.EndOrdinal = ordinal
@@ -1104,10 +1121,15 @@ func (ctx *parseCtx) readInit(line string) error {
 		ctx.normalizationFeatures.UpgradeBlockV2ToV3 = true
 	case "2.1", "2.2":
 		ctx.blockVersion = 3
-	case "2.3", "2.4":
+	case "2.3":
 		ctx.blockVersion = 3
 		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
 		ctx.readTransactionIndex = true
+	case "2.4":
+		ctx.blockVersion = 3
+		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
+		ctx.readTransactionIndex = true
+		ctx.readBlobGasUsed = true
 	case "3.0":
 		ctx.blockVersion = 3
 		ctx.useReadBlock2 = true

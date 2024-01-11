@@ -167,9 +167,14 @@ message BlockHeader {
   // Only available in DetailLevel: EXTENDED
   Uint64NestedArray tx_dependency = 20;
 
-  // ExcesseDataGas is the running total of excess data gas consumed on chain since EIP-4844 (Shared Blob Transactions) was activated.
-  // If the total amount of data gas is below the target, 'excess_data_gas' is capped at zero.
-  BigInt excess_data_gas = 21;
+	// BlobGasUsed was added by EIP-4844 and is ignored in legacy headers.
+	uint64 blob_gas_used = 22;
+
+	// ExcessBlobGas was added by EIP-4844 and is ignored in legacy headers.
+	uint64 excess_blob_gas = 23;
+
+	// ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers.
+	bytes parent_beacon_root = 24;
 }
 
 message Uint64NestedArray {
@@ -352,7 +357,7 @@ message TransactionTrace {
   // Only available in DetailLevel: EXTENDED
   repeated Call calls = 32;
 
-  // BlockDataGasUSed keep track of total data gas spent in this transaction, it's sum up for all successful
+  // BlobGas keep track of total data gas spent in this transaction, it's sum up for all successful
   // transaction in a block and can be used to compute the block's data gas. The data gas is computed using
   // the formula `BlobTxDataGasPerBlob * len(BlobVersionedHashes)` where is `BlobTxDataGasPerBlob` is decided
   // by the current Ethereum active fork (at time of introduction of the Blob feature, this value was 17).
@@ -363,17 +368,17 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Dencun fork is active on the chain.
-  uint64 blob_data_gas_used = 33;
+  uint64 blob_gas = 33;
 
-  // MaxFeePerDataGas is the maximum fee per data gas the user is willing to pay for the data gas used.
+  // BlobGasFeeCap is the maximum fee per data gas the user is willing to pay for the data gas used.
   //
   // This is specified by https://eips.ethereum.org/EIPS/eip-4844
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Dencun fork is active on the chain.
-  BigInt max_fee_per_data_gas = 34;
+  BigInt blob_gas_fee_cap = 34;
 
-  // BlobVersionedHashes field represents a list of hash outputs from 'kzg_to_versioned_hash' which
+  // BlobHashes field represents a list of hash outputs from 'kzg_to_versioned_hash' which
   // essentially is a version byte + the sha256 hash of the blob commitment (e.g.
   // `BLOB_COMMITMENT_VERSION_KZG + sha256(commitment)[1:]`.
   //
@@ -381,7 +386,7 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Dencun fork is active on the chain.
-  repeated bytes blob_versioned_hashes = 35;
+  repeated bytes blob_hashes = 35;
 }
 
 // AccessTuple represents a list of storage keys for a given contract's address and is used
@@ -414,6 +419,8 @@ message TransactionReceipt {
   uint64 cumulative_gas_used = 2;
   bytes logs_bloom = 3;
   repeated Log logs = 4;
+  uint64 blob_gas_used = 5;
+  BigInt blob_gas_price = 6;
 }
 
 message Log {

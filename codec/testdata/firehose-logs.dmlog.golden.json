@@ -9709,7 +9709,7 @@
     "mixHash": "0000000000000000000000000000000000000000000000000000000000000000",
     "hash": "a13fceaed8a1be650b01091bfcb09b22be10720af8de1a45ad650abaf7f4bc33",
     "withdrawalsRoot": "c22b1d0bd0ef408994cbee1a835dc33115baec88641480c03c5fce1ef94d3861",
-    "excessDataGas": "44"
+    "excessBlobGas": "68"
   },
   "ver": 3
 }

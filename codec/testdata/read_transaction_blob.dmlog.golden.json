@@ -45,9 +45,9 @@
       "address": "79f19a189068a79ec01343b8c70096114f048753"
     }
   ],
-  "blobDataGasUsed": "99",
-  "maxFeePerDataGas": "ab",
-  "blobVersionedHashes": [
+  "blobGas": "99",
+  "blobGasFeeCap": "ab",
+  "blobHashes": [
     "0174b9554595faea99f11f5310c086acaec4686ef94b30466f966d67071b228b65",
     "0184b9554595faea99f11f5310c086acaec4686ef94b30466f966d67071b228b64"
   ]

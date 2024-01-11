@@ -45,7 +45,7 @@
       "address": "79f19a189068a79ec01343b8c70096114f048753"
     }
   ],
-  "blobDataGasUsed": "99",
-  "maxFeePerDataGas": "ab"
+  "blobGas": "99",
+  "blobGasFeeCap": "ab"
 }
 ]
