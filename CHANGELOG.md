@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.2.0
 
 * Added support for EIP-4844 (upcoming with activation of Dencun fork), through instrumented go-ethereum nodes with version fh2.4. This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
   - [Block.system_calls](./proto/sf/ethereum/type/v2/type.proto#69)
@@ -17,6 +17,8 @@ for instructions to keep up to date.
   - [TransactionReceipt.BlobGasUsed](./proto/sf/ethereum/type/v2/type.proto#422)
   - [TransactionReceipt.BlobGasPrice](./proto/sf/ethereum/type/v2/type.proto#423)
   - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#281)
+
+* Added `tools poller generic-evm` subcommand. It is identical to optimism/arb-one in feature at the moment and should work for most evm chains.
 
 ## v2.1.0
 
