@@ -166,9 +166,11 @@ func (s *parsingStats) inc(key string) {
 }
 
 type parseCtx struct {
-	blockVersion  int32
-	fhVersion     string
-	useReadBlock2 bool
+	blockVersion         int32
+	fhVersion            string
+	useReadBlock2        bool
+	readTransactionIndex bool
+	readBlobGasUsed      bool
 
 	currentBlock         *pbeth.Block
 	currentTrace         *pbeth.TransactionTrace
@@ -177,11 +179,13 @@ type parseCtx struct {
 	// CreateAccount, BalanceChange, NonceChanges and append them in order in the first EVM call
 	currentRootCall *pbeth.Call
 	finalizing      bool
+	inSystemCall    bool
 
 	normalizationFeatures            *normalizationFeatures
 	highestOrdinalBeforeTransactions int64
 
 	transactionTraces   []*pbeth.TransactionTrace
+	systemCalls         []*pbeth.Call
 	evmCallStackIndexes []int32
 
 	encoder     firecore.BlockEncoder
@@ -273,6 +277,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 			ctx.stats.inc("EVM_RUN_CALL")
 			err = ctx.readEVMRunCall(line)
 
+		case strings.HasPrefix(line, "SYSTEM_CALL_START"):
+			ctx.stats.inc("SYSTEM_CALL_START")
+			err = ctx.readSystemCallStart(line)
+
 		case strings.HasPrefix(line, "EVM_PARAM"):
 			ctx.stats.inc("EVM_PARAM")
 			err = ctx.readEVMParamCall(line)
@@ -280,6 +288,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		case strings.HasPrefix(line, "EVM_END_CALL"):
 			ctx.stats.inc("EVM_END_CALL")
 			err = ctx.readEVMEndCall(line)
+
+		case strings.HasPrefix(line, "SYSTEM_CALL_END"):
+			ctx.stats.inc("SYSTEM_CALL_END")
+			err = ctx.readSystemCallEnd(line)
 
 		case strings.HasPrefix(line, "ADD_LOG"):
 			ctx.stats.inc("ADD_LOG")
@@ -305,6 +317,9 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 			err = ctx.readApplyTrxEnd(line)
 
 			if readType == readTransaction {
+				if err != nil {
+					return nil, err
+				}
 				if len(ctx.transactionTraces) != 1 {
 					return nil, fmt.Errorf("expecting to have a single transaction trace, got %d", len(ctx.transactionTraces))
 				}
@@ -430,7 +445,7 @@ func (ctx *parseCtx) popCallIndexReturnParent() (int32, uint32, error) {
 }
 
 // Formats
-// FIRE BEGIN_BLOCK <NUM>
+// BEGIN_BLOCK <NUM>
 func (ctx *parseCtx) readBeginBlock(line string) error {
 	if ctx.blockVersion == 0 {
 		return fmt.Errorf("cannot start reading block: INIT not done")
@@ -459,11 +474,10 @@ func (ctx *parseCtx) readBeginBlock(line string) error {
 	return nil
 }
 
-// Formats
-// FIRE BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <ACCESS_LIST> <MAX_FEE_PER_GAS> <MAX_PRIORITY_FEE_PER_GAS> <TRX_TYPE> <BEGIN_ORDINAL>
-
-// FIRE BEGIN_APPLY_TRX 2becdee3b9ce9dd9a7274b8f6881e8e8d119ab046502ea90688773ef545731c7 929bc44bbd41ca0e621dc50f7c7e3204ce026258 . 0bf9 2b0d6434d98be6858c367710fff02ed69b86c0b1188a737d3ca55507f363928c 691797966e89cbb83dd45c2b6685ca1dc3734ee0c58ae8ffd935c9823b051e9f 300000 0ba43b7400 58 41c0e1b5 . 0 1
-
+// Supported Formats
+// BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <ACCESS_LIST> <MAX_FEE_PER_GAS> <MAX_PRIORITY_FEE_PER_GAS> <TRX_TYPE> <BEGIN_ORDINAL>
+// (2.3+) BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <ACCESS_LIST> <MAX_FEE_PER_GAS> <MAX_PRIORITY_FEE_PER_GAS> <TRX_TYPE> <BEGIN_ORDINAL> <TRX_INDEX>
+// (2.3+ with blobs) BEGIN_APPLY_TRX <TRX_HASH> <TO> <VALUE> <V> <R> <S> <GAS> <GAS_PRICE> <NONCE> <input> <ACCESS_LIST> <MAX_FEE_PER_GAS> <MAX_PRIORITY_FEE_PER_GAS> <TRX_TYPE> <BEGIN_ORDINAL> <TRX_INDEX> <BLOB_GAS_USED> <MAX_FEE_PER_DATA_GAS> <BLOB_HASHES>
 func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	if ctx.currentTrace != nil {
 		return fmt.Errorf("received when trx already begun")
@@ -475,8 +489,8 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	var err error
 	var index uint32
 
-	if ctx.fhVersion == "2.3" { // trx index provided now
-		chunks, err = SplitInChunks(line, 17)
+	if ctx.readTransactionIndex {
+		chunks, err = SplitInChunks(line, 17, 20)
 		if err != nil {
 			return fmt.Errorf("split: %s", err)
 		}
@@ -510,6 +524,15 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	trxType := pbeth.TransactionTrace_Type(FromInt32(chunks[13], "BEGIN_APPLY_TRX trxType"))
 	ordinal := FromUint64(chunks[14], "BEGIN_APPLY_TRX ordinal")
 
+	blobDataGasUsed := uint64(0)
+	var maxFeePerDataGas *pbeth.BigInt
+	var blobVersionedHashes [][]byte
+	if len(chunks) == 19 {
+		blobDataGasUsed = FromUint64(chunks[16], "BEGIN_APPLY_TRX blobDataGasUsed")
+		maxFeePerDataGas = pbeth.BigIntFromBytes(FromHex(chunks[17], "BEGIN_APPLY_TRX maxFeePerDataGas"))
+		blobVersionedHashes = decodeBlobHashes(chunks[18], "BEGIN_APPLY_TRX blobVerifiedHashes")
+	}
+
 	ctx.currentTraceLogCount = 0
 	ctx.currentTrace = &pbeth.TransactionTrace{
 		Index:                index,
@@ -527,6 +550,9 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 		MaxPriorityFeePerGas: maxPriorityGasFee,
 		Type:                 trxType,
 		BeginOrdinal:         ordinal,
+		BlobGas:              blobDataGasUsed,
+		BlobGasFeeCap:        maxFeePerDataGas,
+		BlobHashes:           blobVersionedHashes,
 	}
 
 	// A contract creation will have the `to` being null. In such case,
@@ -601,8 +627,63 @@ func decodeAccessList(b []byte) (out []*pbeth.AccessTuple, err error) {
 	return
 }
 
+func decodeBlobHashes(in string, tag string) (out [][]byte) {
+	if len(in) == 0 || in == "." {
+		return nil
+	}
+
+	chunks := strings.Split(in, ",")
+	out = make([][]byte, len(chunks))
+	for i, chunk := range chunks {
+		out[i] = FromHex(chunk, tag+"element at index"+strconv.Itoa(i))
+	}
+
+	return out
+}
+
 // Formats
-// FIRE EVM_RUN_CALL CALL 4 6
+// SYSTEM_CALL_START
+func (ctx *parseCtx) readSystemCallStart(_ string) error {
+	if ctx.currentTrace != nil {
+		return fmt.Errorf("cannot start system call start when currentTrace isn't nil")
+	}
+	// fake a transaction trace to contain the system call
+	ctx.currentTrace = &pbeth.TransactionTrace{}
+	ctx.currentTraceLogCount = 0
+	ctx.inSystemCall = true
+
+	ctx.currentRootCall = &pbeth.Call{
+		// We don't know yet its real type, so put CALL and it will be resolved to its final value later on.
+		// Using CALL is important because genesis block generates a dummy transaction without a call and
+		// it must be of type CALL.
+		CallType: pbeth.CallType_CALL,
+		Index:    1,
+	}
+	ctx.currentTrace.Calls = append(ctx.currentTrace.Calls, ctx.currentRootCall)
+
+	return nil
+}
+
+// Formats
+// SYSTEM_CALL_END
+func (ctx *parseCtx) readSystemCallEnd(_ string) error {
+	if ctx.currentTrace == nil {
+		return fmt.Errorf("cannot end system call: currentTrace is nil")
+	}
+	if len(ctx.currentTrace.Calls) != 1 {
+		return fmt.Errorf("system calls cannot be nested: unsupported")
+	}
+
+	ctx.systemCalls = append(ctx.systemCalls, ctx.currentTrace.Calls[0])
+	ctx.currentTrace = nil
+	ctx.currentTraceLogCount = 0
+	ctx.currentRootCall = nil
+	ctx.inSystemCall = false
+	return nil
+}
+
+// Formats
+// EVM_RUN_CALL CALL 4 6
 func (ctx *parseCtx) readEVMRunCall(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
@@ -626,6 +707,9 @@ func (ctx *parseCtx) readEVMRunCall(line string) error {
 
 	if index == 1 {
 		ctx.currentRootCall.CallType = callType
+		if ctx.inSystemCall {
+			ctx.currentRootCall.BeginOrdinal = ordinal // don't change behavior before system calls
+		}
 		return nil
 	}
 
@@ -643,7 +727,7 @@ func (ctx *parseCtx) readEVMRunCall(line string) error {
 }
 
 // Formats
-// FIRE EVM_PARAM CALL 4 a63e668919f50a591f5a23fb77881a347d10c081 0000000000000000000000000000000000003003 defd 2300 .
+// EVM_PARAM CALL 4 a63e668919f50a591f5a23fb77881a347d10c081 0000000000000000000000000000000000003003 defd 2300 .
 func (ctx *parseCtx) readEVMParamCall(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
@@ -687,7 +771,7 @@ func (ctx *parseCtx) readEVMParamCall(line string) error {
 }
 
 // Formats
-// FIRE EVM_CALL_FAILED <CALL_INDEX> <GAS_LEFT> <REASON>
+// EVM_CALL_FAILED <CALL_INDEX> <GAS_LEFT> <REASON>
 func (ctx *parseCtx) readEVMCallFailed(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
@@ -717,7 +801,7 @@ func (ctx *parseCtx) readEVMCallFailed(line string) error {
 }
 
 // Formats
-// FIRE EVM_REVERTED <CALL_INDEX>
+// EVM_REVERTED <CALL_INDEX>
 func (ctx *parseCtx) readEVMReverted(line string) error {
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -735,7 +819,7 @@ func (ctx *parseCtx) readEVMReverted(line string) error {
 }
 
 // Formats
-// FIRE EVM_END_CALL <CALL_INDEX> <GAS_LEFT> <RETURN_VALUE> <ORDINAL>
+// EVM_END_CALL <CALL_INDEX> <GAS_LEFT> <RETURN_VALUE> <ORDINAL>
 func (ctx *parseCtx) readEVMEndCall(line string) error {
 	chunks, err := SplitInChunks(line, 5)
 	if err != nil {
@@ -766,13 +850,16 @@ func (ctx *parseCtx) readEVMEndCall(line string) error {
 }
 
 // Formats
-// FIRE SKIPPED_TRX <REASON>
+// SKIPPED_TRX <REASON>
 func (ctx *parseCtx) readSkippedTrx(line string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
 	}
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
+	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
 	}
 
 	// TODO: handle reason?
@@ -782,15 +869,23 @@ func (ctx *parseCtx) readSkippedTrx(line string) error {
 }
 
 // Formats
-// FIRE END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> { []<deth.Log> }
+// END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> { []<deth.Log> } //fh2.3
+// END_APPLY_TRX <STATE_ROOT> <CUMULATIVE_GAS_USED> <LOGS_BLOOM> <ORDINAL> <BLOB_GAS_USED> <BLOB_GAS_PRICE> { []<deth.Log> } // readBlobGasUsed==true
 func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no matching BEGIN_APPLY_TRX")
 	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
+	}
 
 	trxTrace := ctx.currentTrace
 
-	chunks, err := SplitInBoundedChunks(line, 7)
+	chunkNum := 7
+	if ctx.readBlobGasUsed {
+		chunkNum = 9
+	}
+	chunks, err := SplitInBoundedChunks(line, chunkNum)
 	if err != nil {
 		return fmt.Errorf("split: %s", err)
 	}
@@ -801,8 +896,17 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	logsBloom := FromHex(chunks[3], "END_APPLY_TRX logsBloom")
 	ordinal := FromUint64(chunks[4], "END_APPLY_TRX ordinal")
 
+	logChunkNum := 5
+	var blobGasUsed uint64
+	var blobGasPrice *pbeth.BigInt
+	if ctx.readBlobGasUsed {
+		logChunkNum = 7
+		blobGasUsed = FromUint64(chunks[5], "END_APPLY_TRX blobGasUsed")
+		blobGasPrice = pbeth.BigIntFromBytes(FromHex(chunks[6], "END_APPLY_TRX blogGasPrice"))
+	}
+
 	var logs []*Log
-	if err := json.Unmarshal([]byte(chunks[5]), &logs); err != nil {
+	if err := json.Unmarshal([]byte(chunks[logChunkNum]), &logs); err != nil {
 		return err
 	}
 
@@ -811,6 +915,8 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 		StateRoot:         stateRoot,
 		CumulativeGasUsed: cumulativeGasUsed,
 		LogsBloom:         logsBloom,
+		BlobGasUsed:       blobGasUsed,
+		BlobGasPrice:      blobGasPrice,
 	}
 
 	trxTrace.EndOrdinal = ordinal
@@ -855,10 +961,13 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 }
 
 // Formats
-// FIRE FINALIZE_BLOCK <NUM>
+// FINALIZE_BLOCK <NUM>
 func (ctx *parseCtx) readFinalizeBlock(line string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
+	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
 	}
 
 	chunks, err := SplitInChunks(line, 2)
@@ -880,13 +989,16 @@ func (ctx *parseCtx) readFinalizeBlock(line string) error {
 }
 
 // Formats
-// FIRE FAILED_APPLY_TRX transaction failure error message...
+// FAILED_APPLY_TRX transaction failure error message...
 func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
 	}
 	if ctx.currentTrace == nil {
 		return fmt.Errorf("no transaction started")
+	}
+	if ctx.inSystemCall {
+		return fmt.Errorf("in system call")
 	}
 
 	chunks, err := SplitInBoundedChunks(line, 2)
@@ -906,7 +1018,7 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 }
 
 // Formats
-// FIRE CANCEL_BLOCK 123456 Something wrong happened, etc.
+// CANCEL_BLOCK 123456 Something wrong happened, etc.
 func (ctx *parseCtx) readCancelBlock(line string) error {
 	if ctx.currentBlock == nil {
 		ctx.logger.Debug("received CANCEL_BLOCK while no block is active, ignoring")
@@ -934,13 +1046,15 @@ func (ctx *parseCtx) readCancelBlock(line string) error {
 	ctx.currentTrace = nil
 	ctx.currentTraceLogCount = 0
 	ctx.currentRootCall = nil
+	ctx.inSystemCall = false
+	ctx.systemCalls = nil
 	ctx.finalizing = false
 
 	return nil
 }
 
 // Formats
-// FIRE CREATED_ACCOUNT 4 2af4f4790a71313e0c532072207a77f1e4c1baec 7
+// CREATED_ACCOUNT 4 2af4f4790a71313e0c532072207a77f1e4c1baec 7
 func (ctx *parseCtx) readCreateAccount(line string) error {
 	chunks, err := SplitInChunks(line, 4)
 	if err != nil {
@@ -1013,11 +1127,17 @@ func (ctx *parseCtx) readInit(line string) error {
 	case "2.3":
 		ctx.blockVersion = 3
 		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
+		ctx.readTransactionIndex = true
+	case "2.4":
+		ctx.blockVersion = 3
+		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
+		ctx.readTransactionIndex = true
+		ctx.readBlobGasUsed = true
 	case "3.0":
 		ctx.blockVersion = 3
 		ctx.useReadBlock2 = true
 	default:
-		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
+		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
 
 	if nodeVariant == "polygon" {
@@ -1035,7 +1155,7 @@ func (ctx *parseCtx) readInit(line string) error {
 }
 
 // Format
-// FIRE SUICIDE_CHANGE 1 c356a543cec92de8bf1e43a88d09e568e9d3aca3 false .
+// SUICIDE_CHANGE 1 c356a543cec92de8bf1e43a88d09e568e9d3aca3 false .
 func (ctx *parseCtx) readSuicideChange(line string) error {
 	chunks, err := SplitInChunks(line, 5)
 	if err != nil {
@@ -1059,7 +1179,7 @@ func (ctx *parseCtx) readSuicideChange(line string) error {
 }
 
 // Format
-// FIRE CODE_CHANGE 2 cb32e940a34b938f9cebe70313fe7e8ca3d23d36 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 . 89f3219c608c80bcbb274738ff7a325624cd54c9868b9d54bde369e5ab005bc6 6080604052600080fdfea165627a7a723058204a5d828a5772e67b2eaa10bd570ffa7d9607586e73576cc26299c24348dc64450029 8
+// CODE_CHANGE 2 cb32e940a34b938f9cebe70313fe7e8ca3d23d36 c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 . 89f3219c608c80bcbb274738ff7a325624cd54c9868b9d54bde369e5ab005bc6 6080604052600080fdfea165627a7a723058204a5d828a5772e67b2eaa10bd570ffa7d9607586e73576cc26299c24348dc64450029 8
 // deepmind.Print("CODE_CHANGE", deepmind.CallIndex(), deepmind.Addr(s.address), deepmind.Hex(s.CodeHash()), deepmind.Hex(prevcode),
 // deepmind.Hash(codeHash), deepmind.Hex(code), <ORDINAL>)
 func (ctx *parseCtx) readCodeChange(line string) error {
@@ -1259,7 +1379,7 @@ func readFinalizedStatus(libNumInput, libHashInput string) (libNum uint64, libHa
 }
 
 // Formats
-// FIRE END_BLOCK <NUM> <SIZE> { header: <BlockHeader>, uncles: []<BlockHeader> }
+// END_BLOCK <NUM> <SIZE> { header: <BlockHeader>, uncles: []<BlockHeader> }
 func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 	if ctx.currentBlock == nil {
 		return nil, fmt.Errorf("no block started")
@@ -1307,6 +1427,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 	}
 
 	ctx.currentBlock.TransactionTraces = ctx.transactionTraces
+	ctx.currentBlock.SystemCalls = ctx.systemCalls
 
 	ctx.globalStats.lastBlock = pbbstream.BlockRef{
 		Num: ctx.currentBlock.Number,
@@ -1315,6 +1436,7 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 
 	block := ctx.currentBlock
 	ctx.transactionTraces = nil
+	ctx.systemCalls = nil
 	ctx.currentBlock = nil
 	ctx.finalizing = false
 	ctx.stats.log()
@@ -1366,7 +1488,7 @@ func computeProofOfStakeLIBNum(blockNum uint64, finalizedBlockNum uint64, firstS
 }
 
 // Formats
-// FIRE STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESSS> <KEY> <OLD_VALUE> <NEW_VALUE> <ORDINAL>
+// STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESSS> <KEY> <OLD_VALUE> <NEW_VALUE> <ORDINAL>
 func (ctx *parseCtx) readStorageChange(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
@@ -1398,7 +1520,7 @@ func (ctx *parseCtx) readStorageChange(line string) error {
 }
 
 // Formats
-// FIRE BALANCE_CHANGE <CALL_INDEX> <ADDRESSS> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
+// BALANCE_CHANGE <CALL_INDEX> <ADDRESSS> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
 func (ctx *parseCtx) readBalanceChange(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
@@ -1456,7 +1578,7 @@ func (ctx *parseCtx) readBalanceChange(line string) error {
 }
 
 // Formats
-// FIRE GAS_CHANGE <CALL_INDEX> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
+// GAS_CHANGE <CALL_INDEX> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
 func (ctx *parseCtx) readGasChange(line string) error {
 	chunks, err := SplitInChunks(line, 6)
 	if err != nil {
@@ -1494,7 +1616,7 @@ func (ctx *parseCtx) readGasChange(line string) error {
 }
 
 // Formats
-// FIRE NONCE_CHANGE <CALL_INDEX> <ADDRESS> <OLD_VALUE> <NEW_VALUE> <ORDINAL
+// NONCE_CHANGE <CALL_INDEX> <ADDRESS> <OLD_VALUE> <NEW_VALUE> <ORDINAL
 func (ctx *parseCtx) readNonceChange(line string) error {
 	chunks, err := SplitInChunks(line, 6)
 	if err != nil {
@@ -1531,7 +1653,7 @@ func (ctx *parseCtx) readNonceChange(line string) error {
 }
 
 // Formats
-// FIRE EVM_KECCAK <CALL_INDEX> <HASH_RESULT> <HASH_INPUT>
+// EVM_KECCAK <CALL_INDEX> <HASH_RESULT> <HASH_INPUT>
 func (ctx *parseCtx) readEVMKeccak(line string) error {
 	chunks, err := SplitInChunks(line, 4)
 	if err != nil {
@@ -1561,7 +1683,7 @@ func (ctx *parseCtx) readEVMKeccak(line string) error {
 }
 
 // Formats
-// FIRE TRX_FROM <ADDRESS>
+// TRX_FROM <ADDRESS>
 func (ctx *parseCtx) readTrxFrom(line string) error {
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -1581,7 +1703,7 @@ func (ctx *parseCtx) readTrxFrom(line string) error {
 }
 
 // Formats
-// FIRE ACCOUNT_WITHOUT_CODE <CALL_INDEX>
+// ACCOUNT_WITHOUT_CODE <CALL_INDEX>
 func (ctx *parseCtx) readAccountWithoutCode(line string) error {
 	chunks, err := SplitInChunks(line, 2)
 	if err != nil {
@@ -1598,7 +1720,7 @@ func (ctx *parseCtx) readAccountWithoutCode(line string) error {
 }
 
 // Formats
-// FIRE ADD_LOG <CALL_INDEX> <BLOCK_INDEX> <CONTRACT_ADDRESS> <TOPICS> <DATA> <ORDINAL>
+// ADD_LOG <CALL_INDEX> <BLOCK_INDEX> <CONTRACT_ADDRESS> <TOPICS> <DATA> <ORDINAL>
 func (ctx *parseCtx) readAddLog(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {

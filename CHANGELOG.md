@@ -4,6 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Added support for EIP-4844 (upcoming with activation of Dencun fork), through instrumented go-ethereum nodes with version fh2.4. This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
+  - [Block.system_calls](./proto/sf/ethereum/type/v2/type.proto#69)
+  - [BlockHeader.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L171)
+  - [BlockHeader.excess_blob_gas](./proto/sf/ethereum/type/v2/type.proto#L174)
+  - [BlockHeader.parent_beacon_root](./proto/sf/ethereum/type/v2/type.proto#L177)
+  - [TransactionTrace.blob_gas](./proto/sf/ethereum/type/v2/type.proto#371)
+  - [TransactionTrace.blob_gas_fee_cap](./proto/sf/ethereum/type/v2/type.proto#379)
+  - [TransactionTrace.blob_hashes](./proto/sf/ethereum/type/v2/type.proto#389)
+  - [TransactionReceipt.BlobGasUsed](./proto/sf/ethereum/type/v2/type.proto#422)
+  - [TransactionReceipt.BlobGasPrice](./proto/sf/ethereum/type/v2/type.proto#423)
+  - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#281)
+
 ## v2.1.0
 
 * Bump to major release firehose-core v1.0.0
@@ -609,12 +623,12 @@ The components should be deployed simultaneously to `tier1` and `tier2`, or user
 
 ### Added
 
-* Added substreams scheduler tracing support. Enable tracing by setting the ENV variables `SF_TRACING` to one of the following:
-  - stdout://
-  - cloudtrace://[host:port]?project_id=<project_id>&ratio=<0.25>
-  - jaeger://[host:port]?scheme=<http|https>
-  - zipkin://[host:port]?scheme=<http|https>
-  - otelcol://[host:port]
+* Added Substreams scheduler tracing support. Enable tracing by setting the ENV variables `SF_TRACING` to one of the following:
+  - `stdout://`
+  - `cloudtrace://[host:port]?project_id=<project_id>&ratio=<0.25>`
+  - `jaeger://[host:port]?scheme=<http|https>`
+  - `zipkin://[host:port]?scheme=<http|https>`
+  - `otelcol://[host:port]`
 
 ## v1.4.2
 

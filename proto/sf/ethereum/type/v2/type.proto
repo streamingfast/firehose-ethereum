@@ -27,6 +27,8 @@ message Block {
 
   // TransactionTraces hold the execute trace of all the transactions that were executed
   // in this block. In in there that you will find most of the Ethereum data model.
+  //
+  // They are ordered by the order of execution of the transaction in the block.
   repeated TransactionTrace transaction_traces = 10;
 
   // BalanceChanges here is the array of ETH transfer that happened at the block level
@@ -47,7 +49,7 @@ message Block {
   // DetailLevel affects the data available in this block.
   //
   // EXTENDED describes the most complete block, with traces, balance changes, storage changes. It is extracted during the execution of the block.
-  // BASE describes a block that contains only the block header, transaction receipts and event logs: everything that can be extracted using the base JSON-RPC interface (https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods) 
+  // BASE describes a block that contains only the block header, transaction receipts and event logs: everything that can be extracted using the base JSON-RPC interface (https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods)
   //      Furthermore, the eth_getTransactionReceipt call has been avoided because it brings only minimal improvements at the cost of requiring an archive node or a full node with complete transaction index.
   DetailLevel detail_level = 12;
 
@@ -61,6 +63,10 @@ message Block {
   // that this happen rarely, so the vast majority of block will have an empty list here.
   // Only available in DetailLevel: EXTENDED
   repeated CodeChange code_changes = 20;
+
+  // System calls are introduced in Dencun, along with blobs. They are executed outside of transactions but affect the state.
+  // Only available in DetailLevel: EXTENDED
+  repeated Call system_calls = 21;
 
   reserved 40; // bool filtering_applied = 40 [deprecated = true];
   reserved 41; // string filtering_include_filter_expr = 41 [deprecated = true];
@@ -143,8 +149,9 @@ message BlockHeader {
   //    extra_data,
   //    mix_hash,
   //    nonce,
-  //    base_fee_per_gas (to be included, only if London Fork is active)
-  //    withdrawals_root (to be included, only if Shangai Fork is active)
+  //    base_fee_per_gas (to be included only if London fork is active)
+  //    withdrawals_root (to be included only if Shangai fork is active)
+  //    excess_data_gas (to be included only if Dencun fork is active)
   //  ]))
   //
   bytes hash = 16;
@@ -159,6 +166,15 @@ message BlockHeader {
 
   // Only available in DetailLevel: EXTENDED
   Uint64NestedArray tx_dependency = 20;
+
+	// BlobGasUsed was added by EIP-4844 and is ignored in legacy headers.
+	uint64 blob_gas_used = 22;
+
+	// ExcessBlobGas was added by EIP-4844 and is ignored in legacy headers.
+	uint64 excess_blob_gas = 23;
+
+	// ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers.
+	bytes parent_beacon_root = 24;
 }
 
 message Uint64NestedArray {
@@ -173,6 +189,31 @@ message BigInt {
   bytes bytes = 1;
 }
 
+// TransactionTrace is full trace of execution of the transaction when the
+// it actually executed on chain.
+//
+// It contains all the transaction details like `from`, `to`, `gas`, etc.
+// as well as all the internal calls that were made during the transaction.
+//
+// The `calls` vector contains Call objects which have balance changes, events
+// storage changes, etc.
+//
+// If ordering is important between elements, almost each message like `Log`,
+// `Call`, `StorageChange`, etc. have an ordinal field that is represents "execution"
+// order of the said element against all other elements in this block.
+//
+// Due to how the call tree works doing "naively", looping through all calls then
+// through a Call's element like `logs` while not yielding the elements in the order
+// they were executed on chain. A log in call could have been done before or after
+// another in another call depending on the actual call tree.
+//
+// The `calls` are ordered by creation order and the call tree can be re-computing
+// using fields found in `Call` object (parent/child relationship).
+//
+// Another important thing to note is that even if a transaction succeed, some calls
+// within it could have been reverted internally, if this is important to you, you must
+// check the field `state_reverted` on the `Call` to determine if it was fully committed
+// to the chain or not.
 message TransactionTrace {
   // consensus
   bytes to = 1;
@@ -228,6 +269,16 @@ message TransactionTrace {
     // max base gas gee and max priority gas fee to pay for this transaction. Transaction's of those type are
     // executed against EIP-1559 rules which dictates a dynamic gas cost based on the congestion of the network.
     TRX_TYPE_DYNAMIC_FEE = 2;
+
+    // Transaction which contain a large amount of data that cannot be accessed by EVM execution, but whose commitment
+    // can be accessed. The format is intended to be fully compatible with the format that will be used in full sharding.
+    //
+    // Transaction that defines specifis an access list just like TRX_TYPE_ACCESS_LIST and enables dynamic fee just like
+    // TRX_TYPE_DYNAMIC_FEE but in addition defines the fields 'max_fee_per_data_gas' of type 'uint256' and the fields
+    // 'blob_versioned_hashes' field represents a list of hash outputs from 'kzg_to_versioned_hash'.
+    //
+    // Activated in Dencun
+    TRX_TYPE_BLOB = 3;
 
     // Arbitrum-specific transactions
     TRX_TYPE_ARBITRUM_DEPOSIT = 100;
@@ -305,6 +356,37 @@ message TransactionTrace {
 
   // Only available in DetailLevel: EXTENDED
   repeated Call calls = 32;
+
+  // BlobGas keep track of total data gas spent in this transaction, it's sum up for all successful
+  // transaction in a block and can be used to compute the block's data gas. The data gas is computed using
+  // the formula `BlobTxDataGasPerBlob * len(BlobVersionedHashes)` where is `BlobTxDataGasPerBlob` is decided
+  // by the current Ethereum active fork (at time of introduction of the Blob feature, this value was 17).
+  //
+  // It means the gas per blob can be computed by doing `blob_data_gas_used/len(BlobVersionedHashes`.
+  //
+  // This is specified by https://eips.ethereum.org/EIPS/eip-4844
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
+  // if Dencun fork is active on the chain.
+  uint64 blob_gas = 33;
+
+  // BlobGasFeeCap is the maximum fee per data gas the user is willing to pay for the data gas used.
+  //
+  // This is specified by https://eips.ethereum.org/EIPS/eip-4844
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
+  // if Dencun fork is active on the chain.
+  BigInt blob_gas_fee_cap = 34;
+
+  // BlobHashes field represents a list of hash outputs from 'kzg_to_versioned_hash' which
+  // essentially is a version byte + the sha256 hash of the blob commitment (e.g.
+  // `BLOB_COMMITMENT_VERSION_KZG + sha256(commitment)[1:]`.
+  //
+  // This is specified by https://eips.ethereum.org/EIPS/eip-4844
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
+  // if Dencun fork is active on the chain.
+  repeated bytes blob_hashes = 35;
 }
 
 // AccessTuple represents a list of storage keys for a given contract's address and is used
@@ -337,6 +419,8 @@ message TransactionReceipt {
   uint64 cumulative_gas_used = 2;
   bytes logs_bloom = 3;
   repeated Log logs = 4;
+  uint64 blob_gas_used = 5;
+  BigInt blob_gas_price = 6;
 }
 
 message Log {

@@ -137,5 +137,9 @@ func FromHeader(header *BlockHeader) *pbeth.BlockHeader {
 		BaseFeePerGas:    pbeth.BigIntFromBytes(header.BaseFeePerGas),
 		WithdrawalsRoot:  header.WithdrawalsHash,
 		TxDependency:     pbeth.Uint64NestedArrayFromEthUint(header.TxDependency),
+
+		BlobGasUsed:      uint64(header.BlobGasUsed),
+		ExcessBlobGas:    uint64(header.ExcessBlobGas),
+		ParentBeaconRoot: header.ParentBeaconRoot,
 	}
 }
