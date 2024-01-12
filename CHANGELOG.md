@@ -6,7 +6,7 @@ for instructions to keep up to date.
 
 ## Unreleased
 
-* Added support for EIP-4844 (upcoming with activation of Dencun fork). This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
+* Added support for EIP-4844 (upcoming with activation of Dencun fork), through instrumented go-ethereum nodes with version fh2.4. This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
   - [Block.system_calls](./proto/sf/ethereum/type/v2/type.proto#69)
   - [BlockHeader.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L171)
   - [BlockHeader.excess_blob_gas](./proto/sf/ethereum/type/v2/type.proto#L174)
