@@ -6,6 +6,8 @@ for instructions to keep up to date.
 
 ## v2.2.0
 
+### Support for Dencun fork (Goerli: Jan 17th)
+
 * Added support for EIP-4844 (upcoming with activation of Dencun fork), through instrumented go-ethereum nodes with version fh2.4. This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
   - [Block.system_calls](./proto/sf/ethereum/type/v2/type.proto#69)
   - [BlockHeader.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L171)
@@ -17,6 +19,17 @@ for instructions to keep up to date.
   - [TransactionReceipt.BlobGasUsed](./proto/sf/ethereum/type/v2/type.proto#422)
   - [TransactionReceipt.BlobGasPrice](./proto/sf/ethereum/type/v2/type.proto#423)
   - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#281)
+
+> [!IMPORTANT]
+> Operators running Goerli chain will need to upgrade to this version, with this geth node release: https://github.com/streamingfast/go-ethereum/releases/tag/geth-v1.13.10-fh2.4
+
+### Substreams server (bumped to v1.3.1)
+
+* Fixed error-passing between tier2 and tier1 (tier1 will not retry sending requests that fail deterministicly to tier2)
+* Tier1 will now schedule a single job on tier2, quickly ramping up to the requested number of workers after 4 seconds of delay, to catch early exceptions
+* "store became too big" is now considered a deterministic error and returns code "InvalidArgument"
+
+### Misc
 
 * Added `tools poller generic-evm` subcommand. It is identical to optimism/arb-one in feature at the moment and should work for most evm chains.
 
