@@ -901,10 +901,13 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	var blobGasPrice *pbeth.BigInt
 	if ctx.readBlobGasUsed {
 		logChunkNum = 7
-		blobGasUsed = FromUint64(chunks[5], "END_APPLY_TRX blobGasUsed")
-		blobGasPrice = pbeth.BigIntFromBytes(FromHex(chunks[6], "END_APPLY_TRX blogGasPrice"))
-	}
 
+		// Only in the blob trx type we compute those field for the receipt
+		if ctx.currentTrace.Type == pbeth.TransactionTrace_TRX_TYPE_BLOB {
+			blobGasUsed = FromUint64(chunks[5], "END_APPLY_TRX blobGasUsed")
+			blobGasPrice = pbeth.BigIntFromBytes(FromHex(chunks[6], "END_APPLY_TRX blogGasPrice"))
+		}
+	}
 	var logs []*Log
 	if err := json.Unmarshal([]byte(chunks[logChunkNum]), &logs); err != nil {
 		return err
