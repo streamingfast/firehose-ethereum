@@ -64,7 +64,7 @@ message Block {
   // Only available in DetailLevel: EXTENDED
   repeated CodeChange code_changes = 20;
 
-  // System calls are introduced in Dencun, along with blobs. They are executed outside of transactions but affect the state.
+  // System calls are introduced in Cancun, along with blobs. They are executed outside of transactions but affect the state.
   // Only available in DetailLevel: EXTENDED
   repeated Call system_calls = 21;
 
@@ -151,7 +151,9 @@ message BlockHeader {
   //    nonce,
   //    base_fee_per_gas (to be included only if London fork is active)
   //    withdrawals_root (to be included only if Shangai fork is active)
-  //    excess_data_gas (to be included only if Dencun fork is active)
+  //    blob_gas_used (to be included only if Cancun fork is active)
+  //    excess_blob_gas (to be included only if Cancun fork is active)
+  //    parent_beacon_root (to be included only if Cancun fork is active)
   //  ]))
   //
   bytes hash = 16;
@@ -357,17 +359,13 @@ message TransactionTrace {
   // Only available in DetailLevel: EXTENDED
   repeated Call calls = 32;
 
-  // BlobGas keep track of total data gas spent in this transaction, it's sum up for all successful
-  // transaction in a block and can be used to compute the block's data gas. The data gas is computed using
-  // the formula `BlobTxDataGasPerBlob * len(BlobVersionedHashes)` where is `BlobTxDataGasPerBlob` is decided
-  // by the current Ethereum active fork (at time of introduction of the Blob feature, this value was 17).
-  //
-  // It means the gas per blob can be computed by doing `blob_data_gas_used/len(BlobVersionedHashes`.
+  // BlobGas is the amount of gas the transaction is going to pay for the blobs, this is a computed value
+  // equivalent to `self.blob_gas_fee_cap * len(self.blob_hashes)` and provided in the model for convenience.
   //
   // This is specified by https://eips.ethereum.org/EIPS/eip-4844
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
-  // if Dencun fork is active on the chain.
+  // if Cancun fork is active on the chain.
   uint64 blob_gas = 33;
 
   // BlobGasFeeCap is the maximum fee per data gas the user is willing to pay for the data gas used.
@@ -375,7 +373,7 @@ message TransactionTrace {
   // This is specified by https://eips.ethereum.org/EIPS/eip-4844
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
-  // if Dencun fork is active on the chain.
+  // if Cancun fork is active on the chain.
   BigInt blob_gas_fee_cap = 34;
 
   // BlobHashes field represents a list of hash outputs from 'kzg_to_versioned_hash' which
@@ -385,7 +383,7 @@ message TransactionTrace {
   // This is specified by https://eips.ethereum.org/EIPS/eip-4844
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
-  // if Dencun fork is active on the chain.
+  // if Cancun fork is active on the chain.
   repeated bytes blob_hashes = 35;
 }
 
@@ -419,7 +417,22 @@ message TransactionReceipt {
   uint64 cumulative_gas_used = 2;
   bytes logs_bloom = 3;
   repeated Log logs = 4;
+
+  // BlobGasUsed is the amount of blob gas that has been used within this transaction. At time
+  // of writing, this is equal to `self.blob_gas_fee_cap * len(self.blob_hashes)`.
+  //
+  // This is specified by https://eips.ethereum.org/EIPS/eip-4844
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
+  // if Cancun fork is active on the chain.
   uint64 blob_gas_used = 5;
+
+  // BlobGasPrice is the amount to pay per blob item in the transaction.
+  //
+  // This is specified by https://eips.ethereum.org/EIPS/eip-4844
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
+  // if Cancun fork is active on the chain.
   BigInt blob_gas_price = 6;
 }
 

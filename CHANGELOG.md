@@ -4,21 +4,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Updated the documentation for some of the upcoming new Cancun hard-fork fields:
+  - [TransactionTrace.blob_gas](./proto/sf/ethereum/type/v2/type.proto#L369)
+  - [TransactionReceipt.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L428)
+  - [TransactionReceipt.blob_gas_price](./proto/sf/ethereum/type/v2/type.proto#L436)
+
 ## v2.2.0
 
-### Support for Dencun fork (Goerli: Jan 17th)
+### Support for Cancun fork (Goerli: Jan 17th)
 
-* Added support for EIP-4844 (upcoming with activation of Dencun fork), through instrumented go-ethereum nodes with version fh2.4. This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
-  - [Block.system_calls](./proto/sf/ethereum/type/v2/type.proto#69)
-  - [BlockHeader.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L171)
-  - [BlockHeader.excess_blob_gas](./proto/sf/ethereum/type/v2/type.proto#L174)
-  - [BlockHeader.parent_beacon_root](./proto/sf/ethereum/type/v2/type.proto#L177)
-  - [TransactionTrace.blob_gas](./proto/sf/ethereum/type/v2/type.proto#371)
-  - [TransactionTrace.blob_gas_fee_cap](./proto/sf/ethereum/type/v2/type.proto#379)
-  - [TransactionTrace.blob_hashes](./proto/sf/ethereum/type/v2/type.proto#389)
-  - [TransactionReceipt.BlobGasUsed](./proto/sf/ethereum/type/v2/type.proto#422)
-  - [TransactionReceipt.BlobGasPrice](./proto/sf/ethereum/type/v2/type.proto#423)
-  - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#281)
+* Added support for EIP-4844 (upcoming with activation of Cancun fork), through instrumented go-ethereum nodes with version `fh2.4`. This adds new fields in the Ethereum Block model, fields that will be non-empty when the Ethereum network your pulling have EIP-4844 activated.  The fields in questions are:
+  - [Block.system_calls](./proto/sf/ethereum/type/v2/type.proto#L69)
+  - [BlockHeader.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L173)
+  - [BlockHeader.excess_blob_gas](./proto/sf/ethereum/type/v2/type.proto#L176)
+  - [BlockHeader.parent_beacon_root](./proto/sf/ethereum/type/v2/type.proto#L179)
+  - [TransactionTrace.blob_gas](./proto/sf/ethereum/type/v2/type.proto#L369)
+  - [TransactionTrace.blob_gas_fee_cap](./proto/sf/ethereum/type/v2/type.proto#L377)
+  - [TransactionTrace.blob_hashes](./proto/sf/ethereum/type/v2/type.proto#L387)
+  - [TransactionReceipt.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L428)
+  - [TransactionReceipt.blob_gas_price](./proto/sf/ethereum/type/v2/type.proto#L436)
+  - A new `TransactionTrace.Type` value [TRX_TYPE_BLOB](./proto/sf/ethereum/type/v2/type.proto#L283)
 
 > [!IMPORTANT]
 > Operators running Goerli chain will need to upgrade to this version, with this geth node release: https://github.com/streamingfast/go-ethereum/releases/tag/geth-v1.13.10-fh2.4
