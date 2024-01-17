@@ -37,8 +37,8 @@ type BlockHeader struct {
 	Nonce            eth.Uint64     `json:"nonce"`
 	BaseFeePerGas    eth.Hex        `json:"baseFeePerGas"`
 	WithdrawalsHash  eth.Hash       `json:"withdrawalsRoot"`
-	BlobGasUsed      eth.Uint64     `json:"blobGasUsed"`
-	ExcessBlobGas    eth.Uint64     `json:"excessBlobGas"`
+	BlobGasUsed      *eth.Uint64    `json:"blobGasUsed"`
+	ExcessBlobGas    *eth.Uint64    `json:"excessBlobGas"`
 	ParentBeaconRoot eth.Hash       `json:"parentBeaconBlockRoot"`
 	TxDependency     [][]eth.Uint64 `json:"txDependency"`
 }

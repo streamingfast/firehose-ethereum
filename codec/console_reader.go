@@ -524,11 +524,11 @@ func (ctx *parseCtx) readApplyTrxBegin(line string) error {
 	trxType := pbeth.TransactionTrace_Type(FromInt32(chunks[13], "BEGIN_APPLY_TRX trxType"))
 	ordinal := FromUint64(chunks[14], "BEGIN_APPLY_TRX ordinal")
 
-	blobDataGasUsed := uint64(0)
+	var blobDataGasUsed *uint64
 	var maxFeePerDataGas *pbeth.BigInt
 	var blobVersionedHashes [][]byte
-	if len(chunks) == 19 {
-		blobDataGasUsed = FromUint64(chunks[16], "BEGIN_APPLY_TRX blobDataGasUsed")
+	if len(chunks) == 19 && trxType == pbeth.TransactionTrace_TRX_TYPE_BLOB {
+		blobDataGasUsed = ptr(FromUint64(chunks[16], "BEGIN_APPLY_TRX blobDataGasUsed"))
 		maxFeePerDataGas = pbeth.BigIntFromBytes(FromHex(chunks[17], "BEGIN_APPLY_TRX maxFeePerDataGas"))
 		blobVersionedHashes = decodeBlobHashes(chunks[18], "BEGIN_APPLY_TRX blobVerifiedHashes")
 	}
@@ -897,14 +897,14 @@ func (ctx *parseCtx) readApplyTrxEnd(line string) error {
 	ordinal := FromUint64(chunks[4], "END_APPLY_TRX ordinal")
 
 	logChunkNum := 5
-	var blobGasUsed uint64
+	var blobGasUsed *uint64
 	var blobGasPrice *pbeth.BigInt
 	if ctx.readBlobGasUsed {
 		logChunkNum = 7
 
 		// Only in the blob trx type we compute those field for the receipt
 		if ctx.currentTrace.Type == pbeth.TransactionTrace_TRX_TYPE_BLOB {
-			blobGasUsed = FromUint64(chunks[5], "END_APPLY_TRX blobGasUsed")
+			blobGasUsed = ptr(FromUint64(chunks[5], "END_APPLY_TRX blobGasUsed"))
 			blobGasPrice = pbeth.BigIntFromBytes(FromHex(chunks[6], "END_APPLY_TRX blogGasPrice"))
 		}
 	}
@@ -1835,3 +1835,5 @@ func SplitInBoundedChunks(line string, count int) ([]string, error) {
 func Has0xPrefix(input string) bool {
 	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
 }
+
+func ptr[T any](v T) *T { return &v }

@@ -4,6 +4,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.2.2
+
+The Cancun hard fork happened on Goerli and after further review, we decided to change the Protobuf definition for the new `BlockHeader`, `Transaction` and `TransactionReceipt` fields that are related to blob transaction.
+
+We made explicit that those fields are optional in the Protobuf definition which will render them in your language of choice using the appropriate "null" mechanism. For example on Golang, those fields are generated as `BlobGasUsed *uint64` and `ExcessBlobGas *uint64` which will make it clear that those fields are not populated at all.
+
+The affected fields are:
+  - [BlockHeader.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L173), now `optional uint64`.
+  - [BlockHeader.excess_blob_gas](./proto/sf/ethereum/type/v2/type.proto#L176), now `optional uint64`.
+  - [TransactionTrace.blob_gas](./proto/sf/ethereum/type/v2/type.proto#L369), now `optional uint64`.
+  - [TransactionTrace.blob_gas_fee_cap](./proto/sf/ethereum/type/v2/type.proto#L377), now `optional BigInt`.
+  - [TransactionReceipt.blob_gas_used](./proto/sf/ethereum/type/v2/type.proto#L428), now `optional uint64`.
+  - [TransactionReceipt.blob_gas_price](./proto/sf/ethereum/type/v2/type.proto#L436), now `optional BigInt`.
+
+This is technically a breaking change for those that could have consumed those fields already but we think he impact is so minimal that it's better to make the change right now.
+
+### Operators
+
+You will need to reprocess a small Goerli range. You should update to new version to produce the newer version and the reprocess from block 10377700 up to when you upgraded to v2.2.2.
+
+The block 10377700 was chosen since it is the block at the time of the first release we did supporting Cancun where we introduced those new field. If you know when you deploy either `v2.2.0` or `v2.2.1`, you should reprocess from that point.
+
+An alternative to reprocessing is updating your blocks by having a [StreamingFast API Token](https://substreams.streamingfast.io/getting-started/quickstart#run-your-first-substreams) and using `fireeth tools download-from-firehose goerli.eth.streamingfast.io:443 -a SUBSTREAMS_API_TOKEN 10377700:<recent block rounded to 100s> <destination>`.
+
+> [!NOTE]
+> You should download the blocks to a temporary destination and copy over to your production destination once you have them all.
+
+You can reach to us on Discord if you need help on something.
+
 ## v2.2.1
 
 * Updated the documentation for some of the upcoming new Cancun hard-fork fields:

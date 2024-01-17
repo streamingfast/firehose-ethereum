@@ -170,10 +170,10 @@ message BlockHeader {
   Uint64NestedArray tx_dependency = 20;
 
 	// BlobGasUsed was added by EIP-4844 and is ignored in legacy headers.
-	uint64 blob_gas_used = 22;
+	optional uint64 blob_gas_used = 22;
 
 	// ExcessBlobGas was added by EIP-4844 and is ignored in legacy headers.
-	uint64 excess_blob_gas = 23;
+	optional uint64 excess_blob_gas = 23;
 
 	// ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers.
 	bytes parent_beacon_root = 24;
@@ -366,7 +366,7 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Cancun fork is active on the chain.
-  uint64 blob_gas = 33;
+  optional uint64 blob_gas = 33;
 
   // BlobGasFeeCap is the maximum fee per data gas the user is willing to pay for the data gas used.
   //
@@ -374,7 +374,7 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Cancun fork is active on the chain.
-  BigInt blob_gas_fee_cap = 34;
+  optional BigInt blob_gas_fee_cap = 34;
 
   // BlobHashes field represents a list of hash outputs from 'kzg_to_versioned_hash' which
   // essentially is a version byte + the sha256 hash of the blob commitment (e.g.
@@ -425,7 +425,7 @@ message TransactionReceipt {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Cancun fork is active on the chain.
-  uint64 blob_gas_used = 5;
+  optional uint64 blob_gas_used = 5;
 
   // BlobGasPrice is the amount to pay per blob item in the transaction.
   //
@@ -433,7 +433,7 @@ message TransactionReceipt {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Cancun fork is active on the chain.
-  BigInt blob_gas_price = 6;
+  optional BigInt blob_gas_price = 6;
 }
 
 message Log {
