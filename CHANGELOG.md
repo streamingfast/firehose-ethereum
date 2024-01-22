@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Bump `firehose` and `firehose-core` in order to reduce logging
+
 ## v2.2.2
 
 The Cancun hard fork happened on Goerli and after further review, we decided to change the Protobuf definition for the new `BlockHeader`, `Transaction` and `TransactionReceipt` fields that are related to blob transaction.

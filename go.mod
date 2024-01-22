@@ -20,13 +20,13 @@ require (
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20231204174036-34e2cb6d64af
-	github.com/streamingfast/firehose v0.1.1-0.20231109192301-ebfed7417cf6
-	github.com/streamingfast/firehose-core v1.0.1-0.20240109204056-bffc42bc79f6
+	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
+	github.com/streamingfast/firehose-core v1.0.1-0.20240122145356-5c2c3ee639fb
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20231208140754-ed2bd10b96ee
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.3.1
+	github.com/streamingfast/substreams v1.3.2-0.20240122120515-89758b320871
 	github.com/stretchr/testify v1.8.4
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -165,8 +165,7 @@ require (
 	github.com/streamingfast/dauth v0.0.0-20231120142446-843f4e045cc2 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1 // indirect
-	github.com/streamingfast/dgrpc v0.0.0-20230929132851-893fc52687fa // indirect
-	github.com/streamingfast/dlauncher v0.0.0-20230607184145-76399faad89e // indirect
+	github.com/streamingfast/dgrpc v0.0.0-20240119162453-69517bcc1a7f // indirect
 	github.com/streamingfast/dmetering v0.0.0-20231120142327-a3405f0eed83 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
