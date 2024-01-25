@@ -83,7 +83,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -171,7 +171,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -219,7 +219,7 @@ jobs:
     strategy:
       matrix:
         binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon","nitro"]' ) }}
-        exclude: 
+        exclude:
           - binary: nitro
 
     env:
@@ -277,7 +277,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -319,7 +319,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_OUTPUT
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -327,8 +327,8 @@ jobs:
         with:
           args: |
             :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
-  
-  
+
+
 
   slack-notifications:
     needs: [ build-vanilla, bundle-docker-versions ]
@@ -341,7 +341,7 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_OUTPUT
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -364,7 +364,8 @@ jobs:
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
-          echo "SLACK_ID=$SLACK_ID" > $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID" > $GITHUB_OUTPUT
+          echo
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
