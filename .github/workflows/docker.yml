@@ -34,6 +34,9 @@ jobs:
       contents: read
       packages: write
 
+    env:
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
+
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
 
