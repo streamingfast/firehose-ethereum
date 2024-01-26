@@ -103,13 +103,14 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (o
 		if eg.Stop() {
 			continue // short-circuit the loop if we got an error
 		}
+		hash := tx.Hash
 		eg.Go(func() error {
-			receipt, err := client.TransactionReceipt(ctx, tx.Hash)
+			receipt, err := client.TransactionReceipt(ctx, hash)
 			if err != nil {
-				return fmt.Errorf("fetching receipt for tx %q: %w", tx.Hash.Pretty(), err)
+				return fmt.Errorf("fetching receipt for tx %q: %w", hash.Pretty(), err)
 			}
 			lock.Lock()
-			out[tx.Hash.Pretty()] = receipt
+			out[hash.Pretty()] = receipt
 			lock.Unlock()
 			return err
 		})
