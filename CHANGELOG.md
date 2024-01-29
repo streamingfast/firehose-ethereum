@@ -8,7 +8,7 @@ for instructions to keep up to date.
 
 ### Operators
 
-* Firehose blocks that were produced using the RPC Poller will have to be extracted again to fix the Transaction Status and the potential missing headers
+* Firehose blocks that were produced using the RPC Poller will have to be extracted again to fix the Transaction Status and the potential missing receipt (ex: arb-one pre-nitro, Avalanche, Optimism ...)
 
 ### Fixes
 
