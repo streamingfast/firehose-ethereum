@@ -4,6 +4,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.3.1
+
+### Operators
+
+* Firehose blocks that were produced using the RPC Poller will have to be extracted again to fix the Transaction Status and the potential missing headers
+
+### Fixes
+
+* Fix race condition in RPC Poller which would cause some missing transaction receipts
+* Fix conversion of transaction status from RPC Poller: failed transactions would show up as "status unknown" in firehose blocks.
+
+### Added
+
+* Added the support the FORCE_FINALITY_AFTER_BLOCKS environment variable: setting it to a value like '200' will make the 'reader' mark blocks as final after a maximum of 200 block confirmations, even if the chain implements finality via a beacon that lags behind.
+
 ## v2.3.0
 
 * Reduce logging and logging "payload".

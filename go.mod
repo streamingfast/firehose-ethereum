@@ -15,16 +15,16 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
-	github.com/streamingfast/bstream v0.0.2-0.20231211192436-01f6a005b0e4
+	github.com/streamingfast/bstream v0.0.2-0.20240127132523-330edbf00208
 	github.com/streamingfast/cli v0.0.4-0.20230825151644-8cc84512cd80
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
 	github.com/streamingfast/dstore v0.1.1-0.20230620124109-3924b3b36c77
 	github.com/streamingfast/eth-go v0.0.0-20240129180546-72c8e66e24b3
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.1.0
+	github.com/streamingfast/firehose-core v1.1.1-0.20240129194026-1c7d627f11ff
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
-	github.com/streamingfast/pbgo v0.0.6-0.20231208140754-ed2bd10b96ee
+	github.com/streamingfast/pbgo v0.0.6-0.20240126214028-e57a3692caee
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/substreams v1.3.2
 	github.com/stretchr/testify v1.8.4
