@@ -2,6 +2,7 @@ package block
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 
 	"github.com/holiman/uint256"
@@ -119,13 +120,26 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 	out.Receipt = fhReceipt
 
 	if receipt != nil {
-		out.Status = pbeth.TransactionTraceStatus(receipt.Status)
+		if receipt.Root == nil {
+			out.Status = toFirehoseReceiptStatus(uint64(receipt.Status))
+		}
 		out.Type = pbeth.TransactionTrace_Type(receipt.Type)
 		out.GasUsed = uint64(receipt.GasUsed)
 	}
 	out.EndOrdinal = ordinal.next()
 
 	return out
+}
+
+func toFirehoseReceiptStatus(in uint64) pbeth.TransactionTraceStatus {
+	switch in {
+	case 0:
+		return pbeth.TransactionTraceStatus_FAILED
+	case 1:
+		return pbeth.TransactionTraceStatus_SUCCEEDED
+	default:
+		panic(fmt.Errorf("invalid receipt status: %d", in))
+	}
 }
 
 func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.TransactionReceipt) (traces []*pbeth.TransactionTrace, hashesWithoutTo map[string]bool) {
