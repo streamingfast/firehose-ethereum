@@ -85,7 +85,7 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				continue
 			}
 
-			ethBlock, _ := block.RpcToEthBlock(rpcBlock, receipts)
+			ethBlock, _ := block.RpcToEthBlock(rpcBlock, receipts, logger)
 			cnt, err := proto.Marshal(ethBlock)
 			if err != nil {
 				return fmt.Errorf("failed to proto  marshal pb sol block: %w", err)

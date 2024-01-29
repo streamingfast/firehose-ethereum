@@ -2,6 +2,7 @@ package block
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -9,12 +10,13 @@ import (
 	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt) (*pbeth.Block, map[string]bool) {
+func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (*pbeth.Block, map[string]bool) {
 
-	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, receipts)
+	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, receipts, logger)
 
 	out := &pbeth.Block{
 		DetailLevel:       pbeth.Block_DETAILLEVEL_BASE,
@@ -120,8 +122,8 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 	out.Receipt = fhReceipt
 
 	if receipt != nil {
-		if receipt.Root == nil {
-			out.Status = toFirehoseReceiptStatus(uint64(receipt.Status))
+		if receipt.Status != nil {
+			out.Status = toFirehoseReceiptStatus(uint64(*receipt.Status))
 		}
 		out.Type = pbeth.TransactionTrace_Type(receipt.Type)
 		out.GasUsed = uint64(receipt.GasUsed)
@@ -142,12 +144,13 @@ func toFirehoseReceiptStatus(in uint64) pbeth.TransactionTraceStatus {
 	}
 }
 
-func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.TransactionReceipt) (traces []*pbeth.TransactionTrace, hashesWithoutTo map[string]bool) {
+func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (traces []*pbeth.TransactionTrace, hashesWithoutTo map[string]bool) {
 	ordinal := &counter{}
 
 	transactions, _ := in.Receipts() //todo: this is confusing, Why is it not call Transactions?
 	out := make([]*pbeth.TransactionTrace, len(transactions))
 	hashesWithoutTo = make(map[string]bool)
+	loggedUnknownReceiptStatus := false
 	for i := range transactions {
 		txHash := eth.Hash(transactions[i].Hash.Bytes()).String()
 		var toBytes []byte
@@ -159,6 +162,10 @@ func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.Transa
 
 		receipt := receipts[transactions[i].Hash.Pretty()]
 		pbTrace := convertTrx(&transactions[i], toBytes, ordinal, receipt)
+		if !loggedUnknownReceiptStatus && pbTrace.Status == pbeth.TransactionTraceStatus_UNKNOWN {
+			logger.Warn("receipt status is nil, firehose transaction status will be 'Unknown' (if this is pre-byzantium, you should try using an Erigon endpoint to get the status)", zap.String("tx_hash", hex.EncodeToString(pbTrace.Hash)))
+			loggedUnknownReceiptStatus = true
+		}
 
 		out[i] = pbTrace
 	}

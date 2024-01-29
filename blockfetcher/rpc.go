@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type ToEthBlock func(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt) (*pbeth.Block, map[string]bool)
+type ToEthBlock func(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (*pbeth.Block, map[string]bool)
 
 type BlockFetcher struct {
 	rpcClient                *rpc.Client
@@ -77,7 +77,7 @@ func (f *BlockFetcher) Fetch(ctx context.Context, blockNum uint64) (block *pbbst
 		return nil, fmt.Errorf("fetching logs for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
 	}
 
-	ethBlock, _ := f.toEthBlock(rpcBlock, receipts)
+	ethBlock, _ := f.toEthBlock(rpcBlock, receipts, f.logger)
 	anyBlock, err := anypb.New(ethBlock)
 	if err != nil {
 		return nil, fmt.Errorf("create any block: %w", err)

@@ -379,7 +379,7 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, receipts ma
 		return true, nil
 	}
 
-	rpcAsPBEth, hashesWithoutTo := block.RpcToEthBlock(rpcBlock, receipts)
+	rpcAsPBEth, hashesWithoutTo := block.RpcToEthBlock(rpcBlock, receipts, zap.NewNop())
 	stripFirehoseBlock(fhBlock, hashesWithoutTo)
 
 	// tweak that new block for comparison
