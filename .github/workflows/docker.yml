@@ -82,7 +82,7 @@ jobs:
         id: get-slack-id
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
@@ -170,7 +170,7 @@ jobs:
         id: get-slack-id
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
@@ -276,7 +276,7 @@ jobs:
         id: get-slack-id
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
@@ -318,7 +318,7 @@ jobs:
         id: get-slack-id
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
       - name: Slack notification
         env:
@@ -340,7 +340,7 @@ jobs:
         id: get-slack-id
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
       - name: Slack notification
         env:
@@ -363,7 +363,7 @@ jobs:
         id: get-slack-id
         run: |
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r ".${{ github.actor }}")
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
           echo
       - name: Slack notification
