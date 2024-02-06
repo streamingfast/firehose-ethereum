@@ -92,8 +92,12 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 		poller := blockpoller.New(fetcher, handler, blockpoller.WithStoringState(stateDir), blockpoller.WithLogger(logger))
 
 		latestBlockRef := rpc.FinalizedBlock
-		if blockQuery, err := sflags.GetString(cmd, "latest-block-query"); err == nil && blockQuery == "latest" {
-			latestBlockRef = rpc.LatestBlock
+		if blockQuery, err := sflags.GetString(cmd, "latest-block-query"); err == nil {
+			if blockQuery == "latest" {
+				latestBlockRef = rpc.LatestBlock
+			} else if blockQuery != "finalized" {
+				return fmt.Errorf("invalid value given for the --latest-block-query flag: %q", blockQuery)
+			}
 		}
 
 		latestBlock, err := rpcClient.GetBlockByNumber(ctx, latestBlockRef)
