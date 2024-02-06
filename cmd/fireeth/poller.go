@@ -61,6 +61,7 @@ func newGenericEVMPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Co
 		RunE:  pollerRunE(logger, tracer),
 	}
 	cmd.Flags().Duration("interval-between-fetch", 0, "interval between fetch")
+	cmd.Flags().String("latest-block-query", "finalized", "query parameter to fetch the latest block, can either be 'finalized' or 'latest'")
 
 	return cmd
 }
@@ -90,7 +91,12 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New(fetcher, handler, blockpoller.WithStoringState(stateDir), blockpoller.WithLogger(logger))
 
-		latestBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.FinalizedBlock)
+		latestBlockRef := rpc.FinalizedBlock
+		if blockQuery, err := sflags.GetString(cmd, "latest-block-query"); err == nil && blockQuery == "latest" {
+			latestBlockRef = rpc.LatestBlock
+		}
+
+		latestBlock, err := rpcClient.GetBlockByNumber(ctx, latestBlockRef)
 		if err != nil {
 			return fmt.Errorf("getting latest block: %w", err)
 		}
