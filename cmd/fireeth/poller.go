@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/eth-go/rpc"
 	firecore "github.com/streamingfast/firehose-core"
@@ -90,12 +89,7 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New(fetcher, handler, blockpoller.WithStoringState(stateDir), blockpoller.WithLogger(logger))
 
-		latestBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.FinalizedBlock)
-		if err != nil {
-			return fmt.Errorf("getting latest block: %w", err)
-		}
-
-		err = poller.Run(ctx, firstStreamableBlock, bstream.NewBlockRef(latestBlock.Hash.String(), uint64(latestBlock.Number)))
+		err = poller.Run(ctx, firstStreamableBlock)
 		if err != nil {
 			return fmt.Errorf("running poller: %w", err)
 		}
