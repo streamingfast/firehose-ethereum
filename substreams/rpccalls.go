@@ -48,11 +48,6 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 		zap.Uint64("cache_chunk_size_in_block", cacheChunkSizeInBlock),
 	)
 
-	rpcCacheStore, err := dstore.NewStore(rpcCachePath, "", "", false)
-	if err != nil {
-		return nil, fmt.Errorf("setting up rpc cache store: %w", err)
-	}
-
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true, // don't reuse connections
@@ -71,7 +66,17 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 	if len(rpcClients) == 1 {
 		zlog.Warn("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
 	}
-	rpcCacheStore.SetOverwrite(true)
+
+	var err error
+	var rpcCacheStore dstore.Store
+
+	if rpcCachePath != "" {
+		rpcCacheStore, err = dstore.NewStore(rpcCachePath, "", "", false)
+		if err != nil {
+			return nil, fmt.Errorf("setting up rpc cache store: %w", err)
+		}
+		rpcCacheStore.SetOverwrite(true)
+	}
 
 	return &RPCEngine{
 		perRequestCache:       map[string]Cache{},
@@ -103,6 +108,9 @@ func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 }
 
 func (e *RPCEngine) PipelineOptions(ctx context.Context, startBlockNum, stopBlockNum uint64, traceID string) []pipeline.Option {
+	if e.rpcCacheStore == nil {
+		return []pipeline.Option{}
+	}
 	pipelineCache := NewStoreBackedCache(ctx, e.rpcCacheStore, startBlockNum, e.cacheChunkSizeInBlock)
 	e.registerRequestCache(traceID, pipelineCache)
 
@@ -153,16 +161,22 @@ func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID strin
 		return nil, false, fmt.Errorf("unmarshal rpc calls proto: %w", err)
 	}
 
-	e.perRequestCacheLock.RLock()
-	cache, found := e.perRequestCache[traceID]
-	e.perRequestCacheLock.RUnlock()
+	var cache Cache
+	if e.rpcCacheStore != nil {
+		e.perRequestCacheLock.RLock()
+		var found bool
+		cache, found = e.perRequestCache[traceID]
+		e.perRequestCacheLock.RUnlock()
 
-	if !found {
-		panic(fmt.Sprintf("cache not found for trace ID %s", traceID))
-	}
+		if !found {
+			panic(fmt.Sprintf("cache not found for trace ID %s", traceID))
+		}
 
-	if cache == nil {
-		panic("no cache initialized for this request")
+		if cache == nil {
+			panic("no cache initialized for this request")
+		}
+	} else {
+		cache = &NoOpCache{}
 	}
 
 	if err := e.validateCalls(ctx, calls); err != nil {
