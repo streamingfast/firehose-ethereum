@@ -23,7 +23,7 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20240215171730-493ad5a0f537
 	github.com/streamingfast/eth-go v0.0.0-20240129180546-72c8e66e24b3
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.2.2-0.20240222161628-54b99e940913
+	github.com/streamingfast/firehose-core v1.2.2-0.20240222214306-c8ea7c02a763
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20240131193313-6b88bc7139db
@@ -167,7 +167,7 @@ require (
 	github.com/streamingfast/dauth v0.0.0-20240219205130-bfe428489338 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1 // indirect
-	github.com/streamingfast/dgrpc v0.0.0-20240221215336-fd4bfbe03582 // indirect
+	github.com/streamingfast/dgrpc v0.0.0-20240222213940-b9f324ff4d5c // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20240215171500-4f0413a948bb // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
