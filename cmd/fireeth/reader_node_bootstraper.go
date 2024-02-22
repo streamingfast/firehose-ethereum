@@ -150,7 +150,7 @@ type TarballBootstrapper struct {
 }
 
 func isBootstrapped(dataDir string, logger *zap.Logger) bool {
-	var foundCURRENT bool
+	var foundFile bool
 	err := filepath.Walk(dataDir,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -159,17 +159,16 @@ func isBootstrapped(dataDir string, logger *zap.Logger) bool {
 			if info.IsDir() {
 				return nil
 			}
-			if filepath.Base(path) == "CURRENT" {
-				foundCURRENT = true
-				return io.EOF
-			}
-			return nil
+
+			// As soon as there is a file, we assume it's bootstrapped
+			foundFile = true
+			return io.EOF
 		})
 	if err != nil && !os.IsNotExist(err) && err != io.EOF {
 		logger.Warn("error while checking for bootstrapped status", zap.Error(err))
 	}
 
-	return foundCURRENT
+	return foundFile
 }
 
 func (b *TarballBootstrapper) isBootstrapped() bool {
