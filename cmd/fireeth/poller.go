@@ -89,7 +89,7 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New(fetcher, handler, blockpoller.WithStoringState(stateDir), blockpoller.WithLogger(logger))
 
-		err = poller.Run(ctx, firstStreamableBlock)
+		err = poller.Run(ctx, firstStreamableBlock, 1)
 		if err != nil {
 			return fmt.Errorf("running poller: %w", err)
 		}
