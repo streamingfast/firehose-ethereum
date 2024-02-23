@@ -1,10 +1,12 @@
-ARG CHAIN_VERSION=geth-latest
+ARG CHAIN_DOCKER_REPO=ghcr.io/streamingfast/go-ethereum
+ARG CHAIN_DOCKER_VERSION=geth-latest
+ARG CHAIN_BINARY_PATH=/usr/local/bin/geth
 ARG SF_VERSION=latest
 
-FROM ghcr.io/streamingfast/go-ethereum:$CHAIN_VERSION as chain
+FROM $CHAIN_DOCKER_REPO:$CHAIN_DOCKER_VERSION as chain
 FROM ghcr.io/streamingfast/firehose-ethereum:$SF_VERSION
 
-COPY --from=chain /usr/local/bin/geth /app/geth
+COPY --from=chain $CHAIN_BINARY_PATH /app/
 
 COPY tools/fireeth/motd_node_manager /etc/motd
 COPY tools/fireeth/scripts/. /usr/local/bin/
