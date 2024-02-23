@@ -265,17 +265,19 @@ jobs:
             SF_VERSION=${{ env.SF_VERSION }}
 
       - name: Get Job ID from GH API
-        id: get-job-id
-        if: ${{ failure() }}
+        id: get_job_id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh api "repos/streamingfast/firehose-ethereum/actions/runs/8024607951/attempts/1/jobs"
           jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
           job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ github.job }}") | .id')
-          echo "$jobs"
+          echo "Job from runner name"
           echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id'
+          echo "Job from name"
           echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ github.job }}") | .id'
+          echo "Job from variable"
+          echo "$job_id"
           echo "job_id=$job_id" >> $GITHUB_OUTPUT
 
       - name: Notify build failure on Slack
@@ -285,7 +287,7 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get-job-id.outputs.job_id }}|See Actions Logs>) :broken_heart:
+            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
       - id: print
         run: |
