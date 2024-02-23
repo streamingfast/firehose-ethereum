@@ -4,6 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Auth and metering
+
+* Add missing metering events for `sf.firehose.v2.Fetch/Block` responses.
+* Changed default polling interval in 'continuous authentication' from 10s to 60s, added 'interval' query param to URL.
+
+### Substreams
+
+* Fixed bug in scheduler ramp-up function sometimes waiting before raising the number of workers
+* Fixed load-balancing from tier1 to tier2 when using dns:/// (round-robin policy was not set correctly)
+* Added `trace_id` in grpc authentication calls
+* Bumped connect-go library to new "connectrpc.com/connect" location
+
 ## v2.3.1
 
 ### Operators
