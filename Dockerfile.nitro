@@ -1,4 +1,4 @@
-ARG CHAIN_VERSION="latest"
+ARG CHAIN_DOCKER_VERSION="latest"
 
 ####
 
@@ -15,7 +15,7 @@ RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
 
 ####
 
-FROM ghcr.io/streamingfast/nitro:${CHAIN_VERSION} as chain
+FROM ghcr.io/streamingfast/nitro:${CHAIN_DOCKER_VERSION} as chain
 
 ####
 

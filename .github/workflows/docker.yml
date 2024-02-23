@@ -27,15 +27,37 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    env:
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
+
+    outputs:
+      slack_id: ${{ steps.get-slack-id.outputs.SLACK_ID }}
+
+    steps:
+      - name: Check SLACK_IDS env variable
+        run: |
+          if [ -z "${SLACK_IDS}" ]; then
+            echo "The secret 'vars.SLACK_IDS' is empty"
+            exit 1
+          fi
+
+      - name: Get Slack ID
+        id: get-slack-id
+        run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
+          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
+
   build-vanilla:
+    needs: [setup]
     runs-on: ubuntu-20.04
 
     permissions:
       contents: read
       packages: write
-
-    env:
-      SLACK_IDS: ${{ vars.SLACK_IDS }}
 
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
@@ -71,20 +93,6 @@ jobs:
           flavor: |
             latest=${{ startsWith(github.ref, 'refs/tags/') }}
 
-      - name: Check SLACK_IDS env variable
-        run: |
-          if [ -z "${SLACK_IDS}" ]; then
-            echo "SLACK_IDS is empty"
-            exit 1
-          fi
-
-      - name: Get Slack ID
-        id: get-slack-id
-        run: |
-          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -96,6 +104,16 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Get Job ID from GH API
+        id: get_job_id
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
+          job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
+          echo "job_id=$job_id" >> $GITHUB_OUTPUT
+
       - name: Notify build failure on Slack
         if: ${{ failure() }}
         env:
@@ -103,11 +121,11 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
 
   bundle-docker-version-nitro:
-    needs: build-vanilla
+    needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'nitro')) }}
 
@@ -117,9 +135,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    env:
-      SLACK_IDS: ${{ vars.SLACK_IDS }}
 
     steps:
       - name: Log in to the Container registry
@@ -159,20 +174,6 @@ jobs:
             type=raw,prefix=,suffix=-nitro,enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: latest=false
 
-      - name: Check SLACK_IDS env variable
-        run: |
-          if [ -z "${SLACK_IDS}" ]; then
-            echo "SLACK_IDS is empty"
-            exit 1
-          fi
-
-      - name: Get Slack ID
-        id: get-slack-id
-        run: |
-          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -182,8 +183,18 @@ jobs:
           file: ./Dockerfile.nitro
           build-args: |
             VERSION=${{ github.event.ref }}
-            CHAIN_VERSION=${{ env.VERSION }}
+            CHAIN_DOCKER_VERSION=${{ env.VERSION }}
             SF_VERSION=${{ env.SF_VERSION }}
+
+      - name: Get Job ID from GH API
+        id: get_job_id
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
+          job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
+          echo "job_id=$job_id" >> $GITHUB_OUTPUT
 
       - name: Notify build failure on Slack
         if: ${{ failure() }}
@@ -192,7 +203,7 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed building bundle for nitro from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building bundle for nitro from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
       - id: print
         run: |
@@ -203,7 +214,7 @@ jobs:
           echo "nitro=$OUT" >> $GITHUB_OUTPUT
 
   bundle-docker-versions:
-    needs: build-vanilla
+    needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bsc')) }}
 
@@ -221,9 +232,6 @@ jobs:
         binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon","nitro"]' ) }}
         exclude:
           - binary: nitro
-
-    env:
-      SLACK_IDS: ${{ vars.SLACK_IDS }}
 
     steps:
       - name: Log in to the Container registry
@@ -265,20 +273,6 @@ jobs:
             type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: latest=false
 
-      - name: Check SLACK_IDS env variable
-        run: |
-          if [ -z "${SLACK_IDS}" ]; then
-            echo "SLACK_IDS is empty"
-            exit 1
-          fi
-
-      - name: Get Slack ID
-        id: get-slack-id
-        run: |
-          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -287,8 +281,19 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           file: ./Dockerfile.bundle
           build-args: |
-            CHAIN_VERSION=${{ env.VERSION }}
+            CHAIN_DOCKER_REPO=ghcr.io/streamingfast/go-ethereum
+            CHAIN_DOCKER_VERSION=${{ env.VERSION }}
             SF_VERSION=${{ env.SF_VERSION }}
+
+      - name: Get Job ID from GH API
+        id: get_job_id
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
+          job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
+          echo "job_id=$job_id" >> $GITHUB_OUTPUT
 
       - name: Notify build failure on Slack
         if: ${{ failure() }}
@@ -297,7 +302,7 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :x: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Failed bundling docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :broken_heart:
+            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker versions from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
       - id: print
         run: |
@@ -309,68 +314,41 @@ jobs:
 
   slack-notifications-vanilla:
     if: ${{ !startsWith(github.ref, 'refs/tags/') && !contains(github.event.head_commit.message, 'build:all') && github.event_name != 'workflow_dispatch' }}
-    needs: [build-vanilla]
+    needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
-    env:
-      SLACK_IDS: ${{ vars.SLACK_IDS }}
     steps:
-      - name: Get Slack ID
-        id: get-slack-id
-        run: |
-          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
-
-
+            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
 
   slack-notifications:
-    needs: [ build-vanilla, bundle-docker-versions ]
+    needs: [ setup, build-vanilla, bundle-docker-versions ]
     runs-on: ubuntu-20.04
-    env:
-      SLACK_IDS: ${{ vars.SLACK_IDS }}
     steps:
-      - name: Get Slack ID
-        id: get-slack-id
-        run: |
-          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
             ${{ needs.bundle-docker-versions.outputs.geth }}
             ${{ needs.bundle-docker-versions.outputs.bsc }}
             ${{ needs.bundle-docker-versions.outputs.polygon }}```
 
   slack-notification-nitro:
-    needs: [ bundle-docker-version-nitro ]
+    needs: [ setup, bundle-docker-version-nitro ]
     runs-on: ubuntu-20.04
-    env:
-      SLACK_IDS: ${{ vars.SLACK_IDS }}
     steps:
-      - name: Get Slack ID
-        id: get-slack-id
-        run: |
-          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
-          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
-          echo
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: <@${{ steps.get-slack-id.outputs.SLACK_ID }}> *${{ github.repository }}* Success building nitro docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building nitro docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
             ${{ needs.bundle-docker-version-nitro.outputs.nitro }}```
