@@ -219,9 +219,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api "repos/streamingfast/firehose-ethereum/actions/runs/8024607951/attempts/1/jobs"
           jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
-          job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ github.job }}") | .id')
+          job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
           echo "Job from runner name"
           echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id'
           echo "Job from name"
