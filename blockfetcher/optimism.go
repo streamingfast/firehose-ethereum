@@ -15,9 +15,8 @@ type OptimismBlockFetcher struct {
 	fetcher *BlockFetcher
 }
 
-func (f *OptimismBlockFetcher) IsBlockAvailable(requestedSlot uint64) bool {
-	//TODO implement me
-	panic("implement me")
+func (f *OptimismBlockFetcher) IsBlockAvailable(requested uint64) bool {
+	return f.fetcher.IsBlockAvailable(requested)
 }
 
 func (f *OptimismBlockFetcher) Fetch(ctx context.Context, blockNum uint64) (b *pbbstream.Block, skipped bool, err error) {
@@ -32,4 +31,4 @@ func NewOptimismBlockFetcher(rpcClient *rpc.Client, intervalBetweenFetch time.Du
 	}
 }
 
-func (f *OptimismBlockFetcher) PollingInterval() time.Duration { return 1 * time.Second }
+func (f *OptimismBlockFetcher) PollingInterval() time.Duration { return 5 * time.Second }

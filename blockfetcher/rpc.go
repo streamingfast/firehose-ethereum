@@ -37,6 +37,10 @@ func NewBlockFetcher(rpcClient *rpc.Client, intervalBetweenFetch, latestBlockRet
 	}
 }
 
+func (f *BlockFetcher) IsBlockAvailable(blockNum uint64) bool {
+	return blockNum <= f.latest
+}
+
 func (f *BlockFetcher) Fetch(ctx context.Context, blockNum uint64) (block *pbbstream.Block, err error) {
 	f.logger.Debug("fetching block", zap.Uint64("block_num", blockNum))
 	for f.latest < blockNum {

@@ -4,7 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.3.3
+
+### Known issues ###
+
+* The block decoding to JSON is broken in the client tools (firehose-client, print merged-blocks, etc.). Use version v2.3.1
+
+### Hotfix
+
+* Fix block poller panic on v2.3.2
+
 ## v2.3.2
+
+### Known issues ###
+
+* This release has a broken RPC poller component. Upgrade to v2.3.3.
+* The block decoding to JSON is broken in the client tools (firehose-client, print merged-blocks, etc.). Use version v2.3.1
 
 ### Auth and metering
 
