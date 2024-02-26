@@ -4,26 +4,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
-
-* The `reader-node-bootstrap-url` gained the ability to be bootstrapped from a `bash` script.
-
-	If the bootstrap URL is of the form `bash:///<path/to/script>?<parameters>`, the bash script at
-	`<path/to/script>` will be executed. The script is going to receive in environment variables the resolved
-	reader node variables in the form of `READER_NODE_<VARIABLE_NAME>`. The fully resolved node arguments
-	(from `reader-node-arguments`) are passed as args to the bash script. The query parameters accepted are:
-
-	- `arg=<value>` | Pass as extra argument to the script, prepended to the list of resolved node arguments
-	- `env=<key>%3d<value>` | Pass as extra environment variable as `<key>=<value>` with key being upper-cased (multiple(s) allowed)
-	- `env_<key>=<value>` | Pass as extra environment variable as `<key>=<value>` with key being upper-cased (multiple(s) allowed)
-	- `cwd=<path>` | Change the working directory to `<path>` before running the script
-	- `interpreter=<path>` | Use `<path>` as the interpreter to run the script
-	- `interpreter_arg=<arg>` | Pass `<interpreter_arg>` as arguments to the interpreter before the script path (multiple(s) allowed)
-
-  > [!NOTE]
-  > The `bash:///` script support is currently experimental and might change in upcoming releases, the behavior changes will be
-    clearly documented here.
-
 ## v2.3.4
 
 * Fix JSON decoding in the client tools (firehose-client, print merged-blocks, etc.).

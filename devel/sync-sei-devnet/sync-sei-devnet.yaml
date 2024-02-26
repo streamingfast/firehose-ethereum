@@ -11,7 +11,7 @@ start:
     common-first-streamable-block: 1
     firehose-grpc-listen-addr: :8089
     merger-time-between-store-pruning: 10s
-    reader-node-bootstrap-data-url: bash:///./node/generate.sh?env_chain=arctic-1
+    reader-node-bootstrap-data-url: ./node/sei-devnet-chain.tar.zst
     reader-node-path: seid
     reader-node-arguments:
        start
