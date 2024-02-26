@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/streamingfast/cli"
 	firecore "github.com/streamingfast/firehose-core"
 	fhCmd "github.com/streamingfast/firehose-core/cmd"
 	"github.com/streamingfast/firehose-core/substreams"
@@ -56,7 +57,12 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 		ConsoleReaderFactory: codec.NewConsoleReader,
 
 		RegisterExtraStartFlags: func(flags *pflag.FlagSet) {
-			flags.String("reader-node-bootstrap-data-url", "", "URL (file or gs) to either a genesis.json file or a .tar.zst archive to decompress in the datadir. Only used when bootstrapping (no prior data)")
+			// The "\n" is there on purpose to improve readability of the added elements
+			flags.String("reader-node-bootstrap-data-url", "", firecore.DefaultReaderNodeBootstrapDataURLFlagDescription()+"\n"+cli.Dedent(`
+				If the URL ends with json, it will be treated as a genesis.json file and the node will be bootstrapped with it. The bootstrapping
+				is done by calling 'geth init' with the genesis file. If you need more custom logic, think about using 'bash://...' instead
+				which execute any bash script and offers more flexibility.
+			`)+"\n")
 
 			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			flags.String("substreams-rpc-cache-store-url", "{data-dir}/rpc-cache", "where rpc cache will be store call responses")
@@ -91,7 +97,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			}, nil
 		},
 
-		ReaderNodeBootstrapperFactory: newReaderNodeBootstrapper,
+		ReaderNodeBootstrapperFactory: firecore.DefaultReaderNodeBootstrapper(newReaderNodeBootstrapper),
 
 		Tools: &firecore.ToolsConfig[*pbeth.Block]{
 
