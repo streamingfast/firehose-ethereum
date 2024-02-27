@@ -8,6 +8,7 @@ start:
   - substreams-tier1
   - substreams-tier2
   flags:
+    # This will need to be adjusted manually to fit with the snapshot sync, sadly it's not known in advance
     common-first-streamable-block: 1
     firehose-grpc-listen-addr: :8089
     merger-time-between-store-pruning: 10s
