@@ -2,7 +2,7 @@ ARG CHAIN_DOCKER_VERSION="latest"
 
 ####
 
-FROM golang:1.22-bullseye as builder
+FROM golang:1.22-bookworm as builder
 WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
@@ -19,11 +19,11 @@ FROM ghcr.io/streamingfast/nitro:${CHAIN_DOCKER_VERSION} as chain
 
 ####
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
        apt-get -y install -y \
-       ca-certificates libssl1.1 \
+       ca-certificates libssl3 \
        curl jq && \
        rm -rf /var/cache/apt /var/lib/apt/lists/*
 
