@@ -1,7 +1,6 @@
 package main
 
 import (
-	"archive/tar"
 	"context"
 	"fmt"
 	"io"
@@ -26,23 +25,19 @@ func newReaderNodeBootstrapper(_ context.Context, logger *zap.Logger, cmd *cobra
 		return nil, nil
 	}
 
-	nodePath := sflags.MustGetString(cmd, "reader-node-path")
-	nodeDataDir := resolver("{node-data-dir}")
-
 	switch {
-	case strings.HasSuffix(bootstrapDataURL, "tar.zst") || strings.HasSuffix(bootstrapDataURL, "tar.zstd"):
-		// There could be a mistmatch here if the user override `--datadir` manually, we live it for now
-		return NewTarballBootstrapper(bootstrapDataURL, nodeDataDir, logger), nil
-
 	case strings.HasSuffix(bootstrapDataURL, "json"):
 		var args []string
 		if dataDirArgument := findDataDirArgument(resolvedNodeArguments); dataDirArgument != "" {
 			args = append(args, dataDirArgument)
 		}
 
-		return NewGenesisBootstrapper(nodeDataDir, bootstrapDataURL, nodePath, append(args, "init"), logger), nil
+		return NewGenesisBootstrapper(resolver("{node-data-dir}"), bootstrapDataURL, sflags.MustGetString(cmd, "reader-node-path"), append(args, "init"), logger), nil
+
 	default:
-		return nil, fmt.Errorf("'reader-node-bootstrap-data-url' config should point to either an archive ending in '.tar.zstd' or a genesis file ending in '.json', not %s", bootstrapDataURL)
+		// There is a default handler for some base cases, so we need to return nil so the default handler can take over
+		// and handle the case(s).
+		return nil, nil
 	}
 }
 
@@ -131,28 +126,20 @@ func (b *GenesisBootstrapper) Bootstrap() error {
 	return nil
 }
 
-func NewTarballBootstrapper(
-	url string,
-	dataDir string,
-	logger *zap.Logger,
-) *TarballBootstrapper {
-	return &TarballBootstrapper{
-		url:     url,
-		dataDir: dataDir,
-		logger:  logger,
+func runCmd(cmd *exec.Cmd) (string, error) {
+	// This runs (and wait) the command, combines both stdout and stderr in a single stream and return everything
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		return "", nil
 	}
-}
 
-type TarballBootstrapper struct {
-	url     string
-	dataDir string
-	logger  *zap.Logger
+	return string(out), err
 }
 
 func isBootstrapped(dataDir string, logger *zap.Logger) bool {
 	var foundFile bool
 	err := filepath.Walk(dataDir,
-		func(path string, info os.FileInfo, err error) error {
+		func(_ string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
@@ -169,80 +156,4 @@ func isBootstrapped(dataDir string, logger *zap.Logger) bool {
 	}
 
 	return foundFile
-}
-
-func (b *TarballBootstrapper) isBootstrapped() bool {
-	return isBootstrapped(b.dataDir, b.logger)
-}
-
-func (b *TarballBootstrapper) Bootstrap() error {
-	if b.isBootstrapped() {
-		return nil
-	}
-
-	b.logger.Info("bootstrapping geth chain data from pre-built data", zap.String("bootstrap_data_url", b.url))
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
-	defer cancel()
-
-	reader, _, _, err := dstore.OpenObject(ctx, b.url, dstore.Compression("zstd"))
-	if err != nil {
-		return fmt.Errorf("cannot get snapshot from gstore: %w", err)
-	}
-	defer reader.Close()
-
-	b.createChainData(reader)
-	return nil
-}
-
-func (b *TarballBootstrapper) createChainData(reader io.Reader) error {
-	err := os.MkdirAll(b.dataDir, os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("unable to create blocks log file: %w", err)
-	}
-
-	b.logger.Info("extracting bootstrapping data into node data directory", zap.String("data_dir", b.dataDir))
-	tr := tar.NewReader(reader)
-	for {
-		header, err := tr.Next()
-		if err != nil {
-			if err == io.EOF {
-				return nil
-			}
-
-			return err
-		}
-
-		path := filepath.Join(b.dataDir, header.Name)
-		b.logger.Debug("about to write content of entry", zap.String("name", header.Name), zap.String("path", path), zap.Bool("is_dir", header.FileInfo().IsDir()))
-		if header.FileInfo().IsDir() {
-			err = os.MkdirAll(path, os.ModePerm)
-			if err != nil {
-				return fmt.Errorf("unable to create directory: %w", err)
-			}
-
-			continue
-		}
-
-		file, err := os.Create(path)
-		if err != nil {
-			return fmt.Errorf("unable to create file: %w", err)
-		}
-
-		if _, err := io.Copy(file, tr); err != nil {
-			file.Close()
-			return err
-		}
-		file.Close()
-	}
-}
-
-func runCmd(cmd *exec.Cmd) (string, error) {
-	// This runs (and wait) the command, combines both stdout and stderr in a single stream and return everything
-	out, err := cmd.CombinedOutput()
-	if err == nil {
-		return "", nil
-	}
-
-	return string(out), err
 }
