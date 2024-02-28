@@ -88,14 +88,16 @@ type consoleReaderStats struct {
 	blockRate       *dmetrics.AvgRatePromCounter
 	transactionRate *dmetrics.AvgRatePromCounter
 
+	printTransactionRate bool
 	cancelPeriodicLogger context.CancelFunc
 }
 
 func newConsoleReaderStats() *consoleReaderStats {
 	return &consoleReaderStats{
-		lastBlock:       pbbstream.BlockRef{},
-		blockRate:       dmetrics.MustNewAvgRateFromPromCounter(BlockReadCount, 1*time.Second, 30*time.Second, "blocks"),
-		transactionRate: dmetrics.MustNewAvgRateFromPromCounter(TransactionReadCount, 1*time.Second, 30*time.Second, "trxs"),
+		lastBlock:            pbbstream.BlockRef{},
+		blockRate:            dmetrics.MustNewAvgRateFromPromCounter(BlockReadCount, 1*time.Second, 30*time.Second, "blocks"),
+		transactionRate:      dmetrics.MustNewAvgRateFromPromCounter(TransactionReadCount, 1*time.Second, 30*time.Second, "trxs"),
+		printTransactionRate: true,
 	}
 }
 
@@ -122,12 +124,17 @@ func (s *consoleReaderStats) StopPeriodicLogToZap() {
 }
 
 func (s *consoleReaderStats) ZapFields() []zap.Field {
-	return []zap.Field{
+	fields := []zap.Field{
 		zap.Stringer("block_rate", s.blockRate),
-		zap.Stringer("trx_rate", s.transactionRate),
 		zap.Uint64("last_block_num", s.lastBlock.Num),
 		zap.String("last_block_id", s.lastBlock.Id),
 	}
+
+	if s.printTransactionRate {
+		fields = append(fields, zap.Stringer("transaction_rate", s.transactionRate))
+	}
+
+	return fields
 }
 
 type parsingStats struct {
@@ -1122,6 +1129,7 @@ func (ctx *parseCtx) readInit(line string) error {
 	case "1.0": // 1.0 is erroneously used by the first implementation of the rpc poller. will upgrade to 3.0 in next firecore releases
 		ctx.blockVersion = 3
 		ctx.useReadBlock2 = true
+
 	case "2.0":
 		ctx.blockVersion = 2
 		ctx.normalizationFeatures.UpgradeBlockV2ToV3 = true
@@ -1141,6 +1149,10 @@ func (ctx *parseCtx) readInit(line string) error {
 		ctx.useReadBlock2 = true
 	default:
 		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
+	}
+
+	if ctx.useReadBlock2 {
+		ctx.globalStats.printTransactionRate = false
 	}
 
 	if nodeVariant == "polygon" {
@@ -1237,6 +1249,8 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 // readBlock2 reads the new format of blocks, the one exported by rpc pollers and tracer-based instrumented geth
 // [block_num:342342342] [block_hash] [parent_num] [parent_hash] [lib:123123123] [timestamp:unix_nano] B64ENCODED_any
 func (ctx *parseCtx) readBlock2(line string) (*pbbstream.Block, error) {
+	start := time.Now()
+
 	chunks, err := SplitInBoundedChunks(line, 8)
 	if err != nil {
 		return nil, fmt.Errorf("splitting block log line: %w", err)
@@ -1269,6 +1283,9 @@ func (ctx *parseCtx) readBlock2(line string) (*pbbstream.Block, error) {
 	timestamp := time.Unix(0, int64(timestampUnixNano))
 
 	payload, err := base64.StdEncoding.DecodeString(chunks[6])
+	if err != nil {
+		return nil, fmt.Errorf("decoding base64 block payload: %w", err)
+	}
 
 	blockPayload := &anypb.Any{
 		TypeUrl: "type.googleapis.com/sf.ethereum.type.v2.Block",
@@ -1283,6 +1300,14 @@ func (ctx *parseCtx) readBlock2(line string) (*pbbstream.Block, error) {
 		Timestamp: timestamppb.New(timestamp),
 		LibNum:    libNum,
 		Payload:   blockPayload,
+	}
+
+	BlockReadCount.Inc()
+	BlockTotalParseTime.AddInt64(int64(time.Since(start)))
+
+	ctx.globalStats.lastBlock = pbbstream.BlockRef{
+		Num: blockNum,
+		Id:  blockHash,
 	}
 
 	return block, nil
