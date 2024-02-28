@@ -17,7 +17,7 @@ latest block height and hash from the primary endpoint.
 At this point the folder structure is compressed and moved to the
 root folder of the repository.
 
-Requires binary 'sd', 'wget', 'jq', 'zstd', 'curl', 'tar' and 'seid'
+Requires binary 'sd', 'wget', 'jq', 'curl', and 'seid'
 to be installed.
 
 Options
@@ -26,6 +26,8 @@ END
 )
 
 main() {
+  bootstrap
+
   pushd "$ROOT" &> /dev/null
 
   chain=${CHAIN:-"arctic-1"}
@@ -108,6 +110,21 @@ function update_trust_checkpoint() {
   echo "If you get an error that received block is after first streamable block, restart using a closer"
   echo "value to the actual chain's block height (the one you see in 'seid' output logs as finalized block)."
   echo ""
+}
+
+bootstrap() {
+  if [[ -f "/etc/os-release" ]]; then
+    os=$(cat /etc/os-release  | grep -E "^ID=" | sed 's/ID=//')
+  else
+    os="unknown"
+  fi
+
+  case "${os}" in
+    alpine)
+      echo "Installing dependencies for Alpine Linux"
+      apk add --no-cache jq sd curl wget
+      ;;
+  esac
 }
 
 usage_error() {
