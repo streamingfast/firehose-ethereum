@@ -16,7 +16,6 @@ package codec
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/binary"
@@ -31,13 +30,11 @@ import (
 	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/dmetrics"
-	"github.com/streamingfast/eth-go"
 	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-core/node-manager/mindreader"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -97,7 +94,7 @@ func newConsoleReaderStats() *consoleReaderStats {
 		lastBlock:            pbbstream.BlockRef{},
 		blockRate:            dmetrics.MustNewAvgRateFromPromCounter(BlockReadCount, 1*time.Second, 30*time.Second, "blocks"),
 		transactionRate:      dmetrics.MustNewAvgRateFromPromCounter(TransactionReadCount, 1*time.Second, 30*time.Second, "trxs"),
-		printTransactionRate: true,
+		printTransactionRate: false,
 	}
 }
 
@@ -175,7 +172,7 @@ func (s *parsingStats) inc(key string) {
 type parseCtx struct {
 	blockVersion         int32
 	fhVersion            string
-	useReadBlock2        bool
+	fhMajorVersion       int
 	readTransactionIndex bool
 	readBlobGasUsed      bool
 
@@ -259,10 +256,11 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		switch {
 		case strings.HasPrefix(line, "BLOCK"):
 			ctx.stats.inc("BLOCK")
-			if ctx.useReadBlock2 {
-				return ctx.readBlock2(line)
+			if ctx.fhMajorVersion != 3 {
+				return nil, fmt.Errorf("got 'FIRE BLOCK ...' line while Firehose protocol major version reported by 'FIRE INIT ...' was actually %d, this is invalid as 'FIRE BLOCK ...' can be emitted only if Firehose protocol major version is 3", ctx.fhMajorVersion)
 			}
-			return ctx.readBlock(line)
+
+			return ctx.readBlockForProtocolVersion3(line)
 
 		case strings.HasPrefix(line, "GAS_CHANGE"):
 			ctx.stats.inc("GAS_CHANGE")
@@ -858,7 +856,7 @@ func (ctx *parseCtx) readEVMEndCall(line string) error {
 
 // Formats
 // SKIPPED_TRX <REASON>
-func (ctx *parseCtx) readSkippedTrx(line string) error {
+func (ctx *parseCtx) readSkippedTrx(_ string) error {
 	if ctx.currentBlock == nil {
 		return fmt.Errorf("no block started")
 	}
@@ -1126,34 +1124,48 @@ func (ctx *parseCtx) readInit(line string) error {
 	ctx.fhVersion = chunks[0]
 
 	switch ctx.fhVersion {
-	case "1.0": // 1.0 is erroneously used by the first implementation of the rpc poller. will upgrade to 3.0 in next firecore releases
+	// The protocol version 1.0 was erroneously used by very first implementation of the Ethereum RPC Poller
+	// which is incorrect because there were actually implementing the Firehose 3.0 protocol. This is why we
+	// are treating 1.0 as 3.0 here for backward compatibility (which is most probably not needed anymore since
+	// I think not such version is used anymore, let's still wait a bit before removing this backward compatibility
+	// code).
+	case "1.0":
 		ctx.blockVersion = 3
-		ctx.useReadBlock2 = true
+		// That is correct, we are really treating 1.0 as 3.0 here
+		ctx.fhMajorVersion = 3
 
 	case "2.0":
 		ctx.blockVersion = 2
 		ctx.normalizationFeatures.UpgradeBlockV2ToV3 = true
+		ctx.fhMajorVersion = 2
+
 	case "2.1", "2.2":
 		ctx.blockVersion = 3
+		ctx.fhMajorVersion = 2
 	case "2.3":
 		ctx.blockVersion = 3
 		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
 		ctx.readTransactionIndex = true
+		ctx.fhMajorVersion = 2
 	case "2.4":
 		ctx.blockVersion = 3
 		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
 		ctx.readTransactionIndex = true
 		ctx.readBlobGasUsed = true
+		ctx.fhMajorVersion = 2
 	case "3.0":
 		ctx.blockVersion = 3
-		ctx.useReadBlock2 = true
+		ctx.fhMajorVersion = 3
 	default:
 		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
 
-	if ctx.useReadBlock2 {
-		ctx.globalStats.printTransactionRate = false
-	}
+	// Firehose 3.0 tracer are outputing directly `pbbstream.Block` messages which means that to
+	// determine transaction count, we would need to unpack the full block which is prohibitively expensive
+	// just for printing the transaction rate.
+	//
+	// So, we print transaction rate only if current tracer major version is 2
+	ctx.globalStats.printTransactionRate = ctx.fhMajorVersion == 2
 
 	if nodeVariant == "polygon" {
 		ctx.normalizationFeatures.CombinePolygonSystemTransactions = true
@@ -1246,9 +1258,9 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 	return nil
 }
 
-// readBlock2 reads the new format of blocks, the one exported by rpc pollers and tracer-based instrumented geth
+// readBlockForProtocolVersion3 reads the new format of blocks, the one exported by rpc pollers and tracer-based instrumented geth
 // [block_num:342342342] [block_hash] [parent_num] [parent_hash] [lib:123123123] [timestamp:unix_nano] B64ENCODED_any
-func (ctx *parseCtx) readBlock2(line string) (*pbbstream.Block, error) {
+func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block, error) {
 	start := time.Now()
 
 	chunks, err := SplitInBoundedChunks(line, 8)
@@ -1311,99 +1323,6 @@ func (ctx *parseCtx) readBlock2(line string) (*pbbstream.Block, error) {
 	}
 
 	return block, nil
-}
-
-// Formats
-// FIRE BLOCK <NUMBER (u64 string)> <HASH (hex string)> <LIB NUMBER (u64 string)> <LIB ID (hex string)> <proto (base64 string)>
-func (ctx *parseCtx) readBlock(line string) (*pbbstream.Block, error) {
-	if ctx.blockVersion == 0 {
-		return nil, fmt.Errorf("cannot start reading block: INIT not done")
-	}
-
-	start := time.Now()
-
-	chunks, err := SplitInBoundedChunks(line, 6)
-	if err != nil {
-		return nil, fmt.Errorf("split: %w", err)
-	}
-
-	blockNum, err := strconv.ParseUint(chunks[0], 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse blockNum: %w", err)
-	}
-
-	blockHash, err := eth.NewHash(chunks[1])
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse blockHash: %w", err)
-	}
-
-	finalizedNum, finalizedHash, err := readFinalizedStatus(chunks[2], chunks[3])
-	if err != nil {
-		return nil, fmt.Errorf("failed to read finalized status: %w", err)
-	}
-
-	data, err := base64.StdEncoding.DecodeString(chunks[4])
-	if err != nil {
-		return nil, fmt.Errorf("decode base64 bytes: %w", err)
-	}
-
-	block := &pbeth.Block{}
-	if err = proto.Unmarshal(data, block); err != nil {
-		return nil, fmt.Errorf("unmarshal block: %w", err)
-	}
-
-	if block.Number != blockNum || !bytes.Equal(blockHash.Bytes(), block.Hash) {
-		return nil, fmt.Errorf("decoced block number/hash (%d/%s) mistmatch firehose log line number/hash (%d/%s)", block.Number, eth.Hash(block.Hash), blockNum, blockHash)
-	}
-
-	var libNum uint64
-	if len(finalizedHash) > 0 {
-		libNum = computeProofOfStakeLIBNum(blockNum, finalizedNum, bstream.GetProtocolFirstStreamableBlock)
-	} else {
-		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
-	}
-
-	bstreamBlock, err := ctx.encoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: libNum})
-	if err != nil {
-		return nil, err
-	}
-
-	BlockReadCount.Inc()
-	BlockTotalParseTime.AddInt64(int64(time.Since(start)))
-
-	ctx.currentBlock = block
-	ctx.globalStats.lastBlock = pbbstream.BlockRef{
-		Num: ctx.currentBlock.Number,
-		Id:  ctx.currentBlock.ID(),
-	}
-
-	return bstreamBlock, nil
-}
-
-func readFinalizedStatus(libNumInput, libHashInput string) (libNum uint64, libHash eth.Hash, err error) {
-	if libNumInput == "." {
-		libNum = 0
-	} else {
-		libNum, err = strconv.ParseUint(libNumInput, 10, 64)
-		if err != nil {
-			return 0, nil, fmt.Errorf("failed to parse libNum %q: %w", libNumInput, err)
-		}
-	}
-
-	if libHashInput == "." {
-		libHash = nil
-	} else {
-		libHash, err = eth.NewHash(libHashInput)
-		if err != nil {
-			return 0, nil, fmt.Errorf("failed to parse libID %q: %w", libHashInput, err)
-		}
-
-		if len(libHash) != 32 {
-			return 0, nil, fmt.Errorf("libID %q is not 32 bytes long, got %d", libHashInput, len(libHash))
-		}
-	}
-
-	return
 }
 
 // Formats
