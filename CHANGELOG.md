@@ -6,6 +6,8 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+* Substreams Performance: prevent reprocessing jobs when there is only a mapper in production mode and everything is already cached
+* Substreams Performance: prevent "UpdateStats" from running too often and affecting performance
 * The `reader-node-bootstrap-url` gained the ability to be bootstrapped from a `bash` script.
 
 	If the bootstrap URL is of the form `bash:///<path/to/script>?<parameters>`, the bash script at
