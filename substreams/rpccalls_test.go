@@ -33,7 +33,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
 	}))
 
-	engine, err := NewRPCEngine(localCache, []string{server.URL}, 1)
+	engine, err := NewRPCEngine(localCache, []string{server.URL}, 1, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
@@ -128,7 +128,7 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			}))
 			defer server.Close()
 
-			engine, err := NewRPCEngine(localCache, []string{server.URL}, 1)
+			engine, err := NewRPCEngine(localCache, []string{server.URL}, 1, 50_000_000)
 			require.NoError(t, err)
 
 			traceID := "someTraceID"
