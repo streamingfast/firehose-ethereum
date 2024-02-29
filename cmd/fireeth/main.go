@@ -65,6 +65,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			`)+"\n")
 
 			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
+			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")
 			flags.String("substreams-rpc-cache-store-url", "{data-dir}/rpc-cache", "where rpc cache will be store call responses")
 			flags.Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
 		},
@@ -76,6 +77,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				return nil, fmt.Errorf("unable to setup directory structure: %w", err)
 			}
 
+			rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit")
 			rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
 			rpcCacheStoreURL := firecore.MustReplaceDataDir(dataDirAbs, viper.GetString("substreams-rpc-cache-store-url"))
 			rpcCacheChunkSize := viper.GetUint64("substreams-rpc-cache-chunk-size")
@@ -83,6 +85,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				rpcCacheStoreURL,
 				rpcEndpoints,
 				rpcCacheChunkSize,
+				rpcGasLimit,
 			)
 
 			if err != nil {

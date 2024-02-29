@@ -6,6 +6,7 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+* Substreams RPC: add `--substreams-rpc-gas-limit` flag to allow overriding default of 50M. Arbitrum chains behave better with a value of `0` to avoid `intrinsic gas too low (supplied gas 50000000)` errors
 * Substreams Performance: prevent reprocessing jobs when there is only a mapper in production mode and everything is already cached
 * Substreams Performance: prevent "UpdateStats" from running too often and affecting performance
 * The `reader-node-bootstrap-url` gained the ability to be bootstrapped from a `bash` script.

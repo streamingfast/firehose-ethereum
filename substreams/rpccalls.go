@@ -32,6 +32,7 @@ type extension struct {
 
 type RPCEngine struct {
 	rpcCacheStore dstore.Store
+	gasLimit      uint64
 
 	rpcClients            []*rpc.Client
 	currentRpcClientIndex int
@@ -41,11 +42,12 @@ type RPCEngine struct {
 	perRequestCacheLock sync.RWMutex
 }
 
-func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBlock uint64) (*RPCEngine, error) {
+func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBlock uint64, gasLimit uint64) (*RPCEngine, error) {
 	zlog.Debug("creating new Substreams RPC engine",
 		zap.String("rpc_cache_path", rpcCachePath),
 		zap.Strings("rpc_endpoints", rpcEndpoints),
 		zap.Uint64("cache_chunk_size_in_block", cacheChunkSizeInBlock),
+		zap.Uint64("gas_limit", gasLimit),
 	)
 
 	httpClient := &http.Client{
@@ -83,6 +85,7 @@ func NewRPCEngine(rpcCachePath string, rpcEndpoints []string, cacheChunkSizeInBl
 		rpcCacheStore:         rpcCacheStore,
 		rpcClients:            rpcClients,
 		cacheChunkSizeInBlock: cacheChunkSizeInBlock,
+		gasLimit:              gasLimit,
 	}, nil
 }
 
@@ -245,7 +248,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, alwaysRetry bool, cache Cache,
 	for i, call := range calls.Calls {
 		reqs[i] = rpc.NewRawETHCall(rpc.CallParams{
 			To:       call.ToAddr,
-			GasLimit: 50_000_000,
+			GasLimit: e.gasLimit,
 			Data:     call.Data,
 		}, rpc.BlockHash(blockHash)).ToRequest()
 	}
