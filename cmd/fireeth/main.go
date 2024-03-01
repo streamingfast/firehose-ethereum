@@ -66,8 +66,8 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 
 			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")
-			flags.String("substreams-rpc-cache-store-url", "{data-dir}/rpc-cache", "where rpc cache will be store call responses")
-			flags.Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block")
+			flags.String("substreams-rpc-cache-store-url", "", "if non-empty, RPC cache will store call responses in this folder [DEPRECATED, previous value was '{data-dir}/rpc-cache'")
+			flags.Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block [DEPRECATED]")
 		},
 
 		RegisterSubstreamsExtensions: func(chain *firecore.Chain[*pbeth.Block]) ([]substreams.Extension, error) {

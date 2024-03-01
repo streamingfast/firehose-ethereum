@@ -4,11 +4,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.3.5
 
+### Substreams
+
+  > [!WARNING]
+  > This release deprecates the "RPC Cache (for eth_calls)" feature of substreams: It has been turned off by default and will not be supported in future releases.
+  > The RPC cache was a not-well-known feature that cached all eth_calls responses by default and loaded them on each request. 
+  > It is being deprecated because it has a negative impact on global performance. 
+  > If you want to cache your eth_call responses, you should do it in a specialized proxy instead of having substreams manage this.
+  > Until the feature is completely removed, you can keep the previous behavior by setting the `--substreams-rpc-cache-store-url` flag to a non-empty value (its previous default value was `{data-dir}/rpc-cache`)
+
+* Performance: prevent reprocessing jobs when there is only a mapper in production mode and everything is already cached
+* Performance: prevent "UpdateStats" from running too often and stalling other operations when running with a high parallel jobs count
+* Performance: fixed bug in scheduler ramp-up function sometimes waiting before raising the number of workers
+* Added the output module's hash to the "incoming request" log
 * Substreams RPC: add `--substreams-rpc-gas-limit` flag to allow overriding default of 50M. Arbitrum chains behave better with a value of `0` to avoid `intrinsic gas too low (supplied gas 50000000)` errors
-* Substreams Performance: prevent reprocessing jobs when there is only a mapper in production mode and everything is already cached
-* Substreams Performance: prevent "UpdateStats" from running too often and affecting performance
+
+### Reader node
+
 * The `reader-node-bootstrap-url` gained the ability to be bootstrapped from a `bash` script.
 
 	If the bootstrap URL is of the form `bash:///<path/to/script>?<parameters>`, the bash script at
