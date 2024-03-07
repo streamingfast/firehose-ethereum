@@ -186,7 +186,7 @@ func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID strin
 		return nil, true, err
 	}
 
-	res, deterministic, err := e.rpcCalls(ctx, alwaysRetry, cache, clock.Id, calls)
+	res, deterministic, err := e.rpcCalls(ctx, traceID, alwaysRetry, cache, clock.Id, calls)
 	if err != nil {
 		return nil, deterministic, err
 	}
@@ -230,7 +230,7 @@ var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(
 // rpcsCalls performs the RPC calls with full retry unless `alwaysRetry` is `false` in which case output is
 // returned right away. If `alwaysRetry` is sets to `true` than `deterministic` will always return `true`
 // and `err` will always be nil.
-func (e *RPCEngine) rpcCalls(ctx context.Context, alwaysRetry bool, cache Cache, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
+func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, alwaysRetry bool, cache Cache, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
 	callsBytes, _ := proto.Marshal(calls)
 	cacheKey := fmt.Sprintf("%s:%x", blockHash, sha256.Sum256(callsBytes))
 	if len(callsBytes) != 0 {
@@ -271,12 +271,12 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, alwaysRetry bool, cache Cache,
 			}
 
 			if errors.Is(err, context.Canceled) {
-				zlog.Debug("stopping rpc calls here, context is canceled")
+				zlog.Debug("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
 				return nil, false, err
 			}
 
 			e.rollRpcClient()
-			zlog.Warn("retrying RPCCall on RPC error", zap.Error(err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
+			zlog.Warn("retrying RPCCall on RPC error", zap.String("trace_id", traceID), zap.Error(err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
 			continue
 		}
 
@@ -292,7 +292,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, alwaysRetry bool, cache Cache,
 					}
 				}
 
-				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.Error(resp.Err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client))
+				zlog.Warn("retrying RPCCall on non-deterministic RPC call error", zap.String("trace_id", traceID), zap.Error(resp.Err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client))
 				deterministicResp = false
 				break
 			}
