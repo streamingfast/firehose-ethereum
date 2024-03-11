@@ -18,6 +18,23 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 
 	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, receipts, logger)
 
+	var blobGasUsed *uint64
+	if in.BlobGasUsed != nil {
+		asUint := uint64(*in.BlobGasUsed)
+		blobGasUsed = &asUint
+	}
+
+	var excessBlobGas *uint64
+	if in.ExcessBlobGas != nil {
+		asUint := uint64(*in.ExcessBlobGas)
+		excessBlobGas = &asUint
+	}
+
+	var parentBeaconRoot []byte
+	if in.ParentBeaconBlockRoot != nil {
+		parentBeaconRoot = (*in.ParentBeaconBlockRoot).Bytes()
+	}
+
 	out := &pbeth.Block{
 		DetailLevel:       pbeth.Block_DETAILLEVEL_BASE,
 		Hash:              in.Hash.Bytes(),
@@ -47,7 +64,10 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 			Hash:             in.Hash.Bytes(),
 			MixHash:          in.MixHash.Bytes(),
 			BaseFeePerGas:    BigIntFromEthUint256(in.BaseFeePerGas),
-			WithdrawalsRoot:  nil, // not available
+			WithdrawalsRoot:  *in.WithdrawalsHash,
+			BlobGasUsed:      blobGasUsed,
+			ExcessBlobGas:    excessBlobGas,
+			ParentBeaconRoot: parentBeaconRoot,
 			TxDependency:     nil, // not available
 		},
 	}

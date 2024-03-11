@@ -6,6 +6,7 @@ for instructions to keep up to date.
 
 #### Unreleased
 * Adding traceID for RPCCalls
+* BlockFetcher: added support for WithdrawalsRoot, BlobGasUsed, BlobExcessGas and ParentBeaconRoot fields when fetching blocks from RPC.
 
 ## v2.3.5
 
