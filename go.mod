@@ -2,8 +2,6 @@ module github.com/streamingfast/firehose-ethereum
 
 go 1.22
 
-toolchain go1.22.0
-
 require (
 	github.com/RoaringBitmap/roaring v0.9.4
 	github.com/abourget/llerrgroup v0.2.0
