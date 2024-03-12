@@ -35,6 +35,11 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 		parentBeaconRoot = (*in.ParentBeaconBlockRoot).Bytes()
 	}
 
+	var withdrawalHash []byte
+	if in.WithdrawalsHash != nil {
+		withdrawalHash = in.WithdrawalsHash.Bytes()
+	}
+
 	out := &pbeth.Block{
 		DetailLevel:       pbeth.Block_DETAILLEVEL_BASE,
 		Hash:              in.Hash.Bytes(),
@@ -64,7 +69,7 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 			Hash:             in.Hash.Bytes(),
 			MixHash:          in.MixHash.Bytes(),
 			BaseFeePerGas:    BigIntFromEthUint256(in.BaseFeePerGas),
-			WithdrawalsRoot:  *in.WithdrawalsHash,
+			WithdrawalsRoot:  withdrawalHash,
 			BlobGasUsed:      blobGasUsed,
 			ExcessBlobGas:    excessBlobGas,
 			ParentBeaconRoot: parentBeaconRoot,

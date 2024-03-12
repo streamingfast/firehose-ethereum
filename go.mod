@@ -19,7 +19,7 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20230825151644-8cc84512cd80
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
 	github.com/streamingfast/dstore v0.1.1-0.20240311181234-470a7a84936f
-	github.com/streamingfast/eth-go v0.0.0-20240311210930-5c0110fcad20
+	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
 	github.com/streamingfast/firehose-core v1.2.5-0.20240312114332-0d4f97f06280
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
