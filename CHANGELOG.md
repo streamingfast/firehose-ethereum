@@ -7,6 +7,7 @@ for instructions to keep up to date.
 #### Unreleased
 * Adding traceID for RPCCalls
 * BlockFetcher: added support for WithdrawalsRoot, BlobGasUsed, BlobExcessGas and ParentBeaconRoot fields when fetching blocks from RPC.
+* Substreams: add support for `substreams-tier2-max-concurrent-requests` flag to limit the number of concurrent requests to tier2
 
 ## v2.3.5
 
