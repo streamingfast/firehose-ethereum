@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-#### Unreleased
+## v2.3.6
+
 * Adding traceID for RPCCalls
 * BlockFetcher: added support for WithdrawalsRoot, BlobGasUsed, BlobExcessGas and ParentBeaconRoot fields when fetching blocks from RPC.
 * Substreams: add support for `substreams-tier2-max-concurrent-requests` flag to limit the number of concurrent requests to tier2
