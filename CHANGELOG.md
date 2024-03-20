@@ -4,6 +4,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.3.7
+
+* Fixed `tools check merged-blocks` default range when `-r <range>` is not provided to now be `[0, +∞]` (was previously `[HEAD, +∞]`).
+
+* Fixed `tools check merged-blocks` to be able to run without a block range provided.
+
+* Added API Key based authentication to `tools firehose-client` and `tools firehose-single-block-client`, specify the value through environment variable `FIREHOSE_API_KEY` (you can use flag `--api-key-env-var` to change variable's name to something else than `FIREHOSE_API_KEY`).
+
+* Fixed `tools check merged-blocks` examples using block range (range should be specified as `[<start>]?:[<end>]`).
+
+* Added `--substreams-tier2-max-concurrent-requests` to limit the number of concurrent requests to the tier2 Substreams service.
+
 ## v2.3.6
 
 * Adding traceID for RPCCalls
@@ -16,8 +28,8 @@ for instructions to keep up to date.
 
   > [!WARNING]
   > This release deprecates the "RPC Cache (for eth_calls)" feature of substreams: It has been turned off by default and will not be supported in future releases.
-  > The RPC cache was a not-well-known feature that cached all eth_calls responses by default and loaded them on each request. 
-  > It is being deprecated because it has a negative impact on global performance. 
+  > The RPC cache was a not-well-known feature that cached all eth_calls responses by default and loaded them on each request.
+  > It is being deprecated because it has a negative impact on global performance.
   > If you want to cache your eth_call responses, you should do it in a specialized proxy instead of having substreams manage this.
   > Until the feature is completely removed, you can keep the previous behavior by setting the `--substreams-rpc-cache-store-url` flag to a non-empty value (its previous default value was `{data-dir}/rpc-cache`)
 
