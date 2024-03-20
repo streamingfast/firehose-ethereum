@@ -6,6 +6,48 @@ option go_package = "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethe
 
 import "google/protobuf/timestamp.proto";
 
+// Block is the representation of the tracing of a block in the Ethereum
+// blockchain. A block is a collection of [TransactionTrace] that are grouped
+// together and processed as an atomic unit. Each [TransactionTrace] is composed
+// of a series of [Call] (a.k.a internal transactions) and there is also at
+// least one call per transaction a.k.a the root call which essentially has the
+// same parameters as the transaction itself (e.g. `from`, `to`, `gas`, `value`,
+// etc.).
+//
+// The exact tracing method used to build the block must be checked against
+// [DetailLevel] field. There is two levels of details available, `BASE` and
+// `EXTENDED`. The `BASE` level has been extracted using archive node RPC calls
+// and will contain only the block header, transaction receipts and event logs.
+// Refers to the Firehose service provider to know which blocks are offered on
+// each network.
+//
+// The `EXTENDED` level has been extracted using the Firehose tracer and all
+// fields are available in this Protobuf.
+//
+// The Ethereum block model is used across many chains which means that it
+// happen that certain fields are not available in one chain but are available
+// in another. Each field should be documented when necesssary if it's available
+// on a subset of chains.
+//
+// One major concept to get about the Block is the concept of 'ordinal'. The
+// ordinal is a number that is used to globally order every element of execution
+// that happened throughout the processing of the block like
+// [TransactionTracer], [Call], [Log], [BalanceChange], [StateChange], etc.
+// Element that have a start and end interval, [Transaction] and [Call], will
+// have two ordinals: `begin_ordinal` and `end_ordinal`. Element that are
+// executed as "point in time" [Log], [BalanceChange], [StateChange], etc. will
+// have only one ordinal named `ordinal`. If you take all of the message in the
+// Block that have an 'ordinal' field in an array and you sort each element
+// against the `ordinal` field, you will get the exact order of execution of
+// each element in the block.
+//
+// All the 'ordinal' fields in a block are globally unique for the given block,
+// it is **not** a chain-wide global ordering. Furthermore, caution must be take
+// with reverted elements due to execution failure. For anything attached to a
+// [Call] that has a `state_reverted` field set to `true`, the `ordinal` field
+// is not reliable and should not be used to order the element against other
+// elements in the block as those element might have 0 as the ordinal. Only
+// successful calls have a reliable `ordinal` field.
 message Block {
   // Hash is the block's hash.
   bytes hash = 2;
@@ -48,9 +90,20 @@ message Block {
 
   // DetailLevel affects the data available in this block.
   //
-  // EXTENDED describes the most complete block, with traces, balance changes, storage changes. It is extracted during the execution of the block.
-  // BASE describes a block that contains only the block header, transaction receipts and event logs: everything that can be extracted using the base JSON-RPC interface (https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods)
-  //      Furthermore, the eth_getTransactionReceipt call has been avoided because it brings only minimal improvements at the cost of requiring an archive node or a full node with complete transaction index.
+  // ## DetailLevel_EXTENDED
+  //
+  // Describes the most complete block, with traces, balance changes, storage
+  // changes. It is extracted during the execution of the block.
+  //
+  // ## DetailLevel_BASE
+  //
+  // Describes a block that contains only the block header, transaction receipts
+  // and event logs: everything that can be extracted using the base JSON-RPC
+  // interface
+  // (https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods)
+  // Furthermore, the eth_getTransactionReceipt call has been avoided because it
+  // brings only minimal improvements at the cost of requiring an archive node
+  // or a full node with complete transaction index.
   DetailLevel detail_level = 12;
 
   // CodeChanges here is the array of smart code change that happened that happened at the block level
@@ -61,10 +114,12 @@ message Block {
   // On hard fork, some procedure runs to upgrade the smart contract code to a new version. In those
   // network, a `CodeChange` for each modified smart contract on upgrade would be present here. Note
   // that this happen rarely, so the vast majority of block will have an empty list here.
+  //
   // Only available in DetailLevel: EXTENDED
   repeated CodeChange code_changes = 20;
 
   // System calls are introduced in Cancun, along with blobs. They are executed outside of transactions but affect the state.
+  //
   // Only available in DetailLevel: EXTENDED
   repeated Call system_calls = 21;
 
@@ -325,7 +380,13 @@ message TransactionTrace {
   bytes return_data = 23;
   // Only available in DetailLevel: EXTENDED
   bytes public_key = 24;
+
+  // The block's global ordinal when the transaction started executing, refer to
+  // [Block] documentation for further information about ordinals and total ordering.
   uint64 begin_ordinal = 25;
+
+  // The block's global ordinal when the transaction finished executing, refer to
+  // [Block] documentation for further information about ordinals and total ordering.
   uint64 end_ordinal = 26;
 
   // TransactionTraceStatus is the status of the transaction execution and will let you know if the transaction
@@ -465,6 +526,8 @@ message Log {
   // the `blockIndex` value will always be 0.
   uint32 blockIndex = 6;
 
+  // The block's global ordinal when the log was recorded, refer to [Block]
+  // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 7;
 }
 
@@ -545,7 +608,12 @@ message Call {
   // perform.
   bool state_reverted = 30;
 
+  // The block's global ordinal when the call started executing, refer to
+  // [Block] documentation for further information about ordinals and total ordering.
   uint64 begin_ordinal = 31;
+
+  // The block's global ordinal when the call finished executing, refer to
+  // [Block] documentation for further information about ordinals and total ordering.
   uint64 end_ordinal = 32;
 
   repeated AccountCreation account_creations = 33;
@@ -570,6 +638,8 @@ message StorageChange {
   bytes old_value = 3;
   bytes new_value = 4;
 
+  // The block's global ordinal when the storage change was recorded, refer to [Block]
+  // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 5;
 }
 
@@ -605,6 +675,8 @@ message BalanceChange {
     REASON_WITHDRAWAL = 16;
   }
 
+  // The block's global ordinal when the balance change was recorded, refer to [Block]
+  // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 5;
 }
 
@@ -612,11 +684,17 @@ message NonceChange {
   bytes address = 1;
   uint64 old_value = 2;
   uint64 new_value = 3;
+
+  // The block's global ordinal when the nonce change was recorded, refer to [Block]
+  // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 4;
 }
 
 message AccountCreation {
   bytes account = 1;
+
+  // The block's global ordinal when the account creation was recorded, refer to [Block]
+  // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 2;
 }
 
@@ -627,6 +705,8 @@ message CodeChange {
   bytes new_hash = 4;
   bytes new_code = 5;
 
+  // The block's global ordinal when the code change was recorded, refer to [Block]
+  // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 6;
 }
 
@@ -724,6 +804,8 @@ message GasChange {
     REASON_CALL_LEFT_OVER_RETURNED = 25;
   }
 
+  // The block's global ordinal when the gas change was recorded, refer to [Block]
+  // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 4;
 }
 

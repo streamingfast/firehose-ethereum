@@ -1,3 +1,3 @@
-generate.sh - Wed Jan 17 11:49:31 EST 2024 - maoueh
-streamingfast/proto revision: 43ccc05e2374e18dee0ce81f8634f078770fe94e
-streamingfast/firehose-ethereum/proto revision: ab7428a
+generate.sh - Wed Mar 20 10:22:42 EDT 2024 - maoueh
+streamingfast/proto revision: 67073d7d67736a3d36e8b4181ccdd7dcf406a4f6
+streamingfast/firehose-ethereum/proto revision: 9ef6e8d
