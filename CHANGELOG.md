@@ -6,7 +6,7 @@ for instructions to keep up to date.
 
 ## Unreleased
 
-* Substreams server: performance improvements: less redundant module execution (at the cost of more storage)
+* Substreams server @v1.4.0: performance improvements: less redundant module execution (at the cost of more cache storage). See https://github.com/streamingfast/substreams/releases/tag/v1.4.0.
 
 ## v2.3.7
 
