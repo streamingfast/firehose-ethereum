@@ -69,6 +69,9 @@ main() {
   sd '^rpc-servers *=.*' "rpc-servers = \"$primary_endpoint,$secondary_endpoint\"" $config_file
   sd '^enable *=.*' "enable = true" $config_file
   sd '^db-sync-enable *=.*' "db-sync-enable = false" $config_file
+  sd '^occ-enabled *=.*' "occ-enabled = false" $config_file
+
+  sd '\[evm\]' "[evm]\nlive_evm_tracer = \"firehose\"\nlive_evm_tracer_chain_id = 713715" "$app_file"
 
   update_trust_checkpoint "$primary_endpoint" "$config_file"
 
