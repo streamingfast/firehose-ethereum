@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,16 +45,29 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' is implemented)", in)
 	}
 
-	rpcURL, found := in["rpc_eth_call"]
+	rpcInfo, found := in["rpc_eth_call"]
 	if !found {
 		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' is implemented)", in)
 	}
 
-	// TODO: split rpcURL into multiplie
-	// `https://patate.com/mykey?gas_limit=12,http://carotte.com/mykey2?gas_limit=15` -> flag on substreams-tier1
-	// --rpc-endpoints= ^^
-	// this goes into sf.substreams.intern.v2/ProcessRangeRequest under the extension map, key = `rpc_eth_call`
-	eng, err := NewRPCEngine([]string{rpcURL}, 50_000_000) //todo: get gas limit from url
+	parts := strings.Split(rpcInfo, ",")
+
+	var rpcURLs []string
+	var gasLimit uint64 = 50_000_000 //default gas limit
+	if len(parts) > 1 {
+		//  first one is gas limit
+		gasLimitString := parts[0]
+		gasLimitRes, err := strconv.ParseUint(gasLimitString, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parsing gas limit: %w", err)
+		}
+		gasLimit = gasLimitRes
+		rpcURLs = parts[1:]
+	} else {
+		rpcURLs = []string{rpcInfo}
+	}
+
+	eng, err := NewRPCEngine(rpcURLs, gasLimit) //todo: get gas limit from url
 	if err != nil {
 		return nil, fmt.Errorf("creating new RPC engine: %w", err)
 	}

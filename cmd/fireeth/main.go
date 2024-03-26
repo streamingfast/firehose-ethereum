@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/streamingfast/substreams/wasm"
@@ -68,12 +69,24 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 		},
 
 		RegisterSubstreamsExtensions: func() (wasm.WASMExtensioner, error) {
-			//rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit") //todo
+			rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit")
 			rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
 
-			// TODO: this is confusing: clarify that tier2 does not have this flag and will set the params as nil
+			commaCheck := func(ss []string) bool {
+				for _, s := range ss {
+					if strings.Contains(s, ",") {
+						return true
+					}
+				}
+				return false
+			}
+			if commaCheck(rpcEndpoints) {
+				return nil, fmt.Errorf("rpc endpoints cannot contain commas")
+			}
+
+			rpcData := fmt.Sprintf("%d,%s", rpcGasLimit, strings.Join(rpcEndpoints, ","))
 			return ethss.NewRPCExtensioner(map[string]string{
-				"rpc_eth_call": strings.Join(rpcEndpoints, ","),
+				"rpc_eth_call": rpcData,
 			}), nil
 		},
 
