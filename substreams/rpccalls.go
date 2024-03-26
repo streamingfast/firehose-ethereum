@@ -67,7 +67,7 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 		rpcURLs = []string{rpcInfo}
 	}
 
-	eng, err := NewRPCEngine(rpcURLs, gasLimit) //todo: get gas limit from url
+	eng, err := NewRPCEngine(rpcURLs, gasLimit)
 	if err != nil {
 		return nil, fmt.Errorf("creating new RPC engine: %w", err)
 	}
@@ -152,7 +152,7 @@ func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID strin
 		return nil, false, fmt.Errorf("unmarshal rpc calls proto: %w", err)
 	}
 
-	if err := e.validateCalls(ctx, calls); err != nil {
+	if err := e.validateCalls(calls); err != nil {
 		return nil, true, err
 	}
 
@@ -185,7 +185,7 @@ type RPCResponse struct {
 	CallError     error // always deterministic
 }
 
-func (e *RPCEngine) validateCalls(ctx context.Context, calls *pbethss.RpcCalls) (err error) {
+func (e *RPCEngine) validateCalls(calls *pbethss.RpcCalls) (err error) {
 	for i, call := range calls.Calls {
 		if len(call.ToAddr) != 20 {
 			err = multierr.Append(err, fmt.Errorf("invalid call #%d: 'ToAddr' should contain 20 bytes, got %d bytes", i, len(call.ToAddr)))
@@ -289,23 +289,6 @@ func toProtoResponses(in []*rpc.RPCResponse) (out *pbethss.RpcResponses) {
 			}
 		}
 		out.Responses = append(out.Responses, newResp)
-	}
-	return
-}
-
-func callToString(c *pbethss.RpcCall) string {
-	return fmt.Sprintf("%x:%x", c.ToAddr, c.Data)
-}
-
-func toRPCResponse(in []*rpc.RPCResponse) (out []*RPCResponse) {
-	for _, rpcResp := range in {
-		decoded, decodingError := rpcResp.Decode()
-		out = append(out, &RPCResponse{
-			Decoded:       decoded,
-			DecodingError: decodingError,
-			CallError:     rpcResp.Err,
-			Raw:           rpcResp.Content,
-		})
 	}
 	return
 }

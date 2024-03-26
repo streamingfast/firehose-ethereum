@@ -6,8 +6,7 @@ import (
 )
 
 var zlog *zap.Logger
-var tracer logging.Tracer
 
 func init() {
-	zlog, tracer = logging.PackageLogger("rpc-cache", "github.com/firehose-ethereum/substreams")
+	zlog, _ = logging.PackageLogger("rpc-cache", "github.com/firehose-ethereum/substreams")
 }
