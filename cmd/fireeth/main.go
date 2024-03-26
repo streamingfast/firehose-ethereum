@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"strings"
 
-	"path/filepath"
+	"github.com/streamingfast/substreams/wasm"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -11,7 +11,6 @@ import (
 	"github.com/streamingfast/cli"
 	firecore "github.com/streamingfast/firehose-core"
 	fhCmd "github.com/streamingfast/firehose-core/cmd"
-	"github.com/streamingfast/firehose-core/substreams"
 	"github.com/streamingfast/firehose-ethereum/codec"
 	ethss "github.com/streamingfast/firehose-ethereum/substreams"
 	"github.com/streamingfast/firehose-ethereum/transform"
@@ -66,38 +65,15 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 
 			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")
-			flags.String("substreams-rpc-cache-store-url", "", "if non-empty, RPC cache will store call responses in this folder [DEPRECATED, previous value was '{data-dir}/rpc-cache'")
-			flags.Uint64("substreams-rpc-cache-chunk-size", uint64(1_000), "RPC cache chunk size in block [DEPRECATED]")
 		},
 
-		RegisterSubstreamsExtensions: func(chain *firecore.Chain[*pbeth.Block]) ([]substreams.Extension, error) {
-			dataDir := viper.GetString("global-data-dir")
-			dataDirAbs, err := filepath.Abs(dataDir)
-			if err != nil {
-				return nil, fmt.Errorf("unable to setup directory structure: %w", err)
-			}
-
-			rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit")
+		RegisterSubstreamsExtensions: func() (wasm.WASMExtensioner, error) {
+			//rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit") //todo
 			rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
-			rpcCacheStoreURL := firecore.MustReplaceDataDir(dataDirAbs, viper.GetString("substreams-rpc-cache-store-url"))
-			rpcCacheChunkSize := viper.GetUint64("substreams-rpc-cache-chunk-size")
-			rpcEngine, err := ethss.NewRPCEngine(
-				rpcCacheStoreURL,
-				rpcEndpoints,
-				rpcCacheChunkSize,
-				rpcGasLimit,
-			)
 
-			if err != nil {
-				return nil, fmt.Errorf("creating rpc engine: %w", err)
-			}
-
-			return []substreams.Extension{
-				{
-					PipelineOptioner: rpcEngine,
-					WASMExtensioner:  rpcEngine,
-				},
-			}, nil
+			return ethss.NewRPCExtensioner(map[string]string{
+				"rpc_eth_call": strings.Join(rpcEndpoints, ","),
+			}), nil
 		},
 
 		ReaderNodeBootstrapperFactory: firecore.DefaultReaderNodeBootstrapper(newReaderNodeBootstrapper),
