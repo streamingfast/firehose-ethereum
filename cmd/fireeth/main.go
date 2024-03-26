@@ -71,6 +71,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			//rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit") //todo
 			rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
 
+			// TODO: this is confusing: clarify that tier2 does not have this flag and will set the params as nil
 			return ethss.NewRPCExtensioner(map[string]string{
 				"rpc_eth_call": strings.Join(rpcEndpoints, ","),
 			}), nil

@@ -95,7 +95,7 @@ func NewRPCEngine(rpcEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
 	}
 
 	if len(rpcClients) == 1 {
-		zlog.Warn("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
+		zlog.Debug("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
 	}
 
 	return &RPCEngine{
