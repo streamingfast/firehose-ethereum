@@ -19,7 +19,7 @@ FROM ghcr.io/streamingfast/firehose-core:${COREVERSION} as core
 
 ####
 
-FROM alpine:edge
+FROM alpine:3
 
 ENV PATH "$PATH:/app"
 
