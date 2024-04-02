@@ -4,9 +4,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.4.0
 
-* Substreams server @v1.4.0: performance improvements: less redundant module execution (at the cost of more cache storage). See https://github.com/streamingfast/substreams/releases/tag/v1.4.0.
+
+## Substreams
+
+* Substreams bumped to @v1.5.0: See https://github.com/streamingfast/substreams/releases/tag/v1.5.0 for details.
+
+#### Chain-agnostic tier2
+
+* A single substreams-tier2 instance can now serve requests for multiple chains or networks. All network-specific parameters are now passed from Tier1 to Tier2 in the internal ProcessRange request.
+* This allows you to better use your computing resources by pooling all the networks together.
+
+> [!IMPORTANT]
+> Since the `tier2` services will now get the network information from the `tier1` request, you must make sure that the file paths and network addresses will be the same for both tiers.
+> ex: if `--common-merged-blocks-store-url=/data/merged` is set on tier1, make sure the merged blocks are also available from tier2 under the path `/data/merged`.
+> The flags `--substreams-state-store-url`, `--substreams-state-store-default-tag`,  `--common-merged-blocks-store-url`, `--substreams-rpc-endpoints stringArray` and `--substreams-rpc-gas-limit` are now ignored on tier2. 
+> The flag `--common-first-streamable-block` should be set to 0 to accommodate every chain.
+> Non-ethereum chains can query a `firehose-ethereum` tier2, but the opposite is not true, since only the `firehose-ethereum` implements the `eth_call` WASM extension.
+
+> [!TIP]
+> The cached 'partial' files no longer contain the "trace ID" in their filename, preventing accumulation of "unsquashed" partial store files. The system will delete files under '{modulehash}/state' named in this format`{blocknumber}-{blocknumber}.{hexadecimal}.partial.zst` when it runs into them.
+
+#### Performance improvements
+
+* All module outputs are now cached. (previously, only the last module was cached, along with the "store snapshots", to allow parallel processing). 
+* Tier2 will now read back mapper outputs (if they exist) to prevent running them again. Additionally, it will not read back the full blocks if its inputs can be satisfied from existing cached mapper outputs.
+* Tier2 will skip processing completely if it's processing the last stage and the `output_module` is a mapper that has already been processed (ex: when multiple requests are indexing the same data at the same time)
+* Tier2 will skip processing completely if it's processing a stage where all the stores and outputs have been processed and cached.
+* Scheduler modification: a stage now waits for the previous stage to have completed the same segment before running, to take advantage of the cached intermediate layers.
+* Improved file listing performance for Google Storage backends by 25%!
+
+> [!TIP]
+> Concurrent requests on the same module hashes may benefit from the other requests' work to a certain extent (up to 75%!) -- The very first request does most of the work for the other ones.
+
+> [!TIP]
+> More caches will increase disk usage and there is no automatic removal of old module caches. The operator is responsible for deleting old module caches.
+
+> [!TIP]
+> The cached 'partial' files no longer contain the "trace ID" in their filename, preventing accumulation of "unsquashed" partial store files.
+> The system will delete files under '{modulehash}/state' named in this format`{blocknumber}-{blocknumber}.{hexadecimal}.partial.zst` when it runs into them.
+
+#### Metrics
+
+* Readiness metric for Substreams tier1 app is now named `substreams_tier1` (was mistakenly called `firehose` before).
+* Added back readiness metric for Substreams tiere app (named `substreams_tier2`).
+* Added metric `substreams_tier1_active_worker_requests` which gives the number of active Substreams worker requests a tier1 app is currently doing against tier2 nodes.
+* Added metric `substreams_tier1_worker_request_counter` which gives the total Substreams worker requests a tier1 app made against tier2 nodes.
+
+### Flags
+
+* Added `--merger-delete-threads` to customize the number of threads the merger will use to delete files. It's recommended to increase this when using Ceph as S3 storage provider to 25 or higher (due to performance issues with deletes the merger might otherwise not be able to delete one-block files fast enough).
 
 ## v2.3.7
 
