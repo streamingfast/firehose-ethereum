@@ -6,8 +6,7 @@ for instructions to keep up to date.
 
 ## v2.4.0
 
-
-## Substreams
+### Substreams
 
 * Substreams bumped to @v1.5.0: See https://github.com/streamingfast/substreams/releases/tag/v1.5.0 for details.
 
