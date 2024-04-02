@@ -3,6 +3,7 @@ package substreams
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,13 +14,37 @@ import (
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
 var clockBlock1 = &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"}
 
+func assertProtoEqual(t *testing.T, expected proto.Message, actual proto.Message) {
+	t.Helper()
+
+	if !proto.Equal(expected, actual) {
+		expectedAsJSON, err := protojson.Marshal(expected)
+		require.NoError(t, err)
+
+		actualAsJSON, err := protojson.Marshal(actual)
+		require.NoError(t, err)
+
+		expectedAsMap := map[string]interface{}{}
+		err = json.Unmarshal(expectedAsJSON, &expectedAsMap)
+		require.NoError(t, err)
+
+		actualAsMap := map[string]interface{}{}
+		err = json.Unmarshal(actualAsJSON, &actualAsMap)
+		require.NoError(t, err)
+
+		// We use equal is not equal above so we get a good diff, if the first condition failed, the second will also always
+		// fail which is what we want here
+		assert.Equal(t, expectedAsMap, actualAsMap)
+	}
+}
+
 func TestRPCEngine_rpcCalls(t *testing.T) {
-	localCache := t.TempDir()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		buffer := bytes.NewBuffer(nil)
 		_, err := buffer.ReadFrom(r.Body)
@@ -33,11 +58,10 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
 	}))
 
-	engine, err := NewRPCEngine(localCache, []string{server.URL}, 1, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
-	engine.registerRequestCache(traceID, NoOpCache{})
 
 	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
 	data := eth.MustNewMethodDef("decimals()").MethodID()
@@ -122,18 +146,15 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			localCache := t.TempDir()
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Write([]byte(fmt.Sprintf(`{"jsonrpc":"2.0","id":"0x1","error":%s}`, tt.response)))
 			}))
 			defer server.Close()
 
-			engine, err := NewRPCEngine(localCache, []string{server.URL}, 1, 50_000_000)
+			engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
 			require.NoError(t, err)
 
 			traceID := "someTraceID"
-
-			engine.registerRequestCache(traceID, NoOpCache{})
 
 			protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{tt.rpcCall}})
 			require.NoError(t, err)

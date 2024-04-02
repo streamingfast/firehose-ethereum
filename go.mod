@@ -3,7 +3,7 @@ module github.com/streamingfast/firehose-ethereum
 go 1.22
 
 require (
-	github.com/RoaringBitmap/roaring v0.9.4
+	github.com/RoaringBitmap/roaring v1.9.1
 	github.com/abourget/llerrgroup v0.2.0
 	github.com/bobg/go-generics/v2 v2.1.1
 	github.com/golang/protobuf v1.5.3
@@ -18,19 +18,18 @@ require (
 	github.com/streamingfast/bstream v0.0.2-0.20240207154557-a98153ba4b86
 	github.com/streamingfast/cli v0.0.4-0.20230825151644-8cc84512cd80
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
-	github.com/streamingfast/dstore v0.1.1-0.20240320135256-1aeefdeeecd5
+	github.com/streamingfast/dstore v0.1.1-0.20240325191553-bcce8892a9bb
 	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.2.6-0.20240328191045-6941720745ed
+	github.com/streamingfast/firehose-core v1.2.6-0.20240402142301-912d47b6141d
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20240131193313-6b88bc7139db
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.4.1-0.20240328190938-81c82176fffe
+	github.com/streamingfast/substreams v1.4.1-0.20240402141712-b2a8afdd34cc
 	github.com/stretchr/testify v1.8.4
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
-	go.uber.org/atomic v1.10.0
 	go.uber.org/multierr v1.10.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.61.0
@@ -65,7 +64,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.325 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.3.1 // indirect
+	github.com/bits-and-blooms/bitset v1.12.0 // indirect
 	github.com/blendle/zapdriver v1.3.2-0.20200203083823-9200777f8a3d // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/bufbuild/protocompile v0.4.0 // indirect
@@ -168,7 +167,7 @@ require (
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1 // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20240222213940-b9f324ff4d5c // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
-	github.com/streamingfast/dmetering v0.0.0-20240319201447-018aabe46634 // indirect
+	github.com/streamingfast/dmetering v0.0.0-20240327163525-9249aa9bcceb // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20240209202324-9daa52c71a52 // indirect
@@ -193,6 +192,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.23.1 // indirect
 	go.opentelemetry.io/otel/trace v1.23.1 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/automaxprocs v1.5.1 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
