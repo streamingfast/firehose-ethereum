@@ -3,7 +3,6 @@ package substreams
 import (
 	"context"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -227,8 +226,8 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, alwaysRetry bo
 				return nil, false, err
 			}
 
-			if errors.Is(err, context.Canceled) {
-				zlog.Debug("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
+			if ctx.Err() != nil {
+				zlog.Info("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
 				return nil, false, err
 			}
 
