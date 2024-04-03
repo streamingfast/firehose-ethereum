@@ -4,12 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v2.4.1 (Unreleased)
+## v2.4.1
 
 ### Substreams
 
 * fix thread leak in metering affecting substreams
 * revert a substreams scheduler optimisation that causes slow restarts when close to head
+* add substreams_tier2_active_requests and substreams_tier2_request_counter prometheus metrics
 
 ## v2.4.0
 
