@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.4.2
+
+### substreams
+
+* Fix a context leak causing tier1 responses to slow down progressively
+
 ## v2.4.1
 
 ### Substreams
