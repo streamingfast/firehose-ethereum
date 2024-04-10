@@ -38,6 +38,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 		ExecutableName:       "geth",
 		FullyQualifiedModule: "github.com/streamingfast/firehose-ethereum",
 		Version:              version,
+		DefaultBlockType:     "sf.ethereum.type.v2.Block",
 
 		// Ensure that if you ever modify test, modify also `types/init.go#init` so that the `bstream.InitGeneric` there fits us
 		BlockFactory: func() firecore.Block { return new(pbeth.Block) },
