@@ -5,13 +5,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). S
 for instructions to keep up to date.
 
 
-## v2.4.3 (unreleased)
+## v2.4.3
 
 ### substreams
 
+* fix memory leak on substreams execution (by bumping wazero dependency)
+* remove the need for substreams-tier1 blocktype auto-detection
 * fix missing error handling when writing output data to files. This could result in tier1 request just "hanging" waiting for the file never produced by tier2.
 * fix handling of dstore error in tier1 'execout walker' causing stalling issues on S3 or on unexpected storage errors
 * increase number of retries on storage when writing states or execouts (5 -> 10)
+* prevent slow squashing when loading each segment from full KV store (can happen when a stage contains multiple stores)
 
 ## v2.4.2
 
