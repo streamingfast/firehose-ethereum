@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.4.4
+
+### Substreams fixes
+
+* fix a possible panic() when an request is interrupted during the file loading phase of a squashing operation.
+* fix a rare possibility of stalling if only some fullkv stores caches were deleted, but further segments were still present.
+* fix stats counters for store operations time
 
 ## v2.4.3
 
