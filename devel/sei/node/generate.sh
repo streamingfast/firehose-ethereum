@@ -10,7 +10,7 @@ usage: generate.sh <sei-chain-path>
 Runs the necessary commands to generate the a local Sei node and pack
 it.
 
-The script uses the scripts/initialize_local_chain.sh (slightly modifying it)
+The script uses the scripts/initialize_local_chain.sh
 to generate the node and then it packs it into a tar.zst file.
 
 Requires binary 'sd', 'wget', 'jq', 'curl', and 'seid'
@@ -55,18 +55,14 @@ main() {
   echo " App Config: $app_file"
   echo ""
 
-  echo ""
-  sd '^#(.*~/go/bin/seid.*)$' '# $1' "$initialize_script"
-  trap revert_script_changes EXIT
-
   echo "Running $initialize_script ..."
   pushd "$sei_chain_path" &> /dev/null
-    "$initialize_script_relative_path"
+    NO_RUN=1 "$initialize_script_relative_path"
   popd &> /dev/null
 
   pushd "$sei_home" &> /dev/null
     echo "Adjusting config/app.toml to use FirehoseTracer"
-    sd '\[evm\]' "[evm]\nlive_evm_tracer = \"firehose\"\nlive_evm_tracer_chain_id = 713715" "$app_file"
+    sd '\[evm\]' "[evm]\nlive_evm_tracer = \"firehose\"" "$app_file"
 
     echo "Packing archive ${archive_file_path}.zst..."
     tar -cf "${archive_file_path}" *
@@ -76,14 +72,6 @@ main() {
   popd &> /dev/null
 
   # We print Done in the revert scripts changes which is a trap on EXIT
-}
-
-revert_script_changes() {
-  echo ""
-  echo "Reverting changes to $initialize_script"
-  sd '^# (.*~/go/bin/seid.*)$' '$1' "$initialize_script"
-
-  echo "Done"
 }
 
 usage_error() {
