@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.4.7
+
+### Substreams fixes
+
+* bump substreams to v1.5.5 with fix in wazero to prevent process freezing on certain substreams
+
 ## v2.4.6
 
 * Added support for Firehose reader format 2.5 which will be required for `BSC 1.4.5+`.
