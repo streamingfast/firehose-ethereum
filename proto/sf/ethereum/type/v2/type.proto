@@ -673,6 +673,10 @@ message BalanceChange {
     // Used on chain(s) where some Ether burning happens
     REASON_BURN = 15;
     REASON_WITHDRAWAL = 16;
+
+    // Rewards for Blob processing on BNB chain added in Tycho hard-fork, refers
+    // to BNB documentation to check the timestamp at which it was activated.
+    REASON_REWARD_BLOB_FEE = 17;
   }
 
   // The block's global ordinal when the balance change was recorded, refer to [Block]
