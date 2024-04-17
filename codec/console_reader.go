@@ -1147,7 +1147,7 @@ func (ctx *parseCtx) readInit(line string) error {
 		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
 		ctx.readTransactionIndex = true
 		ctx.fhMajorVersion = 2
-	case "2.4":
+	case "2.4", "2.5":
 		ctx.blockVersion = 3
 		ctx.normalizationFeatures.ReorderTransactionsAndRenumberOrdinals = true
 		ctx.readTransactionIndex = true
@@ -1157,7 +1157,7 @@ func (ctx *parseCtx) readInit(line string) error {
 		ctx.blockVersion = 3
 		ctx.fhMajorVersion = 3
 	default:
-		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
+		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4, 2.5], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
 
 	// Firehose 3.0 tracer are outputing directly `pbbstream.Block` messages which means that to
