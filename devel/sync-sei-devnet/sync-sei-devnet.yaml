@@ -20,7 +20,6 @@ start:
        --trace
        --chain-id arctic-1
     #substreams-rpc-endpoints: $ETH_MAINNET_RPC # replace with eth mainnet rpc endpoint
-    substreams-rpc-cache-chunk-size: 100
     substreams-state-bundle-size: 100
     substreams-tier1-grpc-listen-addr: :9000
     substreams-tier1-subrequests-insecure: false
