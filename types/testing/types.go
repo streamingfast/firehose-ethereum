@@ -15,6 +15,8 @@
 package ct
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -24,21 +26,11 @@ import (
 	"strings"
 	"time"
 
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-
 	"github.com/mitchellh/go-testing-interface"
-	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/eth-go"
-	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
-	"github.com/streamingfast/jsonpb"
-	"github.com/streamingfast/logging"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-var zlog, _ = logging.PackageLogger("fireeth", "github.com/streamingfast/firehose-ethereum/types/testing")
 
 type from hexString
 
@@ -59,20 +51,20 @@ func PreviousHashFull(in string) previousHash {
 
 func Block(t testing.T, blkHash string, components ...interface{}) *pbeth.Block {
 	// This is for testing purposes, so it's easier to convey the id and the num from a single element
-	ref := bstream.NewBlockRefFromID(blkHash)
+	ref := newBlockRefFromID(blkHash)
 
 	pbblock := &pbeth.Block{
 		Ver:    2,
-		Hash:   toBytes(t, ref.ID()),
-		Number: ref.Num(),
+		Hash:   toBytes(t, ref.ID),
+		Number: ref.Number,
 	}
 
 	blockTime, err := time.Parse(time.RFC3339, "2006-01-02T15:04:05.5Z")
 	require.NoError(t, err)
 
 	pbblock.Header = &pbeth.BlockHeader{
-		Hash:       toBytes(t, ref.ID()),
-		Number:     ref.Num(),
+		Hash:       toBytes(t, ref.ID),
+		Number:     ref.Number,
 		ParentHash: toBytes(t, fmt.Sprintf("%08x%s", pbblock.Number-1, blkHash[8:])),
 		Timestamp:  timestamppb.New(blockTime),
 	}
@@ -93,15 +85,14 @@ func Block(t testing.T, blkHash string, components ...interface{}) *pbeth.Block 
 	}
 
 	if os.Getenv("DEBUG") != "" {
-		marshaler := &jsonpb.Marshaler{}
-		out, err := marshaler.MarshalToString(pbblock)
+		out, err := json.MarshalIndent(pbblock, "", "  ")
 		require.NoError(t, err)
 
 		// We re-normalize to a plain map[string]interface{} so it's printed as JSON and not a proto default String implementation
 		normalizedOut := map[string]interface{}{}
 		require.NoError(t, json.Unmarshal([]byte(out), &normalizedOut))
 
-		zlog.Debug("created test block", zap.Any("block", normalizedOut))
+		fmt.Println("created test block", normalizedOut)
 	}
 
 	return pbblock
@@ -388,12 +379,12 @@ func CodeChange(t testing.T, address address, old, new []byte, components ...int
 	}
 
 	if old != nil {
-		codeChange.OldHash = eth.Keccak256(old)
+		codeChange.OldHash = sha256Sum(old)
 		codeChange.OldCode = old
 	}
 
 	if new != nil {
-		codeChange.NewHash = eth.Keccak256(new)
+		codeChange.NewHash = sha256Sum(new)
 		codeChange.NewCode = new
 	}
 
@@ -407,6 +398,11 @@ func CodeChange(t testing.T, address address, old, new []byte, components ...int
 	}
 
 	return codeChange
+}
+
+func sha256Sum(data []byte) []byte {
+	hash := sha256.Sum256(data)
+	return hash[:]
 }
 
 type logTopic hexString
@@ -440,21 +436,6 @@ func ToTimestamp(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
-func ToBstreamBlock(t testing.T, block *pbeth.Block, libNum uint64) *pbbstream.Block {
-	blk, err := firecore.NewBlockEncoder().Encode(firecore.BlockEnveloppe{Block: block, LIBNum: libNum})
-	require.NoError(t, err)
-
-	return blk
-}
-
-func ToBstreamBlocks(t testing.T, blocks []*pbeth.Block, libNum uint64) (out []*pbbstream.Block) {
-	out = make([]*pbbstream.Block, len(blocks))
-	for i, block := range blocks {
-		out[i] = ToBstreamBlock(t, block, libNum)
-	}
-	return
-}
-
 type address hexString
 
 func Address(in string) address     { return address(newHexString(in)) }
@@ -472,7 +453,7 @@ func (a hash) Bytes(t testing.T) []byte  { return hexString(a).bytes(t) }
 func (a hash) String(t testing.T) string { return hexString(a).string(t) }
 
 func toBytes(t testing.T, in string) []byte {
-	out, err := hex.DecodeString(eth.SanitizeHex(in))
+	out, err := hex.DecodeString(sanitizeHex(in))
 	require.NoError(t, err)
 
 	return out
@@ -548,4 +529,38 @@ func failInvalidComponent(t testing.T, tag string, component interface{}, option
 	}
 
 	require.FailNowf(t, "invalid component", "Invalid %s component of type %T", tag, component)
+}
+
+type blockRef struct {
+	ID     string
+	Number uint64
+}
+
+func newBlockRefFromID(id string) blockRef {
+	if len(id) < 8 {
+		return blockRef{id, 0}
+	}
+
+	bin, err := hex.DecodeString(string(id)[:8])
+	if err != nil {
+		return blockRef{id, 0}
+	}
+
+	return blockRef{id, uint64(binary.BigEndian.Uint32(bin))}
+}
+
+func sanitizeHex(input string) string {
+	if has0xPrefix(input) {
+		input = input[2:]
+	}
+
+	if len(input)%2 != 0 {
+		input = "0" + input
+	}
+
+	return strings.ToLower(input)
+}
+
+func has0xPrefix(input string) bool {
+	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
 }

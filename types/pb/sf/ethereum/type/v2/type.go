@@ -23,17 +23,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/streamingfast/bstream"
-	"github.com/streamingfast/eth-go"
-	"github.com/streamingfast/jsonpb"
 	"google.golang.org/protobuf/proto"
 )
 
 var b0 = big.NewInt(0)
-
-func (b *BlockRef) AsBstreamBlockRef() bstream.BlockRef {
-	return bstream.NewBlockRef(hex.EncodeToString(b.Hash), b.Number)
-}
 
 // TODO: We should probably memoize all fields that requires computation
 //       like ID() and likes.
@@ -61,21 +54,6 @@ func (b *Block) MustTime() time.Time {
 
 func (b *Block) PreviousID() string {
 	return hex.EncodeToString(b.Header.ParentHash)
-}
-
-// FIXME: This logic at some point is hard-coded and will need to be re-visited in regard
-//
-//	of the fork logic.
-func (b *Block) LIBNum() uint64 {
-	if b.Number <= bstream.GetProtocolFirstStreamableBlock+200 {
-		return bstream.GetProtocolFirstStreamableBlock
-	}
-
-	return b.Number - 200
-}
-
-func (b *Block) AsRef() bstream.BlockRef {
-	return bstream.NewBlockRef(b.ID(), b.Number)
 }
 
 func NewBigInt(in int64) *BigInt {
@@ -141,36 +119,6 @@ func (m *BigInt) UnmarshalJSON(in []byte) (err error) {
 	return
 }
 
-func (m *BigInt) MarshalJSONPB(marshaler *jsonpb.Marshaler) ([]byte, error) {
-	return m.MarshalJSON()
-}
-
-func (m *BigInt) UnmarshalJSONPB(unmarshaler *jsonpb.Unmarshaler, in []byte) (err error) {
-	return m.UnmarshalJSON(in)
-}
-
-func toUint64Array(in []eth.Uint64) []uint64 {
-	out := make([]uint64, len(in))
-
-	for i, el := range in {
-		out[i] = uint64(el)
-	}
-	return out
-}
-
-func Uint64NestedArrayFromEthUint(in [][]eth.Uint64) *Uint64NestedArray {
-	if in == nil {
-		return nil
-	}
-	out := &Uint64NestedArray{}
-	for _, v := range in {
-		out.Val = append(out.Val, &Uint64Array{
-			Val: toUint64Array(v),
-		})
-	}
-	return out
-}
-
 func NewUint64NestedArray(in [][]uint64) *Uint64NestedArray {
 	out := &Uint64NestedArray{}
 	for _, v := range in {
@@ -213,14 +161,6 @@ func (a *Uint64NestedArray) UnmarshalJSON(in []byte) (err error) {
 	dummy := NewUint64NestedArray(out)
 	a.Val = dummy.Val
 	return
-}
-
-func (a *Uint64NestedArray) MarshalJSONPB(marshaler *jsonpb.Marshaler) ([]byte, error) {
-	return a.MarshalJSON()
-}
-
-func (a *Uint64NestedArray) UnmarshalJSONPB(unmarshaler *jsonpb.Unmarshaler, in []byte) (err error) {
-	return a.UnmarshalJSON(in)
 }
 
 func BlockToBuffer(block *Block) ([]byte, error) {

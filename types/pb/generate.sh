@@ -27,7 +27,6 @@ function main() {
   cd "$ROOT/types/pb" &> /dev/null
 
   generate "sf/ethereum/transform/v1/transforms.proto"
-  generate "sf/ethereum/trxstream/v1/trxstream.proto"
   generate "sf/ethereum/type/v2/type.proto"
   generate "sf/ethereum/substreams/v1/rpc.proto"
 

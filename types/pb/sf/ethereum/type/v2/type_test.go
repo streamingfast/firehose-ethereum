@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/streamingfast/jsonpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,22 +33,6 @@ func TestBigInt_JSON(t *testing.T) {
 
 	actual := &BigInt{}
 	err = json.Unmarshal(actualJSON, actual)
-	require.NoError(t, err)
-
-	assert.Equal(t, value, actual)
-}
-
-func TestBigInt_JSONPB(t *testing.T) {
-	value := NewBigInt(123456)
-
-	marshaler := &jsonpb.Marshaler{}
-	actualJSON, err := marshaler.MarshalToString(value)
-	require.NoError(t, err)
-
-	assert.JSONEq(t, `"01e240"`, actualJSON)
-
-	actual := &BigInt{}
-	err = jsonpb.UnmarshalString(actualJSON, actual)
 	require.NoError(t, err)
 
 	assert.Equal(t, value, actual)
