@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/streamingfast/substreams/wasm"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/streamingfast/bstream"
 	"github.com/streamingfast/cli"
 	firecore "github.com/streamingfast/firehose-core"
 	fhCmd "github.com/streamingfast/firehose-core/cmd"
@@ -17,9 +16,16 @@ import (
 	"github.com/streamingfast/firehose-ethereum/transform"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/logging"
+	"github.com/streamingfast/substreams/wasm"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
+
+func init() {
+	bstream.NormalizeBlockID = func(in string) string {
+		return strings.TrimPrefix(strings.ToLower(in), "0x")
+	}
+}
 
 func main() {
 	fhCmd.Main(Chain())
