@@ -3,7 +3,9 @@
     "hash": "736fb90beb572642b589ee15f8d73516d8a41b4b79ee60fe97565203009c00ea",
     "header": {
       "coinbase": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
-      "difficulty": "1b1039fe",
+      "difficulty": {
+        "bytes": "1b1039fe"
+      },
       "extraData": "d883010816846765746888676f312e31302e34856c696e7578",
       "gasLimit": "8000000",
       "gasUsed": "7980203",

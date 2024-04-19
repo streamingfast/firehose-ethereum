@@ -3,7 +3,9 @@
     "hash": "3cd348f297c3f6da6703fa0cb4752bad2f07046e46c3b81b58ecbab2297c9f5e",
     "header": {
       "coinbase": "0000000000000000000000000000000000000000",
-      "difficulty": "02",
+      "difficulty": {
+        "bytes": "02"
+      },
       "extraData": "d98301090a846765746888676f312e31372e358664617277696e0000000000005c84ffb2f7b3804dc3b234fd1933148595fb7f1a7088f4b0ca5d1f7d6a75631b65a33395864f80888428a5d2ee12cd77a65f91a8eaf8dacd59989183d292296d00",
       "gasLimit": "93724883",
       "gasUsed": "84000",
@@ -15,7 +17,9 @@
       "receiptRoot": "04deb4be6955e1a300123be48007597f67e4229f8ce70f4f10388de6fd3fa267",
       "stateRoot": "7d6bbd50df3e89043cee8d29e4f319d7685bdd1cdbaecbef602da8c895e19d68",
       "timestamp": "2022-01-31T21:31:00Z",
-      "totalDifficulty": "07",
+      "totalDifficulty": {
+        "bytes": "07"
+      },
       "transactionsRoot": "90ccc9d19f0720bb5ae5c8d9e4051b32f1bab46171cc8adda764af9ec2775d40",
       "uncleHash": "1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347"
     },
@@ -27,15 +31,23 @@
         "balanceChanges": [
           {
             "address": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
-            "newValue": "02863c1f5cdae0749d12fbfe56",
-            "oldValue": "02863c1f5cdae0749d12fbfe57",
+            "newValue": {
+              "bytes": "02863c1f5cdae0749d12fbfe56"
+            },
+            "oldValue": {
+              "bytes": "02863c1f5cdae0749d12fbfe57"
+            },
             "ordinal": "18",
             "reason": "REASON_TRANSFER"
           },
           {
             "address": "d549d2fd4b177767b84ab2fd17423cee1cf1d7bd",
-            "newValue": "02",
-            "oldValue": "01",
+            "newValue": {
+              "bytes": "02"
+            },
+            "oldValue": {
+              "bytes": "01"
+            },
             "ordinal": "19",
             "reason": "REASON_TRANSFER"
           }
@@ -45,7 +57,9 @@
         "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
         "endOrdinal": "20",
         "index": 1,
-        "value": "01"
+        "value": {
+          "bytes": "01"
+        }
       }
     ],
     "transactionTraces": [
@@ -63,21 +77,31 @@
             "balanceChanges": [
               {
                 "address": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
-                "newValue": "02863c1f5cdae3eb5ef3a3ee58",
-                "oldValue": "02863c1f5cdae42f953fff9e58",
+                "newValue": {
+                  "bytes": "02863c1f5cdae3eb5ef3a3ee58"
+                },
+                "oldValue": {
+                  "bytes": "02863c1f5cdae42f953fff9e58"
+                },
                 "ordinal": "2",
                 "reason": "REASON_GAS_BUY"
               },
               {
                 "address": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
-                "newValue": "02863c1f5cdae3eb5ef3a3ee57",
-                "oldValue": "02863c1f5cdae3eb5ef3a3ee58",
+                "newValue": {
+                  "bytes": "02863c1f5cdae3eb5ef3a3ee57"
+                },
+                "oldValue": {
+                  "bytes": "02863c1f5cdae3eb5ef3a3ee58"
+                },
                 "ordinal": "7",
                 "reason": "REASON_TRANSFER"
               },
               {
                 "address": "d549d2fd4b177767b84ab2fd17423cee1cf1d7bd",
-                "newValue": "01",
+                "newValue": {
+                  "bytes": "01"
+                },
                 "ordinal": "8",
                 "reason": "REASON_TRANSFER"
               }
@@ -103,13 +127,17 @@
                 "ordinal": "4"
               }
             ],
-            "value": "01"
+            "value": {
+              "bytes": "01"
+            }
           }
         ],
         "endOrdinal": "12",
         "from": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
         "gasLimit": "75000",
-        "gasPrice": "3b9aca00",
+        "gasPrice": {
+          "bytes": "3b9aca00"
+        },
         "gasUsed": "21000",
         "hash": "a0f7c019246761e08a3fe202d2ab466a15bbc514faadfbf812b7c656cbbf2b5b",
         "index": 1,
@@ -123,7 +151,9 @@
         "status": "SUCCEEDED",
         "to": "d549d2fd4b177767b84ab2fd17423cee1cf1d7bd",
         "v": "0bfa",
-        "value": "01"
+        "value": {
+          "bytes": "01"
+        }
       }
     ],
     "ver": 3

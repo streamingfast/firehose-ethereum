@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/abourget/llerrgroup"
+	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/eth-go/rpc"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
@@ -92,7 +93,7 @@ func (f *BlockFetcher) Fetch(ctx context.Context, blockNum uint64) (block *pbbst
 		Id:        ethBlock.GetFirehoseBlockID(),
 		ParentId:  ethBlock.GetFirehoseBlockParentID(),
 		Timestamp: timestamppb.New(ethBlock.GetFirehoseBlockTime()),
-		LibNum:    ethBlock.LIBNum(),
+		LibNum:    ethBlockLIBNum(ethBlock),
 		ParentNum: ethBlock.GetFirehoseBlockParentNumber(),
 		Payload:   anyBlock,
 	}, nil
@@ -125,4 +126,12 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (o
 	}
 
 	return
+}
+
+func ethBlockLIBNum(b *pbeth.Block) uint64 {
+	if b.Number <= bstream.GetProtocolFirstStreamableBlock+200 {
+		return bstream.GetProtocolFirstStreamableBlock
+	}
+
+	return b.Number - 200
 }

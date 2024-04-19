@@ -3,7 +3,9 @@
     "hash": "937b1a9a6686ca5d845d41cf6264586e4333caa009c9001ce71f174748881c4f",
     "header": {
       "coinbase": "0000000000000000000000000000000000000000",
-      "difficulty": "07",
+      "difficulty": {
+        "bytes": "07"
+      },
       "extraData": "d58301090083626f7286676f312e3133856c696e7578000000000000000000000375b2fc7140977c9c76d45421564e354ed42277000000000000000000000000000000000000271042eefcda06ead475cde3731b8eb138e88cd0bac300000000000000000000000000000000000027105973918275c01f50555d44e92c9d9b353cadad5400000000000000000000000000000000000027107fcd58c2d53d980b247f1612fdba93e9a76193e60000000000000000000000000000000000002710b702f1c9154ac9c08da247a8e30ee6f2f3373f410000000000000000000000000000000000002710b8bb158b93c94ed35c1970d610d1e2b34e26652c0000000000000000000000000000000000002710f84c74dea96df0ec22e11e7c33996c73fcc2d8220000000000000000000000000000000000002710b9dc800a95f8342af918585ff50f43fe85ebe0b42a9ed2d49bcfc3e6c0fbf0b81c66058dbdbca3a14bfabb76092a878d900ee699b80d0becb991022ab1c0365801",
       "gasLimit": "15469060",
       "gasUsed": "21000",
@@ -29,13 +31,17 @@
             "callType": "CALL",
             "caller": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
             "index": 1,
-            "value": "01"
+            "value": {
+              "bytes": "01"
+            }
           }
         ],
         "endOrdinal": "2",
         "from": "821b55d8abe79bc98f05eb675fdc50dfe796b7ab",
         "gasLimit": "21000",
-        "gasPrice": "0ba43b7400",
+        "gasPrice": {
+          "bytes": "0ba43b7400"
+        },
         "gasUsed": "21000",
         "hash": "6a5468d2774c8b7b2aab6cc582d76e0cd1e93d99ac3d5cf26e761675d62f9f0c",
         "input": "00",
@@ -49,7 +55,9 @@
         "status": "SUCCEEDED",
         "to": "dead1000a67b85dac757e6bfda0214780002beef",
         "v": "0bfa",
-        "value": "01"
+        "value": {
+          "bytes": "01"
+        }
       }
     ],
     "ver": 3

@@ -3,22 +3,34 @@
     "balanceChanges": [
       {
         "address": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
-        "newValue": "1fa95b40a3b6c32930f9",
-        "oldValue": "1fa95450485cef7730f9",
+        "newValue": {
+          "bytes": "1fa95b40a3b6c32930f9"
+        },
+        "oldValue": {
+          "bytes": "1fa95450485cef7730f9"
+        },
         "ordinal": "1",
         "reason": "REASON_REWARD_MINE_UNCLE"
       },
       {
         "address": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
-        "newValue": "1fa96230ff1096db30f9",
-        "oldValue": "1fa95b40a3b6c32930f9",
+        "newValue": {
+          "bytes": "1fa96230ff1096db30f9"
+        },
+        "oldValue": {
+          "bytes": "1fa95b40a3b6c32930f9"
+        },
         "ordinal": "2",
         "reason": "REASON_REWARD_MINE_UNCLE"
       },
       {
         "address": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
-        "newValue": "1fa97fae834e5a8fb0f9",
-        "oldValue": "1fa96230ff1096db30f9",
+        "newValue": {
+          "bytes": "1fa97fae834e5a8fb0f9"
+        },
+        "oldValue": {
+          "bytes": "1fa96230ff1096db30f9"
+        },
         "ordinal": "3",
         "reason": "REASON_REWARD_MINE_BLOCK"
       }
@@ -26,7 +38,9 @@
     "hash": "736fb90beb572642b589ee15f8d73516d8a41b4b79ee60fe97565203009c00ea",
     "header": {
       "coinbase": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
-      "difficulty": "1b1039fe",
+      "difficulty": {
+        "bytes": "1b1039fe"
+      },
       "extraData": "d883010816846765746888676f312e31302e34856c696e7578",
       "gasLimit": "8000000",
       "gasUsed": "7980203",
@@ -47,7 +61,9 @@
     "uncles": [
       {
         "coinbase": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
-        "difficulty": "1b279b0d",
+        "difficulty": {
+          "bytes": "1b279b0d"
+        },
         "extraData": "d883010816846765746888676f312e31302e34856c696e7578",
         "gasLimit": "8000000",
         "hash": "2c46694b43b6c8e687edaf1b5257aca53fe1935e6d59c0ee7d00a68b801445e4",
@@ -64,7 +80,9 @@
       },
       {
         "coinbase": "6212dd88f890fefe0af24d1404d96adf488e4e3b",
-        "difficulty": "1b279b0d",
+        "difficulty": {
+          "bytes": "1b279b0d"
+        },
         "extraData": "d883010816846765746888676f312e31302e34856c696e7578",
         "gasLimit": "8000000",
         "hash": "1174ab3f74e43afce47d084bb8c3e9ee8cbf1e886b53ef85b4b97a676ba51561",

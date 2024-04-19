@@ -1,6 +1,6 @@
 module github.com/streamingfast/firehose-ethereum
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
@@ -22,12 +22,13 @@ require (
 	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
 	github.com/streamingfast/firehose-core v1.3.6
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20240418200457-5ca25e11e762
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20240131193313-6b88bc7139db
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/substreams v1.5.5
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
 	go.uber.org/multierr v1.10.0

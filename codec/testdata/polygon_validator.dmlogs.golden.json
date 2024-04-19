@@ -2,9 +2,13 @@
   {
     "hash": "422af5b0ab069273d82acc077d82c571275756a2209d6c8aa567131800ca31b1",
     "header": {
-      "baseFeePerGas": "0d3cd0eda1",
+      "baseFeePerGas": {
+        "bytes": "0d3cd0eda1"
+      },
       "coinbase": "0000000000000000000000000000000000000000",
-      "difficulty": "15",
+      "difficulty": {
+        "bytes": "15"
+      },
       "extraData": "d782040083626f7289676f312e31392e3130856c696e7578000000000000000034966b0287bdac0f41eb2c9da4c868040b3df1682a66a52579eb5a599e036c0d743fa90720568fc43e32c907bce9f7039e0120e2b60dff5b4188ec8658185df601",
       "gasLimit": "30000000",
       "gasUsed": "6982955",
@@ -16,7 +20,9 @@
       "receiptRoot": "b3f9657e49ab7bfeea50c6cb354ca732ba42785c6c92341bdd71947358fb47fe",
       "stateRoot": "0895073e353f6b29889143656853c6666849c7769ed98256f82819b44766dc38",
       "timestamp": "2023-08-21T02:23:21Z",
-      "totalDifficulty": "3013de3d",
+      "totalDifficulty": {
+        "bytes": "3013de3d"
+      },
       "transactionsRoot": "5188a4495770a672a5dbffa412da66bac673d740205cad6570c5d04f2d6f0cb8",
       "uncleHash": "1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347"
     },
@@ -31,8 +37,12 @@
             "balanceChanges": [
               {
                 "address": "d77cd621164b78f85fb7d56ae75997e6c19b88a1",
-                "newValue": "3ed526283c57812c3a",
-                "oldValue": "3f9cfd3bf0f5212c3a",
+                "newValue": {
+                  "bytes": "3ed526283c57812c3a"
+                },
+                "oldValue": {
+                  "bytes": "3f9cfd3bf0f5212c3a"
+                },
                 "ordinal": "2",
                 "reason": "REASON_GAS_BUY"
               }
@@ -66,7 +76,9 @@
         "endOrdinal": "22",
         "from": "d77cd621164b78f85fb7d56ae75997e6c19b88a1",
         "gasLimit": "20000000",
-        "gasPrice": "a7a3582000",
+        "gasPrice": {
+          "bytes": "a7a3582000"
+        },
         "gasUsed": "60843",
         "hash": "61c294583def04f258310f5abe2f39a99388e8cb43afae27bbc360e22e8b626c",
         "input": "7b06424000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000603658f95bfc00000000000000000000000000000000000000000000000000000000064e2caa50000000000000000000000000000000000000000000000000000000064e2cabf000000000000000000000000000000000000000000000000000000000f92e0e60000000000000000000000000000000000000000000000000000000000000064000000000000000000000000000000000000000000000000000000000000000533303a3135000000000000000000000000000000000000000000000000000000",

@@ -7,28 +7,42 @@
         "balanceChanges": [
           {
             "address": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
-            "newValue": "ab989816a6c000",
-            "oldValue": "0118bb1a9c901f98f0",
+            "newValue": {
+              "bytes": "ab989816a6c000"
+            },
+            "oldValue": {
+              "bytes": "0118bb1a9c901f98f0"
+            },
             "ordinal": "2",
             "reason": "REASON_GAS_BUY"
           },
           {
             "address": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
-            "oldValue": "01180f82047978d8f0",
+            "oldValue": {
+              "bytes": "01180f82047978d8f0"
+            },
             "ordinal": "6",
             "reason": "REASON_TRANSFER"
           },
           {
             "address": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
-            "newValue": "a772652e04a800",
-            "oldValue": "01180f82047978d8f0",
+            "newValue": {
+              "bytes": "a772652e04a800"
+            },
+            "oldValue": {
+              "bytes": "01180f82047978d8f0"
+            },
             "ordinal": "9",
             "reason": "REASON_GAS_REFUND"
           },
           {
             "address": "69e43fdaf4106e88d2d48312ba56a90828ae3728",
-            "newValue": "042632e8a21800",
-            "oldValue": "071aba99f8887bae88fc",
+            "newValue": {
+              "bytes": "042632e8a21800"
+            },
+            "oldValue": {
+              "bytes": "071aba99f8887bae88fc"
+            },
             "ordinal": "10",
             "reason": "REASON_REWARD_TRANSACTION_FEE"
           }
@@ -69,7 +83,9 @@
     "endOrdinal": "11",
     "from": "ab07a50ad459b41fe065f7bbab866d5390e9f705",
     "gasLimit": "966000",
-    "gasPrice": "0ba43b7400",
+    "gasPrice": {
+      "bytes": "0ba43b7400"
+    },
     "gasUsed": "23358",
     "hash": "74b9554595faea99f11f5310c086acaec4686ef94b30466f966d67071b228b65",
     "input": "f93d3def0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004b7265616c79206c6f6e6720737472696e67206c6172676572207468616e20333220627974657320746f2074657374206f757420736f6c69646974792073706c697474696e67207374756666000000000000000000000000000000000000000000",

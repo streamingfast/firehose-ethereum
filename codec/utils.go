@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/streamingfast/eth-go"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -136,9 +137,30 @@ func FromHeader(header *BlockHeader) *pbeth.BlockHeader {
 		Hash:             header.Hash,
 		BaseFeePerGas:    pbeth.BigIntFromBytes(header.BaseFeePerGas),
 		WithdrawalsRoot:  header.WithdrawalsHash,
-		TxDependency:     pbeth.Uint64NestedArrayFromEthUint(header.TxDependency),
+		TxDependency:     Uint64NestedArrayFromEthUint(header.TxDependency),
 		BlobGasUsed:      (*uint64)(header.BlobGasUsed),
 		ExcessBlobGas:    (*uint64)(header.ExcessBlobGas),
 		ParentBeaconRoot: header.ParentBeaconRoot,
 	}
+}
+func Uint64NestedArrayFromEthUint(in [][]eth.Uint64) *pbeth.Uint64NestedArray {
+	if in == nil {
+		return nil
+	}
+	out := &pbeth.Uint64NestedArray{}
+	for _, v := range in {
+		out.Val = append(out.Val, &pbeth.Uint64Array{
+			Val: toUint64Array(v),
+		})
+	}
+	return out
+}
+
+func toUint64Array(in []eth.Uint64) []uint64 {
+	out := make([]uint64, len(in))
+
+	for i, el := range in {
+		out[i] = uint64(el)
+	}
+	return out
 }
