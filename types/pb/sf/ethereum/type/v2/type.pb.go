@@ -841,6 +841,13 @@ type BlockHeader struct {
 	//
 	// Only available in DetailLevel: EXTENDED
 	WithdrawalsRoot []byte `protobuf:"bytes,19,opt,name=withdrawals_root,json=withdrawalsRoot,proto3" json:"withdrawals_root,omitempty"`
+	// TxDependency is list of transaction indexes that are dependent on each other in the block
+	// header. This is metadata only that was used by the internal Polygon parallel execution engine.
+	//
+	// This field was available in a few versions on Polygon Mainnet and Polygon Mumbai chains. It was actually
+	// removed and is not populated anymore. It's now embeded in the `extraData` field, refer to Polygon source
+	// code to determine how to extract it if you need it.
+	//
 	// Only available in DetailLevel: EXTENDED
 	TxDependency *Uint64NestedArray `protobuf:"bytes,20,opt,name=tx_dependency,json=txDependency,proto3" json:"tx_dependency,omitempty"`
 	// BlobGasUsed was added by EIP-4844 and is ignored in legacy headers.
@@ -1283,6 +1290,8 @@ type TransactionTrace struct {
 	EndOrdinal uint64 `protobuf:"varint,26,opt,name=end_ordinal,json=endOrdinal,proto3" json:"end_ordinal,omitempty"`
 	// TransactionTraceStatus is the status of the transaction execution and will let you know if the transaction
 	// was successful or not.
+	//
+	// ## Explanation relevant only for blocks with `DetailLevel: EXTENDED`
 	//
 	// A successful transaction has been recorded to the blockchain's state for calls in it that were successful.
 	// This means it's possible only a subset of the calls were properly recorded, refer to [calls[].state_reverted] field
