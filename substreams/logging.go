@@ -8,5 +8,5 @@ import (
 var zlog *zap.Logger
 
 func init() {
-	zlog, _ = logging.PackageLogger("rpc-cache", "github.com/firehose-ethereum/substreams")
+	zlog, _ = logging.PackageLogger("rpc-cache", "github.com/streamingfast/firehose-ethereum/substreams")
 }
