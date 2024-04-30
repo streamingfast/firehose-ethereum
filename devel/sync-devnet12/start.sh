@@ -21,6 +21,13 @@ main() {
   set -e
 
   if [[ $clean == "true" ]]; then
+    printf "Are you sure you want to clean the data directory? [y/N] "
+    read -r answer
+    if [[ $answer != "y" ]]; then
+      echo "Aborting"
+      exit 0
+    fi
+
     rm -rf sf-data &> /dev/null || true
   fi
 

@@ -21,7 +21,14 @@ main() {
   set -e
 
   if [[ $clean == "true" ]]; then
-    rm -rf firehose-data &> /dev/null || true
+    printf "Are you sure you want to clean the data directory? [y/N] "
+    read -r answer
+    if [[ $answer != "y" ]]; then
+      echo "Aborting"
+      exit 0
+    fi
+
+    rm -rf sf-data &> /dev/null || true
   fi
 
   exec $fireeth -c $(basename $ROOT).yaml start "$@"
