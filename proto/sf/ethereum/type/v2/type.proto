@@ -686,6 +686,10 @@ message BalanceChange {
     // Rewards for Blob processing on BNB chain added in Tycho hard-fork, refers
     // to BNB documentation to check the timestamp at which it was activated.
     REASON_REWARD_BLOB_FEE = 17;
+
+    //USE on optimism chan
+    REASON_INCREASE_MINT = 18;
+
   }
 
   // The block's global ordinal when the balance change was recorded, refer to [Block]
