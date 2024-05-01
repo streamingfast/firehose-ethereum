@@ -1,3 +1,7 @@
+buf.build/gen/go/bufbuild/reflect/connectrpc/go v1.16.1-20240117202343-bf8f65e8876c.1 h1:UITHLAtIrN0+SNbpYlNs3ca/Xme048ecetS6DD3t6E8=
+buf.build/gen/go/bufbuild/reflect/connectrpc/go v1.16.1-20240117202343-bf8f65e8876c.1/go.mod h1:8aC0AUYVzAH5wP6/43Z89/0un0nvZyf+PVSeeaHyYyg=
+buf.build/gen/go/bufbuild/reflect/protocolbuffers/go v1.33.0-20240117202343-bf8f65e8876c.1 h1:9ROfgUJtdplIn+2PvUB+Z7HMRVBIsU0uCPAcPfes98I=
+buf.build/gen/go/bufbuild/reflect/protocolbuffers/go v1.33.0-20240117202343-bf8f65e8876c.1/go.mod h1:TF9ggHlVzYnMjBa4v+ghV6daBmQ0AU4KaAMezoCmX9c=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -639,8 +643,8 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 h1:Y15G1Z4fpEdm2b+/70owI7TLuXadlqBtGM7rk4Hxrzk=
 github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0/go.mod h1:/Rnz2TJvaShjUct0scZ9kKV2Jr9/+KBAoWy4UMYxgv4=
-github.com/streamingfast/substreams v1.5.5 h1:5EFokbMs5cjnjZbCSJk0J7hQjITPxBN3Zip5yGUDIRw=
-github.com/streamingfast/substreams v1.5.5/go.mod h1:P/DmHJP0qCy0lZ/XIuek7bNsGK6PIat9tu5Fi50F4xY=
+github.com/streamingfast/substreams v1.5.6-0.20240501182049-2e5674e5778e h1:DVCYFTqPkHe3CL0OO02z1GW8yb5eWDTVezp6iYH2Lc0=
+github.com/streamingfast/substreams v1.5.6-0.20240501182049-2e5674e5778e/go.mod h1:5dtWfziOGeemeauy0rJ7TnfMBen/PQEkzxKvU1Ja9JM=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
