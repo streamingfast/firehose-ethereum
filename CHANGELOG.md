@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.4.8
+
+* The `fireeth tools download-from-firehose` now respects its documentation when doing `--help`, correct invocation now is `fireeth tools download-from-firehose <endpoint> <start>:<end> <output_folder>`.
+
+* The `fireeth tools download-from-firehose` has been improved to work with new Firehose `sf.firehose.v2.BlockMetadata` field, if the server sends this new field, the tool is going to work on any chain. If the server's you are reaching is not recent enough, the tool fallbacks to the previous logic. All StreamingFast endpoints should serves be compatible.
+
+* Firehose response (both single block and stream) now include the `sf.firehose.v2.BlockMetadata` field. This new field contains the chain agnostic fields we hold about any block of any chain.
+
 ## v2.4.7
 
 ### Substreams fixes
