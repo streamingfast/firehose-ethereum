@@ -140,22 +140,27 @@ func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 }
 
 func (e *RPCEngine) ETHCall(ctx context.Context, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
-	// We set `alwaysRetry` parameter to `true` here so it means `deterministic` return value will always be `true` and we can safely ignore it
-	out, _, err = e.ethCall(ctx, true, traceID, clock, in)
+	// We set `retryCount` parameter to `-1` (infinite retry) here so it means `deterministic` return value will always be `true` and we can safely ignore it
+	out, _, err = e.ethCall(ctx, -1, traceID, clock, in)
 	return out, err
 }
 
-func (e *RPCEngine) ethCall(ctx context.Context, alwaysRetry bool, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, deterministic bool, err error) {
+func (e *RPCEngine) ethCall(ctx context.Context, retryCount int, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, deterministic bool, err error) {
 	calls := &pbethss.RpcCalls{}
 	if err := proto.Unmarshal(in, calls); err != nil {
 		return nil, false, fmt.Errorf("unmarshal rpc calls proto: %w", err)
+	}
+
+	if len(calls.Calls) == 0 {
+		// A empty byte slice is a valid output that will lead to 0 responses
+		return make([]byte, 0), false, nil
 	}
 
 	if err := e.validateCalls(calls); err != nil {
 		return nil, true, err
 	}
 
-	res, deterministic, err := e.rpcCalls(ctx, traceID, alwaysRetry, clock.Id, calls)
+	res, deterministic, err := e.rpcCalls(ctx, traceID, retryCount, clock.Id, calls)
 	if err != nil {
 		return nil, deterministic, err
 	}
@@ -196,10 +201,15 @@ func (e *RPCEngine) validateCalls(calls *pbethss.RpcCalls) (err error) {
 
 var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(timeout\s*=\s*[^\)]+\)`)
 
-// rpcsCalls performs the RPC calls with full retry unless `alwaysRetry` is `false` in which case output is
-// returned right away. If `alwaysRetry` is sets to `true` than `deterministic` will always return `true`
-// and `err` will always be nil.
-func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, alwaysRetry bool, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
+// rpcsCalls performs the RPC calls retrying forever on error if `retryCount` is set to -1. If `retryCount`
+// is sets to 0, no retry is attempted. If `retryCount` is > 0, it will retry `retryCount` times.
+//
+// If there is no retry or if partial retry, deterministic will be always `false`. Otherwise, it can only
+// be `true` (since we retry either forever or until we hit a deterministic error).
+//
+// Note that the `retryCount` value should be set to something else than -1 only for testing purposes, production
+// code paths should always set it to -1 (infinite retry).
+func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
 	reqs := make([]*rpc.RPCRequest, len(calls.Calls))
 	for i, call := range calls.Calls {
 		reqs[i] = rpc.NewRawETHCall(rpc.CallParams{
@@ -222,7 +232,8 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, alwaysRetry bo
 
 		out, err := client.DoRequests(ctx, reqs)
 		if err != nil {
-			if !alwaysRetry {
+			// Never retry on retry attempted max count
+			if retryCount == 0 || (retryCount > 0 && attemptNumber > retryCount) {
 				return nil, false, err
 			}
 
@@ -254,7 +265,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, alwaysRetry bo
 			}
 		}
 
-		if !alwaysRetry {
+		if retryCount == 0 {
 			return toProtoResponses(out), deterministicResp, nil
 		}
 

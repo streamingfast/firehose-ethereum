@@ -4,11 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v2.4.9 (unreleased)
+## v2.4.9
 
 ### Substreams
 
+* Fixed a crash when `eth_call` batch is of length 0 and a retry is attempted.
+
 * Allow stores to write to stores with out-of-order ordinals (they will be reordered at the end of the module execution for each block)
+
 * Fix issue in substreams-tier2 causing some files to be written to the wrong place sometimes under load, resulting in some hanging requests
 
 ## v2.4.8

@@ -69,7 +69,79 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
 	require.NoError(t, err)
 
-	out, deterministic, err := engine.ethCall(context.Background(), false, traceID, clockBlock1, protoCalls)
+	out, deterministic, err := engine.ethCall(context.Background(), 0, traceID, clockBlock1, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
+}
+
+func TestRPCEngine_rpcCalls_noCallsInInput(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Fail(t, "The server should never been called")
+	}))
+
+	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{}})
+	require.NoError(t, err)
+
+	out, deterministic, err := engine.ethCall(context.Background(), 1, traceID, clockBlock1, protoCalls)
+	require.NoError(t, err)
+	require.False(t, deterministic)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{},
+	}, responses)
+}
+
+func TestRPCEngine_rpcCalls_retry(t *testing.T) {
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		if invokedCount == 1 {
+			// Error than retry
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			assert.Equal(t,
+				`[{"params":[{"to":"0xea674fdde714fd979de3edf0f56aa9716b898ec8","gas":"0x2faf080","data":"0x313ce567"},{"blockHash":"0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"}],"method":"eth_call","jsonrpc":"2.0","id":"0x1"}]`,
+				buffer.String(),
+			)
+
+			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+		}
+	}))
+
+	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	out, deterministic, err := engine.ethCall(context.Background(), 1, traceID, clockBlock1, protoCalls)
 	require.NoError(t, err)
 	require.True(t, deterministic)
 
@@ -159,7 +231,7 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{tt.rpcCall}})
 			require.NoError(t, err)
 
-			out, deterministic, err := engine.ethCall(context.Background(), false, traceID, clockBlock1, protoCalls)
+			out, deterministic, err := engine.ethCall(context.Background(), 0, traceID, clockBlock1, protoCalls)
 			tt.expectedErr(t, err)
 			require.Equal(t, tt.wantOut.deterministic, deterministic)
 
