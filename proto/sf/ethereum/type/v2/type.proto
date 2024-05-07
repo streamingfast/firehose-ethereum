@@ -353,6 +353,9 @@ message TransactionTrace {
     TRX_TYPE_ARBITRUM_INTERNAL	= 106;
     TRX_TYPE_ARBITRUM_LEGACY	= 120;
 
+    // OPTIMISM-specific transactions
+    TRX_TYPE_OPTIMISM_DEPOSIT = 126;
+
   }
 
   // AcccessList represents the storage access this transaction has agreed to do in which case those storage
