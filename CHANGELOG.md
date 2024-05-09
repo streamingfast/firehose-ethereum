@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.5.0
+
+### Substreams bumped to v1.6.0
+
+> **Note** Upgrading will require changing the tier1 and tier2 versions concurrently, as the internal protocol has changed.
+
+* *Index Modules* and *Block Filter* now supported. See https://github.com/streamingfast/substreams-foundational-modules for an example implementation
+* Various scheduling and performance improvements
+* env variable `SUBSTREAMS_WORKERS_RAMPUP_TIME` changed from `4s` to `0`. Set it to `4s` to keep previous behavior
+* `otelcol://` tracing protocol no longer supported
+
 ## v2.4.9
 
 ### Substreams
