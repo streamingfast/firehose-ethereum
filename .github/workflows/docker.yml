@@ -230,7 +230,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON(github.event.inputs.flavors || '[{"name":"geth", "version":"-latest-fh2"}, {"name":"bsc","version":},{"name":"polygon", "version":"-latest-fh2"), {"name":"nitro", "version":"-latest-fh2"}, {"name":"optimism", "version":"-latest-fh3"}]' ) }}
+        binary: ${{ fromJSON(github.event.inputs.flavors || '[{"name":"geth", "version":"latest-fh2"}, {"name":"bsc","version":},{"name":"polygon", "version":"latest-fh2"), {"name":"nitro", "version":"latest-fh2"}, {"name":"optimism", "version":"latest-fh3"}]' ) }}
         exclude:
           - binary: nitro
 
@@ -250,7 +250,7 @@ jobs:
           echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" >> $GITHUB_OUTPUT
 
       - run: |
-          docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary.name }}-${GETH_VERSION:-latest-fh2}
+          docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary.name }}-${{ matrix.binary.version }}
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary.name }}-${{ matrix.binary.version }}) >> $GITHUB_ENV
           echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
         env:
@@ -263,15 +263,15 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag,suffix=-${{ env.VERSION }}
-            type=ref,event=tag,suffix=-${{ matrix.binary }}
+            type=ref,event=tag,suffix=-${{ matrix.binary.name }}
             type=sha,prefix=,suffix=-${{ env.VERSION }},enable=true
             type=sha,prefix=,suffix=-${{ matrix.binary }},enable=true
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
-            type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,prefix=,suffix=-${{ matrix.binary.name }},enable=${{ github.ref == 'refs/heads/develop' }},value=develop
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
-            type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
+            type=raw,prefix=,suffix=-${{ matrix.binary.name }},enable=${{ github.ref == 'refs/heads/dockerbuild' }},value=manual
             type=raw,prefix=,suffix=-${{ env.VERSION }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
-            type=raw,prefix=,suffix=-${{ matrix.binary }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
+            type=raw,prefix=,suffix=-${{ matrix.binary.name }},enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: latest=false
 
       - name: Build and push Docker image
@@ -311,7 +311,7 @@ jobs:
           OUT="${OUT//'%'/'%25'}"
           OUT="${OUT//$'\n'/' '}"
           OUT="${OUT//$'\r'/' '}"
-          echo "${{ matrix.binary }}=$OUT" >> $GITHUB_OUTPUT
+          echo "${{ matrix.binary.name }}=$OUT" >> $GITHUB_OUTPUT
 
   slack-notifications-vanilla:
     if: ${{ !startsWith(github.ref, 'refs/tags/') && !contains(github.event.head_commit.message, 'build:all') && github.event_name != 'workflow_dispatch' }}
