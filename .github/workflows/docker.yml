@@ -25,7 +25,7 @@ on:
         description: 'JSON-formatted list of flavors to build'
         required: true
         type: string
-        default: ${{ env.BINARY_CONFIG }}
+        default: ${{ BINARY_CONFIG }}
 
 
 jobs:
@@ -232,7 +232,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON(github.event.inputs.flavors || env.BINARY_CONFIG) }}
+        binary: ${{ fromJSON(github.event.inputs.flavors || BINARY_CONFIG) }}
         exclude:
           - binary: nitro
 
