@@ -230,7 +230,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON('[{"name":"geth", "version":"latest-fh2"}, {"name":"bsc","version":},{"name":"polygon", "version":"latest-fh2"), {"name":"nitro", "version":"latest-fh2"}, {"name":"optimism", "version":"latest-fh3"}]') }}
+        binary: ${{ fromJSON('[{"name":"optimism", "version":"latest-fh3"}]') }}
         exclude:
           - binary: nitro
 
