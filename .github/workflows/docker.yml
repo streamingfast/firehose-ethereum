@@ -25,7 +25,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  BINARY_CONFIG: ${{ github.event.inputs.flavors }}
+  BINARY_CONFIG: '[{"name":"geth", "version":"latest-fh2"}, {"name":"bsc","version":"latest-fh2"},{"name":"polygon", "version":"latest-fh2"), {"name":"nitro", "version":"latest-fh2"}, {"name":"optimism", "version":"latest-fh3"}]'
 
 
 jobs:
