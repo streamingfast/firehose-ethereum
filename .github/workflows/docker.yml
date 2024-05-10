@@ -35,6 +35,14 @@ jobs:
       BINARY_CONFIG: ${{ env.BINARY_CONFIG }}
     steps:
       - run: echo "null"
+
+  display-env-vars: # this is a fix/patch/workaround for the issue https://github.com/actions/runner/issues/2372
+    name: Display Environment vars
+    needs: [get-env-vars]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "BINARY_CONFIG=${{ needs.get-env-vars.outputs.BINARY_CONFIG }}"
+
   setup:
     runs-on: ubuntu-latest
 
