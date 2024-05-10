@@ -216,7 +216,7 @@ jobs:
   bundle-docker-versions:
     needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
-    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bsc')) }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bsc') || contains(github.event.inputs.flavors, 'optimism')) }}
 
     permissions:
       contents: read
@@ -226,10 +226,11 @@ jobs:
       geth: ${{ steps.print.outputs.geth }}
       bsc: ${{ steps.print.outputs.bsc }}
       polygon: ${{ steps.print.outputs.polygon }}
+      optimism: ${{ steps.print.outputs.optimism }}
 
     strategy:
       matrix:
-        binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon","nitro"]' ) }}
+        binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon","nitro", optimism]' ) }}
         exclude:
           - binary: nitro
 
