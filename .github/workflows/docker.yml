@@ -232,7 +232,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON(env.BINARY_CONFIG) }}
+        binary: ${{ fromJSON(BINARY_CONFIG) }}
         exclude:
           - binary: nitro
 
