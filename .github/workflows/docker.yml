@@ -21,7 +21,12 @@ on:
         description: 'JSON-formatted list of flavors to build'
         required: true
         type: string
-        default: '[{"name":"geth","version":"latest-fh2"},{"name":"bsc","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"},{"name":"nitro","version":"latest-fh2"}]'
+        default: '[{"name":"geth","version":"latest-fh2"},{"name":"bsc","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]'
+      flavors_nitro:
+        description: 'JSON-formatted list of flavors to build'
+        required: true
+        type: string
+        default: '[{"name":"nitro","version":"latest-fh2"}]'
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -128,7 +133,7 @@ jobs:
   bundle-docker-version-nitro:
     needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
-    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'nitro')) }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors_nitro == '' || contains(github.event.inputs.flavors_nitro, 'nitro')) }}
 
     outputs:
       nitro: ${{ steps.print.outputs.nitro }}
