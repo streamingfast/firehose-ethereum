@@ -1,10 +1,6 @@
 ---
 name: Build docker image
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  BINARY_CONFIG: '[{"name":"geth", "version":"latest-fh2"}, {"name":"bsc","version":"latest-fh2"},{"name":"polygon", "version":"latest-fh2"), {"name":"nitro", "version":"latest-fh2"}, {"name":"optimism", "version":"latest-fh3"}]'
 
 on:
   push:
@@ -25,7 +21,11 @@ on:
         description: 'JSON-formatted list of flavors to build'
         required: true
         type: string
-        default: ${{ BINARY_CONFIG }}
+        default: '[{"name":"geth", "version":"latest-fh2"}, {"name":"bsc","version":"latest-fh2"},{"name":"polygon", "version":"latest-fh2"), {"name":"nitro", "version":"latest-fh2"}, {"name":"optimism", "version":"latest-fh3"}]'
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  BINARY_CONFIG: $${{ github.event.inputs.flavors }}
 
 
 jobs:
