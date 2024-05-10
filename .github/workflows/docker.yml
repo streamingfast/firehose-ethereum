@@ -19,7 +19,7 @@ on:
       flavors:
         description: 'JSON-formatted list of flavors to build'
         required: true
-        default: '["geth","bsc","polygon","nitro"]' # careful, this value is not used in automatic triggers, this value is repeated in step bundle-docker-versions
+        default: '["geth","bsc","polygon","nitro", "optimism"]' # careful, this value is not used in automatic triggers, this value is repeated in step bundle-docker-versions
         type: string
 
 env:
