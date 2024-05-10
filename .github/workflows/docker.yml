@@ -231,9 +231,9 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON( github.event.inputs.flavors || '[{"name":"geth","version":"latest-fh2"},{"name":"bsc","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]' ) }}
+        binary: ${{ fromJSON( github.event.inputs.flavors ) }} #|| '[{"name":"geth","version":"latest-fh2"},{"name":"bsc","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]'
         exclude:
-          - binary: nitro
+          - binary.name: nitro
 
     steps:
       - name: Log in to the Container registry
