@@ -25,23 +25,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  BINARY_CONFIG: ${{ github.event.inputs.flavors }}
 
 jobs:
-  get-env-vars: # this is a fix/patch/workaround for the issue https://github.com/actions/runner/issues/2372
-    name: Get Environment vars
-    runs-on: ubuntu-latest
-    outputs:
-      BINARY_CONFIG: ${{ env.BINARY_CONFIG }}
-    steps:
-      - run: echo "null"
-
-  display-env-vars: # this is a fix/patch/workaround for the issue https://github.com/actions/runner/issues/2372
-    name: Display Environment vars
-    needs: [get-env-vars]
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "BINARY_CONFIG=${{ needs.get-env-vars.outputs.BINARY_CONFIG }}"
 
   setup:
     runs-on: ubuntu-latest
@@ -246,8 +231,7 @@ jobs:
 
     strategy:
       matrix:
-
-        binary: ${{ fromJSON( needs.get-env.outputs.BINARY_CONFIG ) }}
+        binary: ${{ fromJSON( github.event.inputs.flavors || '[{"name":"geth", "version":"latest-fh2"}, {"name":"bsc","version":"latest-fh2"},{"name":"polygon", "version":"latest-fh2"), {"name":"nitro", "version":"latest-fh2"}, {"name":"optimism", "version":"latest-fh3"}]' ) }}
         exclude:
           - binary: nitro
 
