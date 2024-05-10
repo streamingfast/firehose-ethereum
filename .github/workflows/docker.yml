@@ -30,7 +30,7 @@ env:
 jobs:
   get-env-vars: # this is a fix/patch/workaround for the issue https://github.com/actions/runner/issues/2372
     name: Get Environment vars
-    runs-on: some-runner
+    runs-on: ubuntu-latest
     outputs:
       BINARY_CONFIG: ${{ env.BINARY_CONFIG }}
     steps:
