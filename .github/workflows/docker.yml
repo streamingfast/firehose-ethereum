@@ -1,6 +1,11 @@
 ---
 name: Build docker image
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  BINARY_CONFIG: '[{"name":"geth", "version":"latest-fh2"}, {"name":"bsc","version":"latest-fh2"},{"name":"polygon", "version":"latest-fh2"), {"name":"nitro", "version":"latest-fh2"}, {"name":"optimism", "version":"latest-fh3"}]'
+
 on:
   push:
     tags:
@@ -19,12 +24,9 @@ on:
       flavors:
         description: 'JSON-formatted list of flavors to build'
         required: true
-        default: '["geth","bsc","polygon","nitro", "optimism"]' # careful, this value is not used in automatic triggers, this value is repeated in step bundle-docker-versions
         type: string
+        default: ${{ env.BINARY_CONFIG }}
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   setup:
@@ -230,7 +232,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON('[{"name":"optimism", "version":"latest-fh3"}]') }}
+        binary: ${{ fromJSON(github.event.inputs.flavors || env.BINARY_CONFIG) }}
         exclude:
           - binary: nitro
 
