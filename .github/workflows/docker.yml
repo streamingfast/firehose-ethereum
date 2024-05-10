@@ -246,6 +246,7 @@ jobs:
 
     strategy:
       matrix:
+
         binary: ${{ fromJSON( needs.get-env.outputs.BINARY_CONFIG ) }}
         exclude:
           - binary: nitro
