@@ -230,7 +230,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON(github.event.inputs.flavors || '["geth","bsc","polygon","nitro", optimism]' ) }}
+        binary: ${{ fromJSON(github.event.inputs.flavors || '[{"name":"geth", "version":"-latest-fh2"}, {"name":"bsc","version":},{"name":"polygon", "version":"-latest-fh2"), {"name":"nitro", "version":"-latest-fh2"}, {"name":"optimism", "version":"-latest-fh3"}]' ) }}
         exclude:
           - binary: nitro
 
@@ -250,8 +250,8 @@ jobs:
           echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" >> $GITHUB_OUTPUT
 
       - run: |
-          docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary }}-${GETH_VERSION:-latest-fh2}
-          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary }}-${GETH_VERSION:-latest-fh2}) >> $GITHUB_ENV
+          docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary.name }}-${GETH_VERSION:-latest-fh2}
+          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary.name }}-${{ matrix.binary.version }}) >> $GITHUB_ENV
           echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
         env:
           GETH_VERSION: ${{ github.event.inputs.geth_version }}
