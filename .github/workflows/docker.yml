@@ -215,7 +215,7 @@ jobs:
           echo "nitro=$OUT" >> $GITHUB_OUTPUT
 
   bundle-docker-versions:
-    needs: [get-env-vars, setup, build-vanilla]
+    needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bsc') || contains(github.event.inputs.flavors, 'optimism')) }}
 
