@@ -346,6 +346,7 @@ jobs:
             :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
             ${{ needs.bundle-docker-versions.outputs.geth }}
             ${{ needs.bundle-docker-versions.outputs.bsc }}
+            ${{ needs.bundle-docker-versions.outputs.optimism }}
             ${{ needs.bundle-docker-versions.outputs.polygon }}```
 
   slack-notification-nitro:
