@@ -3,6 +3,7 @@ package transform
 import (
 	"encoding/hex"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/streamingfast/bstream"
@@ -143,13 +144,19 @@ func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) error {
 	return nil
 }
 
-func addSigString(in AddressSignatureFilter) string {
+func addSigString(in AddressSignatureFilter, limit int) string {
 	var addresses []string
 	var signatures []string
-	for _, a := range in.Addresses() {
+	for i, a := range in.Addresses() {
+		if i > limit {
+			break
+		}
 		addresses = append(addresses, a.Pretty())
 	}
-	for _, s := range in.Signatures() {
+	for i, s := range in.Signatures() {
+		if i > limit {
+			break
+		}
 		signatures = append(signatures, s.Pretty())
 	}
 	return fmt.Sprintf("{addrs: %s, sigs: %s}", strings.Join(addresses, ","), strings.Join(signatures, ","))
@@ -167,13 +174,23 @@ func truncate(in string, size int, suffix string) string {
 }
 
 func (f *CombinedFilter) String() string {
+	limit := 5
+	debug := os.Getenv("DEBUG_FILTERS") == "true"
+	if debug {
+		limit = 999999
+	}
+
 	callFilters := make([]string, len(f.CallToFilters))
 	for i, f := range f.CallToFilters {
-		callFilters[i] = addSigString(f)
+		callFilters[i] = addSigString(f, limit)
 	}
 	logFilters := make([]string, len(f.LogFilters))
 	for i, f := range f.LogFilters {
-		logFilters[i] = addSigString(f)
+		logFilters[i] = addSigString(f, limit)
+	}
+
+	if debug {
+		return fmt.Sprintf("Combined filter: Calls:[%s], Logs:[%s], SendAllBlockHeaders: %v", strings.Join(callFilters, ","), strings.Join(logFilters, ","), f.sendAllBlockHeaders)
 	}
 
 	return fmt.Sprintf("Combined filter: Calls:[%s], Logs:[%s], SendAllBlockHeaders: %v", truncate(strings.Join(callFilters, ","), 90, "...}"), truncate(strings.Join(logFilters, ","), 90, "...}"), f.sendAllBlockHeaders)
