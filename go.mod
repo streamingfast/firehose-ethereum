@@ -21,7 +21,7 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20240419152712-b7df14cba7b5
 	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.3.8
+	github.com/streamingfast/firehose-core v1.4.2-0.20240514235211-75636557dda2
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20240419152810-415efff8efec
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
