@@ -58,7 +58,11 @@ func newCompareBlocksRPCCmd(logger *zap.Logger) *cobra.Command {
 		`),
 	}
 
-	cmd.PersistentFlags().Bool("diff", false, "When activated, difference is displayed for each block with a difference")
+	cmd.PersistentFlags().Bool("save-files", false, cli.Dedent(`
+		When activated, block files with difference are saved.
+		Format will be fh_{block_num}.json and rpc_{block_num}.json
+		diff fh_{block_num}.json and rpc_{block_num}.json
+	`))
 	cmd.Flags().BoolP("plaintext", "p", false, "Use plaintext connection to Firehose")
 	cmd.Flags().BoolP("insecure", "k", false, "Use SSL connection to Firehose but skip SSL certificate validation")
 
@@ -87,6 +91,7 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 
 		plaintext := sflags.MustGetBool(cmd, "plaintext")
 		insecure := sflags.MustGetBool(cmd, "insecure")
+		saveFiles := sflags.MustGetBool(cmd, "save-files")
 
 		firehoseClient, connClose, grpcCallOpts, err := client.NewFirehoseClient(firehoseEndpoint, jwt, insecure, plaintext)
 		if err != nil {
@@ -133,11 +138,14 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 					panic(err)
 				}
 
-				identical, diffs := CompareFirehoseToRPC(firehoseBlock, rpcBlock, receipts)
-				if !identical {
-					fmt.Println("different", diffs)
-				} else {
-					fmt.Println(firehoseBlock.Number, "identical")
+				identical, diffs := CompareFirehoseToRPC(firehoseBlock, rpcBlock, receipts, saveFiles)
+
+				if !saveFiles {
+					if !identical {
+						fmt.Println("different", diffs)
+					} else {
+						fmt.Println(firehoseBlock.Number, "identical")
+					}
 				}
 			}
 			close(allDone)
@@ -295,7 +303,6 @@ func stripFirehoseUncles(in []*pbeth.BlockHeader) {
 
 func stripFirehoseHeader(in *pbeth.BlockHeader) {
 	in.TxDependency = nil
-	in.WithdrawalsRoot = nil
 
 	if in.BaseFeePerGas == nil {
 		in.BaseFeePerGas = &pbeth.BigInt{}
@@ -341,19 +348,15 @@ func stripFirehoseTransactionTraces(in []*pbeth.TransactionTrace, hashesWithoutT
 		trace.S = bytes.TrimLeft(trace.S, string([]byte{0}))
 		trace.R = bytes.TrimLeft(trace.R, string([]byte{0}))
 
-		trace.GasUsed = 0 // only available on getTransactionReceipt
 		if trace.GasPrice == nil {
 			trace.GasPrice = &pbeth.BigInt{}
 		}
-
-		trace.Type = 0 // only available on getTransactionReceipt
 
 		trace.MaxFeePerGas = nil         // not available on RPC
 		trace.MaxPriorityFeePerGas = nil // not available on RPC
 		trace.ReturnData = nil           // not available on RPC
 		trace.PublicKey = nil            // not available on RPC
 
-		trace.Status = 0 // only available on getTransactionReceipt
 		stripFirehoseTrxReceipt(trace.Receipt)
 		trace.Calls = nil // not available on RPC
 
@@ -369,12 +372,10 @@ func stripFirehoseTrxReceipt(in *pbeth.TransactionReceipt) {
 		log.Ordinal = 0
 		log.Index = 0 // index inside transaction is a pbeth construct, it doesn't exist in RPC interface and we can't reconstruct exactly the same from RPC because the pbeth ones are increased even when a call is reverted.
 	}
-	in.LogsBloom = nil       // only available on getTransactionReceipt
-	in.StateRoot = nil       // only available on getTransactionReceipt
-	in.CumulativeGasUsed = 0 // only available on getTransactionReceipt
+	in.StateRoot = nil // only available on getTransactionReceipt
 }
 
-func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, receipts map[string]*rpc.TransactionReceipt) (isEqual bool, differences []string) {
+func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, receipts map[string]*rpc.TransactionReceipt, saveFiles bool) (isEqual bool, differences []string) {
 	if fhBlock == nil && rpcBlock == nil {
 		return true, nil
 	}
@@ -406,6 +407,11 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, receipts ma
 		//		fmt.Println(string(fh))
 		//		fmt.Println("RPC")
 		//		fmt.Println(string(rpc))
+
+		if saveFiles {
+			os.WriteFile(fmt.Sprintf("fh_%d.json", fhBlock.Number), fh, 0644)
+			os.WriteFile(fmt.Sprintf("rpc_%d.json", rpcBlock.Number), rpc, 0644)
+		}
 
 		if diff := r.Diff(f).Render(); diff != "" {
 			differences = append(differences, diff)

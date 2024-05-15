@@ -15,7 +15,6 @@ import (
 )
 
 func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (*pbeth.Block, map[string]bool) {
-
 	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, receipts, logger)
 
 	var blobGasUsed *uint64
