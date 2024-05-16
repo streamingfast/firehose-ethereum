@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.5.2
+
+### Substreams bumped to v1.6.2
+
+* execout: preload only one file instead of two, log if undeleted caches found
+* execout: add environment variable SUBSTREAMS_DISABLE_PRELOAD_EXEC_FILES to disable file preloading
+
 ## v2.5.1
 
 ### Substreams bumped to v1.6.1
