@@ -47,7 +47,7 @@ usage_error() {
 }
 
 usage() {
-  echo "usage: start.sh [-c]"
+  echo "usage: consensus.sh [-c]"
   echo ""
   echo "Start $(basename $ROOT) environment."
   echo ""

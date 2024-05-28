@@ -1,10 +1,10 @@
 ## Syncing Mainnet
 
-To sync Mainnet, an Ethereum Beacon Chain client is required.
+To sync Optimism, an Ethereum Beacon Chain client is required.
 
-This means that starting `firehose-ethereum` alone is not enough to sync a chain, you also need a Beacon Chain client also called an Ethereum Consensus Client. We use here https://github.com/sigp/lighthouse as our consensus client.
+This means that starting `firehose-ethereum` alone is not enough to sync a chain, you also need a Beacon Chain client also called an Ethereum Consensus Client. We use [lighthouse](https://github.com/sigp/lighthouse) as our consensus client.
 
-In this folder, you will a script to run the consensus client [consensus.sh](./consensus.sh) and a config file [sync-mainnet.yaml](./sync-mainnet.yaml) that starts the full Firehose on Ethereum stack locally.
+In this folder, you will a script to run the consensus client [consensus.sh](./consensus.sh) and a config file [sync-opt-mainnet.yaml](./sync-opt-mainnet.yaml) that starts the full Firehose on Optimism stack locally.
 
 The file [jwt.txt](./jwt.txt) is used by both end to communicate with each other, it's hard-coded right now to show case proper syncing.
 
@@ -42,7 +42,7 @@ Once you have the consensus client synced and `geth` available, download latest 
 The [sync-mainnet.yaml](./sync-mainnet.yaml) is already configured so the the consensus client can connect to it. Go in the folder where this readme is contained (so [here](.)) and run:
 
 ```bash
-fireeth -c sync-mainnet.yaml start
+fireeth -c sync-opt-mainnet.yaml start
 ```
 
 > **Note** If you want to start "fresh" again, stop current running instance, delete the folder `firehose-data` and restart the command above.

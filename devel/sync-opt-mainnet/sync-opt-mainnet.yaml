@@ -1,0 +1,35 @@
+start:
+  args:
+    # - merger
+    - reader-node
+    # - relayer
+    # - firehose
+    # - index-builder
+  flags:
+    # We have set `authrpc.addr` and `http.addr` to `0.0.0.0` so that RPC listen on all interfaces, we also
+    # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
+    # to ensure foreign access to these connection are protected.
+    #
+    # Change the example above to the block you want to sync to initially. You can then start
+    # `geth` right away and it will start syncing up to that block without requiring
+    # a consensus node.
+    #
+    # Meanwhile, you sync a consensus node and when it's ready, you can change the `--synctarget`
+    # to the consensus node's address and restart `geth` to sync from the consensus node.
+    config-file:
+    log-format: stackdriver
+    log-to-file: false
+    data-dir: ./data
+    common-one-block-store-url: ./data/one-block-store
+    common-first-streamable-block: 104739000
+    reader-node-data-dir: ./data
+    reader-node-working-dir: ./data/work
+    reader-node-readiness-max-latency: 1200s
+    reader-node-debug-firehose-logs: false
+    reader-node-blocks-chan-capacity: 1000
+    reader-node-grpc-listen-addr: :9000
+    reader-node-manager-api-addr: :8080
+    reader-node-path: geth
+    # here we run with `--synctarget` to sync from a specific block
+    reader-node-arguments:
+      --verbosity=3 --rollup.sequencerhttp=https://mainnet-sequencer.optimism.io/ --op-network=op-mainnet --datadir={node-data-dir} --vmtrace=firehose --datadir={node-data-dir} --networkid=10 --metrics --metrics.port=6061 --metrics.addr=0.0.0.0 --port=30303 --authrpc.addr=0.0.0.0 --authrpc.port=8551 --authrpc.vhosts=* --authrpc.jwtsecret=jwt.txt --http --http.addr=0.0.0.0 --http.port=8545 --http.api=engine,eth,net,web3 --http.vhosts=* --snapshot=false --txlookuplimit=1000
