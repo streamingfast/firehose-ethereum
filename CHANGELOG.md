@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.6.1
+
+### Improvements
+
+* Bumped firehose-core v1.5.1 and substreams v1.7.3
+
+* Bootstrapping from live blocks improved for chains with very slow blocks or with very fast blocks (affects relayer, firehose and substreams tier1)
+* Substreams fixed slow response close to HEAD in production-mode
+
 ## v2.6.0
 
 ### Highlights
