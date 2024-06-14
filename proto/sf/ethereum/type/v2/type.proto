@@ -656,9 +656,32 @@ message StorageChange {
 }
 
 message BalanceChange {
+  // Address is the address of the account that has changed balance.
   bytes address = 1;
+
+  // OldValue is the balance of the address before the change. This value
+  // can be **nil/null/None** if there was no previous balance for the address.
+  // It is safe in those case(s) to consider the balance as being 0.
+  //
+  // If you consume this from a Substreams, you can safely use:
+  //
+  //     let old_value = old_value.unwrap_or_default();
+  //
   BigInt old_value = 2;
+
+  // NewValue is the balance of the address after the change. This value
+  // can be **nil/null/None** if there was no previous balance for the address
+  // after the change. It is safe in those case(s) to consider the balance as being
+  // 0.
+  //
+  // If you consume this from a Substreams, you can safely use:
+  //
+  //     let new_value = new_value.unwrap_or_default();
+  //
   BigInt new_value = 3;
+
+  // Reason is the reason why the balance has changed. This is useful to determine
+  // why the balance has changed and what is the context of the change.
   Reason reason = 4;
 
   // Obtain all balanche change reasons under deep mind repository:
