@@ -22,11 +22,11 @@ on:
         required: true
         type: string
         default: '[{"name":"geth","version":"latest-fh2"},{"name":"bsc","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]'
-      flavors_nitro:
-        description: 'JSON-formatted list of flavors to build'
+      nitro_tag:
+        description: 'nitro docker image to pull (will not build if set to the string "null")'
         required: true
         type: string
-        default: '[{"name":"nitro","version":"latest-fh2"}]'
+        default: 'latest'
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -133,7 +133,7 @@ jobs:
   bundle-docker-version-nitro:
     needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
-    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors_nitro == '' || contains(github.event.inputs.flavors_nitro, 'nitro')) }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.nitro_tag != 'null') }}
 
     outputs:
       nitro: ${{ steps.print.outputs.nitro }}
@@ -158,8 +158,8 @@ jobs:
           echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" >> $GITHUB_OUTPUT
 
       - run: |
-          docker pull ghcr.io/streamingfast/nitro:latest
-          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/nitro:latest') >> $GITHUB_ENV
+          docker pull ghcr.io/streamingfast/nitro:${{ github.event.inputs.nitro_tag }}
+          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/nitro:${{ github.event.inputs.nitro_tag }}') >> $GITHUB_ENV
           echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
 
       - name: Generate docker tags/labels from github build context
