@@ -29,6 +29,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 
 COPY --from=builder /work/fireeth /app/fireeth
 COPY --from=chain /usr/local/bin/nitro /app/nitro
+COPY --from=chain /home/user/target/machines/. /app/machines/
+COPY --from=chain /home/user/nitro-legacy/machines/. /app/legacy-machines/
 
 COPY tools/fireeth/motd_node_manager /etc/motd
 COPY tools/fireeth/scripts/. /usr/local/bin/

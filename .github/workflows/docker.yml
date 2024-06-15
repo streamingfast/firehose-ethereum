@@ -13,10 +13,6 @@ on:
       - "feature/*"
   workflow_dispatch:
     inputs:
-      geth_version:
-        description: 'The Geth version to build from'
-        required: true
-        default: 'latest-fh2'
       flavors:
         description: 'JSON-formatted list of flavors to build'
         required: true
@@ -260,8 +256,6 @@ jobs:
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary.name }}-${{ matrix.binary.version }}
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary.name }}-${{ matrix.binary.version }}) >> $GITHUB_ENV
           echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
-        env:
-          GETH_VERSION: ${{ github.event.inputs.geth_version }}
 
       - name: Generate docker tags/labels from github build context
         id: meta
