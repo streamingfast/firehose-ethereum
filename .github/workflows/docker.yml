@@ -155,7 +155,7 @@ jobs:
 
       - run: |
           docker pull ghcr.io/streamingfast/nitro:${{ github.event.inputs.nitro_tag == '' && 'latest' || github.event.inputs.nitro_tag }}
-          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/nitro:${{ github.event.inputs.nitro_tag }}') >> $GITHUB_ENV
+          echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/nitro:${{ github.event.inputs.nitro_tag == '' && 'latest' || github.event.inputs.nitro_tag }}') >> $GITHUB_ENV
           echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
 
       - name: Generate docker tags/labels from github build context
