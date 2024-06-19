@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.6.3 (Unreleased)
+
+* fix "hub" not recovering on certain disconnections in relayer/firehose/substreams (scenarios requiring full restart)
+
 ## v2.6.2
 
 * Bumped firehose-core to v1.5.2 and substreams v1.8.0
