@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Substreams server: expose a new intrinsic to modules: `skip_empty_output`, which causes the module output to be skipped if it has zero bytes.
+
 ## v2.6.3
 
 * fix "hub" not recovering on certain disconnections in relayer/firehose/substreams (scenarios requiring full restart)
