@@ -32,8 +32,9 @@ func main() {
 	go func() {
 		i := 0
 		for {
+			fmt.Printf("test log %d\n", i)
 			time.Sleep(time.Second)
-			fmt.Printf("test log %d", i)
+			i++
 		}
 	}()
 	fhCmd.Main(Chain())
