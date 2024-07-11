@@ -4,9 +4,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.6.4
 
-* Substreams server: expose a new intrinsic to modules: `skip_empty_output`, which causes the module output to be skipped if it has zero bytes.
+### Substreams bumped to v1.9.0
+
+#### Important Substreams BUG FIX
+
+* Fix a bug introduced in v1.6.0 that could result in corrupted store "state" file if all 
+  the "outputs" were already cached for a module in a given segment (rare occurence)
+* We recommend clearing your substreams cache after this upgrade and re-processing or 
+  validating your data if you use stores.
+
+#### Added
+
+* Expose a new intrinsic to modules: `skip_empty_output`, which causes the module output to be skipped if it has zero bytes. (Watch out, a protobuf object with all its default values will have zero bytes)
+* Improve schedule order (faster time to first block) for substreams with multiple stages when starting mid-chain 
 
 ## v2.6.3
 
