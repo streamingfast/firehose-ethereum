@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -28,6 +29,13 @@ func init() {
 }
 
 func main() {
+	go func() {
+		i := 0
+		for {
+			time.Sleep(time.Second)
+			fmt.Printf("test log %d", i)
+		}
+	}()
 	fhCmd.Main(Chain())
 }
 
