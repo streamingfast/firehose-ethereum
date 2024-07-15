@@ -9,6 +9,7 @@ import (
 	"github.com/abourget/llerrgroup"
 	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+	"github.com/streamingfast/derr"
 	"github.com/streamingfast/eth-go/rpc"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
@@ -110,10 +111,19 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (o
 		}
 		hash := tx.Hash
 		eg.Go(func() error {
-			receipt, err := client.TransactionReceipt(ctx, hash)
+			var receipt *rpc.TransactionReceipt
+			err := derr.RetryContext(ctx, 25, func(ctx context.Context) error {
+				r, err := client.TransactionReceipt(ctx, hash)
+				if err != nil {
+					return err
+				}
+				receipt = r
+				return nil
+			})
 			if err != nil {
-				return fmt.Errorf("fetching receipt for tx %q: %w", hash.Pretty(), err)
+				return fmt.Errorf("fetching receipt for tx %s: %w", hash.Pretty(), err)
 			}
+
 			lock.Lock()
 			out[hash.Pretty()] = receipt
 			lock.Unlock()
