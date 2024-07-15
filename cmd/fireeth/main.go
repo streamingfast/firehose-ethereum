@@ -104,6 +104,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			RegisterExtraCmd: func(chain *firecore.Chain[*pbeth.Block], parent *cobra.Command, zlog *zap.Logger, tracer logging.Tracer) error {
 				parent.AddCommand(compareOneblockRPCCmd())
 				parent.AddCommand(newCompareBlocksStoreRPCCmd(zlog))
+				parent.AddCommand(newPatchBlocksNonceStatusCmd(zlog))
 				parent.AddCommand(newCompareBlocksRPCCmd(zlog))
 				parent.AddCommand(newFixOrdinalsCmd(zlog))
 				parent.AddCommand(newFixAnyTypeCmd(zlog))
