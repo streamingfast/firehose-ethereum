@@ -4,9 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.6.5
 
-* Fix a bug in the blockfetcher which could cause transactions receipts to be nil
+### Fixed
+
+* Fixed a bug in the blockfetcher which could cause transactions receipts to be nil
+* Fixed a bug in substreams where chains with non-zero first-streamable-block would cause some substreams to hang. Solution changes the 'cached' hashes for those substreams.
 
 ## v2.6.4
 
