@@ -112,11 +112,15 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (o
 		hash := tx.Hash
 		eg.Go(func() error {
 			var receipt *rpc.TransactionReceipt
-			err := derr.RetryContext(ctx, 25, func(ctx context.Context) error {
+			err := derr.RetryContext(ctx, 10, func(ctx context.Context) error {
 				r, err := client.TransactionReceipt(ctx, hash)
 				if err != nil {
 					return err
 				}
+				if r == nil {
+					return fmt.Errorf("receipt is nil")
+				}
+
 				receipt = r
 				return nil
 			})
