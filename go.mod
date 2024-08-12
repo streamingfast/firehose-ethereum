@@ -5,7 +5,7 @@ go 1.22.0
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
 	github.com/abourget/llerrgroup v0.2.0
-	github.com/bobg/go-generics/v2 v2.1.1
+	github.com/bobg/go-generics/v2 v2.2.2
 	github.com/golang/protobuf v1.5.4
 	github.com/holiman/uint256 v1.2.0
 	github.com/josephburnett/jd v1.7.1
@@ -22,13 +22,13 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20240419152712-b7df14cba7b5
 	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.5.6
+	github.com/streamingfast/firehose-core v1.5.8-0.20240812201656-941891ff316f
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20240603154554-acc011d4f8c4
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20240430190514-722fe9d82e5d
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.9.4-0.20240801142150-9da72c6fa000
+	github.com/streamingfast/substreams v1.9.4-0.20240812201411-47dcc4536b7b
 	github.com/stretchr/testify v1.9.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -100,7 +100,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
-	github.com/google/pprof v0.0.0-20221203041831-ce31453925ec // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
@@ -178,14 +177,14 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/automaxprocs v1.5.1 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
-	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
+	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.18.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/term v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/api v0.172.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
