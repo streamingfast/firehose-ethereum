@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Substreams: revert module hash calculation from `v2.6.5`, when using a non-zero firstStreamableBlock. Hashes will now be the same even if the chain's first streamable block affects the initialBlock of a module.
+* Substreams: add `--substreams-block-execution-timeout` flag (default 3 minutes) to prevent requests stalling. Timeout errors are returned to the client who can decide to retry.
+
 ## v2.6.7
 
 * Bump substreams to v1.9.3: fix high CPU usage on tier1 caused by a bad error handling

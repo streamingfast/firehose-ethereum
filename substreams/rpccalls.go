@@ -3,6 +3,7 @@ package substreams
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -96,7 +97,6 @@ func NewRPCEngine(rpcEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
 		Transport: &http.Transport{
 			DisableKeepAlives: true, // don't reuse connections
 		},
-		Timeout: 60 * time.Second,
 	}
 	opts := []rpc.Option{
 		rpc.WithHttpClient(httpClient),
@@ -238,8 +238,9 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 			}
 
 			if ctx.Err() != nil {
+				callDesc, _ := json.Marshal(reqs)
 				zlog.Info("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
-				return nil, false, err
+				return nil, false, fmt.Errorf("timeout while doing eth_call: %s, %w", string(callDesc), ctx.Err())
 			}
 
 			e.rollRpcClient()
