@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/streamingfast/bstream"
+	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/cli"
 	firecore "github.com/streamingfast/firehose-core"
 	fhCmd "github.com/streamingfast/firehose-core/cmd"
@@ -16,6 +17,7 @@ import (
 	"github.com/streamingfast/firehose-ethereum/transform"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/logging"
+	pbfirehose "github.com/streamingfast/pbgo/sf/firehose/v2"
 	"github.com/streamingfast/substreams/wasm"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -128,9 +130,125 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				Parse: parseTransformFlags,
 			},
 		},
+
+		InfoResponseFiller: fillChainInfoResponse,
 	}
 	return chain
 }
 
 // Version value, injected via go build `ldflags` at build time, **must** not be removed or inlined
 var version = "dev"
+
+var fillChainInfoResponse = func(block *pbbstream.Block, resp *pbfirehose.InfoResponse) error {
+	resp.FirstStreamableBlockId = block.Id
+	resp.BlockIdEncoding = pbfirehose.InfoResponse_BLOCK_ID_ENCODING_HEX
+
+	ethBlock := &pbeth.Block{}
+	if err := block.Payload.UnmarshalTo(ethBlock); err != nil {
+		return fmt.Errorf("cannot decode first streamable block: %w", err)
+	}
+
+	var detailLevel string
+	switch ethBlock.DetailLevel {
+	case pbeth.Block_DETAILLEVEL_BASE:
+		detailLevel = "base"
+	case pbeth.Block_DETAILLEVEL_EXTENDED:
+		detailLevel = "extended"
+	default:
+		return fmt.Errorf("unknown detail level in block: %q", ethBlock.DetailLevel)
+	}
+
+	var flagDetailLevel string
+	for _, feature := range resp.BlockFeatures {
+		if feature == "base" || feature == "extended" || feature == "hybrid" {
+			flagDetailLevel = feature
+			break
+		}
+	}
+	switch flagDetailLevel {
+	case "":
+		resp.BlockFeatures = append(resp.BlockFeatures, detailLevel)
+	case "hybrid":
+		// we ignore the detail level from blocks in this case
+	default:
+		if flagDetailLevel != detailLevel {
+			return fmt.Errorf("detail level defined in flag: %q inconsistent with the one seen in blocks %q", flagDetailLevel, detailLevel)
+		}
+	}
+
+	if resp.ChainName != "" {
+		if chain := knownChains.byName(resp.ChainName); chain != nil {
+			if block.Number == chain.genesisBlockNumber && chain.genesisBlockID != block.Id { // we can only check if first-streamable-block == gensis block
+				return fmt.Errorf("chain name defined in flag: %q inconsistent with the genesis block ID %q (expected: %q)", resp.ChainName, ox(block.Id), ox(chain.genesisBlockID))
+			}
+			resp.ChainName = chain.name
+			resp.ChainNameAliases = chain.aliases
+		} else if chain := knownChains.byBlock(block.Number, block.Id); chain != nil {
+			return fmt.Errorf("chain name defined in flag: %q inconsistent with the one discovered from genesis block %q", resp.ChainName, chain.name)
+		}
+	} else {
+		if chain := knownChains.byBlock(block.Number, block.Id); chain != nil {
+			resp.ChainName = chain.name
+			resp.ChainNameAliases = chain.aliases
+		}
+	}
+
+	return nil
+}
+
+func ox(in string) string {
+	return "0x" + in
+}
+
+type knownChain struct {
+	name               string
+	aliases            []string
+	genesisBlockID     string
+	genesisBlockNumber uint64
+}
+
+type chainList []*knownChain
+
+func (c chainList) byBlock(blockNum uint64, blockID string) *knownChain {
+	for _, chain := range knownChains {
+		if chain.genesisBlockNumber == blockNum && chain.genesisBlockID == blockID {
+			return chain
+		}
+	}
+	return nil
+}
+
+func (c chainList) byName(name string) *knownChain {
+	for _, chain := range knownChains {
+		if chain.name == name {
+			return chain
+		}
+		for _, alias := range chain.aliases {
+			if alias == name {
+				return chain
+			}
+		}
+	}
+	return nil
+}
+
+var knownChains = chainList{
+	{
+		name:               "mainnet",
+		aliases:            []string{"ethereum"},
+		genesisBlockID:     "d4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3",
+		genesisBlockNumber: 0,
+	},
+	{
+		name:               "matic",
+		aliases:            []string{"polygon"},
+		genesisBlockID:     "a9c28ce2141b56c474f1dc504bee9b01eb1bd7d1a507580d5519d4437a97de1b",
+		genesisBlockNumber: 0,
+	},
+	{
+		name:               "bsc",
+		aliases:            []string{"bnb"},
+		genesisBlockID:     "0d21840abff46b96c84b2ac9e10e4f5cdaeb5693cb665db62a2f3b02d2d57b5b",
+		genesisBlockNumber: 0,
+	},
+}

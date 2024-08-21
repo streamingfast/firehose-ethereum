@@ -26,7 +26,7 @@ require (
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20240603154554-acc011d4f8c4
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
-	github.com/streamingfast/pbgo v0.0.6-0.20240430190514-722fe9d82e5d
+	github.com/streamingfast/pbgo v0.0.6-0.20240821201153-468db4096ff0
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/substreams v1.9.4-0.20240820153702-37a109caa0da
 	github.com/stretchr/testify v1.9.0
@@ -216,3 +216,5 @@ replace (
 )
 
 retract v1.4.5 //included private repositories
+
+replace github.com/streamingfast/firehose-core => /Users/stepd/repos/firehose-core
