@@ -140,21 +140,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 // Version value, injected via go build `ldflags` at build time, **must** not be removed or inlined
 var version = "dev"
 
-var fillChainInfoResponse = func(block *pbbstream.Block, resp *pbfirehose.InfoResponse) error {
-	ethBlock := &pbeth.Block{}
-	if err := block.Payload.UnmarshalTo(ethBlock); err != nil {
-		return fmt.Errorf("cannot decode first streamable block: %w", err)
-	}
-
-	var detailLevelFromBlock string
-	switch ethBlock.DetailLevel {
-	case pbeth.Block_DETAILLEVEL_BASE:
-		detailLevelFromBlock = "base"
-	case pbeth.Block_DETAILLEVEL_EXTENDED:
-		detailLevelFromBlock = "extended"
-	default:
-		return fmt.Errorf("unknown detail level in block: %q", ethBlock.DetailLevel)
-	}
+var fillChainInfoResponse = func(block *pbbstream.Block, resp *pbfirehose.InfoResponse, validate bool) error {
 
 	var detailLevelFromConfig string
 	for _, feature := range resp.BlockFeatures {
@@ -164,24 +150,43 @@ var fillChainInfoResponse = func(block *pbbstream.Block, resp *pbfirehose.InfoRe
 		}
 	}
 
-	switch detailLevelFromConfig {
-	case "":
-		resp.BlockFeatures = append(resp.BlockFeatures, detailLevelFromBlock)
-	case "hybrid":
-		// we ignore the detail level from blocks in this case
-	default:
-		if detailLevelFromConfig != detailLevelFromBlock {
-			return fmt.Errorf("detail level defined in flag: %q inconsistent with the one seen in blocks %q", detailLevelFromConfig, detailLevelFromBlock)
+	ethBlock := &pbeth.Block{}
+	if err := block.Payload.UnmarshalTo(ethBlock); err != nil {
+		if validate {
+			return fmt.Errorf("cannot decode first streamable block: %w", err)
+		}
+	} else {
+		var detailLevelFromBlock string
+		switch ethBlock.DetailLevel {
+		case pbeth.Block_DETAILLEVEL_BASE:
+			detailLevelFromBlock = "base"
+		case pbeth.Block_DETAILLEVEL_EXTENDED:
+			detailLevelFromBlock = "extended"
+		default:
+			if validate {
+				return fmt.Errorf("unknown detail level in block: %q", ethBlock.DetailLevel)
+			}
+		}
+
+		switch detailLevelFromConfig {
+		case "":
+			resp.BlockFeatures = append(resp.BlockFeatures, detailLevelFromBlock)
+		case "hybrid":
+			// we ignore the detail level from blocks in this case
+		default:
+			if detailLevelFromConfig != detailLevelFromBlock && validate {
+				return fmt.Errorf("detail level defined in flag: %q inconsistent with the one seen in blocks %q", detailLevelFromConfig, detailLevelFromBlock)
+			}
 		}
 	}
 
 	// The firecore default filler will fill the encoding, genesisBlock ID/number and the chain name/aliases if it can
 	// It requires the BlockFeatures to be filled with the detail level
-	if err := info.DefaultInfoResponseFiller(block, resp); err != nil {
+	if err := info.DefaultInfoResponseFiller(block, resp, validate); err != nil && validate {
 		return err
 	}
 
-	if resp.ChainName == "arbitrum-one" && detailLevelFromConfig == "" && resp.FirstStreamableBlockNum < 22_207_817 {
+	if validate && resp.ChainName == "arbitrum-one" && detailLevelFromConfig == "" && resp.FirstStreamableBlockNum < 22_207_817 {
 		return fmt.Errorf("chain arbitrum-one specifically requires a block detail level to be set under 'block features', since the first 22_207_817 blocks are always type 'base', (set it to 'hybrid')")
 	}
 

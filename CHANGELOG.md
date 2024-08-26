@@ -6,6 +6,18 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+* Add `sf.firehose.v2.EndpointInfo/Info` service on Firehose and `sf.substreams.rpc.v2.EndpointInfo/Info` to Substreams endpoints. This involves the following new flags:
+  - `advertise-chain-name` Canonical name of the chain according to https://thegraph.com/docs/en/developing/supported-networks/ (required, unless it is in the "well-known" list)
+  - `advertise-chain-aliases` Alternate names for that chain (optional)
+  - `advertise-block-features` List of features describing the blocks (optional)
+  - `ignore-advertise-validation` Runtime checks of chain name/features/encoding against the genesis block will no longer cause server to wait or fail.
+
+* Add a well-known list of chains (hard-coded in `wellknown/chains.go` to help automatically determine the 'advertise' flag values). Users are encouraged to propose Pull Requests to add more chains to the list.
+* The new info endpoint adds a mandatory fetching of the first streamable block on startup, with a failure if no block can be fetched after 3 minutes and you are running `firehose` or `substreams-tier1` service.
+  It validates the following on a well-known chain:
+    - if the first-streamable-block Num/ID match the genesis block of a known chain, e.g. `matic`, it will refuse another value for `advertise-chain-name` than `matic` or one of its aliases (`polygon`)
+    - If the first-streamable-block does not match any known chain, it will require the `advertise-chain-name` to be non-empty
+
 * Substreams: revert module hash calculation from `v2.6.5`, when using a non-zero firstStreamableBlock. Hashes will now be the same even if the chain's first streamable block affects the initialBlock of a module.
 * Substreams: add `--substreams-block-execution-timeout` flag (default 3 minutes) to prevent requests stalling. Timeout errors are returned to the client who can decide to retry.
 
