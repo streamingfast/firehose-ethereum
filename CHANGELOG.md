@@ -18,6 +18,7 @@ for instructions to keep up to date.
     - if the first-streamable-block Num/ID match the genesis block of a known chain, e.g. `matic`, it will refuse another value for `advertise-chain-name` than `matic` or one of its aliases (`polygon`)
     - If the first-streamable-block does not match any known chain, it will require the `advertise-chain-name` to be non-empty
 
+* Substreams: add `--common-tmp-dir` flag and activate local caching of pre-compiled WASM modules through wazero feature
 * Substreams: revert module hash calculation from `v2.6.5`, when using a non-zero firstStreamableBlock. Hashes will now be the same even if the chain's first streamable block affects the initialBlock of a module.
 * Substreams: add `--substreams-block-execution-timeout` flag (default 3 minutes) to prevent requests stalling. Timeout errors are returned to the client who can decide to retry.
 

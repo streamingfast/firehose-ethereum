@@ -22,13 +22,13 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20240419152712-b7df14cba7b5
 	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.5.8-0.20240826192922-a5050bd9e55d
+	github.com/streamingfast/firehose-core v1.5.8-0.20240826201807-7b3ee7bbdaa4
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20240603154554-acc011d4f8c4
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20240823134334-812f6a16c5cb
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.9.4-0.20240823175139-fee92bc72fad
+	github.com/streamingfast/substreams v1.9.4-0.20240826160128-7d7c7b132e06
 	github.com/stretchr/testify v1.9.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -160,7 +160,7 @@ require (
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
-	github.com/tetratelabs/wazero v1.7.1 // indirect
+	github.com/tetratelabs/wazero v1.8.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869 // indirect
