@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.7.0
 
 * Add `sf.firehose.v2.EndpointInfo/Info` service on Firehose and `sf.substreams.rpc.v2.EndpointInfo/Info` to Substreams endpoints. This involves the following new flags:
   - `advertise-chain-name` Canonical name of the chain according to https://thegraph.com/docs/en/developing/supported-networks/ (required, unless it is in the "well-known" list)
@@ -18,7 +18,7 @@ for instructions to keep up to date.
     - if the first-streamable-block Num/ID match the genesis block of a known chain, e.g. `matic`, it will refuse another value for `advertise-chain-name` than `matic` or one of its aliases (`polygon`)
     - If the first-streamable-block does not match any known chain, it will require the `advertise-chain-name` to be non-empty
 
-* Substreams: add `--common-tmp-dir` flag and activate local caching of pre-compiled WASM modules through wazero feature
+* Substreams: add `--common-tmp-dir` flag to activate local caching of pre-compiled WASM modules through wazero v1.8.0 feature (performance improvement on WASM compilation)
 * Substreams: revert module hash calculation from `v2.6.5`, when using a non-zero firstStreamableBlock. Hashes will now be the same even if the chain's first streamable block affects the initialBlock of a module.
 * Substreams: add `--substreams-block-execution-timeout` flag (default 3 minutes) to prevent requests stalling. Timeout errors are returned to the client who can decide to retry.
 
