@@ -15,20 +15,20 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
-	github.com/streamingfast/bstream v0.0.2-0.20240619142813-9d23840859bf
+	github.com/streamingfast/bstream v0.0.2-0.20240819202225-ca1b790abf0b
 	github.com/streamingfast/cli v0.0.4-0.20240412191021-5f81842cb71d
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
 	github.com/streamingfast/dmetrics v0.0.0-20230919161904-206fa8ebd545
-	github.com/streamingfast/dstore v0.1.1-0.20240419152712-b7df14cba7b5
+	github.com/streamingfast/dstore v0.1.1-0.20240826190906-91345d4a31f2
 	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.6.0
+	github.com/streamingfast/firehose-core v1.6.1
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20240603154554-acc011d4f8c4
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20240823134334-812f6a16c5cb
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.9.4-0.20240826160128-7d7c7b132e06
+	github.com/streamingfast/substreams v1.10.0
 	github.com/stretchr/testify v1.9.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.14.1
@@ -152,7 +152,7 @@ require (
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20240423143010-f36784700c9a // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
-	github.com/streamingfast/dmetering v0.0.0-20240422183130-658027cbb7a1 // indirect
+	github.com/streamingfast/dmetering v0.0.0-20240816165719-51768d3da951 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/streamingfast/payment-gateway v0.0.0-20240426151444-581e930c76e2 // indirect
