@@ -8,6 +8,8 @@ for instructions to keep up to date.
 
 ### Substreams fixes
 
+* Fix bug where some invalid cursors may be sent (with 'LIB' being above the block being sent) and add safeguard/loggin if the bug appears again
+* Fix panic in the whole tier2 process when stores go above the size limit while being read from "kvops" cached changes
 * Fix "cannot resolve 'old cursor' from files in passthrough mode" error on some requests with an old cursor
 * Fix handling of 'special case' substreams module with only "params" as its input: should not skip this execution (used in graph-node for head tracking) 
   -> empty files in module cache with hash `d3b1920483180cbcd2fd10abcabbee431146f4c8` should be deleted for consistency
