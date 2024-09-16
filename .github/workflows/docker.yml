@@ -10,6 +10,7 @@ on:
       - "dockerbuild"
       - "develop"
       - "release/v*"
+      - "fix/*"
       - "feature/*"
   workflow_dispatch:
     inputs:
