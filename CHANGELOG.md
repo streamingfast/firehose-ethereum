@@ -4,7 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## v2.7.3 (Unreleased)
+## v2.7.4
+
+### Substreams fixes
+
+* Fixed an(other) issue where multiple stores running on the same stage with different initialBlocks will fail to proress (and hang)
+
+## v2.7.3
 
 ### Substreams fixes
 
