@@ -852,6 +852,18 @@ message GasChange {
     // be a negative change as we "drain" left over gas towards 0. If there was no gas left at the end of execution, no such even
     // will be emitted.
     REASON_CALL_LEFT_OVER_RETURNED = 25;
+
+
+   	REASON_WITNESS_CONTRACT_INIT = 26;
+	// GasChangeWitnessContractCreation flags the event of adding to the witness during the contract creation finalization step.
+	REASON_WITNESS_CONTRACT_CREATION = 27;
+	// GasChangeWitnessCodeChunk flags the event of adding one or more contract code chunks to the witness.
+	REASON_WITNESS_CODE_CHUNK = 28;
+	// GasChangeWitnessContractCollisionCheck flags the event of adding to the witness when checking for contract address collision.
+	REASON_WITNESS_CONTRACT_COLLISION_CHECK = 29;
+	// GasChangeTxDataFloor is the amount of extra gas the transaction has to pay to reach the minimum gas requirement for the
+	// transaction data. This change will always be a negative change.
+	REASON_TX_DATA_FLOOR = 30;
   }
 
   // The block's global ordinal when the gas change was recorded, refer to [Block]
