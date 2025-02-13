@@ -1,7 +1,6 @@
 ---
 name: Build docker image
 
-
 on:
   push:
     tags:
@@ -14,21 +13,20 @@ on:
   workflow_dispatch:
     inputs:
       flavors:
-        description: 'JSON-formatted list of flavors to build'
+        description: "JSON-formatted list of flavors to build"
         required: true
         type: string
-        default: '[{"name":"geth","version":"latest-fh2"},{"name":"bsc","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]'
+        default: '[{"name":"geth","version":"latest-fh2"},{"name":"bnb","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]'
       nitro_tag:
         description: 'nitro docker image to pull (will not build if set to the string "null")'
         required: true
         type: string
-        default: 'latest'
+        default: "latest"
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-
   setup:
     runs-on: ubuntu-latest
 
@@ -125,7 +123,6 @@ jobs:
           args: |
             :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
-
   bundle-docker-version-nitro:
     needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
@@ -218,7 +215,7 @@ jobs:
   bundle-docker-versions:
     needs: [setup, build-vanilla]
     runs-on: ubuntu-20.04
-    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bsc') || contains(github.event.inputs.flavors, 'optimism')) }}
+    if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bnb') || contains(github.event.inputs.flavors, 'optimism')) }}
 
     permissions:
       contents: read
@@ -226,13 +223,13 @@ jobs:
 
     outputs:
       geth: ${{ steps.print.outputs.geth }}
-      bsc: ${{ steps.print.outputs.bsc }}
+      bnb: ${{ steps.print.outputs.bnb }}
       polygon: ${{ steps.print.outputs.polygon }}
       optimism: ${{ steps.print.outputs.optimism }}
 
     strategy:
       matrix:
-        binary: ${{ fromJSON( github.event.inputs.flavors || '[{"name":"geth","version":"latest-fh2"},{"name":"bsc","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]') }}
+        binary: ${{ fromJSON( github.event.inputs.flavors || '[{"name":"geth","version":"latest-fh2"},{"name":"bnb","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]') }}
 
     steps:
       - name: Log in to the Container registry
@@ -328,7 +325,7 @@ jobs:
             :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
 
   slack-notifications:
-    needs: [ setup, build-vanilla, bundle-docker-versions ]
+    needs: [setup, build-vanilla, bundle-docker-versions]
     runs-on: ubuntu-20.04
     steps:
       - name: Slack notification
@@ -339,12 +336,12 @@ jobs:
           args: |
             :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
             ${{ needs.bundle-docker-versions.outputs.geth }}
-            ${{ needs.bundle-docker-versions.outputs.bsc }}
+            ${{ needs.bundle-docker-versions.outputs.bnb }}
             ${{ needs.bundle-docker-versions.outputs.optimism }}
             ${{ needs.bundle-docker-versions.outputs.polygon }}```
 
   slack-notification-nitro:
-    needs: [ setup, bundle-docker-version-nitro ]
+    needs: [setup, bundle-docker-version-nitro]
     runs-on: ubuntu-20.04
     steps:
       - name: Slack notification
