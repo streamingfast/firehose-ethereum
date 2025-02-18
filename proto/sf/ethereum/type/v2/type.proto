@@ -506,8 +506,9 @@ message SetCodeAuthorization {
   // Read SetCodeAuthorization to know how to recover the `authority` value.
   uint64 nonce = 2;
 
-  // V is the recovery ID value for the signature Y point.
-  uint64 v = 3;
+  // V is the recovery ID value for the signature Y point. While it's defined as a
+  // `uint32`, it's actually bounded by a `uint8` data type withing the Ethereum protocol.
+  uint32 v = 3;
 
   // R is the signature's X point on the elliptic curve (32 bytes).
   bytes r = 4;
@@ -815,11 +816,6 @@ message GasChange {
   uint64 new_value = 2;
   Reason reason = 3;
 
-  // Obtain all gas change reasons under deep mind repository:
-  //
-  // ```shell
-  // ack -ho 'GasChangeReason\(".*"\)' | grep -Eo '".*"' | sort | uniq
-  // ```
   enum Reason {
     REASON_UNKNOWN = 0;
     // REASON_CALL is the amount of gas that will be charged for a 'CALL' opcode executed by the EVM
@@ -897,17 +893,18 @@ message GasChange {
     // will be emitted.
     REASON_CALL_LEFT_OVER_RETURNED = 25;
 
+    // REASON_WITNESS_CONTRACT_INIT flags the event of adding to the witness during the contract creation initialization step.
+    REASON_WITNESS_CONTRACT_INIT = 26;
 
-   	REASON_WITNESS_CONTRACT_INIT = 26;
-	// GasChangeWitnessContractCreation flags the event of adding to the witness during the contract creation finalization step.
-	REASON_WITNESS_CONTRACT_CREATION = 27;
-	// GasChangeWitnessCodeChunk flags the event of adding one or more contract code chunks to the witness.
-	REASON_WITNESS_CODE_CHUNK = 28;
-	// GasChangeWitnessContractCollisionCheck flags the event of adding to the witness when checking for contract address collision.
-	REASON_WITNESS_CONTRACT_COLLISION_CHECK = 29;
-	// GasChangeTxDataFloor is the amount of extra gas the transaction has to pay to reach the minimum gas requirement for the
-	// transaction data. This change will always be a negative change.
-	REASON_TX_DATA_FLOOR = 30;
+    // REASON_WITNESS_CONTRACT_CREATION flags the event of adding to the witness during the contract creation finalization step.
+    REASON_WITNESS_CONTRACT_CREATION = 27;
+    // REASON_WITNESS_CODE_CHUNK flags the event of adding one or more contract code chunks to the witness.
+    REASON_WITNESS_CODE_CHUNK = 28;
+    // REASON_WITNESS_CONTRACT_COLLISION_CHECK flags the event of adding to the witness when checking for contract address collision.
+    REASON_WITNESS_CONTRACT_COLLISION_CHECK = 29;
+    // REASON_TX_DATA_FLOOR is the amount of extra gas the transaction has to pay to reach the minimum gas requirement for the
+    // transaction data. This change will always be a negative change.
+    REASON_TX_DATA_FLOOR = 30;
   }
 
   // The block's global ordinal when the gas change was recorded, refer to [Block]

@@ -385,11 +385,6 @@ func (BalanceChange_Reason) EnumDescriptor() ([]byte, []int) {
 	return file_sf_ethereum_type_v2_type_proto_rawDescGZIP(), []int{12, 0}
 }
 
-// Obtain all gas change reasons under deep mind repository:
-//
-// ```shell
-// ack -ho 'GasChangeReason\(".*"\)' | grep -Eo '".*"' | sort | uniq
-// ```
 type GasChange_Reason int32
 
 const (
@@ -465,14 +460,15 @@ const (
 	// be a negative change as we "drain" left over gas towards 0. If there was no gas left at the end of execution, no such even
 	// will be emitted.
 	GasChange_REASON_CALL_LEFT_OVER_RETURNED GasChange_Reason = 25
-	GasChange_REASON_WITNESS_CONTRACT_INIT   GasChange_Reason = 26
-	// GasChangeWitnessContractCreation flags the event of adding to the witness during the contract creation finalization step.
+	// REASON_WITNESS_CONTRACT_INIT flags the event of adding to the witness during the contract creation initialization step.
+	GasChange_REASON_WITNESS_CONTRACT_INIT GasChange_Reason = 26
+	// REASON_WITNESS_CONTRACT_CREATION flags the event of adding to the witness during the contract creation finalization step.
 	GasChange_REASON_WITNESS_CONTRACT_CREATION GasChange_Reason = 27
-	// GasChangeWitnessCodeChunk flags the event of adding one or more contract code chunks to the witness.
+	// REASON_WITNESS_CODE_CHUNK flags the event of adding one or more contract code chunks to the witness.
 	GasChange_REASON_WITNESS_CODE_CHUNK GasChange_Reason = 28
-	// GasChangeWitnessContractCollisionCheck flags the event of adding to the witness when checking for contract address collision.
+	// REASON_WITNESS_CONTRACT_COLLISION_CHECK flags the event of adding to the witness when checking for contract address collision.
 	GasChange_REASON_WITNESS_CONTRACT_COLLISION_CHECK GasChange_Reason = 29
-	// GasChangeTxDataFloor is the amount of extra gas the transaction has to pay to reach the minimum gas requirement for the
+	// REASON_TX_DATA_FLOOR is the amount of extra gas the transaction has to pay to reach the minimum gas requirement for the
 	// transaction data. This change will always be a negative change.
 	GasChange_REASON_TX_DATA_FLOOR GasChange_Reason = 30
 )
@@ -1684,8 +1680,9 @@ type SetCodeAuthorization struct {
 	//
 	// Read SetCodeAuthorization to know how to recover the `authority` value.
 	Nonce uint64 `protobuf:"varint,2,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	// V is the recovery ID value for the signature Y point.
-	V uint64 `protobuf:"varint,3,opt,name=v,proto3" json:"v,omitempty"`
+	// V is the recovery ID value for the signature Y point. While it's defined as a
+	// `uint32`, it's actually bounded by a `uint8` data type withing the Ethereum protocol.
+	V uint32 `protobuf:"varint,3,opt,name=v,proto3" json:"v,omitempty"`
 	// R is the signature's X point on the elliptic curve (32 bytes).
 	R []byte `protobuf:"bytes,4,opt,name=r,proto3" json:"r,omitempty"`
 	// S is the signature's Y point on the elliptic curve (32 bytes).
@@ -1738,7 +1735,7 @@ func (x *SetCodeAuthorization) GetNonce() uint64 {
 	return 0
 }
 
-func (x *SetCodeAuthorization) GetV() uint64 {
+func (x *SetCodeAuthorization) GetV() uint32 {
 	if x != nil {
 		return x.V
 	}
@@ -3240,7 +3237,7 @@ var file_sf_ethereum_type_v2_type_proto_rawDesc = string([]byte{
 	0x61, 0x69, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x07, 0x63, 0x68,
 	0x61, 0x69, 0x6e, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x6e, 0x6f, 0x6e, 0x63, 0x65, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x04, 0x52, 0x05, 0x6e, 0x6f, 0x6e, 0x63, 0x65, 0x12, 0x0c, 0x0a, 0x01, 0x76,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x01, 0x76, 0x12, 0x0c, 0x0a, 0x01, 0x72, 0x18, 0x04,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x01, 0x76, 0x12, 0x0c, 0x0a, 0x01, 0x72, 0x18, 0x04,
 	0x20, 0x01, 0x28, 0x0c, 0x52, 0x01, 0x72, 0x12, 0x0c, 0x0a, 0x01, 0x73, 0x18, 0x05, 0x20, 0x01,
 	0x28, 0x0c, 0x52, 0x01, 0x73, 0x22, 0xc6, 0x02, 0x0a, 0x12, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61,
 	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x63, 0x65, 0x69, 0x70, 0x74, 0x12, 0x1d, 0x0a, 0x0a,
