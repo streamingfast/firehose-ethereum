@@ -600,6 +600,20 @@ message Call {
   CallType call_type = 4;
   bytes caller = 5;
   bytes address = 6;
+
+  // AddressDelegation is the address that the call is delegated to in the code of EIP-7702
+  // that is used to set code to an EOA (Externally Owned Accounts).
+  //
+  // If the 'address' value has in its code a delegation to another address, this field
+  // would be populated with the address that the call is delegated to.
+  //
+  // Again, it's important to emphasis that this field relates to EIP-7702, if the call is
+  // a DELEGATE or CALLCODE type, this field will not be populated and will remain empty.
+  //
+  // Would be populated only if EIP-7702 is active on the chain (Prague fork) and if the
+  // 'address' of the call was pointing to another address at time of execution.
+  optional bytes address_delegation = 34;
+
   BigInt value = 7;
   uint64 gas_limit = 8;
   uint64 gas_consumed = 9;
@@ -679,6 +693,8 @@ message Call {
   uint64 end_ordinal = 32;
 
   repeated AccountCreation account_creations = 33;
+
+  // The identifier 34 is taken by 'delegates_address' field, see closer to 'address' field
 
   reserved 50; // repeated ERC20BalanceChange erc20_balance_changes = 50 [deprecated = true];
   reserved 51; // repeated ERC20TransferEvent erc20_transfer_events = 51 [deprecated = true];
