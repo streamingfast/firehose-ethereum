@@ -4,12 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Un-Release
+## Unreleased
+
+### Substreams
+
 * Global Worker Pool Integration
 * Add flag `--substreams-tier1-global-worker-pool-address` to configure the address of your Global Worker Service. Leave empty to fallback to local per request worker pool
 * Add flag `--substreams-tier1-global-worker-pool-keep-alive-delay` value that is pass to tier2 so it can call your Global Worker Service to extend the TTL of a worker key. Leave empty in you are not using a Global Worker Service
 * Add flag `--substreams-tier2-global-worker-pool-address`" to configure the address of your Global Worker Service. Leave empty in you are not using a Global Worker Service
-
+* Add shared cache for tier1 execution near HEAD, to prevent multiple tier1 instances from reprocessing the same module on the same block when it comes in (ex: foundational modules)
+* Improved fetching of state caches on tier1 requests to speed up "time to first data"
 
 ## v2.9.4
 
