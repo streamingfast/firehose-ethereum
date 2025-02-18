@@ -60,7 +60,7 @@ message Block {
   // and all other information the form a block.
   BlockHeader header = 5;
 
-  // Uncles represents block produced with a valid solution but were not actually choosen
+  // Uncles represents block produced with a valid solution but were not actually chosen
   // as the canonical block for the given height so they are mostly "forked" blocks.
   //
   // If the Block has been produced using the Proof of Stake consensus algorithm, this
@@ -206,6 +206,7 @@ message BlockHeader {
   //    blob_gas_used (to be included only if Cancun fork is active)
   //    excess_blob_gas (to be included only if Cancun fork is active)
   //    parent_beacon_root (to be included only if Cancun fork is active)
+  //    requests_hash (to be included only if Prague fork is active)
   //  ]))
   //
   bytes hash = 16;
@@ -222,7 +223,7 @@ message BlockHeader {
   // header. This is metadata only that was used by the internal Polygon parallel execution engine.
   //
   // This field was available in a few versions on Polygon Mainnet and Polygon Mumbai chains. It was actually
-  // removed and is not populated anymore. It's now embeded in the `extraData` field, refer to Polygon source
+  // removed and is not populated anymore. It's now embedded in the `extraData` field, refer to Polygon source
   // code to determine how to extract it if you need it.
   //
   // Only available in DetailLevel: EXTENDED
@@ -341,12 +342,12 @@ message TransactionTrace {
     // TRX_TYPE_DYNAMIC_FEE but in addition defines the fields 'max_fee_per_data_gas' of type 'uint256' and the fields
     // 'blob_versioned_hashes' field represents a list of hash outputs from 'kzg_to_versioned_hash'.
     //
-    // Activated in Dencun
+    // Activated in Cancun fork (EIP-4844)
     TRX_TYPE_BLOB = 3;
 
     // Transaction that sets code to an EOA (Externally Owned Accounts)
     //
-    // Activated in Prague (eip-7702)
+    // Activated in Prague (EIP-7702)
     TRX_TYPE_SET_CODE = 4;
 
     // Arbitrum-specific transactions
@@ -363,7 +364,7 @@ message TransactionTrace {
 
   }
 
-  // AcccessList represents the storage access this transaction has agreed to do in which case those storage
+  // AccessList represents the storage access this transaction has agreed to do in which case those storage
   // access cost less gas unit per access.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_ACCESS_LIST || TRX_TYPE_DYNAMIC_FEE` which
@@ -373,7 +374,7 @@ message TransactionTrace {
   // MaxFeePerGas is the maximum fee per gas the user is willing to pay for the transaction gas used.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_DYNAMIC_FEE` which is possible only
-  // if Londong fork is active on the chain.
+  // if London fork is active on the chain.
   //
   // Only available in DetailLevel: EXTENDED
   BigInt max_fee_per_gas = 11;
@@ -463,6 +464,15 @@ message TransactionTrace {
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Cancun fork is active on the chain.
   repeated bytes blob_hashes = 35;
+
+  // SetCodeAuthorizations represents the authorizations of a transaction to set code to an EOA (Externally Owned Accounts)
+  // as defined in EIP-7702.
+  //
+  // This is specified by https://eips.ethereum.org/EIPS/eip-7702
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_SET_CODE` which is possible only
+  // if Prague fork is active on the chain.
+  repeated SetCodeAuthorization set_code_authorizations = 36;
 }
 
 // AccessTuple represents a list of storage keys for a given contract's address and is used
@@ -470,6 +480,40 @@ message TransactionTrace {
 message AccessTuple {
   bytes address = 1;
   repeated bytes storage_keys = 2;
+}
+
+// SetCodeAuthorization represents the authorization of a transaction to set code to an EOA (Externally Owned Accounts)
+// as defined in EIP-7702.
+//
+// From the data contained in the message, one can recover the `authority` value by using the following
+// computation `authority = ecrecover(keccak(MAGIC || rlp([chain_id, address, nonce])), y_parity, r, s)`
+// where `MAGIC` is `0x5`, `||` is the bytes concatenation operator, `ecrecover` is the Ethereum signature recovery
+// and `y_parity` is the recovery ID value denoted `v` in the message below.
+//
+// Checking the go-ethereum implementation at https://github.com/ethereum/go-ethereum/blob/v1.15.0/core/types/tx_setcode.go#L117
+// might prove easier to "read".
+message SetCodeAuthorization {
+  // ChainID is the chain ID of the chain where the transaction was executed, used
+  // to recover the authority from the signature.
+  bytes chain_id = 1;
+
+  // Nonce is the nonce of the account that is authorizing delegation mechanism, EIP-7702 rules
+  // states that nonce should be verified using this rule:
+  //
+  // - Verify the nonce of authority is equal to nonce. In case authority does not exist in the trie,
+  // verify that nonce is equal to 0.
+  //
+  // Read SetCodeAuthorization to know how to recover the `authority` value.
+  uint64 nonce = 2;
+
+  // V is the recovery ID value for the signature Y point.
+  uint64 v = 3;
+
+  // R is the signature's X point on the elliptic curve (32 bytes).
+  bytes r = 4;
+
+  // S is the signature's Y point on the elliptic curve (32 bytes).
+  bytes s = 5;
 }
 
 enum TransactionTraceStatus {
@@ -483,7 +527,7 @@ message TransactionReceipt {
   // State root is an intermediate state_root hash, computed in-between transactions to make
   // **sure** you could build a proof and point to state in the middle of a block. Geth client
   // uses `PostState + root + PostStateOrStatus`` while Parity used `status_code, root...`` this piles
-  // hardforks, see (read the EIPs first):
+  // hard forks, see (read the EIPs first):
   // - https://github.com/ethereum/EIPs/blob/master/EIPS/eip-658.md
   //
   // Moreover, the notion of `Outcome`` in parity, which segregates the two concepts, which are
@@ -520,7 +564,7 @@ message Log {
   bytes data = 3;
 
   // Index is the index of the log relative to the transaction. This index
-  // is always populated regardless of the state revertion of the the call
+  // is always populated regardless of the state reversion of the the call
   // that emitted this log.
   //
   // Only available in DetailLevel: EXTENDED
@@ -580,7 +624,7 @@ message Call {
   reserved 29;
 
   // In Ethereum, a call can be either:
-  // - Successfull, execution passes without any problem encountered
+  // - Successful, execution passes without any problem encountered
   // - Failed, execution failed, and remaining gas should be consumed
   // - Reverted, execution failed, but only gas consumed so far is billed, remaining gas is refunded
   //
@@ -594,7 +638,7 @@ message Call {
   // see above for details about those flags.
   string failure_reason = 11;
 
-  // This field represents wheter or not the state changes performed
+  // This field represents whether or not the state changes performed
   // by this call were correctly recorded by the blockchain.
   //
   // On Ethereum, a transaction can record state changes even if some
