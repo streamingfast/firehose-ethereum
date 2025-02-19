@@ -466,7 +466,10 @@ message TransactionTrace {
   repeated bytes blob_hashes = 35;
 
   // SetCodeAuthorizations represents the authorizations of a transaction to set code to an EOA (Externally Owned Accounts)
-  // as defined in EIP-7702.
+  // as defined in EIP-7702. The list will contain all the authorizations as they were specified in the
+  // transaction itself regardless of their validity. If you need to determined if a given authorization was
+  // correctly applied on chain's state, refer to [SetCodeAuthorization.discarded] field that records
+  // if the authorization was discarded or not by the chain due to invalidity.
   //
   // This is specified by https://eips.ethereum.org/EIPS/eip-7702
   //
@@ -495,9 +498,17 @@ message AccessTuple {
 // We do extract the 'authority' value from the signature in the message and store it in the 'authority' field for
 // convenience so you don't need to perform the computation yourself.
 message SetCodeAuthorization {
+  // Discarded determines if this authorization was skipped due to being invalid. As EIP-7702 states,
+  // if the authorization is invalid (invalid signature, nonce mismatch, etc.) it must be simply
+  // discarded and the transaction is processed as if the authorization was not present in the
+  // authorization list.
+  //
+  // This boolean records if the authorization was discarded or not by the chain due to invalidity.
+  bool discarded = 1;
+
   // ChainID is the chain ID of the chain where the transaction was executed, used
   // to recover the authority from the signature.
-  bytes chain_id = 1;
+  bytes chain_id = 2;
 
   // Nonce is the nonce of the account that is authorizing delegation mechanism, EIP-7702 rules
   // states that nonce should be verified using this rule:
@@ -506,21 +517,24 @@ message SetCodeAuthorization {
   // verify that nonce is equal to 0.
   //
   // Read SetCodeAuthorization to know how to recover the `authority` value.
-  uint64 nonce = 2;
+  uint64 nonce = 3;
 
   // V is the recovery ID value for the signature Y point. While it's defined as a
   // `uint32`, it's actually bounded by a `uint8` data type withing the Ethereum protocol.
-  uint32 v = 3;
+  uint32 v = 4;
 
   // R is the signature's X point on the elliptic curve (32 bytes).
-  bytes r = 4;
+  bytes r = 5;
 
   // S is the signature's Y point on the elliptic curve (32 bytes).
-  bytes s = 5;
+  bytes s = 6;
 
   // Authority is the address of the account that is authorizing delegation mechanism, it
   // is computed from the signature contained in the message and stored for convenience.
-  bytes authority = 6;
+  //
+  // If the authority cannot be recovered from the signature, this field will be empty and
+  // the `discarded` field will be set to `true`.
+  optional bytes authority = 7;
 }
 
 enum TransactionTraceStatus {
