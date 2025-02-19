@@ -338,9 +338,9 @@ message TransactionTrace {
     // Transaction which contain a large amount of data that cannot be accessed by EVM execution, but whose commitment
     // can be accessed. The format is intended to be fully compatible with the format that will be used in full sharding.
     //
-    // Transaction that defines specifis an access list just like TRX_TYPE_ACCESS_LIST and enables dynamic fee just like
+    // Transaction that defines an access list just like TRX_TYPE_ACCESS_LIST and enables dynamic fee just like
     // TRX_TYPE_DYNAMIC_FEE but in addition defines the fields 'max_fee_per_data_gas' of type 'uint256' and the fields
-    // 'blob_versioned_hashes' field represents a list of hash outputs from 'kzg_to_versioned_hash'.
+    // 'blob_versioned_hashes' which represents a list of hash outputs from 'kzg_to_versioned_hash'.
     //
     // Activated in Cancun fork (EIP-4844)
     TRX_TYPE_BLOB = 3;
@@ -352,12 +352,12 @@ message TransactionTrace {
 
     // Arbitrum-specific transactions
     TRX_TYPE_ARBITRUM_DEPOSIT = 100;
-    TRX_TYPE_ARBITRUM_UNSIGNED	= 101;
+    TRX_TYPE_ARBITRUM_UNSIGNED = 101;
     TRX_TYPE_ARBITRUM_CONTRACT = 102;
-    TRX_TYPE_ARBITRUM_RETRY	= 104;
-    TRX_TYPE_ARBITRUM_SUBMIT_RETRYABLE	= 105;
-    TRX_TYPE_ARBITRUM_INTERNAL	= 106;
-    TRX_TYPE_ARBITRUM_LEGACY	= 120;
+    TRX_TYPE_ARBITRUM_RETRY = 104;
+    TRX_TYPE_ARBITRUM_SUBMIT_RETRYABLE = 105;
+    TRX_TYPE_ARBITRUM_INTERNAL = 106;
+    TRX_TYPE_ARBITRUM_LEGACY = 120;
 
     // OPTIMISM-specific transactions
     TRX_TYPE_OPTIMISM_DEPOSIT = 126;
@@ -482,16 +482,18 @@ message AccessTuple {
   repeated bytes storage_keys = 2;
 }
 
-// SetCodeAuthorization represents the authorization of a transaction to set code to an EOA (Externally Owned Accounts)
+// SetCodeAuthorization represents the authorization of a transaction to set code of an EOA (Externally Owned Account)
 // as defined in EIP-7702.
 //
-// From the data contained in the message, one can recover the `authority` value by using the following
-// computation `authority = ecrecover(keccak(MAGIC || rlp([chain_id, address, nonce])), y_parity, r, s)`
+// The 'authority' field is the address that is authorizing the delegation mechanism. The 'authority' value is computed
+// from the signature contained in the message using the computation
+// `authority = ecrecover(keccak(MAGIC || rlp([chain_id, address, nonce])), y_parity, r, s)`
 // where `MAGIC` is `0x5`, `||` is the bytes concatenation operator, `ecrecover` is the Ethereum signature recovery
-// and `y_parity` is the recovery ID value denoted `v` in the message below.
+// and `y_parity` is the recovery ID value denoted `v` in the message below. Checking the go-ethereum implementation
+// at https://github.com/ethereum/go-ethereum/blob/v1.15.0/core/types/tx_setcode.go#L117 might prove easier to "read".
 //
-// Checking the go-ethereum implementation at https://github.com/ethereum/go-ethereum/blob/v1.15.0/core/types/tx_setcode.go#L117
-// might prove easier to "read".
+// We do extract the 'authority' value from the signature in the message and store it in the 'authority' field for
+// convenience so you don't need to perform the computation yourself.
 message SetCodeAuthorization {
   // ChainID is the chain ID of the chain where the transaction was executed, used
   // to recover the authority from the signature.
@@ -515,6 +517,10 @@ message SetCodeAuthorization {
 
   // S is the signature's Y point on the elliptic curve (32 bytes).
   bytes s = 5;
+
+  // Authority is the address of the account that is authorizing delegation mechanism, it
+  // is computed from the signature contained in the message and stored for convenience.
+  bytes authority = 6;
 }
 
 enum TransactionTraceStatus {
@@ -601,18 +607,24 @@ message Call {
   bytes caller = 5;
   bytes address = 6;
 
-  // AddressDelegation is the address that the call is delegated to in the code of EIP-7702
-  // that is used to set code to an EOA (Externally Owned Accounts).
+  // AddressDelegatesTo contains the address from which the actual code to execute will be loaded
+  // as defined per EIP-7702 rules. If the Call's address value resolves to a code
+  // that delegates to another address, this field will be populated with the address
+  // that the call is delegated to. It will be empty in all other situations.
   //
-  // If the 'address' value has in its code a delegation to another address, this field
-  // would be populated with the address that the call is delegated to.
+  // Assumes that a 'SetCode' transaction set address `0xA` to delegates to address `0xB`,
+  // then when a call is made to `0xA`, the Call object would have:
   //
-  // Again, it's important to emphasis that this field relates to EIP-7702, if the call is
+  // - caller = <from>
+  // - address = 0xA
+  // - address_delegates_to = 0xB
+  //
+  // Again, it's important to emphasize that this field relates to EIP-7702, if the call is
   // a DELEGATE or CALLCODE type, this field will not be populated and will remain empty.
   //
-  // Would be populated only if EIP-7702 is active on the chain (Prague fork) and if the
+  // It will be populated only if EIP-7702 is active on the chain (Prague fork) and if the
   // 'address' of the call was pointing to another address at time of execution.
-  optional bytes address_delegation = 34;
+  optional bytes address_delegates_to = 34;
 
   BigInt value = 7;
   uint64 gas_limit = 8;
@@ -694,7 +706,7 @@ message Call {
 
   repeated AccountCreation account_creations = 33;
 
-  // The identifier 34 is taken by 'delegates_address' field, see closer to 'address' field
+  // The identifier 34 is taken by 'address_delegates_to' field above.
 
   reserved 50; // repeated ERC20BalanceChange erc20_balance_changes = 50 [deprecated = true];
   reserved 51; // repeated ERC20TransferEvent erc20_transfer_events = 51 [deprecated = true];
