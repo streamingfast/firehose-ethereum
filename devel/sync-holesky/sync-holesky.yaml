@@ -11,8 +11,8 @@ start:
     # to ensure foreign access to these connection are protected.
     reader-node-arguments:
       --vmtrace=firehose
+      --synctarget=0x98f7cde1a4ad487e780b4e7bc3af248256d9bb1825cc73d2a7e392e057099caf
       --syncmode=full
-      --synctarget=0x77d5b3c364c5ee339195eb1a6a1ebabe69a6ea3d3aaefa7e54fbc89441c4ff09
       --holesky
       --datadir={node-data-dir}
       --db.engine=pebble
