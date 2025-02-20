@@ -66,6 +66,8 @@ func TestParseFromFile(t *testing.T) {
 		{"testdata/polygon_validator.dmlogs", nil, nil, false},
 		{"testdata/ethereum_cancun_block_header.dmlog", nil, nil, false},
 		{"testdata/lachesis.dmlog", nil, nil, false},
+		{"testdata/holesky-full-block-3393172.dmlog", nil, nil, false},
+		{"testdata/holesky-block-not-trx.dmlog", nil, nil, false},
 	}
 
 	writeActualFileToTmp := os.Getenv("FIREETH_CONSOLE_READER_TEST_DEBUG") == "true"
