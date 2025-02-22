@@ -778,11 +778,6 @@ message BalanceChange {
   // why the balance has changed and what is the context of the change.
   Reason reason = 4;
 
-  // Obtain all balanche change reasons under deep mind repository:
-  //
-  // ```shell
-  // ack -ho 'BalanceChangeReason\(".*"\)' | grep -Eo '".*"' | sort | uniq
-  // ```
   enum Reason {
     REASON_UNKNOWN = 0;
     REASON_REWARD_MINE_UNCLE = 1;
@@ -807,9 +802,8 @@ message BalanceChange {
     // to BNB documentation to check the timestamp at which it was activated.
     REASON_REWARD_BLOB_FEE = 17;
 
-    //USE on optimism chan
+    // This reason is used only on Optimism chain.
     REASON_INCREASE_MINT = 18;
-
   }
 
   // The block's global ordinal when the balance change was recorded, refer to [Block]

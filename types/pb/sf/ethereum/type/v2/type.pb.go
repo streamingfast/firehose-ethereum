@@ -279,11 +279,6 @@ func (TransactionTrace_Type) EnumDescriptor() ([]byte, []int) {
 	return file_sf_ethereum_type_v2_type_proto_rawDescGZIP(), []int{5, 0}
 }
 
-// Obtain all balanche change reasons under deep mind repository:
-//
-// ```shell
-// ack -ho 'BalanceChangeReason\(".*"\)' | grep -Eo '".*"' | sort | uniq
-// ```
 type BalanceChange_Reason int32
 
 const (
@@ -308,7 +303,7 @@ const (
 	// Rewards for Blob processing on BNB chain added in Tycho hard-fork, refers
 	// to BNB documentation to check the timestamp at which it was activated.
 	BalanceChange_REASON_REWARD_BLOB_FEE BalanceChange_Reason = 17
-	// USE on optimism chan
+	// This reason is used only on Optimism chain.
 	BalanceChange_REASON_INCREASE_MINT BalanceChange_Reason = 18
 )
 
