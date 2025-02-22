@@ -19,6 +19,12 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 		panic(fmt.Errorf("unexpected block message %s, unable to cast to pbeth.Block", block.Payload.TypeUrl))
 	}
 
+	// The TotalDifficulty field has been removed in newer versions of the Geth,
+	// so it's impossible to have it good in all cases, forcing it to nil.
+	if ethBlock.Header.TotalDifficulty != nil {
+		ethBlock.Header.TotalDifficulty = nil
+	}
+
 	for _, tx := range ethBlock.TransactionTraces {
 		for _, call := range tx.Calls {
 			if call.FailureReason != "" {
