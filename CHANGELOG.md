@@ -4,7 +4,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.10.0
+
+### Block Model
+
+The Ethereum block model has been updated to account for upcoming Prague fork. Namely, we added support for the new `SetCode` transaction's
+type, added extracted `SetCodeAuthorization` elements from the transaction and added new gas changes that were introduced in the hard fork.
+
+Also, `totalDifficulty` field is now deprecated, it has been removed entirely from `geth` codebase which means future reprocessing of
+data wouldn't be able to populated that field anymore. If you used that field somehow, you should stop using it. At some point
+we will remove the field entirely.
+
+Also, from Prague hard-fork and onward, the Block model will now switch to version 4 of the block model (a.k.a Firehose Ethereum Block 3.0).
+This means that for a given network, `block.number < Prague`, block will be using version 3 (a.k.a Firehose Ethereum Block 2.3) and when
+`block.number >= Prague`, it will be version 4. This is deterministic per network as the Prague block is deterministic.
+
+This does **not** change at the structure of the various element, everything stays the same in that aspect so the version 4 model is
+backward compatible. What the new version changes:
+ - Does not populate `accountCreations` field anymore, this was bogus from day 1 and should never be used.
+ - Fix `executedCode` field to be more accurate now, as soon as one opcode is executed, this will be set now and not otherwise.
+ - The root's call `BeginOrdinal` is now fixed and not always 0.
+ - Ordinals in presence of system calls are now correctly ordered.
+ - The `returnData` is now properly populated.
+ - The `keccakPreimage` data being "." is now fixed.
+ - The call's `input` field is now properly populated on contract creation, it was omitted before.
+ - There is new gas changed behind recorded now mainly for full view of how gas is allocated, consumed and returned.
+
+### Reader Node
+
+For upcoming Prague hard forks (BNB, Holesky, Sepolia, Mainnet), you will start using `geth` Firehose 3.0 version, so our Firehose enabled
+releases suffixed with `-fh3.0`.
+
+This new Firehose 3.0 `geth` tracer is built on the new `geth` Core Tracing API introduced in Geth 1.14. This new version changes how
+one must start the `geth` binary.
+
+So for Holesky hard-fork, you will need to use https://github.com/streamingfast/go-ethereum/releases/tag/geth-v1.15.2-fh3.0, here what
+you need when you will update your `reader-node`'s `reader-node-arguments` field:
+
+- Remove `--firehose-enabled` and any flag starting with `--firehose-...`.
+- Add `--vmtrace=firehose` flag which activates Firehose output (**Important** do not miss this change, otherwise you will not process new blocks, will make it the default soon).
+- Add `--syncmode=full` flag which is not set automatically anymore.
 
 ### Substreams v1.13.0
 
@@ -13,11 +52,11 @@ for instructions to keep up to date.
 * Integrated the `GlobalRequestPool` service in the `Tier1App` to manage global requests pooling.
 * Integrated the `GlobalWorkerPool` service in the `Tier1App` to manage global worker pooling.
 
-* Added flag `substreams-tier1-global-worker-pool-address`, the address of the global worker pool to use for the substreams tier1. (disabled if empty)
-* Added flag `substreams-tier1-global-worker-pool-keep-alive-delay` delay between two keep alive call to the global worker pool. Default is 25s")
-* Added flag `substreams-tier1-global-request-pool-keep-alive-delay` delay between two keep alive call to the global worker pool for request. Default is 25s
-* Added flag `substreams-tier1-default-max-request-per-user` default max request per user, this will be use of the global worker pool is not reachable. Default is 5
-* Added flag `substreams-tier1-default-minimal-request-life-time-second` default minimal request life time, this will be use of the global worker pool is not reachable. . Default is 180
+* Added flag `substreams-tier1-global-worker-pool-address`, the address of the global worker pool to use for the substreams tier1. (disabled if empty).
+* Added flag `substreams-tier1-global-worker-pool-keep-alive-delay` delay between two keep alive call to the global worker pool (default is 25s").
+* Added flag `substreams-tier1-global-request-pool-keep-alive-delay` delay between two keep alive call to the global worker pool for request (default is 25s).
+* Added flag `substreams-tier1-default-max-request-per-user` default max request per user, this will be use of the global worker pool is not reachable (default is 5).
+* Added flag `substreams-tier1-default-minimal-request-life-time-second` default minimal request life time, this will be use of the global worker pool is not reachable (default is 180).
 
 * Limit parallel execution of a stage's layer: Previously, the engine was executing modules in a stage's layer all in parallel.
   We now change that behavior, development mode will from now on execute every sequentially and when in production mode will
