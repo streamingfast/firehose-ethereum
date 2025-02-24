@@ -3,4 +3,4 @@ global:
   language: golang
   variant: application
 release:
-  goreleaser-docker-image: goreleaser/goreleaser-cross:v1.22
+  goreleaser-docker-image: goreleaser/goreleaser-cross:v1.23
