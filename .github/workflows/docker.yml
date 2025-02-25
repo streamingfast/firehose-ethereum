@@ -247,9 +247,6 @@ jobs:
           echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" >> $GITHUB_OUTPUT
 
       - run: |
-          echo ${{ matrix }}
-          echo ${{ matrix.binary }}
-          echo ${{ matrix.binary.name }}
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary.name }}-${{ matrix.binary.version }}
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary.name }}-${{ matrix.binary.version }}) >> $GITHUB_ENV
           echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
