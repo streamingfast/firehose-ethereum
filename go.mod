@@ -18,20 +18,20 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
-	github.com/streamingfast/bstream v0.0.2-0.20250129191551-5539724f4b12
+	github.com/streamingfast/bstream v0.0.2-0.20250221181559-fb0809660f91
 	github.com/streamingfast/cli v0.0.4-0.20250116003948-fbf66c930cce
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
 	github.com/streamingfast/dmetrics v0.0.0-20240214191810-524a5c58fbaa
 	github.com/streamingfast/dstore v0.1.1-0.20250217165048-d508dcc6b33e
 	github.com/streamingfast/eth-go v0.0.0-20240312122859-216e183c0b7f
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.7.4-0.20250220150850-626a1bba9c0b
+	github.com/streamingfast/firehose-core v1.7.4-0.20250225214122-1ce8cb28ac14
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250219193741-ca2753f1cf5f
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.13.0
+	github.com/streamingfast/substreams v1.13.1-0.20250225211555-8ed7fe0f234c
 	github.com/stretchr/testify v1.10.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -80,6 +80,7 @@ require (
 	github.com/bobg/go-generics/v3 v3.5.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/bufbuild/protocompile v0.4.0 // indirect
+	github.com/bytecodealliance/wasmtime-go/v30 v30.0.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect

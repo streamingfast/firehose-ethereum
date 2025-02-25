@@ -4,6 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Substreams
+
+#### Reconnection time
+
+* Added flag `substreams-tier1-quicksave-store` to enable quicksave of stores on tier1, allowing for a fast reconnection of clients using stores.
+
+#### Performance
+
+* Rust modules will now be executed with `wasmtime` by default instead of `wazero`.
+  - Prevents the whole server from stalling in certain memory-intensive operations in wazero.
+  - Speed improvement: cuts the execution time in half in some circumstances.
+  - Wazero is still used for modules with `wbindgen` and modules compiled with `tinygo`.
+  - Set env var `SUBSTREAMS_WASM_RUNTIME=wazero` to revert to previous behavior.
+
 ## v2.10.0
 
 ### Block Model
