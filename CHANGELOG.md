@@ -4,13 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.11.0
 
-### Substreams
+### Substreams (v1.14.0)
 
 #### Reconnection time
 
-* Added flag `substreams-tier1-quicksave-store` to enable quicksave of stores on tier1, allowing for a fast reconnection of clients using stores.
+* Implement "QuickSave" feature to save the state of "live running" substreams stores when shutting down, and then resume processing from that point if the cursor matches.
+  - Added flag `substreams-tier1-quicksave-store` to enable quicksave when non-empty
+    (requires `--common-system-shutdown-signal-delay` to be set to a long enough value to save the in-flight stores)
 
 #### Performance
 
