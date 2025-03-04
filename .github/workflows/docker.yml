@@ -53,7 +53,7 @@ jobs:
 
   build-vanilla:
     needs: [setup]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     permissions:
       contents: read
@@ -125,7 +125,7 @@ jobs:
 
   bundle-docker-version-nitro:
     needs: [setup, build-vanilla]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.nitro_tag != 'null') }}
 
     outputs:
@@ -214,7 +214,7 @@ jobs:
 
   bundle-docker-versions:
     needs: [setup, build-vanilla]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bnb') || contains(github.event.inputs.flavors, 'optimism')) }}
 
     permissions:
@@ -311,7 +311,7 @@ jobs:
   slack-notifications-vanilla:
     if: ${{ !startsWith(github.ref, 'refs/tags/') && !contains(github.event.head_commit.message, 'build:all') && github.event_name != 'workflow_dispatch' }}
     needs: [setup, build-vanilla]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Slack notification
         env:
@@ -323,7 +323,7 @@ jobs:
 
   slack-notifications:
     needs: [setup, build-vanilla, bundle-docker-versions]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Slack notification
         env:
@@ -339,7 +339,7 @@ jobs:
 
   slack-notification-nitro:
     needs: [setup, bundle-docker-version-nitro]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Slack notification
         env:
