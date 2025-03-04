@@ -329,6 +329,8 @@ func (s *GethPeersEnforcer) getEnodesFromPeers(hostname string) []*Enode {
 	var enodes []*Enode
 	for _, ip := range ips {
 		endpoint := fmt.Sprintf("http://%s:%s", ip, port)
+		s.logger.Debug("retrieving IP node info", zap.String("endpoint", endpoint))
+
 		body := `{"jsonrpc":"2.0","method":"admin_nodeInfo","params":[],"id":1}`
 
 		enodeAddr, err := httpPost(endpoint, body)
@@ -343,6 +345,12 @@ func (s *GethPeersEnforcer) getEnodesFromPeers(hostname string) []*Enode {
 		if err != nil {
 			s.logger.Warn("got invalid enode string from IP", zap.String("enode", enodeStr), zap.Error(err))
 			continue
+		}
+
+		ipString := ip.String()
+		if enode.IP != ipString {
+			s.logger.Warn("IP mismatch, using local resolved IP from hostname", zap.String("local_ip", ipString), zap.String("enode_ip", enodeStr))
+			enode.IP = ipString
 		}
 
 		enodes = append(enodes, enode)
