@@ -247,7 +247,7 @@ func (s *GethPeersEnforcer) runOnce() error {
 
 // AddPeer sends a command through IPC socket to connect geth to the given peer
 func (s *GethPeersEnforcer) addPeer(peer *Enode) error {
-	if s.mustIgnorePeer(peer.Full) {
+	if s.mustIgnorePeer(peer.Original) {
 		return nil
 	}
 
@@ -283,13 +283,17 @@ func (s *GethPeersEnforcer) mustIgnorePeer(peer string) bool {
 }
 
 type Enode struct {
-	Full string
-	ID   string
-	IP   string
+	// Original is the original value as received when parsing the enode string, if you are
+	// constructing a new Enode, you should set this to the original string you are parsing
+	// or if from parts, assign use [String] to set it like `instance.Original = instance.String()`
+	Original string
+	ID       string
+	IP       string
+	Port     int
 }
 
 func (e *Enode) String() string {
-	return e.Full
+	return fmt.Sprintf("enode://%s@%s:%d", e.ID, e.IP, e.Port)
 }
 
 func parseEnode(in string) (*Enode, error) {
@@ -299,15 +303,27 @@ func parseEnode(in string) (*Enode, error) {
 	}
 
 	raw := strings.TrimPrefix(in, "enode://")
-	id, ip, ok := strings.Cut(raw, "@")
+	id, ipPort, ok := strings.Cut(raw, "@")
 	if !ok {
 		return nil, fmt.Errorf("invalid enode string, must have '@' separator: %s", in)
 	}
 
+	port := 30303
+
+	ip, portRaw, ok := strings.Cut(ipPort, ":")
+	if ok {
+		var err error
+		port, err = strconv.Atoi(portRaw)
+		if err != nil {
+			return nil, fmt.Errorf("invalid port in enode string: %s", in)
+		}
+	}
+
 	return &Enode{
-		Full: in,
-		ID:   id,
-		IP:   ip,
+		Original: in,
+		ID:       id,
+		IP:       ip,
+		Port:     port,
 	}, nil
 }
 
