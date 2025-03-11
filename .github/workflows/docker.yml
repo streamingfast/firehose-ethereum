@@ -16,7 +16,7 @@ on:
         description: "JSON-formatted list of flavors to build"
         required: true
         type: string
-        default: '[{"name":"geth","version":"geth-latest"},{"name":"bnb","version":"bnb-latest"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]'
+        default: '[{"name":"geth","version":"latest"},{"name":"bnb","version":"latest"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]'
       nitro_tag:
         description: 'nitro docker image to pull (will not build if set to the string "null")'
         required: true
@@ -229,7 +229,7 @@ jobs:
 
     strategy:
       matrix:
-        binary: ${{ fromJSON( github.event.inputs.flavors || '[{"name":"geth","version":"latest-fh2"},{"name":"bnb","version":"latest-fh2"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]') }}
+        binary: ${{ fromJSON( github.event.inputs.flavors || '[{"name":"geth","version":"latest"},{"name":"bnb","version":"latest"},{"name":"polygon","version":"latest-fh2"},{"name":"optimism","version":"latest-fh3"}]') }}
 
     steps:
       - name: Log in to the Container registry
