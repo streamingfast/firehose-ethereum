@@ -1746,7 +1746,7 @@ func (ctx *parseCtx) getCall(indexString string, allowRoot bool, tag string) (*p
 	return ctx.currentTrace.Calls[idx-1], nil
 }
 
-// splitInChunks split the line in chunks and returns the slice `chunks[1:]`, but verifies
+// SplitInChunks split the line in chunks and returns the slice `chunks[1:]`, but verifies
 // that there are only exactly one of `validCounts` number of chunks
 func SplitInChunks(line string, validCounts ...int) ([]string, error) {
 	chunks := strings.SplitN(line, " ", -1)
