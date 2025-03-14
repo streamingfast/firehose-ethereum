@@ -4,19 +4,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.11.2
 
-### Substreams
+### Substreams (v1.14.3)
+
+#### Bugfixes
 
 * Added RPC code `-32600` as a deterministic error, happen if the JSON-RPC request itself is malformed.
 
-* Added a mechanism for 'production-mode' requests where the tier1 will not schedule tier2 jobs over { max_parallel_subrequests } segments above the current block being streamed to the user. This will ensure that a user slowly reading blocks 1, 2, 3... will not trigger a flood of tier2 jobs for higher blocks, let's say 300_000_000, that might never get read.
+* Fixed `runtime error: slice bounds out of range` error on heavy memory usage with wasmtime engin
 
-* Added a validation for module 'triggering' inputs: it will now fail with a clear error message when the only available inputs are stores used with mode 'get' (not 'deltas'), instead of silenlty skipping the module on every block.
-
-* Fixed runtime error: slice bounds out of range error on heavy memory usage with wasmtime engin
+* Added a validation on a module for the existence of 'triggering' inputs: the server will now fail with a clear error message
+  when the only available inputs are stores used with mode 'get' (not 'deltas'), instead of silenlty skipping the module on every block.
 
 * Fixed a bug where the tier1 would not catch tier2 'module execution timeout' error, improved error messages related to timeouts during eth_call
+
+#### Performance
+
+* Added a mechanism for 'production-mode' requests where the tier1 will not schedule tier2 jobs over { max_parallel_subrequests } segments above the current block being streamed to the user.
+  This will ensure that a user slowly reading blocks 1, 2, 3... will not trigger a flood of tier2 jobs for higher blocks, let's say 300_000_000, that might never get read.
+
+#### Service lifecycle
+
+* Improved connection draining on shutdown: Now waits for the end of the 'shutdown-delay' before draining and refusing new connections, then waits for 'quicksaves' and successful signaling of clients, up to a max of 30 sec.
+
+#### Logging / errors
+
+* Added information about the number of blocks that need to be processed for a given request in the `sf.substreams.rpc.v2.SessionInit` message
+* Added an optional field `limit_processed_blocks` to the `sf.substreams.rpc.v2.Request`. When set to a non-zero value, the server will reject a request that would process more blocks than the given value with the `FailedPrecondition` GRPC error code.
+* Improved error messages when a module execution is timing out on a block (ex: due to a slow external call) and now return a `DeadlineExceeded` Connect/GRPC error code instead of a Internal. Removed 'panic' from wording.
+* In 'substreams request stats' log, add fields: `remote_jobs_completed`, `remote_blocks_processed` and `total_uncompressed_read_bytes`
 
 ## v2.11.1
 

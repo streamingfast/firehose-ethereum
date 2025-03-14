@@ -19,19 +19,19 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	github.com/streamingfast/bstream v0.0.2-0.20250221181559-fb0809660f91
-	github.com/streamingfast/cli v0.0.4-0.20250116003948-fbf66c930cce
+	github.com/streamingfast/cli v0.0.4-0.20250311175935-5df3fe1f6ce7
 	github.com/streamingfast/derr v0.0.0-20230515163924-8570aaa43fe1
 	github.com/streamingfast/dmetrics v0.0.0-20240214191810-524a5c58fbaa
 	github.com/streamingfast/dstore v0.1.1-0.20250217165048-d508dcc6b33e
 	github.com/streamingfast/eth-go v0.0.0-20250314142510-f5d8aa2a99e3
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.9.1
+	github.com/streamingfast/firehose-core v1.9.2
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250219193741-ca2753f1cf5f
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.14.3-0.20250314160755-69ab6e4d1802
+	github.com/streamingfast/substreams v1.14.3
 	github.com/stretchr/testify v1.10.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
