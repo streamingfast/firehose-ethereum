@@ -6,6 +6,8 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Substreams
+
 * Added RPC code `-32600` as a deterministic error, happen if the JSON-RPC request itself is malformed.
 
 * Added a mechanism for 'production-mode' requests where the tier1 will not schedule tier2 jobs over { max_parallel_subrequests } segments above the current block being streamed to the user. This will ensure that a user slowly reading blocks 1, 2, 3... will not trigger a flood of tier2 jobs for higher blocks, let's say 300_000_000, that might never get read.
@@ -13,6 +15,8 @@ for instructions to keep up to date.
 * Added a validation for module 'triggering' inputs: it will now fail with a clear error message when the only available inputs are stores used with mode 'get' (not 'deltas'), instead of silenlty skipping the module on every block.
 
 * Fixed runtime error: slice bounds out of range error on heavy memory usage with wasmtime engin
+
+* Fixed a bug where the tier1 would not catch tier2 'module execution timeout' error, improved error messages related to timeouts during eth_call
 
 ## v2.11.1
 

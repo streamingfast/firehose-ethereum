@@ -219,6 +219,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		}, rpc.BlockHash(blockHash)).ToRequest()
 	}
 
+	var lastError error
 	var delay time.Duration
 	var attemptNumber int
 	for {
@@ -230,21 +231,29 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		// Kept here because later we roll it, but we still want to log the one that generated the error
 		client := e.rpcClient()
 
+		lastRequestSince := time.Now()
 		out, err := client.DoRequests(ctx, reqs)
 		if err != nil {
+			if ctx.Err() != nil {
+				callDesc, _ := json.Marshal(reqs)
+				zlog.Info("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
+				var lastErrorStr string
+				if lastError != nil {
+					lastErrorStr = "last error: " + lastError.Error()
+				} else {
+					lastErrorStr = "no errors"
+				}
+				return nil, false, fmt.Errorf("timeout while doing eth_call, waiting for rpc provider for %s (%d attempt(s), %s). Call details: %q", time.Since(lastRequestSince), attemptNumber, lastErrorStr, string(callDesc))
+			}
+
 			// Never retry on retry attempted max count
 			if retryCount == 0 || (retryCount > 0 && attemptNumber > retryCount) {
 				return nil, false, err
 			}
 
-			if ctx.Err() != nil {
-				callDesc, _ := json.Marshal(reqs)
-				zlog.Info("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
-				return nil, false, fmt.Errorf("timeout while doing eth_call: %s, %w", string(callDesc), ctx.Err())
-			}
-
 			e.rollRpcClient()
 			zlog.Warn("retrying RPCCall on RPC error", zap.String("trace_id", traceID), zap.Error(err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
+			lastError = err
 			continue
 		}
 
