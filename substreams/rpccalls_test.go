@@ -206,6 +206,20 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			require.NoError,
 		},
 		{
+			"invalid request error code, invalid argument",
+			dummyRPCCall,
+			`{"code":-32602,"message":"invalid argument 0: json: cannot unmarshal hex string without 0x prefix into Go struct field CallArgs.to of type common.Address"}`,
+			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
+			require.NoError,
+		},
+		{
+			"invalid json-rpc request error code",
+			dummyRPCCall,
+			`{"code":-32600,"message":"invalid request"}`,
+			want{deterministic: true, response: &pbethss.RpcResponse{Failed: true}},
+			require.NoError,
+		},
+		{
 			"invalid RpcCall",
 			rpcCall("aa", eth.MustNewMethodDef("any()").MethodID()),
 			`{"code":-32602,"message":"invalid request"}`,
