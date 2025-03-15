@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Substreams
+
+* Fix a panic when a module times out on tier2 while being executed from cached outputs
+* eth_call timeout logs now properly show 0x-prefixed values
+
 ## v2.11.2
 
 ### Substreams (v1.14.3)

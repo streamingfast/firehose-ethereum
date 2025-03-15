@@ -235,7 +235,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		out, err := client.DoRequests(ctx, reqs)
 		if err != nil {
 			if ctx.Err() != nil {
-				callDesc, _ := json.Marshal(reqs)
+				callDesc, _ := rpc.MarshalJSONRPC(calls)
 				zlog.Info("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
 				var lastErrorStr string
 				if lastError != nil {
@@ -243,7 +243,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 				} else {
 					lastErrorStr = "no errors"
 				}
-				return nil, false, fmt.Errorf("timeout while doing eth_call, waiting for rpc provider for %s (%d attempt(s), %s). Call details: %q", time.Since(lastRequestSince), attemptNumber, lastErrorStr, string(callDesc))
+				return nil, false, fmt.Errorf("timeout while doing eth_call, waiting for rpc provider for %s (%d attempt(s), %s). Call details: %s", time.Since(lastRequestSince), attemptNumber, lastErrorStr, string(callDesc))
 			}
 
 			// Never retry on retry attempted max count
