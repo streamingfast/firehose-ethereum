@@ -10,6 +10,8 @@ for instructions to keep up to date.
 
 * Fix a panic when a module times out on tier2 while being executed from cached outputs
 * eth_call timeout logs now properly show 0x-prefixed values
+* Add environment variables to control retry behavior, "SUBSTREAMS_WORKER_MAX_RETRIES" (default 10) and "SUBSTREAMS_WORKER_MAX_TIMEOUT_RETRIES" (default 2), changing from previous defaults (720 and 3)
+  The worker_max_timeout_retries is the number of retries specifically applied to block execution timing out (ex: because of external calls)
 
 ## v2.11.2
 
