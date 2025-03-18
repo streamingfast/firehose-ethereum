@@ -12,6 +12,8 @@ for instructions to keep up to date.
 * eth_call timeout logs now properly show 0x-prefixed values
 * Add environment variables to control retry behavior, "SUBSTREAMS_WORKER_MAX_RETRIES" (default 10) and "SUBSTREAMS_WORKER_MAX_TIMEOUT_RETRIES" (default 2), changing from previous defaults (720 and 3)
   The worker_max_timeout_retries is the number of retries specifically applied to block execution timing out (ex: because of external calls)
+* The mechanism to slow down processing segments "ahead of blocks being sent to user" has been disabled on "noop-mode" requests, since these requests are used to pre-cache data and should not be slowed down.
+* The "number of segments ahead" in this mechanism has been increased from `>number of parallel workers>` to `<number of parallel workers> * 1.5`
 
 ## v2.11.2
 
