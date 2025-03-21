@@ -14,6 +14,9 @@ for instructions to keep up to date.
   The worker_max_timeout_retries is the number of retries specifically applied to block execution timing out (ex: because of external calls)
 * The mechanism to slow down processing segments "ahead of blocks being sent to user" has been disabled on "noop-mode" requests, since these requests are used to pre-cache data and should not be slowed down.
 * The "number of segments ahead" in this mechanism has been increased from `>number of parallel workers>` to `<number of parallel workers> * 1.5`
+* Tier2 now returns GRPC error codes for `DeadlineExceeded` when it times out, and `ResourceExhausted` when a request is rejected due to overload
+* Tier1 now correctly reports tier2 job outcomes in the `substreams request stats`
+* Added jitter in "retry" logic to prevent all workers from retrying at the same time when tier2 are overloaded
 
 ## v2.11.2
 
