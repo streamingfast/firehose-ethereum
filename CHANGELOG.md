@@ -4,11 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.11.4
 
-### Substreams
+### Substreams (v1.15.1)
 
 * Save deterministic failures in WASM in the module cache (under a file named `errors.0123456789.zst` at the failed block number), so further requests depending on this module at the same block can return the error immediately without re-executing the module.
+
+* Fix `module_wasm_ext_duration` value in 'substreams request stats' log (always 0 since using wasmtime)
 
 ## v2.11.3
 
