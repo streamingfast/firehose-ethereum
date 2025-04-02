@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.11.5
+
+* Bump substreams to v1.15.2
+* fix the 'quicksave' feature on substreams (incorrect block hash on quicksave)
+
 ## v2.11.4
 
 ### Substreams (v1.15.1)
