@@ -393,6 +393,7 @@ message TransactionTrace {
   bytes hash = 21;
   bytes from = 22;
   // Only available in DetailLevel: EXTENDED
+  // Not populated. It will be empty.
   bytes return_data = 23;
   // Only available in DetailLevel: EXTENDED
   bytes public_key = 24;
@@ -644,12 +645,24 @@ message Call {
   uint64 gas_limit = 8;
   uint64 gas_consumed = 9;
   bytes return_data = 13;
+
+  // When call is `CREATE` or `CREATE2`, this field is not populated. A couple of suggestions:
+  // - You can get the contract's code in the `code_changes` field.
+  // - In the root `CREATE` call, you can directly use the `TransactionTrace`'s input field.
   bytes input = 14;
+
+  // Indicates whether the call executed code.  
+  // This may be incorrectly set to `false` for accounts with code handling native value transfers,  
+  // as well as for certain precompiles with no input.  
+  // The value is initially set based on `call.type != CREATE && len(call.input) > 0`  
+  // and later adjusted if the tracer detects an account without code.
   bool executed_code = 15;
   bool suicide = 16;
 
   /* hex representation of the hash -> preimage */
   map<string, string> keccak_preimages = 20;
+
+  // The data might be not be in order
   repeated StorageChange storage_changes = 21;
   repeated BalanceChange balance_changes = 22;
   repeated NonceChange nonce_changes = 24;
@@ -659,6 +672,10 @@ message Call {
   // Deprecated: repeated bytes created_accounts
   reserved 27;
 
+  // Some gas changes are not correctly tracked:
+  // - Gas refunded due to data returned to the chain (occurs at the end of a transaction, before buyback).
+  // - Initial gas allocation (0 -> GasLimit) at the start of a call.
+  // - Final gas deduction (LeftOver -> 0) at the end of a call (if applicable). 
   repeated GasChange gas_changes = 28;
 
   // Deprecated: repeated GasEvent gas_events
@@ -710,12 +727,17 @@ message Call {
   // perform.
   bool state_reverted = 30;
 
-  // The block's global ordinal when the call started executing, refer to
-  // [Block] documentation for further information about ordinals and total ordering.
+  // - The block's global ordinal when the call started executing, refer to
+  //   [Block] documentation for further information about ordinals and total ordering.
+  // - The transaction root call `begin_ordial` is always `0` (also in the GENESIS block), which can cause issues 
+  //   when sorting by this field. To ensure proper execution order, set it as follows:
+  //   `trx.Calls[0].BeginOrdinal = trx.BeginOrdinal`.
   uint64 begin_ordinal = 31;
 
-  // The block's global ordinal when the call finished executing, refer to
-  // [Block] documentation for further information about ordinals and total ordering.
+  // - The block's global ordinal when the call finished executing, refer to
+  //   [Block] documentation for further information about ordinals and total ordering.
+  // - The root call of the GENESIS block is always `0`. To fix it, you can set it as follows:
+  //   `rx.Calls[0].EndOrdinal = max.Uint64`.
   uint64 end_ordinal = 32;
 
   repeated AccountCreation account_creations = 33;
