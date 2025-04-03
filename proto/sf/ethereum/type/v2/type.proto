@@ -765,6 +765,8 @@ message Call {
   //     [Block] documentation for further information about ordinals and total ordering.
   //    2. The root call of the GENESIS block is always `0`. To fix it, you can set it as follows:
   //     `rx.Calls[0].EndOrdinal = max.Uint64`.
+  //
+  //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
   uint64 end_ordinal = 32;
 
   // Known Issues
