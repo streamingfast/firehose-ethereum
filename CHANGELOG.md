@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.11.6
+
+* Better documentation on versions of `Block` and known issues on version 3.
+
 ## v2.11.5
 
 * Bump substreams to v1.15.2
