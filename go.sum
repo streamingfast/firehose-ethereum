@@ -2193,8 +2193,8 @@ github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd h1:t5n8dD
 github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd/go.mod h1:du6tys2Q6X2pRQ3JbCziWiy7Y7KrOcl4CSb9uiGsVxA=
 github.com/streamingfast/firehose-core v1.9.8-0.20250407154558-4eceda08001e h1:ziXgbWwUVCRd41G1VOUa7nIa7pKD0Xe/9QO3dotNSXM=
 github.com/streamingfast/firehose-core v1.9.8-0.20250407154558-4eceda08001e/go.mod h1:t5Sf2N7W7Bfn8RScQeDseKhmTmUhG5tFeoeIX617s7Y=
-github.com/streamingfast/firehose-ethereum/types v0.0.0-20250219193741-ca2753f1cf5f h1:zvXZMGOLQaDUsOSyqWHyO7pfCW7NfPvwhl8c5v2Ab7w=
-github.com/streamingfast/firehose-ethereum/types v0.0.0-20250219193741-ca2753f1cf5f/go.mod h1:CG22ObinxSbKIP19bAj0uro0a290kzZTiBbjL8VR0SE=
+github.com/streamingfast/firehose-ethereum/types v0.0.0-20250409024301-2986a7a887c6 h1:5nTU1SplUxqn0zWXOkeSeU51vYh9FGAZgmDF0pwCxzM=
+github.com/streamingfast/firehose-ethereum/types v0.0.0-20250409024301-2986a7a887c6/go.mod h1:CG22ObinxSbKIP19bAj0uro0a290kzZTiBbjL8VR0SE=
 github.com/streamingfast/google-cloud-go v0.0.0-20241202194114-f77ff78d4f66 h1:c0cmKOyazz58F94SwI5a9qZswiJxk0cXSq08mhBGFAI=
 github.com/streamingfast/google-cloud-go v0.0.0-20241202194114-f77ff78d4f66/go.mod h1:SzlutmqoI//WgCLSNcuZ9qO52q+3nYNS2J7vOLlB6kI=
 github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0 h1:g8eEYbFSykyzIyuxNMmHEUGGUvJE0ivmqZagLDK42gw=
