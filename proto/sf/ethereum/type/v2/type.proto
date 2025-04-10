@@ -858,6 +858,8 @@ message BalanceChange {
 
     // This reason is used only on Optimism chain.
     REASON_INCREASE_MINT = 18;
+    // This reason is used only on Optimism chain.
+    REASON_REVERT = 19;
   }
 
   // The block's global ordinal when the balance change was recorded, refer to [Block]
