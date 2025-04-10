@@ -4,8 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
-* added support to Balance Change REASON_REVERT for needed by optimism.
+## v2.11.7
+* Added support to Balance Change REASON_REVERT for needed by optimism.
 
 ## v2.11.6
 
