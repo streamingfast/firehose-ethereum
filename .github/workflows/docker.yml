@@ -28,7 +28,7 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     env:
       SLACK_IDS: ${{ vars.SLACK_IDS }}
