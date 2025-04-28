@@ -1,8 +1,8 @@
 module github.com/streamingfast/firehose-ethereum
 
-go 1.23.4
+go 1.24
 
-toolchain go1.23.5
+toolchain go1.24.2
 
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
@@ -14,18 +14,18 @@ require (
 	github.com/josephburnett/jd v1.7.1
 	github.com/klauspost/compress v1.17.11
 	github.com/mitchellh/go-testing-interface v1.14.1
-	github.com/mostynb/go-grpc-compression v1.1.17
+	github.com/mostynb/go-grpc-compression v1.2.3
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
-	github.com/streamingfast/bstream v0.0.2-0.20250221181559-fb0809660f91
-	github.com/streamingfast/cli v0.0.4-0.20250311175935-5df3fe1f6ce7
+	github.com/streamingfast/bstream v0.0.2-0.20250416133616-23bdc92e0e9c
+	github.com/streamingfast/cli v0.0.4-0.20250424204306-678ec20cedec
 	github.com/streamingfast/derr v0.0.0-20250321151415-6b4fbbcb1bb5
-	github.com/streamingfast/dmetrics v0.0.0-20240214191810-524a5c58fbaa
+	github.com/streamingfast/dmetrics v0.0.0-20250425183830-ffcef0cc9f87
 	github.com/streamingfast/dstore v0.1.1-0.20250217165048-d508dcc6b33e
 	github.com/streamingfast/eth-go v0.0.0-20250314142510-f5d8aa2a99e3
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.9.8-0.20250407154558-4eceda08001e
+	github.com/streamingfast/firehose-core v1.9.9-0.20250428193441-ddbe337a9ddc
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250409024301-2986a7a887c6
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
@@ -164,7 +164,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/streamingfast/dauth v0.0.0-20250130223258-c615a033a660 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
-	github.com/streamingfast/dgrpc v0.0.0-20250120175901-89d79176166e // indirect
+	github.com/streamingfast/dgrpc v0.0.0-20250227145723-9bc2e4941b4e // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20241101155221-489f5a9d9139 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
