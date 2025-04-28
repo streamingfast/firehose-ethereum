@@ -73,13 +73,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Branch name
-        id: extract_branch
-        shell: bash
-        run: |
-          echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
-          echo "core_version=$(grep 'github.com/streamingfast/firehose-core' go.mod | cut -d' ' -f2)" >> $GITHUB_OUTPUT
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -111,6 +104,7 @@ jobs:
             version=${GITHUB_REF#refs/tags/}
           fi
 
+          echo "CORE_VERSION=$(grep 'github.com/streamingfast/firehose-core' go.mod | cut -d' ' -f2)" >> $GITHUB_OUTPUT
           echo "VERSION=${version} (Commit ${GITHUB_SHA::7}, Commit Date $(git show -s --format=%cI))" >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker image
@@ -118,12 +112,13 @@ jobs:
         with:
           context: .
           push: true
+          platforms: ${{ matrix.platform }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           build-args: |
             VERSION=${{ steps.extract-version.outputs.VERSION }}
-            COREVERSION=${{ steps.extract_branch.outputs.core_version }}
+            COREVERSION=${{ steps.extract-version.outputs.CORE_VERSION }}
 
       - name: Get Job ID from GH API
         id: get_job_id
