@@ -52,15 +52,23 @@ jobs:
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
 
   build-vanilla:
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            platform_suffix: amd64
+            runner: ubuntu-24.04
+
+          - platform: linux/arm64
+            platform_suffix: arm64
+            runner: ubuntu-24.04-arm
+
     needs: [setup]
-    runs-on: ubuntu-24.04
+    runs-on: [ "${{ matrix.runner }}" ]
 
     permissions:
       contents: read
       packages: write
-
-    outputs:
-      tags: ${{ steps.meta.outputs.tags }}
 
     steps:
       - uses: actions/checkout@v4
@@ -70,8 +78,10 @@ jobs:
         shell: bash
         run: |
           echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
-          echo "release_train=$(echo ${GITHUB_REF#refs/heads/release/})" >> $GITHUB_OUTPUT
           echo "core_version=$(grep 'github.com/streamingfast/firehose-core' go.mod | cut -d' ' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -87,22 +97,33 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=,enable=true
+            type=sha,prefix=
+            type=sha,prefix=,suffix=-${{ matrix.platform_suffix }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
-            type=raw,enable=${{ startsWith(github.ref, 'refs/heads/release/v') }},value=${{ steps.extract_branch.outputs.release_train }}
           flavor: |
             latest=${{ startsWith(github.ref, 'refs/tags/') }}
+
+      - name: Extract version
+        id: extract-version
+        run: |
+          version="edge"
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            version=${GITHUB_REF#refs/tags/}
+          fi
+
+          echo "VERSION=${version} (Commit ${GITHUB_SHA::7}, Commit Date $(git show -s --format=%cI))" >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          build-args: |
-            VERSION=${{ github.event.ref }}
-            COREVERSION=${{ steps.extract_branch.outputs.core_version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          build-args: |
+            VERSION=${{ steps.extract-version.outputs.VERSION }}
+            COREVERSION=${{ steps.extract_branch.outputs.core_version }}
 
       - name: Get Job ID from GH API
         id: get_job_id
@@ -123,8 +144,52 @@ jobs:
           args: |
             :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
+  push-vanilla:
+    needs: build-vanilla
+    runs-on: ubuntu-24.04
+
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+
+    permissions:
+        contents: read
+        packages: write
+
+    steps:
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate docker tags/labels from github build context
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=sha,prefix=
+            type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+          flavor: |
+            latest=${{ startsWith(github.ref, 'refs/tags/') }}
+          sep-tags: ","
+
+      - name: Extract image
+        id: image
+        run: |
+            echo "ID=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push manifest images
+        uses: Noelware/docker-manifest-action@0.4.3
+        with:
+          inputs: "${{ steps.meta.outputs.tags }}"
+          images: "${{ steps.image.outputs.ID }}-amd64, ${{ steps.image.outputs.ID }}-arm64"
+          push: true
+
   bundle-docker-version-nitro:
-    needs: [setup, build-vanilla]
+    needs: [setup, push-vanilla]
     runs-on: ubuntu-24.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.nitro_tag != 'null') }}
 
@@ -153,7 +218,7 @@ jobs:
       - run: |
           docker pull ghcr.io/streamingfast/nitro:${{ github.event.inputs.nitro_tag == '' && 'latest' || github.event.inputs.nitro_tag }}
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/nitro:${{ github.event.inputs.nitro_tag == '' && 'latest' || github.event.inputs.nitro_tag }}') >> $GITHUB_ENV
-          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.push-vanilla.outputs.tags }}" | sed "s/,/\n/g" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
 
       - name: Generate docker tags/labels from github build context
         id: meta
@@ -213,7 +278,7 @@ jobs:
           echo "nitro=$OUT" >> $GITHUB_OUTPUT
 
   bundle-docker-versions:
-    needs: [setup, build-vanilla]
+    needs: [setup, push-vanilla]
     runs-on: ubuntu-24.04
     if: ${{ (startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, 'build:all') || github.event_name == 'workflow_dispatch') && (github.event.inputs.flavors == '' || contains(github.event.inputs.flavors, 'geth') || contains(github.event.inputs.flavors, 'polygon') || contains(github.event.inputs.flavors, 'bnb') || contains(github.event.inputs.flavors, 'optimism')) }}
 
@@ -249,7 +314,7 @@ jobs:
       - run: |
           docker pull ghcr.io/streamingfast/go-ethereum:${{ matrix.binary.name }}-${{ matrix.binary.version }}
           echo VERSION=$(docker inspect --format='{{index .Config.Labels "org.opencontainers.image.version"}}' 'ghcr.io/streamingfast/go-ethereum':${{ matrix.binary.name }}-${{ matrix.binary.version }}) >> $GITHUB_ENV
-          echo SF_VERSION=$(echo "${{ needs.build-vanilla.outputs.tags }}" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
+          echo SF_VERSION=$(echo "${{ needs.push-vanilla.outputs.tags }}" | sed "s/,/\n/g" | grep -Ev "(develop|0.1[01].x)" | head -n 1 |cut -d: -f2) >> $GITHUB_ENV
 
       - name: Generate docker tags/labels from github build context
         id: meta
@@ -310,42 +375,54 @@ jobs:
 
   slack-notifications-vanilla:
     if: ${{ !startsWith(github.ref, 'refs/tags/') && !contains(github.event.head_commit.message, 'build:all') && github.event_name != 'workflow_dispatch' }}
-    needs: [setup, build-vanilla]
+    needs: [setup, push-vanilla]
     runs-on: ubuntu-24.04
     steps:
+      - name: Extract Metadata Tags
+        id: metadata
+        run: echo "tags=${{ needs.push-vanilla.outputs.tags }}" | sed "s/,/\n/g" >> "$GITHUB_OUTPUT"
+
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}```
+            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ steps.metadata.outputs.tags }}```
 
   slack-notifications:
-    needs: [setup, build-vanilla, bundle-docker-versions]
+    needs: [setup, push-vanilla, bundle-docker-versions]
     runs-on: ubuntu-24.04
     steps:
+      - name: Extract Metadata Tags
+        id: metadata
+        run: echo "tags=${{ needs.push-vanilla.outputs.tags }}" | sed "s/,/\n/g" >> "$GITHUB_OUTPUT"
+
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ steps.metadata.outputs.tags }}
             ${{ needs.bundle-docker-versions.outputs.geth }}
             ${{ needs.bundle-docker-versions.outputs.bnb }}
             ${{ needs.bundle-docker-versions.outputs.optimism }}
             ${{ needs.bundle-docker-versions.outputs.polygon }}```
 
   slack-notification-nitro:
-    needs: [setup, bundle-docker-version-nitro]
+    needs: [setup, push-vanilla, bundle-docker-version-nitro]
     runs-on: ubuntu-24.04
     steps:
+      - name: Extract Metadata Tags
+        id: metadata
+        run: echo "tags=${{ needs.push-vanilla.outputs.tags }}" | sed "s/,/\n/g" >> "$GITHUB_OUTPUT"
+
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building nitro docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ join(needs.build-vanilla.outputs.tags, ' ') }}
+            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building nitro docker images from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ steps.metadata.outputs.tags }}
             ${{ needs.bundle-docker-version-nitro.outputs.nitro }}```
