@@ -200,7 +200,7 @@ func (e *RPCEngine) validateCalls(calls *pbethss.RpcCalls) (err error) {
 
 var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(timeout\s*=\s*[^\)]+\)`)
 
-// rpcsCalls performs the RPC calls retrying forever on error if `retryCount` is set to -1. If `retryCount`
+// rpcCalls performs the RPC calls retrying forever on error if `retryCount` is set to -1. If `retryCount`
 // is sets to 0, no retry is attempted. If `retryCount` is > 0, it will retry `retryCount` times.
 //
 // If there is no retry or if partial retry, deterministic will be always `false`. Otherwise, it can only
