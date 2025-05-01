@@ -10,6 +10,7 @@ for instructions to keep up to date.
 
 * (RAM+CPU) dedupe execution of modules with same hash but different name when computing dependency graph. (#619)
 * (RAM) prevent memory usage burst on tier2 when writing mapper by streaming protobuf items to writer
+* Tier1 requests will no longer error out with "service currently overloaded" because tier2 servers are ramping up
 
 ### New 'firehose' reader
 
