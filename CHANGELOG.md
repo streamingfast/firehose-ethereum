@@ -4,9 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.11.8
 
-### Substreams performance improvements
+### Substreams performance improvements v1.15.4
 
 * (RAM+CPU) dedupe execution of modules with same hash but different name when computing dependency graph. (#619)
 * (RAM) prevent memory usage burst on tier2 when writing mapper by streaming protobuf items to writer
