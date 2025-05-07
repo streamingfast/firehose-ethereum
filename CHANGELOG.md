@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.11.9
+
+### Block
+
+* Added missing `address` in `SetCodeAuthorization` structure for proper recording of EIP-7702 feature, this arrives in time for Mainnet but Holesky, Sepolia, BSC Chapel, BSC Mainnet and Arbitrum Sepolia will need to be backfilled to fix the issue at a later time.
+
 ## v2.11.8
 
 ### Substreams performance improvements v1.15.4
