@@ -520,9 +520,9 @@ message SetCodeAuthorization {
   // Address contains the address this account is delegating to. This address usually
   // contain code that this account essentially "delegates" to.
   //
-  // Note: This was missing when EIP-7702 was first activated on Holesky, Sepolia and
-  // Arbitrum Sepolia but was ready for Mainnet hard fork. We will backfill those
-  // missing values in the near future at which point we will remove this note.
+  // Note: This was missing when EIP-7702 was first activated on Holesky, Sepolia, BSC Chapel,
+  // BSC Mainnet and Arbitrum Sepolia but was ready for Ethereum Mainnet hard fork. We will backfill
+  // those missing values in the near future at which point we will remove this note.
   bytes address = 8;
 
   // Nonce is the nonce of the account that is authorizing delegation mechanism, EIP-7702 rules

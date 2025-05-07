@@ -1692,9 +1692,9 @@ type SetCodeAuthorization struct {
 	// Address contains the address this account is delegating to. This address usually
 	// contain code that this account essentially "delegates" to.
 	//
-	// Note: This was missing when EIP-7702 was first activated on Holesky, Sepolia and
-	// Arbitrum Sepolia but was ready for Mainnet hard fork. We will backfill those
-	// missing values in the near future at which point we will remove this note.
+	// Note: This was missing when EIP-7702 was first activated on Holesky, Sepolia, BSC Chapel,
+	// BSC Mainnet and Arbitrum Sepolia but was ready for Ethereum Mainnet hard fork. We will backfill
+	// those missing values in the near future at which point we will remove this note.
 	Address []byte `protobuf:"bytes,8,opt,name=address,proto3" json:"address,omitempty"`
 	// Nonce is the nonce of the account that is authorizing delegation mechanism, EIP-7702 rules
 	// states that nonce should be verified using this rule:
