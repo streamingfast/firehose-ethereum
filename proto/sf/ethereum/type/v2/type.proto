@@ -395,12 +395,12 @@ message TransactionTrace {
 
   // Only available in DetailLevel: EXTENDED
   // Known Issues
-  // - Version 3: 
-  //    Field not populated. It will be empty. 
+  // - Version 3:
+  //    Field not populated. It will be empty.
   //
   //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
   bytes return_data = 23;
-  
+
   // Only available in DetailLevel: EXTENDED
   bytes public_key = 24;
 
@@ -516,6 +516,14 @@ message SetCodeAuthorization {
   // ChainID is the chain ID of the chain where the transaction was executed, used
   // to recover the authority from the signature.
   bytes chain_id = 2;
+
+  // Address contains the address this account is delegating to. This address usually
+  // contain code that this account essentially "delegates" to.
+  //
+  // Note: This was missing when EIP-7702 was first activated on Holesky, Sepolia and
+  // Arbitrum Sepolia but was ready for Mainnet hard fork. We will backfill those
+  // missing values in the near future at which point we will remove this note.
+  bytes address = 8;
 
   // Nonce is the nonce of the account that is authorizing delegation mechanism, EIP-7702 rules
   // states that nonce should be verified using this rule:
@@ -661,13 +669,13 @@ message Call {
   //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
   bytes input = 14;
 
-  // Indicates whether the call executed code.  
+  // Indicates whether the call executed code.
   //
   // Known Issues
-  // - Version 3: 
-  //    This may be incorrectly set to `false` for accounts with code handling native value transfers,  
-  //    as well as for certain precompiles with no input.  
-  //    The value is initially set based on `call.type != CREATE && len(call.input) > 0`  
+  // - Version 3:
+  //    This may be incorrectly set to `false` for accounts with code handling native value transfers,
+  //    as well as for certain precompiles with no input.
+  //    The value is initially set based on `call.type != CREATE && len(call.input) > 0`
   //    and later adjusted if the tracer detects an account without code.
   //
   //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
@@ -678,7 +686,7 @@ message Call {
   map<string, string> keccak_preimages = 20;
 
   // Known Issues
-  // - Version 3: 
+  // - Version 3:
   //    The data might be not be in order.
   //
   //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
@@ -695,7 +703,7 @@ message Call {
   //    Some gas changes are not correctly tracked:
   //      1. Gas refunded due to data returned to the chain (occurs at the end of a transaction, before buyback).
   //      2. Initial gas allocation (0 -> GasLimit) at the start of a call.
-  //      3. Final gas deduction (LeftOver -> 0) at the end of a call (if applicable). 
+  //      3. Final gas deduction (LeftOver -> 0) at the end of a call (if applicable).
   //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
   repeated GasChange gas_changes = 28;
 
@@ -752,7 +760,7 @@ message Call {
   // - Version 3:
   //    1. The block's global ordinal when the call started executing, refer to
   //      [Block] documentation for further information about ordinals and total ordering.
-  //    2. The transaction root call `begin_ordial` is always `0` (also in the GENESIS block), which can cause issues 
+  //    2. The transaction root call `begin_ordial` is always `0` (also in the GENESIS block), which can cause issues
   //      when sorting by this field. To ensure proper execution order, set it as follows:
   //      `trx.Calls[0].BeginOrdinal = trx.BeginOrdinal`.
   //
