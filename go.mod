@@ -23,7 +23,7 @@ require (
 	github.com/streamingfast/derr v0.0.0-20250321151415-6b4fbbcb1bb5
 	github.com/streamingfast/dmetrics v0.0.0-20250425183830-ffcef0cc9f87
 	github.com/streamingfast/dstore v0.1.1-0.20250217165048-d508dcc6b33e
-	github.com/streamingfast/eth-go v0.0.0-20250314142510-f5d8aa2a99e3
+	github.com/streamingfast/eth-go v0.0.0-20250527175121-d89ddb4e1b53
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
 	github.com/streamingfast/firehose-core v1.9.9-0.20250430173700-18bb86fb33a8
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250507011806-81dc82780367

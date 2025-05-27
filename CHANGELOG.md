@@ -4,10 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.11.10
 
-* Speed up DeleteByPrefix operations (5x perf improvement on some heavy substreams)
-* Release existingExecOuts memory as blocks progress on tier2 job
+* Substreams: properly classify eth_calls errors as deterministic on erigon (`return data out of bounds` and `Reverted 0x.....`)
+* Substreams: Speed up DeleteByPrefix operations (5x perf improvement on some heavy substreams)
+* Substreams: Release existingExecOuts memory as blocks progress on tier2 job
 
 ## v2.11.9
 
