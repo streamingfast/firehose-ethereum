@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Substreams: write mapper cache execout as they are produced on tier2 instead of at the end, reducing memory footprint
+
 ## v2.11.10
 
 * Substreams: properly classify eth_calls errors as deterministic on erigon (`return data out of bounds` and `Reverted 0x.....`)
