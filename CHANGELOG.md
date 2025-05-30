@@ -4,9 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.11.11
 
-* Substreams: write mapper cache execout as they are produced on tier2 instead of at the end, reducing memory footprint
+### Substreams improvements v1.15.7
+
+* Tier2 jobs now write mapper outputs "as they progress", preventing memory usage spikes when saving them to disk.
+* Tier2 jobs now limit writing and loading mapper output files to a maximum size of 8GiB by default.
+* Added`SUBSTREAMS_OUTPUT_SIZE_LIMIT_PER_SEGMENT` (int) environment variable to control this new limit.
+* Added `SUBSTREAMS_STORE_SIZE_LIMIT` (uint64) env var to allow overwriting the default 1GiB value
+* Added `SUBSTREAMS_PRINT_STACK` (bool) env var to enable printing full stack traces when caught panic occurs
+* Added `SUBSTREAMS_DEBUG_API_ADDR` (string) environment variable to expose a "debug API" HTTP interface that allows blocking connections, running GC, listing or canceling active requests.
+* Prevent a deterministic failure on a module definition (mode, valueType, updatePolicy) from persisting when the issue is fixed in the substreams.yaml https://github.com/streamingfast/substreams/issues/621
+* Metering events on tier2 now bundled at the end of the job (prevents sending metering events for failing jobs)
+* Added metering for: "processed_blocks" (block * number of stages where execution happened) and "egress_bytes"
 
 ## v2.11.10
 
