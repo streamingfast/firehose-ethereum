@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* add `--headers` flag to `fireeth tools poller` to allow auhenticated calls to ETH_RPC providers
+
 ## v2.11.11
 
 ### Substreams improvements v1.15.7

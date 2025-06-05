@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -23,6 +24,7 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 		Short: "poll blocks from different sources",
 	}
 
+	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
 	cmd.AddCommand(newOptimismPollerCmd(logger, tracer))
 	cmd.AddCommand(newArbOnePollerCmd(logger, tracer))
 	cmd.AddCommand(newGenericEVMPollerCmd(logger, tracer))
@@ -92,7 +94,18 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 			zap.Uint64("first_streamable_block", firstStreamableBlock),
 		)
 		rpcClients := firecorerpc.NewClients[*rpc.Client](maxBlockFetchDuration, firecorerpc.NewStickyRollingStrategy[*rpc.Client](), logger)
-		rpcClients.Add(rpc.NewClient(rpcEndpoint))
+
+		var opts []rpc.Option
+		for _, headerStr := range sflags.MustGetStringSlice(cmd, "headers") {
+			parts := strings.SplitN(headerStr, ":", 2)
+			if len(parts) == 2 {
+				key := strings.TrimSpace(parts[0])
+				value := strings.TrimSpace(parts[1])
+				opts = append(opts, rpc.WithHttpHeader(key, value))
+			}
+		}
+
+		rpcClients.Add(rpc.NewClient(rpcEndpoint, opts...))
 
 		fetcher := blockfetcher.NewOptimismBlockFetcher(fetchInterval, 1*time.Second, logger)
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
