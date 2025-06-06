@@ -20,13 +20,14 @@ import (
 type ToEthBlock func(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (*pbeth.Block, map[string]bool)
 
 type BlockFetcher struct {
-	latest                   uint64
-	latestBlockRetryInterval time.Duration
-	fetchInterval            time.Duration
-	toEthBlock               ToEthBlock
-	lastFetchAt              time.Time
-	parallelTrxWorkers       int
-	logger                   *zap.Logger
+	latest                     uint64
+	latestBlockRetryInterval   time.Duration
+	fetchInterval              time.Duration
+	toEthBlock                 ToEthBlock
+	lastFetchAt                time.Time
+	parallelTrxWorkers         int
+	allowEmptyReceiptsOnBlock0 bool
+	logger                     *zap.Logger
 }
 
 func NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval time.Duration, parallelTrxWorkers int, toEthBlock ToEthBlock, logger *zap.Logger) *BlockFetcher {
@@ -70,7 +71,7 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 		return nil, fmt.Errorf("fetching block %d: %w", blockNum, err)
 	}
 
-	receipts, err := FetchReceipts(ctx, rpcBlock, rpcClient, f.parallelTrxWorkers)
+	receipts, err := FetchReceipts(ctx, rpcBlock, rpcClient, f.parallelTrxWorkers, f.allowEmptyReceiptsOnBlock0)
 	if err != nil {
 		return nil, fmt.Errorf("fetching receipts for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
 	}
@@ -96,7 +97,7 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 	}, nil
 }
 
-func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int) (out map[string]*rpc.TransactionReceipt, err error) {
+func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int, allowEmptyReceiptsOnBlock0 bool) (out map[string]*rpc.TransactionReceipt, err error) {
 	out = make(map[string]*rpc.TransactionReceipt)
 	lock := sync.Mutex{}
 
@@ -114,7 +115,17 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, pa
 					return err
 				}
 				if r == nil {
-					return fmt.Errorf("receipt is nil")
+					if block.Number == 0 && allowEmptyReceiptsOnBlock0 {
+						r = &rpc.TransactionReceipt{
+							TransactionHash: hash,
+							BlockHash:       block.Hash,
+							BlockNumber:     block.Number,
+							From:            tx.From,
+							To:              tx.To,
+						}
+					} else {
+						return derr.NewFatalError(fmt.Errorf("receipt is nil"))
+					}
 				}
 
 				receipt = r

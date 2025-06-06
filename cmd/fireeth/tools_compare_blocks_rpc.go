@@ -133,7 +133,7 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 					panic(err)
 				}
 
-				receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, cli, 20)
+				receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, cli, 20, false)
 				if err != nil {
 					panic(err)
 				}

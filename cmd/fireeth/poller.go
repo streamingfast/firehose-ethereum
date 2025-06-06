@@ -26,6 +26,8 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 
 	cmd.PersistentFlags().Uint("parallel-workers", 20, "number of parallel workers to fetch transaction receipts")
 	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
+	cmd.PersistentFlags().Bool("allow-empty-receipts-on-block-0", false, "whether to accept empty receipts on block 0, filling them with 'empty' transactions (useful for TRON-EVM)")
+
 	cmd.AddCommand(newOptimismPollerCmd(logger, tracer))
 	cmd.AddCommand(newArbOnePollerCmd(logger, tracer))
 	cmd.AddCommand(newGenericEVMPollerCmd(logger, tracer))
@@ -109,7 +111,7 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 
 		rpcClients.Add(rpc.NewClient(rpcEndpoint, opts...))
 
-		fetcher := blockfetcher.NewOptimismBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, logger)
+		fetcher := blockfetcher.NewGenericBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, sflags.MustGetBool(cmd, "allow-empty-receipts-on-block-0"), logger)
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New[*rpc.Client](fetcher, handler, rpcClients, blockpoller.WithStoringState[*rpc.Client](stateDir), blockpoller.WithLogger[*rpc.Client](logger))
 

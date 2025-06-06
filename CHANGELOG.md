@@ -6,7 +6,11 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Poller
+
 * add `--headers` flag to `fireeth tools poller` to allow auhenticated calls to ETH_RPC providers
+* add `--allow-empty-receipts-on-block-0` bool flag to work with tron-evm-mainnet
+* add `--parallel-workers` int flag to allow increasing from the default (which is now 20 instead of 10)
 
 ## v2.11.11
 
