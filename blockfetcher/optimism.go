@@ -24,8 +24,8 @@ func (f *OptimismBlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client,
 	return blk, false, err
 }
 
-func NewOptimismBlockFetcher(intervalBetweenFetch time.Duration, latestBlockRetryInterval time.Duration, logger *zap.Logger) *OptimismBlockFetcher {
-	fetcher := NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval, block.RpcToEthBlock, logger)
+func NewOptimismBlockFetcher(intervalBetweenFetch time.Duration, latestBlockRetryInterval time.Duration, parallelTrxWorkers int, logger *zap.Logger) *OptimismBlockFetcher {
+	fetcher := NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval, parallelTrxWorkers, block.RpcToEthBlock, logger)
 	return &OptimismBlockFetcher{
 		fetcher: fetcher,
 	}

@@ -73,7 +73,7 @@ func compareOneblockRPCE() firecore.CommandExecutor {
 			return err
 		}
 
-		receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, cli)
+		receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, cli, 20)
 		if err != nil {
 			return err
 		}

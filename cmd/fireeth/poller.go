@@ -24,6 +24,7 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 		Short: "poll blocks from different sources",
 	}
 
+	cmd.PersistentFlags().Uint("parallel-workers", 20, "number of parallel workers to fetch transaction receipts")
 	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
 	cmd.AddCommand(newOptimismPollerCmd(logger, tracer))
 	cmd.AddCommand(newArbOnePollerCmd(logger, tracer))
@@ -75,6 +76,7 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 		rpcEndpoint := args[0]
 		//dataDir := cmd.Flag("data-dir").Value.String()
 		fetchInterval := sflags.MustGetDuration(cmd, "interval-between-fetch")
+		parallelWorkers := sflags.MustGetInt(cmd, "parallel-workers")
 		maxBlockFetchDuration := sflags.MustGetDuration(cmd, "max-block-fetch-duration")
 
 		dataDir := sflags.MustGetString(cmd, "data-dir")
@@ -107,7 +109,7 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 
 		rpcClients.Add(rpc.NewClient(rpcEndpoint, opts...))
 
-		fetcher := blockfetcher.NewOptimismBlockFetcher(fetchInterval, 1*time.Second, logger)
+		fetcher := blockfetcher.NewOptimismBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, logger)
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New[*rpc.Client](fetcher, handler, rpcClients, blockpoller.WithStoringState[*rpc.Client](stateDir), blockpoller.WithLogger[*rpc.Client](logger))
 

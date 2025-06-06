@@ -79,7 +79,7 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				continue
 			}
 
-			receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, client)
+			receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, client, 20)
 			if err != nil {
 				delay(fmt.Errorf("fetching receipts for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err))
 				continue

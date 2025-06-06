@@ -25,14 +25,16 @@ type BlockFetcher struct {
 	fetchInterval            time.Duration
 	toEthBlock               ToEthBlock
 	lastFetchAt              time.Time
+	parallelTrxWorkers       int
 	logger                   *zap.Logger
 }
 
-func NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval time.Duration, toEthBlock ToEthBlock, logger *zap.Logger) *BlockFetcher {
+func NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval time.Duration, parallelTrxWorkers int, toEthBlock ToEthBlock, logger *zap.Logger) *BlockFetcher {
 	return &BlockFetcher{
 		latestBlockRetryInterval: latestBlockRetryInterval,
 		toEthBlock:               toEthBlock,
 		fetchInterval:            intervalBetweenFetch,
+		parallelTrxWorkers:       parallelTrxWorkers,
 		logger:                   logger,
 	}
 }
@@ -68,7 +70,7 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 		return nil, fmt.Errorf("fetching block %d: %w", blockNum, err)
 	}
 
-	receipts, err := FetchReceipts(ctx, rpcBlock, rpcClient)
+	receipts, err := FetchReceipts(ctx, rpcBlock, rpcClient, f.parallelTrxWorkers)
 	if err != nil {
 		return nil, fmt.Errorf("fetching receipts for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
 	}
@@ -76,10 +78,6 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 	f.logger.Debug("fetched receipts", zap.Int("count", len(receipts)))
 
 	f.lastFetchAt = time.Now()
-
-	if err != nil {
-		return nil, fmt.Errorf("fetching logs for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
-	}
 
 	ethBlock, _ := f.toEthBlock(rpcBlock, receipts, f.logger)
 	anyBlock, err := anypb.New(ethBlock)
@@ -98,11 +96,11 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 	}, nil
 }
 
-func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (out map[string]*rpc.TransactionReceipt, err error) {
+func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int) (out map[string]*rpc.TransactionReceipt, err error) {
 	out = make(map[string]*rpc.TransactionReceipt)
 	lock := sync.Mutex{}
 
-	eg := llerrgroup.New(10)
+	eg := llerrgroup.New(parallelTrxWorkers)
 	for _, tx := range block.Transactions.Transactions {
 		if eg.Stop() {
 			continue // short-circuit the loop if we got an error
@@ -110,7 +108,7 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (o
 		hash := tx.Hash
 		eg.Go(func() error {
 			var receipt *rpc.TransactionReceipt
-			err := derr.RetryContext(ctx, 10, func(ctx context.Context) error {
+			err := derr.RetryContext(ctx, 5, func(ctx context.Context) error {
 				r, err := client.TransactionReceipt(ctx, hash)
 				if err != nil {
 					return err

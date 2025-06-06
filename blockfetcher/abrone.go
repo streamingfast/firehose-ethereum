@@ -15,8 +15,8 @@ type ArbOneBlockFetcher struct {
 	fetcher *BlockFetcher
 }
 
-func NewArbOneBlockFetcher(intervalBetweenFetch time.Duration, latestBlockRetryInterval time.Duration, logger *zap.Logger) *OptimismBlockFetcher {
-	fetcher := NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval, block.RpcToEthBlock, logger)
+func NewArbOneBlockFetcher(intervalBetweenFetch time.Duration, latestBlockRetryInterval time.Duration, parallelTransactionFetch int, logger *zap.Logger) *OptimismBlockFetcher {
+	fetcher := NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval, parallelTransactionFetch, block.RpcToEthBlock, logger)
 	return &OptimismBlockFetcher{
 		fetcher: fetcher,
 	}
