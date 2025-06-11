@@ -24,8 +24,29 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	if ethBlock.Header.TotalDifficulty != nil {
 		ethBlock.Header.TotalDifficulty = nil
 	}
+	var hasLogBloom bool
+	for _, byte := range ethBlock.Header.LogsBloom {
+		if byte != '0' {
+			hasLogBloom = true
+			break
+		}
+	}
+	if !hasLogBloom {
+		ethBlock.Header.LogsBloom = nil
+	}
 
 	for _, tx := range ethBlock.TransactionTraces {
+		var hasLogBloom bool
+		for _, byte := range tx.Receipt.LogsBloom {
+			if byte != '0' {
+				hasLogBloom = true
+				break
+			}
+		}
+		if !hasLogBloom {
+			tx.Receipt.LogsBloom = nil
+		}
+		tx.Receipt.LogsBloom = nil
 		for _, call := range tx.Calls {
 			if call.FailureReason != "" {
 				call.FailureReason = "<error replaced for comparison>"
