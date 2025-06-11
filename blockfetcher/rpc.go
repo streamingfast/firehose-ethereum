@@ -53,7 +53,8 @@ func (f *BlockFetcher) IsBlockAvailable(blockNum uint64) bool {
 	return blockNum <= f.latest
 }
 
-func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (block *pbbstream.Block, err error) {
+func (f *BlockFetcher) FetchPBEth(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (block *pbeth.Block, err error) {
+
 	f.logger.Debug("fetching block", zap.Uint64("block_num", blockNum))
 	for f.latest < blockNum {
 		f.latest, err = rpcClient.LatestBlockNum(ctx)
@@ -101,6 +102,15 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 	f.lastFetchAt = time.Now()
 
 	ethBlock, _ := f.toEthBlock(rpcBlock, receipts, logs, f.logger)
+	return ethBlock, nil
+}
+
+func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (block *pbbstream.Block, err error) {
+	ethBlock, err := f.FetchPBEth(ctx, rpcClient, blockNum)
+	if err != nil {
+		return nil, err
+	}
+
 	anyBlock, err := anypb.New(ethBlock)
 	if err != nil {
 		return nil, fmt.Errorf("create any block: %w", err)
