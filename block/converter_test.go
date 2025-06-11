@@ -46,7 +46,7 @@ func TestConvertTrx(t *testing.T) {
 				Logs: test.logs,
 			}
 
-			out := convertTrx(in, nil, ordinal, receipt)
+			out := convertTrx(in, nil, ordinal, receipt, nil)
 
 			i := test.beginOrdinal
 			assert.Equal(t, i, out.BeginOrdinal)
