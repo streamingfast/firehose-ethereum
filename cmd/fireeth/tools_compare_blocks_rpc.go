@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/streamingfast/firehose-ethereum/blockfetcher"
 
@@ -65,6 +66,7 @@ func newCompareBlocksRPCCmd(logger *zap.Logger) *cobra.Command {
 	`))
 	cmd.Flags().BoolP("plaintext", "p", false, "Use plaintext connection to Firehose")
 	cmd.Flags().BoolP("insecure", "k", false, "Use SSL connection to Firehose but skip SSL certificate validation")
+	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
 
 	cmd.Flags().StringP("api-token-env-var", "a", "FIREHOSE_API_TOKEN", "Look for a JWT in this environment variable to authenticate against endpoint")
 
@@ -77,7 +79,18 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 
 		firehoseEndpoint := args[0]
 		rpcEndpoint := args[1]
-		cli := rpc.NewClient(rpcEndpoint)
+
+		var opts []rpc.Option
+		for _, headerStr := range sflags.MustGetStringSlice(cmd, "headers") {
+			parts := strings.SplitN(headerStr, ":", 2)
+			if len(parts) == 2 {
+				key := strings.TrimSpace(parts[0])
+				value := strings.TrimSpace(parts[1])
+				opts = append(opts, rpc.WithHttpHeader(key, value))
+			}
+		}
+
+		cli := rpc.NewClient(rpcEndpoint, opts...)
 		start, err := strconv.ParseInt(args[2], 10, 64)
 		if err != nil {
 			return fmt.Errorf("parsing start block num: %w", err)
