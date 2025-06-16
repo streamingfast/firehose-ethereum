@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.11.13
+
+* This release is a hotfix for a thread leak in substreams leading to a slow memory leak.
+
 ## v2.11.12
 
 ### Substreams improvements v1.15.8
