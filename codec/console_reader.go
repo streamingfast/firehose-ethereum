@@ -40,7 +40,7 @@ import (
 )
 
 // ConsoleReader is what reads the `geth` output directly. It builds
-// up some LogEntry objects. See `LogReader to read those entries .
+// up some LogEntry objects. See `LogReader` to read those entries .
 type ConsoleReader struct {
 	lines chan string
 	close func()
