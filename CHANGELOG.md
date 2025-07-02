@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Substreams
+
+* Return 'processed blocks' counter to client at the end of the request
+* Progress notifications will only be sent every 500ms for the first minute, then reduce rate up to every 5 seconds (can be overridden per request)
+* Added `dev_output_modules` to protobuf request (if present, in dev mode, only send the output of the modules listed)
+* Added `progress_messages_interval_ms` to protobuf request (if present, overrides the rate of progress messages to that many milliseconds)
+
 ## v2.11.13
 
 * This release is a hotfix for a thread leak in substreams leading to a slow memory leak.
