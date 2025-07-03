@@ -21,3 +21,26 @@ message RpcResponse {
   bytes raw = 1;
   bool failed = 2;
 }
+
+message RpcGetBalanceRequest {
+  bytes    address = 1;
+  BlockID  block   = 2;
+}
+
+message RpcGetBalanceResponse {
+  bytes    balance = 1;
+}
+
+
+message RpcGetBalanceResponse {
+  bytes    balance = 1;
+  bool     failed  = 2;
+}
+
+message RpcGetBalanceRequests {
+  repeated RpcGetBalanceRequest requests = 1;
+}
+
+message RpcGetBalanceResponses {
+  repeated RpcGetBalanceResponse responses = 1;
+}

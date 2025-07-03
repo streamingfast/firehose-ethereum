@@ -1,8 +1,8 @@
 module github.com/streamingfast/firehose-ethereum
 
-go 1.24
+go 1.24.2
 
-toolchain go1.24.2
+toolchain go1.24.3
 
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
@@ -22,7 +22,7 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20250424204306-678ec20cedec
 	github.com/streamingfast/derr v0.0.0-20250321151415-6b4fbbcb1bb5
 	github.com/streamingfast/dmetrics v0.0.0-20250425183830-ffcef0cc9f87
-	github.com/streamingfast/dstore v0.1.1-0.20250217165048-d508dcc6b33e
+	github.com/streamingfast/dstore v0.1.1-0.20250609173504-95368d3441ee
 	github.com/streamingfast/eth-go v0.0.0-20250314142510-f5d8aa2a99e3
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
 	github.com/streamingfast/firehose-core v1.9.9-0.20250430173700-18bb86fb33a8
@@ -31,12 +31,12 @@ require (
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.15.6-0.20250512141755-e7583779f975
+	github.com/streamingfast/substreams v1.15.5
 	github.com/stretchr/testify v1.10.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
 	go.uber.org/multierr v1.10.0
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
 )
@@ -81,6 +81,7 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/bufbuild/protocompile v0.4.0 // indirect
 	github.com/bytecodealliance/wasmtime-go/v30 v30.0.0 // indirect
+	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
@@ -146,6 +147,7 @@ require (
 	github.com/openzipkin/zipkin-go v0.4.2 // indirect
 	github.com/paulbellamy/ratecounter v0.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
+	github.com/pinax-network/graph-networks-libs/packages/golang v0.6.3 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.16.0 // indirect
@@ -170,6 +172,7 @@ require (
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20241101155221-489f5a9d9139 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
+	github.com/streamingfast/firehose-networks v0.1.0 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/streamingfast/payment-gateway v0.0.0-20240426151444-581e930c76e2 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20240430173521-888827872b90 // indirect
@@ -238,3 +241,7 @@ replace (
 )
 
 retract v1.4.5 //included private repositories
+
+replace github.com/streamingfast/substreams => /home/ulysse/Documents/SF/substreams
+
+replace rogchap.com/v8go => /home/ulysse/Documents/SF/v8go
