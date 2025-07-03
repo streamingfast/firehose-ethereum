@@ -74,7 +74,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				which execute any bash script and offers more flexibility.
 			`)+"\n")
 
-			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
+			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's and 'eth_get_balance's")
 			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")
 		},
 
@@ -96,7 +96,8 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 
 			rpcData := fmt.Sprintf("%d,%s", rpcGasLimit, strings.Join(rpcEndpoints, ","))
 			return ethss.NewRPCExtensioner(map[string]string{
-				"rpc_eth_call": rpcData,
+				"rpc_eth_call":        rpcData,
+				"rpc_eth_get_balance": rpcData,
 			}), nil
 		},
 
