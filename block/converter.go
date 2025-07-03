@@ -14,8 +14,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (*pbeth.Block, map[string]bool) {
-	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, receipts, logger)
+func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logs map[string][]eth.Log, logger *zap.Logger) (*pbeth.Block, map[string]bool) {
+	trx, hashesWithoutTo := toFirehoseTraces(in.Transactions, receipts, logs, logger)
 
 	var blobGasUsed *uint64
 	if in.BlobGasUsed != nil {
@@ -115,7 +115,7 @@ func (c *counter) next() uint64 {
 	return prev
 }
 
-func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, receipt *rpc.TransactionReceipt) *pbeth.TransactionTrace {
+func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, receipt *rpc.TransactionReceipt, logs []eth.Log) *pbeth.TransactionTrace {
 	var out *pbeth.TransactionTrace
 
 	out = &pbeth.TransactionTrace{
@@ -142,7 +142,7 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 	}
 
 	var fhReceipt *pbeth.TransactionReceipt
-	fhReceipt = toFirehoseReceipts(receipt, ordinal) // each log will increment the ordinal by 1
+	fhReceipt = toFirehoseReceipts(receipt, ordinal, logs) // each log will increment the ordinal by 1
 	out.Receipt = fhReceipt
 
 	if receipt != nil {
@@ -168,7 +168,7 @@ func toFirehoseReceiptStatus(in uint64) pbeth.TransactionTraceStatus {
 	}
 }
 
-func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (traces []*pbeth.TransactionTrace, hashesWithoutTo map[string]bool) {
+func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.TransactionReceipt, logs map[string][]eth.Log, logger *zap.Logger) (traces []*pbeth.TransactionTrace, hashesWithoutTo map[string]bool) {
 	ordinal := &counter{}
 
 	transactions, _ := in.Receipts() //todo: this is confusing, Why is it not call Transactions?
@@ -185,7 +185,7 @@ func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.Transa
 		}
 
 		receipt := receipts[transactions[i].Hash.Pretty()]
-		pbTrace := convertTrx(&transactions[i], toBytes, ordinal, receipt)
+		pbTrace := convertTrx(&transactions[i], toBytes, ordinal, receipt, logs[txHash])
 		if !loggedUnknownReceiptStatus && pbTrace.Status == pbeth.TransactionTraceStatus_UNKNOWN {
 			logger.Warn("receipt status is nil, firehose transaction status will be 'Unknown' (if this is pre-byzantium, you should try using an Erigon endpoint to get the status)", zap.String("tx_hash", hex.EncodeToString(pbTrace.Hash)))
 			loggedUnknownReceiptStatus = true
@@ -196,9 +196,11 @@ func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.Transa
 	return out, hashesWithoutTo
 }
 
-func toFirehoseReceipts(receipt *rpc.TransactionReceipt, ordinal *counter) *pbeth.TransactionReceipt {
+func toFirehoseReceipts(receipt *rpc.TransactionReceipt, ordinal *counter, logs []eth.Log) *pbeth.TransactionReceipt {
 	if receipt == nil {
-		return &pbeth.TransactionReceipt{}
+		return &pbeth.TransactionReceipt{
+			Logs: ethLogtoFirehoseLogs(logs, ordinal),
+		}
 	}
 
 	var logBloom []byte
@@ -212,6 +214,21 @@ func toFirehoseReceipts(receipt *rpc.TransactionReceipt, ordinal *counter) *pbet
 		LogsBloom:         logBloom,
 		Logs:              toFirehoseLogs(receipt.Logs, ordinal),
 	}
+}
+
+func ethLogtoFirehoseLogs(logs []eth.Log, ordinal *counter) []*pbeth.Log {
+	out := make([]*pbeth.Log, len(logs))
+	for i, log := range logs {
+		out[i] = &pbeth.Log{
+			Address:    log.Address,
+			Topics:     log.Topics,
+			Data:       log.Data,
+			BlockIndex: log.BlockIndex,
+			Ordinal:    ordinal.next(),
+			Index:      log.Index,
+		}
+	}
+	return out
 }
 
 func toFirehoseLogs(logs []*rpc.LogEntry, ordinal *counter) []*pbeth.Log {

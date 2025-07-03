@@ -1,6 +1,6 @@
 ARG COREVERSION="latest"
 
-FROM golang:1.24.0-bookworm AS build
+FROM golang:1.24.2-bookworm AS build
 WORKDIR /app
 
 COPY go.mod go.sum ./

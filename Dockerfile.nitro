@@ -2,7 +2,7 @@ ARG CHAIN_DOCKER_VERSION="latest"
 
 ####
 
-FROM golang:1.23.4-bookworm as builder
+FROM golang:1.24.2-bookworm AS builder
 WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
@@ -31,6 +31,9 @@ COPY --from=builder /work/fireeth /app/fireeth
 COPY --from=chain /usr/local/bin/nitro /app/nitro
 COPY --from=chain /home/user/target/machines/. /app/machines/
 COPY --from=chain /home/user/nitro-legacy/machines/. /app/legacy-machines/
+# some nitro version does not honor the '--validation.wasm.allowed-wasm-module-roots' flag, so we copy it to root too, unfortunately
+COPY --from=chain /home/user/target/machines/. /machines/
+COPY --from=chain /home/user/nitro-legacy/machines/. /legacy-machines/
 
 COPY tools/fireeth/motd_node_manager /etc/motd
 COPY tools/fireeth/scripts/. /usr/local/bin/

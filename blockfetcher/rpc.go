@@ -10,6 +10,7 @@ import (
 	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/derr"
+	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
@@ -17,31 +18,43 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type ToEthBlock func(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logger *zap.Logger) (*pbeth.Block, map[string]bool)
+// receipts and logs are mutually exclusive
+type ToEthBlock func(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, logs map[string][]eth.Log, logger *zap.Logger) (*pbeth.Block, map[string]bool)
 
 type BlockFetcher struct {
-	latest                   uint64
-	latestBlockRetryInterval time.Duration
-	fetchInterval            time.Duration
-	toEthBlock               ToEthBlock
-	lastFetchAt              time.Time
-	logger                   *zap.Logger
+	latest                     uint64
+	latestBlockRetryInterval   time.Duration
+	fetchInterval              time.Duration
+	toEthBlock                 ToEthBlock
+	lastFetchAt                time.Time
+	parallelTrxWorkers         int
+	allowEmptyReceiptsOnBlock0 bool
+	skipReceipts               bool
+	logger                     *zap.Logger
 }
 
-func NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval time.Duration, toEthBlock ToEthBlock, logger *zap.Logger) *BlockFetcher {
+func NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval time.Duration, parallelTrxWorkers int, toEthBlock ToEthBlock, logger *zap.Logger) *BlockFetcher {
 	return &BlockFetcher{
 		latestBlockRetryInterval: latestBlockRetryInterval,
 		toEthBlock:               toEthBlock,
 		fetchInterval:            intervalBetweenFetch,
+		parallelTrxWorkers:       parallelTrxWorkers,
 		logger:                   logger,
 	}
+}
+
+// SkipReceipts sets whether to skip fetching receipts for transactions. When true, the Logs will be fetched directly instead, using a single RPC call.
+// Some transaction fields will be missing by using this technique, like gasUsed, cumulativeGasUsed, status, log Index...
+func (f *BlockFetcher) SkipReceipts(skip bool) {
+	f.skipReceipts = skip
 }
 
 func (f *BlockFetcher) IsBlockAvailable(blockNum uint64) bool {
 	return blockNum <= f.latest
 }
 
-func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (block *pbbstream.Block, err error) {
+func (f *BlockFetcher) FetchPBEth(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (block *pbeth.Block, err error) {
+
 	f.logger.Debug("fetching block", zap.Uint64("block_num", blockNum))
 	for f.latest < blockNum {
 		f.latest, err = rpcClient.LatestBlockNum(ctx)
@@ -68,20 +81,36 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 		return nil, fmt.Errorf("fetching block %d: %w", blockNum, err)
 	}
 
-	receipts, err := FetchReceipts(ctx, rpcBlock, rpcClient)
-	if err != nil {
-		return nil, fmt.Errorf("fetching receipts for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
+	blockHash := eth.Bytes(rpcBlock.Hash.Bytes())
+	var receipts map[string]*rpc.TransactionReceipt
+	var logs map[string][]eth.Log
+	if f.skipReceipts {
+		logs, err = FetchLogs(ctx, blockHash, rpcClient)
+		if err != nil {
+			return nil, fmt.Errorf("fetching logs for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
+		}
+
+	} else {
+		receipts, err = FetchReceipts(ctx, rpcBlock, rpcClient, f.parallelTrxWorkers, f.allowEmptyReceiptsOnBlock0)
+		if err != nil {
+			return nil, fmt.Errorf("fetching receipts for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
+		}
 	}
 
 	f.logger.Debug("fetched receipts", zap.Int("count", len(receipts)))
 
 	f.lastFetchAt = time.Now()
 
+	ethBlock, _ := f.toEthBlock(rpcBlock, receipts, logs, f.logger)
+	return ethBlock, nil
+}
+
+func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (block *pbbstream.Block, err error) {
+	ethBlock, err := f.FetchPBEth(ctx, rpcClient, blockNum)
 	if err != nil {
-		return nil, fmt.Errorf("fetching logs for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err)
+		return nil, err
 	}
 
-	ethBlock, _ := f.toEthBlock(rpcBlock, receipts, f.logger)
 	anyBlock, err := anypb.New(ethBlock)
 	if err != nil {
 		return nil, fmt.Errorf("create any block: %w", err)
@@ -98,11 +127,32 @@ func (f *BlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNu
 	}, nil
 }
 
-func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (out map[string]*rpc.TransactionReceipt, err error) {
+func FetchLogs(ctx context.Context, blockHash eth.Bytes, client *rpc.Client) (out map[string][]eth.Log, err error) {
+	r, err := client.Logs(ctx, rpc.LogsParams{
+		BlockHash: blockHash,
+	})
+	if err != nil {
+		return nil, err
+	}
+	out = make(map[string][]eth.Log)
+	for _, log := range r {
+		trxHash := log.TransactionHash.String()
+		_, ok := out[trxHash]
+		if !ok {
+			out[trxHash] = []eth.Log{}
+		}
+		converted := log.ToLog()
+		converted.Index = converted.BlockIndex // mimic the behavior with using receipts
+		out[trxHash] = append(out[trxHash], converted)
+	}
+	return out, nil
+}
+
+func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int, allowEmptyReceiptsOnBlock0 bool) (out map[string]*rpc.TransactionReceipt, err error) {
 	out = make(map[string]*rpc.TransactionReceipt)
 	lock := sync.Mutex{}
 
-	eg := llerrgroup.New(10)
+	eg := llerrgroup.New(parallelTrxWorkers)
 	for _, tx := range block.Transactions.Transactions {
 		if eg.Stop() {
 			continue // short-circuit the loop if we got an error
@@ -110,13 +160,23 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client) (o
 		hash := tx.Hash
 		eg.Go(func() error {
 			var receipt *rpc.TransactionReceipt
-			err := derr.RetryContext(ctx, 10, func(ctx context.Context) error {
+			err := derr.RetryContext(ctx, 5, func(ctx context.Context) error {
 				r, err := client.TransactionReceipt(ctx, hash)
 				if err != nil {
 					return err
 				}
 				if r == nil {
-					return fmt.Errorf("receipt is nil")
+					if block.Number == 0 && allowEmptyReceiptsOnBlock0 {
+						r = &rpc.TransactionReceipt{
+							TransactionHash: hash,
+							BlockHash:       block.Hash,
+							BlockNumber:     block.Number,
+							From:            tx.From,
+							To:              tx.To,
+						}
+					} else {
+						return derr.NewFatalError(fmt.Errorf("receipt is nil"))
+					}
 				}
 
 				receipt = r

@@ -79,13 +79,13 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				continue
 			}
 
-			receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, client)
+			receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, client, 20, false)
 			if err != nil {
 				delay(fmt.Errorf("fetching receipts for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err))
 				continue
 			}
 
-			ethBlock, _ := block.RpcToEthBlock(rpcBlock, receipts, logger)
+			ethBlock, _ := block.RpcToEthBlock(rpcBlock, receipts, nil, logger)
 			cnt, err := proto.Marshal(ethBlock)
 			if err != nil {
 				return fmt.Errorf("failed to proto  marshal pb sol block: %w", err)

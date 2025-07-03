@@ -2,8 +2,6 @@ module github.com/streamingfast/firehose-ethereum
 
 go 1.24.2
 
-toolchain go1.24.3
-
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
 	github.com/abourget/llerrgroup v0.2.0
@@ -23,15 +21,15 @@ require (
 	github.com/streamingfast/derr v0.0.0-20250321151415-6b4fbbcb1bb5
 	github.com/streamingfast/dmetrics v0.0.0-20250425183830-ffcef0cc9f87
 	github.com/streamingfast/dstore v0.1.1-0.20250609173504-95368d3441ee
-	github.com/streamingfast/eth-go v0.0.0-20250314142510-f5d8aa2a99e3
+	github.com/streamingfast/eth-go v0.0.0-20250611141046-926b93a01cbb
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.9.9-0.20250430173700-18bb86fb33a8
+	github.com/streamingfast/firehose-core v1.9.13-0.20250702202606-6aab7a81d2fb
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250507011806-81dc82780367
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.15.5
+	github.com/streamingfast/substreams v1.15.9-0.20250702201324-b5533b370559
 	github.com/stretchr/testify v1.10.0
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -170,11 +168,11 @@ require (
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20250423172640-223250ed2391 // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
-	github.com/streamingfast/dmetering v0.0.0-20241101155221-489f5a9d9139 // indirect
+	github.com/streamingfast/dmetering v0.0.0-20250606124734-944cf3e4959e // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/firehose-networks v0.1.0 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
-	github.com/streamingfast/payment-gateway v0.0.0-20240426151444-581e930c76e2 // indirect
+	github.com/streamingfast/payment-gateway v0.0.0-20250606152645-3614ea533458 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20240430173521-888827872b90 // indirect
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
 	github.com/streamingfast/worker-pool-protocol v0.0.0-20250218145136-4ad271e36e39 // indirect
@@ -241,7 +239,3 @@ replace (
 )
 
 retract v1.4.5 //included private repositories
-
-replace github.com/streamingfast/substreams => /home/ulysse/Documents/SF/substreams
-
-replace rogchap.com/v8go => /home/ulysse/Documents/SF/v8go
