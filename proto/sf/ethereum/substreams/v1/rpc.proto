@@ -24,13 +24,8 @@ message RpcResponse {
 
 message RpcGetBalanceRequest {
   bytes    address = 1;
-  BlockID  block   = 2;
+  string  block   = 2;
 }
-
-message RpcGetBalanceResponse {
-  bytes    balance = 1;
-}
-
 
 message RpcGetBalanceResponse {
   bytes    balance = 1;
