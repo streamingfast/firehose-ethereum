@@ -6,8 +6,11 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+* [OPERATORS] Tier2 servers must be upgraded BEFORE tier1 servers
+
 ### Substreams
 
+* tier2 servers will now stream outputs for the 'first segment', to speed up time to first block
 * Return 'processed blocks' counter to client at the end of the request
 * Progress notifications will only be sent every 500ms for the first minute, then reduce rate up to every 5 seconds (can be overridden per request)
 * Added `dev_output_modules` to protobuf request (if present, in dev mode, only send the output of the modules listed)
