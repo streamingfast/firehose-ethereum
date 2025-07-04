@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/proto/sf/ethereum/substreams/v1"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
@@ -212,10 +211,10 @@ func (e *RPCEngine) ethGetBalance(
 
 	rpcReqs := make([]*rpc.RPCRequest, len(reqMsg.Requests))
 	for i, r := range reqMsg.Requests {
-		addrHex := eth.Hex(r.Address).String()
+		addrHex := "0x" + hex.EncodeToString(r.Address)
 		rpcReqs[i] = &rpc.RPCRequest{
 			Method: "eth_getBalance",
-			Params: []interface{}{addrHex, rpc.BlockHash(clock.Id)},
+			Params: []interface{}{addrHex, clock.Id},
 		}
 	}
 
@@ -247,6 +246,9 @@ func (e *RPCEngine) rpcDoWithRetry(
 	var attempt int
 
 	for {
+		if len(reqs) == 0 {
+			return &pbethss.RpcGetBalanceResponses{}, true, nil
+		}
 		time.Sleep(delay)
 		attempt++
 		delay = minDuration(time.Duration(attempt*500)*time.Millisecond, 10*time.Second)
@@ -305,34 +307,6 @@ func (e *RPCEngine) rpcDoWithRetry(
 
 		e.rollRpcClient()
 	}
-}
-
-func toProtoGetBalanceResponses(in []*rpc.RPCResponse) *pbethss.RpcGetBalanceResponses {
-	out := &pbethss.RpcGetBalanceResponses{}
-
-	for _, r := range in {
-		resp := &pbethss.RpcGetBalanceResponse{
-			Failed: r.Err != nil || r.Empty(),
-		}
-
-		if r.Err == nil && !r.Empty() {
-			hexStr := r.Content
-			if strings.HasPrefix(hexStr, "0x") {
-				hexStr = hexStr[2:]
-			}
-
-			raw, err := hex.DecodeString(hexStr)
-			if err != nil {
-				resp.Failed = true
-			} else {
-				resp.Balance = raw
-			}
-		}
-
-		out.Responses = append(out.Responses, resp)
-	}
-
-	return out
 }
 
 type RPCCall struct {
