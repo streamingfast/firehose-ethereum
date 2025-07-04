@@ -4,12 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
-
-* [OPERATORS] Tier2 servers must be upgraded BEFORE tier1 servers
+## v2.12.0
 
 ### Substreams
 
+* [OPERATORS] Tier2 servers must be upgraded BEFORE tier1 servers
 * tier2 servers will now stream outputs for the 'first segment', to speed up time to first block
 * Return 'processed blocks' counter to client at the end of the request
 * Progress notifications will only be sent every 500ms for the first minute, then reduce rate up to every 5 seconds (can be overridden per request)
