@@ -10,8 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/streamingfast/eth-go"
 	"github.com/streamingfast/eth-go/rpc"
-	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
+	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/proto/sf/ethereum/substreams/v1"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/streamingfast/substreams/wasm"
 	"go.uber.org/multierr"
@@ -34,19 +35,26 @@ func (e *RPCExtensioner) Params() map[string]string {
 }
 
 func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[string]wasm.WASMExtension, error) {
-	// set default values from flags ????
-	switch len(in) {
-	case 0:
-		return nil, nil
-	case 1:
-		break
-	default:
-		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' is implemented)", in)
+	// Accept either or both rpc_eth_call and rpc_eth_get_balance, must match if both provided
+	rpcInfoCall, okCall := in["rpc_eth_call"]
+	rpcInfoBal, okBal := in["rpc_eth_get_balance"]
+	if !okCall && !okBal {
+		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' & 'rpc_eth_get_balance' are implemented)", in)
 	}
 
-	rpcInfo, found := in["rpc_eth_call"]
-	if !found {
-		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' is implemented)", in)
+	var rpcInfo string
+	if okCall && okBal {
+		if rpcInfoCall != rpcInfoBal {
+			return nil, fmt.Errorf(
+				"mismatched configs for rpc_eth_call (%q) vs rpc_eth_get_balance (%q)",
+				rpcInfoCall, rpcInfoBal,
+			)
+		}
+		rpcInfo = rpcInfoCall
+	} else if okCall {
+		rpcInfo = rpcInfoCall
+	} else {
+		rpcInfo = rpcInfoBal
 	}
 
 	parts := strings.Split(rpcInfo, ",")
@@ -70,10 +78,17 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 	if err != nil {
 		return nil, fmt.Errorf("creating new RPC engine: %w", err)
 	}
+
+	extMap := make(map[string]wasm.WASMExtension)
+	if okCall {
+		extMap["eth_call"] = eng.ETHCall
+	}
+	if okBal {
+		extMap["eth_get_balance"] = eng.ETHGetBalance
+	}
+
 	return map[string]map[string]wasm.WASMExtension{
-		"rpc": {
-			"eth_call": eng.ETHCall,
-		},
+		"rpc": extMap,
 	}, nil
 }
 
@@ -133,7 +148,8 @@ func (e *RPCEngine) rollRpcClient() {
 func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
 	return map[string]map[string]wasm.WASMExtension{
 		"rpc": {
-			"eth_call": e.ETHCall,
+			"eth_call":        e.ETHCall,
+			"eth_get_balance": e.ETHGetBalance,
 		},
 	}
 }
@@ -170,6 +186,153 @@ func (e *RPCEngine) ethCall(ctx context.Context, retryCount int, traceID string,
 	}
 
 	return cnt, deterministic, nil
+}
+
+func (e *RPCEngine) ETHGetBalance(ctx context.Context, traceID string, clock *pbsubstreams.Clock, in []byte) ([]byte, error) {
+	out, _, err := e.ethGetBalance(ctx, -1, traceID, clock, in)
+	return out, err
+}
+
+func (e *RPCEngine) ethGetBalance(
+	ctx context.Context,
+	retryCount int,
+	traceID string,
+	clock *pbsubstreams.Clock,
+	in []byte,
+) (outBytes []byte, deterministic bool, err error) {
+
+	reqMsg := &pbethss.RpcGetBalanceRequests{}
+	if err := proto.Unmarshal(in, reqMsg); err != nil {
+		return nil, false, fmt.Errorf("unmarshal get_balance proto: %w", err)
+	}
+
+	if len(reqMsg.Requests) == 0 {
+		return []byte{}, true, nil
+	}
+
+	rpcReqs := make([]*rpc.RPCRequest, len(reqMsg.Requests))
+	for i, r := range reqMsg.Requests {
+		addrHex := eth.Hex(r.Address).String()
+		rpcReqs[i] = &rpc.RPCRequest{
+			Method: "eth_getBalance",
+			Params: []interface{}{addrHex, rpc.BlockHash(clock.Id)},
+		}
+	}
+
+	responses, det, err := e.rpcDoWithRetry(ctx, traceID, retryCount, clock.Id, rpcReqs)
+	if err != nil {
+		return nil, det, err
+	}
+
+	outMsg := &pbethss.RpcGetBalanceResponses{}
+	for _, resp := range responses.Responses {
+		outMsg.Responses = append(outMsg.Responses, &pbethss.RpcGetBalanceResponse{
+			Balance: resp.Balance,
+			Failed:  resp.Failed,
+		})
+	}
+	outBytes, err = proto.Marshal(outMsg)
+	return outBytes, det, err
+}
+
+// rpcGetBalanceWithRetry does exactly what rpcCalls does for eth_call, but for eth_getBalance. It returns a fully-populated *RpcGetBalanceResponses plus the deterministic flag.
+func (e *RPCEngine) rpcDoWithRetry(
+	ctx context.Context,
+	traceID string,
+	retryCount int,
+	blockHash string,
+	reqs []*rpc.RPCRequest,
+) (*pbethss.RpcGetBalanceResponses, bool, error) {
+	var delay time.Duration
+	var attempt int
+
+	for {
+		time.Sleep(delay)
+		attempt++
+		delay = minDuration(time.Duration(attempt*500)*time.Millisecond, 10*time.Second)
+
+		client := e.rpcClient()
+		rpcResps, err := client.DoRequests(ctx, reqs)
+		if err != nil {
+
+			if ctx.Err() != nil {
+				zap.L().Info("stopping eth_getBalance calls, context canceled", zap.String("trace_id", traceID))
+				return nil, false, err
+			}
+			if retryCount == 0 || (retryCount > 0 && attempt > retryCount) {
+				return nil, false, err
+			}
+			e.rollRpcClient()
+			zap.L().Warn("retrying eth_getBalance on RPC error",
+				zap.String("trace_id", traceID),
+				zap.Error(err),
+				zap.Stringer("endpoint", client),
+			)
+			continue
+		}
+
+		out := &pbethss.RpcGetBalanceResponses{}
+		deterministic := true
+
+		for _, r := range rpcResps {
+
+			resp := &pbethss.RpcGetBalanceResponse{
+				Failed: r.Err != nil,
+			}
+			if r.Err == nil {
+				content := r.Content
+				if strings.HasPrefix(content, "0x") {
+					content = content[2:]
+				}
+				raw, hexErr := hex.DecodeString(content)
+				if hexErr != nil {
+					resp.Failed = true
+				} else {
+					resp.Balance = raw
+				}
+			}
+			out.Responses = append(out.Responses, resp)
+
+			if !r.Deterministic() {
+				deterministic = false
+				break
+			}
+		}
+
+		if retryCount == 0 || deterministic {
+			return out, deterministic, nil
+		}
+
+		e.rollRpcClient()
+	}
+}
+
+func toProtoGetBalanceResponses(in []*rpc.RPCResponse) *pbethss.RpcGetBalanceResponses {
+	out := &pbethss.RpcGetBalanceResponses{}
+
+	for _, r := range in {
+		resp := &pbethss.RpcGetBalanceResponse{
+			Failed: r.Err != nil || r.Empty(),
+		}
+
+		if r.Err == nil && !r.Empty() {
+			hexStr := r.Content
+			if strings.HasPrefix(hexStr, "0x") {
+				hexStr = hexStr[2:]
+			}
+
+			raw, err := hex.DecodeString(hexStr)
+			if err != nil {
+				resp.Failed = true
+			} else {
+				resp.Balance = raw
+			}
+		}
+
+		out.Responses = append(out.Responses, resp)
+	}
+
+	return out
 }
 
 type RPCCall struct {

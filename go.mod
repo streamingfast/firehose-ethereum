@@ -24,7 +24,7 @@ require (
 	github.com/streamingfast/eth-go v0.0.0-20250611141046-926b93a01cbb
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
 	github.com/streamingfast/firehose-core v1.9.13-0.20250702202606-6aab7a81d2fb
-	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250507011806-81dc82780367
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250704171446-d3afa9a0ad8c
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
@@ -239,3 +239,5 @@ replace (
 )
 
 retract v1.4.5 //included private repositories
+
+replace github.com/streamingfast/firehose-ethereum/types => ./types

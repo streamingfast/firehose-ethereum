@@ -74,13 +74,15 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				which execute any bash script and offers more flexibility.
 			`)+"\n")
 
-			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's and 'eth_get_balance's")
+			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
+			flags.String("substreams-rpc-get-balance-endpoint", "", "Endpoint to contact to satisfy Substreams 'eth_get_balance's")
 			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")
 		},
 
 		RegisterSubstreamsExtensions: func() (wasm.WASMExtensioner, error) {
 			rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit")
 			rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
+			balanceEndpoint := viper.GetString("substreams-rpc-get-balance-endpoint")
 
 			commaCheck := func(ss []string) bool {
 				for _, s := range ss {
@@ -92,6 +94,10 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			}
 			if commaCheck(rpcEndpoints) {
 				return nil, fmt.Errorf("rpc endpoints cannot contain commas")
+			}
+
+			if balanceEndpoint != "" && strings.Contains(balanceEndpoint, ",") {
+				return nil, fmt.Errorf("rpc balance endpoint cannot contain commas")
 			}
 
 			rpcData := fmt.Sprintf("%d,%s", rpcGasLimit, strings.Join(rpcEndpoints, ","))
