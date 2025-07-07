@@ -58,7 +58,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
 	}))
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
@@ -89,7 +89,7 @@ func TestRPCEngine_rpcCalls_noCallsInInput(t *testing.T) {
 		require.Fail(t, "The server should never been called")
 	}))
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
@@ -131,7 +131,7 @@ func TestRPCEngine_rpcCalls_retry(t *testing.T) {
 		}
 	}))
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
@@ -237,7 +237,7 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			}))
 			defer server.Close()
 
-			engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+			engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 			require.NoError(t, err)
 
 			traceID := "someTraceID"
@@ -279,7 +279,7 @@ func TestRPCEngine_ethGetBalance(t *testing.T) {
 	}))
 	defer server.Close()
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	reqProto := &pbethss.RpcGetBalanceRequests{
@@ -313,7 +313,7 @@ func TestRPCEngine_ethGetBalance_noRequests(t *testing.T) {
 	}))
 	defer server.Close()
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	// empty requests
@@ -339,7 +339,7 @@ func TestRPCEngine_ethGetBalance_retry(t *testing.T) {
 	}))
 	defer server.Close()
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	reqProto := &pbethss.RpcGetBalanceRequests{

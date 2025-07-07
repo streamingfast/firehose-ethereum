@@ -34,46 +34,52 @@ func (e *RPCExtensioner) Params() map[string]string {
 }
 
 func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[string]wasm.WASMExtension, error) {
-	// Accept either or both rpc_eth_call and rpc_eth_get_balance, must match if both provided
+	// Accept either or both rpc_eth_call and rpc_eth_get_balance
 	rpcInfoCall, okCall := in["rpc_eth_call"]
 	rpcInfoBal, okBal := in["rpc_eth_get_balance"]
 	if !okCall && !okBal {
 		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' & 'rpc_eth_get_balance' are implemented)", in)
 	}
 
-	var rpcInfo string
-	if okCall && okBal {
-		if rpcInfoCall != rpcInfoBal {
-			return nil, fmt.Errorf(
-				"mismatched configs for rpc_eth_call (%q) vs rpc_eth_get_balance (%q)",
-				rpcInfoCall, rpcInfoBal,
-			)
-		}
-		rpcInfo = rpcInfoCall
-	} else if okCall {
-		rpcInfo = rpcInfoCall
+	var partsGlobal []string
+	var gasLimit uint64 = 50_000_000 //default gas limit
+	if okCall {
+		partsGlobal = strings.Split(rpcInfoCall, ",")
 	} else {
-		rpcInfo = rpcInfoBal
+		partsGlobal = strings.Split(rpcInfoBal, ",")
 	}
 
-	parts := strings.Split(rpcInfo, ",")
-
-	var rpcURLs []string
-	var gasLimit uint64 = 50_000_000 //default gas limit
-	if len(parts) > 1 {
-		//  first one is gas limit
-		gasLimitString := parts[0]
+	if len(partsGlobal) > 1 {
+		gasLimitString := partsGlobal[0]
 		gasLimitRes, err := strconv.ParseUint(gasLimitString, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("parsing gas limit: %w", err)
 		}
 		gasLimit = gasLimitRes
-		rpcURLs = parts[1:]
-	} else {
-		rpcURLs = []string{rpcInfo}
 	}
 
-	eng, err := NewRPCEngine(rpcURLs, gasLimit)
+	var callURLs []string
+	var balURLs []string
+
+	if okCall {
+		parts := strings.Split(rpcInfoCall, ",")
+		if len(parts) > 1 {
+			callURLs = parts[1:]
+		} else {
+			callURLs = []string{rpcInfoCall}
+		}
+	}
+
+	if okBal {
+		parts := strings.Split(rpcInfoBal, ",")
+		if len(parts) > 1 {
+			balURLs = parts[1:]
+		} else {
+			balURLs = []string{rpcInfoBal}
+		}
+	}
+
+	eng, err := NewRPCEngine(callURLs, balURLs, gasLimit)
 	if err != nil {
 		return nil, fmt.Errorf("creating new RPC engine: %w", err)
 	}
@@ -94,15 +100,17 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 type RPCEngine struct {
 	gasLimit uint64
 
-	rpcClients            []*rpc.Client
-	currentRpcClientIndex int
+	callClients            []*rpc.Client
+	currentCallClientIndex int
 
-	endpoints []string
+	balanceClients            []*rpc.Client
+	currentBalanceClientIndex int
 }
 
-func NewRPCEngine(rpcEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
+func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
 	zlog.Debug("creating new Substreams RPC engine",
-		zap.Strings("rpc_endpoints", rpcEndpoints),
+		zap.Strings("call_endpoints", callEndpoints),
+		zap.Strings("get_balance_endpoints", balanceEndpoints),
 		zap.Uint64("gas_limit", gasLimit),
 	)
 
@@ -115,33 +123,51 @@ func NewRPCEngine(rpcEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
 		rpc.WithHttpClient(httpClient),
 	}
 
-	var rpcClients []*rpc.Client
-	for _, endpoint := range rpcEndpoints {
-		rpcClients = append(rpcClients, rpc.NewClient(endpoint, opts...))
+	var callClients []*rpc.Client
+	for _, endpoint := range callEndpoints {
+		callClients = append(callClients, rpc.NewClient(endpoint, opts...))
 	}
 
-	if len(rpcClients) == 1 {
+	var balanceClients []*rpc.Client
+	for _, endpoint := range balanceEndpoints {
+		balanceClients = append(balanceClients, rpc.NewClient(endpoint, opts...))
+	}
+
+	if len(callClients) == 1 {
 		zlog.Debug("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
 	}
-
+	if len(balanceClients) == 1 {
+		zlog.Debug("eth_get_balance balancing disabled (only 1 endpoint)")
+	}
 	return &RPCEngine{
-		rpcClients: rpcClients,
-		gasLimit:   gasLimit,
-		endpoints:  rpcEndpoints,
+		gasLimit:       gasLimit,
+		callClients:    callClients,
+		balanceClients: balanceClients,
 	}, nil
 }
 
-func (e *RPCEngine) rpcClient() *rpc.Client {
-	return e.rpcClients[e.currentRpcClientIndex]
+func (e *RPCEngine) callClient() *rpc.Client {
+	return e.callClients[e.currentCallClientIndex]
 }
 
-func (e *RPCEngine) rollRpcClient() {
-	if e.currentRpcClientIndex == len(e.rpcClients)-1 {
-		e.currentRpcClientIndex = 0
-		return
+func (e *RPCEngine) rollCallClient() {
+	if e.currentCallClientIndex == len(e.callClients)-1 {
+		e.currentCallClientIndex = 0
+	} else {
+		e.currentCallClientIndex++
 	}
+}
 
-	e.currentRpcClientIndex++
+func (e *RPCEngine) balanceClient() *rpc.Client {
+	return e.balanceClients[e.currentBalanceClientIndex]
+}
+
+func (e *RPCEngine) rollBalanceClient() {
+	if e.currentBalanceClientIndex == len(e.balanceClients)-1 {
+		e.currentBalanceClientIndex = 0
+	} else {
+		e.currentBalanceClientIndex++
+	}
 }
 
 func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
@@ -253,7 +279,7 @@ func (e *RPCEngine) rpcDoWithRetry(
 		attempt++
 		delay = minDuration(time.Duration(attempt*500)*time.Millisecond, 10*time.Second)
 
-		client := e.rpcClient()
+		client := e.balanceClient()
 		rpcResps, err := client.DoRequests(ctx, reqs)
 		if err != nil {
 
@@ -264,7 +290,7 @@ func (e *RPCEngine) rpcDoWithRetry(
 			if retryCount == 0 || (retryCount > 0 && attempt > retryCount) {
 				return nil, false, err
 			}
-			e.rollRpcClient()
+			e.rollBalanceClient()
 			zap.L().Warn("retrying eth_getBalance on RPC error",
 				zap.String("trace_id", traceID),
 				zap.Error(err),
@@ -305,7 +331,7 @@ func (e *RPCEngine) rpcDoWithRetry(
 			return out, deterministic, nil
 		}
 
-		e.rollRpcClient()
+		e.rollBalanceClient()
 	}
 }
 
@@ -365,7 +391,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		delay = minDuration(time.Duration(attemptNumber*500)*time.Millisecond, 10*time.Second)
 
 		// Kept here because later we roll it, but we still want to log the one that generated the error
-		client := e.rpcClient()
+		client := e.callClient()
 
 		lastRequestSince := time.Now()
 		out, err := client.DoRequests(ctx, reqs)
@@ -387,7 +413,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 				return nil, false, err
 			}
 
-			e.rollRpcClient()
+			e.rollCallClient()
 			zlog.Warn("retrying RPCCall on RPC error", zap.String("trace_id", traceID), zap.Error(err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
 			lastError = err
 			continue
@@ -416,7 +442,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		}
 
 		if !deterministicResp {
-			e.rollRpcClient()
+			e.rollCallClient()
 			continue
 		}
 
