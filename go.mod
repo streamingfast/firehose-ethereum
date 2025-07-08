@@ -21,7 +21,7 @@ require (
 	github.com/streamingfast/derr v0.0.0-20250321151415-6b4fbbcb1bb5
 	github.com/streamingfast/dmetrics v0.0.0-20250425183830-ffcef0cc9f87
 	github.com/streamingfast/dstore v0.1.1-0.20250609173504-95368d3441ee
-	github.com/streamingfast/eth-go v0.0.0-20250611141046-926b93a01cbb
+	github.com/streamingfast/eth-go v0.0.0-20250708154602-9bdf3066da2d
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
 	github.com/streamingfast/firehose-core v1.9.13-0.20250704171345-54a5c538d201
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250507011806-81dc82780367
@@ -76,7 +76,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.12.0 // indirect
 	github.com/blendle/zapdriver v1.3.2-0.20200203083823-9200777f8a3d // indirect
 	github.com/bobg/go-generics/v3 v3.5.0 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.3.5 // indirect
 	github.com/bufbuild/protocompile v0.4.0 // indirect
 	github.com/bytecodealliance/wasmtime-go/v30 v30.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
