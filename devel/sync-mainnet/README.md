@@ -39,7 +39,7 @@ Once downloaded, ensure it's available in your `PATH` environment variable.
 
 Once you have the consensus client synced and `geth` available, download latest release of `fireeth` binary at https://github.com/streamingfast/firehose-ethereum/releases. Again, once downloaded, ensure it's available in your `PATH` environment variable.
 
-The [sync-mainnet.yaml](./sync-mainnet.yaml) is already configured so the the consensus client can connect to it. Go in the folder where this readme is contained (so [here](.)) and run:
+The [sync-mainnet.yaml](./sync-mainnet.yaml) is already configured so the consensus client can connect to it. Go in the folder where this readme is contained (so [here](.)) and run:
 
 ```bash
 fireeth -c sync-mainnet.yaml start
