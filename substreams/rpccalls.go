@@ -42,12 +42,14 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 	}
 
 	var partsGlobal []string
-	var gasLimit uint64 = 50_000_000 //default gas limit
+
 	if okCall {
 		partsGlobal = strings.Split(rpcInfoCall, ",")
 	} else {
 		partsGlobal = strings.Split(rpcInfoBal, ",")
 	}
+
+	var gasLimit uint64 = 50_000_000 //default gas limit
 
 	if len(partsGlobal) > 1 {
 		gasLimitString := partsGlobal[0]
