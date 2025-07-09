@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/eth-go"
-	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/proto/sf/ethereum/transform/v1"
+	pbtransform "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/transform/v1"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/anypb"
 )

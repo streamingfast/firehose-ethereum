@@ -1,14 +1,13 @@
 version: v1
 name: buf.build/streamingfast/firehose-ethereum
-
+module: github.com/streamingfast/firehose-ethereum
 build:
-  excludes:
-  - google
-
+    excludes:
+        - google
 lint:
-  use:
-    - DEFAULT
+    use:
+        - DEFAULT
 
 breaking:
-  use:
-    - FILE
+    use:
+        - FILE
