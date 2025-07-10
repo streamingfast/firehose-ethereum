@@ -93,7 +93,7 @@ func MultiLogFilterTransformFactory(indexStore dstore.Store, possibleIndexSizes 
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 			mname := message.MessageName()
 			if mname != MultiLogFilterMessageName {
-				return nil, fmt.Errorf("expected type url %q, recevied %q ", MultiLogFilterMessageName, message.TypeUrl)
+				return nil, fmt.Errorf("expected type url %q, received %q ", MultiLogFilterMessageName, message.TypeUrl)
 			}
 
 			filter := &pbtransform.MultiLogFilter{}

@@ -92,7 +92,7 @@ func MultiCallToFilterTransformFactory(indexStore dstore.Store, possibleIndexSiz
 		NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 			mname := message.MessageName()
 			if mname != MultiCallToFilterMessageName {
-				return nil, fmt.Errorf("expected type url %q, recevied %q", MultiCallToFilterMessageName, message.TypeUrl)
+				return nil, fmt.Errorf("expected type url %q, received %q", MultiCallToFilterMessageName, message.TypeUrl)
 			}
 
 			filter := &pbtransform.MultiCallToFilter{}

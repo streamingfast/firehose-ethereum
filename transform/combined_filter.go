@@ -330,7 +330,7 @@ func addressBitmap(addrs []eth.Address, bitmaps transform.BitmapGetter, idxPrefi
 	return out
 }
 
-// sigsBitmap attemps to find the blockNums corresponding to the provided eth.Hash
+// sigsBitmap attempts to find the blockNums corresponding to the provided eth.Hash
 func sigsBitmap(sigs []eth.Hash, bitmaps transform.BitmapGetter, idxPrefix string) *roaring64.Bitmap {
 	out := roaring64.NewBitmap()
 	for _, sig := range sigs {
