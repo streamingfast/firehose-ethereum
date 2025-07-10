@@ -38,7 +38,7 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 	rpcInfoCall, okCall := in["rpc_eth_call"]
 	rpcInfoBal, okBal := in["rpc_eth_get_balance"]
 	if !okCall && !okBal {
-		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' & 'rpc_eth_get_balance' are implemented)", in)
+		return map[string]map[string]wasm.WASMExtension{}, nil
 	}
 
 	var partsGlobal []string
@@ -94,9 +94,11 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 		extMap["eth_get_balance"] = eng.ETHGetBalance
 	}
 
-	return map[string]map[string]wasm.WASMExtension{
+	result := map[string]map[string]wasm.WASMExtension{
 		"rpc": extMap,
-	}, nil
+	}
+
+	return result, nil
 }
 
 type RPCEngine struct {
@@ -172,15 +174,6 @@ func (e *RPCEngine) rollBalanceClient() {
 	}
 }
 
-func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
-	return map[string]map[string]wasm.WASMExtension{
-		"rpc": {
-			"eth_call":        e.ETHCall,
-			"eth_get_balance": e.ETHGetBalance,
-		},
-	}
-}
-
 func (e *RPCEngine) ETHCall(ctx context.Context, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, err error) {
 	// We set `retryCount` parameter to `-1` (infinite retry) here so it means `deterministic` return value will always be `true` and we can safely ignore it
 	out, _, err = e.ethCall(ctx, -1, traceID, clock, in)
@@ -240,9 +233,16 @@ func (e *RPCEngine) ethGetBalance(
 	rpcReqs := make([]*rpc.RPCRequest, len(reqMsg.Requests))
 	for i, r := range reqMsg.Requests {
 		addrHex := "0x" + hex.EncodeToString(r.Address)
+
+		// Add 0x prefix to block hash
+		blockParam := r.Block
+		if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
+			blockParam = "0x" + blockParam
+		}
+
 		rpcReqs[i] = &rpc.RPCRequest{
 			Method: "eth_getBalance",
-			Params: []interface{}{addrHex, clock.Id},
+			Params: []interface{}{addrHex, blockParam},
 		}
 	}
 
@@ -314,12 +314,20 @@ func (e *RPCEngine) rpcDoWithRetry(
 				if strings.HasPrefix(content, "0x") {
 					content = content[2:]
 				}
+
+				// Pad odd-length hex strings with leading zero
+				if len(content)%2 == 1 {
+					content = "0" + content
+				}
+
 				raw, hexErr := hex.DecodeString(content)
 				if hexErr != nil {
 					resp.Failed = true
 				} else {
 					resp.Balance = raw
 				}
+			} else {
+				zap.L().Error("RPC error in eth_getBalance", zap.String("trace_id", traceID), zap.Error(r.Err))
 			}
 			out.Responses = append(out.Responses, resp)
 
