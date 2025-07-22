@@ -40,7 +40,7 @@ import (
 )
 
 // ConsoleReader is what reads the `geth` output directly. It builds
-// up some LogEntry objects. See `LogReader to read those entries .
+// up some LogEntry objects. See `LogReader` to read those entries .
 type ConsoleReader struct {
 	lines chan string
 	close func()
@@ -795,7 +795,7 @@ func (ctx *parseCtx) readEVMCallFailed(line string) error {
 	gasLeft := FromUint64(chunks[1], "EVM_CALL_FAILED gasLeft")
 	failureReason := chunks[2]
 
-	// FIXME: This would be overwitten by endCall below, check if
+	// FIXME: This would be overwritten by endCall below, check if
 	//        we need to make endCall aware of failure/revert and
 	//        act accordingly on gas consumed.
 	evmCall.GasConsumed = evmCall.GasLimit - gasLeft
@@ -1160,7 +1160,7 @@ func (ctx *parseCtx) readInit(line string) error {
 		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4, 2.5], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
 
-	// Firehose 3.0 tracer are outputing directly `pbbstream.Block` messages which means that to
+	// Firehose 3.0 tracer are outputting directly `pbbstream.Block` messages which means that to
 	// determine transaction count, we would need to unpack the full block which is prohibitively expensive
 	// just for printing the transaction rate.
 	//

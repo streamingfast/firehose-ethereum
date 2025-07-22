@@ -25,7 +25,7 @@ var HeaderOnlyTransformFactory = &transform.Factory{
 	NewFunc: func(message *anypb.Any) (transform.Transform, error) {
 		mname := message.MessageName()
 		if mname != HeaderOnlyMessageName {
-			return nil, fmt.Errorf("expected type url %q, recevied %q ", HeaderOnlyMessageName, message.TypeUrl)
+			return nil, fmt.Errorf("expected type url %q, received %q ", HeaderOnlyMessageName, message.TypeUrl)
 		}
 
 		filter := &pbtransform.HeaderOnly{}
