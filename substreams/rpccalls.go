@@ -138,7 +138,7 @@ func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit ui
 	}
 
 	if len(callClients) == 1 {
-		zlog.Debug("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
+		zlog.Debug("balancing of eth_call requests to multiple RPC clients is disabled because you only configured 1 RPC client")
 	}
 	if len(balanceClients) == 1 {
 		zlog.Debug("eth_get_balance balancing disabled (only 1 endpoint)")
@@ -262,7 +262,7 @@ func (e *RPCEngine) ethGetBalance(
 	return outBytes, det, err
 }
 
-// rpcGetBalanceWithRetry does exactly what rpcCalls does for eth_call, but for eth_getBalance. It returns a fully-populated *RpcGetBalanceResponses plus the deterministic flag.
+// rpcDoWithRetry does exactly what rpcCalls does for eth_call, but for eth_getBalance. It returns a fully-populated *RpcGetBalanceResponses plus the deterministic flag.
 func (e *RPCEngine) rpcDoWithRetry(
 	ctx context.Context,
 	traceID string,
@@ -286,14 +286,14 @@ func (e *RPCEngine) rpcDoWithRetry(
 		if err != nil {
 
 			if ctx.Err() != nil {
-				zap.L().Info("stopping eth_getBalance calls, context canceled", zap.String("trace_id", traceID))
+				zlog.Info("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
 				return nil, false, err
 			}
 			if retryCount == 0 || (retryCount > 0 && attempt > retryCount) {
 				return nil, false, err
 			}
 			e.rollBalanceClient()
-			zap.L().Warn("retrying eth_getBalance on RPC error",
+			zlog.Warn("retrying eth_getBalance on RPC error",
 				zap.String("trace_id", traceID),
 				zap.Error(err),
 				zap.Stringer("endpoint", client),
@@ -327,7 +327,7 @@ func (e *RPCEngine) rpcDoWithRetry(
 					resp.Balance = raw
 				}
 			} else {
-				zap.L().Error("RPC error in eth_getBalance", zap.String("trace_id", traceID), zap.Error(r.Err))
+				zlog.Error("RPC error in eth_getBalance", zap.String("trace_id", traceID), zap.Error(r.Err))
 			}
 			out.Responses = append(out.Responses, resp)
 

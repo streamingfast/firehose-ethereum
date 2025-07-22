@@ -101,7 +101,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			}
 
 			rpcData := fmt.Sprintf("%d,%s", rpcGasLimit, strings.Join(rpcEndpoints, ","))
-			balData := fmt.Sprintf("%d,%s", rpcGasLimit, strings.Join(balanceEndpoints, ","))
+			balData := strings.Join(balanceEndpoints, ",")
 
 			return ethss.NewRPCExtensioner(map[string]string{
 				"rpc_eth_call":        rpcData,
