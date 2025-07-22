@@ -239,9 +239,3 @@ replace (
 )
 
 retract v1.4.5 //included private repositories
-
-replace github.com/streamingfast/substreams => ../substreams
-
-//replace rogchap.com/v8go => /Users/ulyssecorbeil/Documents/SF/v8go
-
-replace github.com/streamingfast/firehose-core => ../firehose-core
