@@ -34,61 +34,87 @@ func (e *RPCExtensioner) Params() map[string]string {
 }
 
 func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[string]wasm.WASMExtension, error) {
-	// set default values from flags ????
-	switch len(in) {
-	case 0:
-		return nil, nil
-	case 1:
-		break
-	default:
-		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' is implemented)", in)
+	// Accept either or both rpc_eth_call and rpc_eth_get_balance
+	rpcInfoCall, okCall := in["rpc_eth_call"]
+	rpcInfoBal, okBal := in["rpc_eth_get_balance"]
+	if !okCall && !okBal {
+		return map[string]map[string]wasm.WASMExtension{}, nil
 	}
 
-	rpcInfo, found := in["rpc_eth_call"]
-	if !found {
-		return nil, fmt.Errorf("unsupported wasm extensions: %v (only 'rpc_eth_call' is implemented)", in)
+	var partsGlobal []string
+
+	if okCall {
+		partsGlobal = strings.Split(rpcInfoCall, ",")
+	} else {
+		partsGlobal = strings.Split(rpcInfoBal, ",")
 	}
 
-	parts := strings.Split(rpcInfo, ",")
-
-	var rpcURLs []string
 	var gasLimit uint64 = 50_000_000 //default gas limit
-	if len(parts) > 1 {
-		//  first one is gas limit
-		gasLimitString := parts[0]
+
+	if len(partsGlobal) > 1 {
+		gasLimitString := partsGlobal[0]
 		gasLimitRes, err := strconv.ParseUint(gasLimitString, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("parsing gas limit: %w", err)
 		}
 		gasLimit = gasLimitRes
-		rpcURLs = parts[1:]
-	} else {
-		rpcURLs = []string{rpcInfo}
 	}
 
-	eng, err := NewRPCEngine(rpcURLs, gasLimit)
+	var callURLs []string
+	var balURLs []string
+
+	if okCall {
+		parts := strings.Split(rpcInfoCall, ",")
+		if len(parts) > 1 {
+			callURLs = parts[1:]
+		} else {
+			callURLs = []string{rpcInfoCall}
+		}
+	}
+
+	if okBal {
+		parts := strings.Split(rpcInfoBal, ",")
+		if len(parts) > 1 {
+			balURLs = parts[1:]
+		} else {
+			balURLs = []string{rpcInfoBal}
+		}
+	}
+
+	eng, err := NewRPCEngine(callURLs, balURLs, gasLimit)
 	if err != nil {
 		return nil, fmt.Errorf("creating new RPC engine: %w", err)
 	}
-	return map[string]map[string]wasm.WASMExtension{
-		"rpc": {
-			"eth_call": eng.ETHCall,
-		},
-	}, nil
+
+	extMap := make(map[string]wasm.WASMExtension)
+	if okCall {
+		extMap["eth_call"] = eng.ETHCall
+	}
+	if okBal {
+		extMap["eth_get_balance"] = eng.ETHGetBalance
+	}
+
+	result := map[string]map[string]wasm.WASMExtension{
+		"rpc": extMap,
+	}
+
+	return result, nil
 }
 
 type RPCEngine struct {
 	gasLimit uint64
 
-	rpcClients            []*rpc.Client
-	currentRpcClientIndex int
+	callClients            []*rpc.Client
+	currentCallClientIndex int
 
-	endpoints []string
+	balanceClients            []*rpc.Client
+	currentBalanceClientIndex int
 }
 
-func NewRPCEngine(rpcEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
+func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
 	zlog.Debug("creating new Substreams RPC engine",
-		zap.Strings("rpc_endpoints", rpcEndpoints),
+		zap.Strings("call_endpoints", callEndpoints),
+		zap.Strings("get_balance_endpoints", balanceEndpoints),
 		zap.Uint64("gas_limit", gasLimit),
 	)
 
@@ -101,40 +127,50 @@ func NewRPCEngine(rpcEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
 		rpc.WithHttpClient(httpClient),
 	}
 
-	var rpcClients []*rpc.Client
-	for _, endpoint := range rpcEndpoints {
-		rpcClients = append(rpcClients, rpc.NewClient(endpoint, opts...))
+	var callClients []*rpc.Client
+	for _, endpoint := range callEndpoints {
+		callClients = append(callClients, rpc.NewClient(endpoint, opts...))
 	}
 
-	if len(rpcClients) == 1 {
-		zlog.Debug("balancing of requests to multiple RPC client is disabled because you only configured 1 RPC client")
+	var balanceClients []*rpc.Client
+	for _, endpoint := range balanceEndpoints {
+		balanceClients = append(balanceClients, rpc.NewClient(endpoint, opts...))
 	}
 
+	if len(callClients) == 1 {
+		zlog.Debug("balancing of eth_call requests to multiple RPC clients is disabled because you only configured 1 RPC client")
+	}
+	if len(balanceClients) == 1 {
+		zlog.Debug("eth_get_balance balancing disabled (only 1 endpoint)")
+	}
 	return &RPCEngine{
-		rpcClients: rpcClients,
-		gasLimit:   gasLimit,
-		endpoints:  rpcEndpoints,
+		gasLimit:       gasLimit,
+		callClients:    callClients,
+		balanceClients: balanceClients,
 	}, nil
 }
 
-func (e *RPCEngine) rpcClient() *rpc.Client {
-	return e.rpcClients[e.currentRpcClientIndex]
+func (e *RPCEngine) callClient() *rpc.Client {
+	return e.callClients[e.currentCallClientIndex]
 }
 
-func (e *RPCEngine) rollRpcClient() {
-	if e.currentRpcClientIndex == len(e.rpcClients)-1 {
-		e.currentRpcClientIndex = 0
-		return
+func (e *RPCEngine) rollCallClient() {
+	if e.currentCallClientIndex == len(e.callClients)-1 {
+		e.currentCallClientIndex = 0
+	} else {
+		e.currentCallClientIndex++
 	}
-
-	e.currentRpcClientIndex++
 }
 
-func (e *RPCEngine) WASMExtensions() map[string]map[string]wasm.WASMExtension {
-	return map[string]map[string]wasm.WASMExtension{
-		"rpc": {
-			"eth_call": e.ETHCall,
-		},
+func (e *RPCEngine) balanceClient() *rpc.Client {
+	return e.balanceClients[e.currentBalanceClientIndex]
+}
+
+func (e *RPCEngine) rollBalanceClient() {
+	if e.currentBalanceClientIndex == len(e.balanceClients)-1 {
+		e.currentBalanceClientIndex = 0
+	} else {
+		e.currentBalanceClientIndex++
 	}
 }
 
@@ -170,6 +206,143 @@ func (e *RPCEngine) ethCall(ctx context.Context, retryCount int, traceID string,
 	}
 
 	return cnt, deterministic, nil
+}
+
+func (e *RPCEngine) ETHGetBalance(ctx context.Context, traceID string, clock *pbsubstreams.Clock, in []byte) ([]byte, error) {
+	out, _, err := e.ethGetBalance(ctx, -1, traceID, clock, in)
+	return out, err
+}
+
+func (e *RPCEngine) ethGetBalance(
+	ctx context.Context,
+	retryCount int,
+	traceID string,
+	clock *pbsubstreams.Clock,
+	in []byte,
+) (outBytes []byte, deterministic bool, err error) {
+
+	reqMsg := &pbethss.RpcGetBalanceRequests{}
+	if err := proto.Unmarshal(in, reqMsg); err != nil {
+		return nil, false, fmt.Errorf("unmarshal get_balance proto: %w", err)
+	}
+
+	if len(reqMsg.Requests) == 0 {
+		return []byte{}, true, nil
+	}
+
+	rpcReqs := make([]*rpc.RPCRequest, len(reqMsg.Requests))
+	for i, r := range reqMsg.Requests {
+		addrHex := "0x" + hex.EncodeToString(r.Address)
+
+		// Add 0x prefix to block hash
+		blockParam := r.Block
+		if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
+			blockParam = "0x" + blockParam
+		}
+
+		rpcReqs[i] = &rpc.RPCRequest{
+			Method: "eth_getBalance",
+			Params: []interface{}{addrHex, blockParam},
+		}
+	}
+
+	responses, det, err := e.rpcDoWithRetry(ctx, traceID, retryCount, clock.Id, rpcReqs)
+	if err != nil {
+		return nil, det, err
+	}
+
+	outMsg := &pbethss.RpcGetBalanceResponses{}
+	for _, resp := range responses.Responses {
+		outMsg.Responses = append(outMsg.Responses, &pbethss.RpcGetBalanceResponse{
+			Balance: resp.Balance,
+			Failed:  resp.Failed,
+		})
+	}
+	outBytes, err = proto.Marshal(outMsg)
+	return outBytes, det, err
+}
+
+// rpcDoWithRetry does exactly what rpcCalls does for eth_call, but for eth_getBalance. It returns a fully-populated *RpcGetBalanceResponses plus the deterministic flag.
+func (e *RPCEngine) rpcDoWithRetry(
+	ctx context.Context,
+	traceID string,
+	retryCount int,
+	blockHash string,
+	reqs []*rpc.RPCRequest,
+) (*pbethss.RpcGetBalanceResponses, bool, error) {
+	var delay time.Duration
+	var attempt int
+
+	for {
+		if len(reqs) == 0 {
+			return &pbethss.RpcGetBalanceResponses{}, true, nil
+		}
+		time.Sleep(delay)
+		attempt++
+		delay = minDuration(time.Duration(attempt*500)*time.Millisecond, 10*time.Second)
+
+		client := e.balanceClient()
+		rpcResps, err := client.DoRequests(ctx, reqs)
+		if err != nil {
+
+			if ctx.Err() != nil {
+				zlog.Info("stopping rpc calls here, context is canceled", zap.String("trace_id", traceID))
+				return nil, false, err
+			}
+			if retryCount == 0 || (retryCount > 0 && attempt > retryCount) {
+				return nil, false, err
+			}
+			e.rollBalanceClient()
+			zlog.Warn("retrying eth_getBalance on RPC error",
+				zap.String("trace_id", traceID),
+				zap.Error(err),
+				zap.Stringer("endpoint", client),
+			)
+			continue
+		}
+
+		out := &pbethss.RpcGetBalanceResponses{}
+		deterministic := true
+
+		for _, r := range rpcResps {
+
+			resp := &pbethss.RpcGetBalanceResponse{
+				Failed: r.Err != nil,
+			}
+			if r.Err == nil {
+				content := r.Content
+				if strings.HasPrefix(content, "0x") {
+					content = content[2:]
+				}
+
+				// Pad odd-length hex strings with leading zero
+				if len(content)%2 == 1 {
+					content = "0" + content
+				}
+
+				raw, hexErr := hex.DecodeString(content)
+				if hexErr != nil {
+					resp.Failed = true
+				} else {
+					resp.Balance = raw
+				}
+			} else {
+				zlog.Error("RPC error in eth_getBalance", zap.String("trace_id", traceID), zap.Error(r.Err))
+			}
+			out.Responses = append(out.Responses, resp)
+
+			if !r.Deterministic() {
+				deterministic = false
+				break
+			}
+		}
+
+		if retryCount == 0 || deterministic {
+			return out, deterministic, nil
+		}
+
+		e.rollBalanceClient()
+	}
 }
 
 type RPCCall struct {
@@ -228,7 +401,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		delay = minDuration(time.Duration(attemptNumber*500)*time.Millisecond, 10*time.Second)
 
 		// Kept here because later we roll it, but we still want to log the one that generated the error
-		client := e.rpcClient()
+		client := e.callClient()
 
 		lastRequestSince := time.Now()
 		out, err := client.DoRequests(ctx, reqs)
@@ -250,7 +423,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 				return nil, false, err
 			}
 
-			e.rollRpcClient()
+			e.rollCallClient()
 			zlog.Warn("retrying RPCCall on RPC error", zap.String("trace_id", traceID), zap.Error(err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
 			lastError = err
 			continue
@@ -279,7 +452,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		}
 
 		if !deterministicResp {
-			e.rollRpcClient()
+			e.rollCallClient()
 			continue
 		}
 

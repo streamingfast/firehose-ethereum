@@ -58,7 +58,7 @@ func TestRPCEngine_rpcCalls(t *testing.T) {
 		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
 	}))
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
@@ -89,7 +89,7 @@ func TestRPCEngine_rpcCalls_noCallsInInput(t *testing.T) {
 		require.Fail(t, "The server should never been called")
 	}))
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
@@ -131,7 +131,7 @@ func TestRPCEngine_rpcCalls_retry(t *testing.T) {
 		}
 	}))
 
-	engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 	require.NoError(t, err)
 
 	traceID := "someTraceID"
@@ -237,7 +237,7 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			}))
 			defer server.Close()
 
-			engine, err := NewRPCEngine([]string{server.URL}, 50_000_000)
+			engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
 			require.NoError(t, err)
 
 			traceID := "someTraceID"
@@ -264,4 +264,106 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			}, responses)
 		})
 	}
+}
+
+func TestRPCEngine_ethGetBalance(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buf := new(bytes.Buffer)
+		_, err := buf.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		expected := `[{"params":["0xea674fdde714fd979de3edf0f56aa9716b898ec8","` + clockBlock1.Id + `"],"method":"eth_getBalance","jsonrpc":"2.0","id":"0x1"}]`
+		require.Equal(t, expected, buf.String())
+
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	reqProto := &pbethss.RpcGetBalanceRequests{
+		Requests: []*pbethss.RpcGetBalanceRequest{{
+			Address: eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8"),
+			Block:   clockBlock1.Id,
+		}},
+	}
+	in, err := proto.Marshal(reqProto)
+	require.NoError(t, err)
+
+	out, det, err := engine.ethGetBalance(context.Background(), 1, "traceID", clockBlock1, in)
+	require.NoError(t, err)
+	require.True(t, det)
+
+	got := &pbethss.RpcGetBalanceResponses{}
+	require.NoError(t, proto.Unmarshal(out, got))
+
+	assertProtoEqual(t,
+		&pbethss.RpcGetBalanceResponses{Responses: []*pbethss.RpcGetBalanceResponse{{
+			Balance: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"),
+			Failed:  false,
+		}}},
+		got,
+	)
+}
+
+func TestRPCEngine_ethGetBalance_noRequests(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Fail(t, "server should not be called when there are no requests")
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	// empty requests
+	reqProto := &pbethss.RpcGetBalanceRequests{Requests: []*pbethss.RpcGetBalanceRequest{}}
+	in, err := proto.Marshal(reqProto)
+	require.NoError(t, err)
+
+	out, det, err := engine.ethGetBalance(context.Background(), 1, "traceID", clockBlock1, in)
+	require.NoError(t, err)
+	require.True(t, det)
+	require.Empty(t, out)
+}
+
+func TestRPCEngine_ethGetBalance_retry(t *testing.T) {
+	count := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		count++
+		if count == 1 {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x01"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	reqProto := &pbethss.RpcGetBalanceRequests{
+		Requests: []*pbethss.RpcGetBalanceRequest{{
+			Address: eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8"),
+			Block:   clockBlock1.Id,
+		}},
+	}
+	in, err := proto.Marshal(reqProto)
+	require.NoError(t, err)
+
+	out, det, err := engine.ethGetBalance(context.Background(), 1, "traceID", clockBlock1, in)
+	require.NoError(t, err)
+	require.True(t, det)
+
+	got := &pbethss.RpcGetBalanceResponses{}
+	require.NoError(t, proto.Unmarshal(out, got))
+
+	assertProtoEqual(t,
+		&pbethss.RpcGetBalanceResponses{
+			Responses: []*pbethss.RpcGetBalanceResponse{
+				{Balance: eth.MustNewBytes("0x01"), Failed: false},
+			},
+		},
+		got,
+	)
 }

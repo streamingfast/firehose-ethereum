@@ -75,12 +75,14 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			`)+"\n")
 
 			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
+			flags.StringArray("substreams-rpc-get-balance-endpoints", nil, "Endpoints to contact to satisfy Substreams 'eth_get_balance's")
 			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")
 		},
 
 		RegisterSubstreamsExtensions: func() (wasm.WASMExtensioner, error) {
 			rpcGasLimit := viper.GetUint64("substreams-rpc-gas-limit")
 			rpcEndpoints := viper.GetStringSlice("substreams-rpc-endpoints")
+			balanceEndpoints := viper.GetStringSlice("substreams-rpc-get-balance-endpoints")
 
 			commaCheck := func(ss []string) bool {
 				for _, s := range ss {
@@ -94,9 +96,16 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				return nil, fmt.Errorf("rpc endpoints cannot contain commas")
 			}
 
+			if commaCheck(balanceEndpoints) {
+				return nil, fmt.Errorf("rpc balance endpoints cannot contain commas")
+			}
+
 			rpcData := fmt.Sprintf("%d,%s", rpcGasLimit, strings.Join(rpcEndpoints, ","))
+			balData := strings.Join(balanceEndpoints, ",")
+
 			return ethss.NewRPCExtensioner(map[string]string{
-				"rpc_eth_call": rpcData,
+				"rpc_eth_call":        rpcData,
+				"rpc_eth_get_balance": balData,
 			}), nil
 		},
 
