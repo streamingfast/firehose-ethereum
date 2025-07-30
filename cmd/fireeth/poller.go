@@ -1,7 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"context"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
+	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"path"
 	"strconv"
 	"strings"
@@ -31,6 +39,7 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	cmd.AddCommand(newOptimismPollerCmd(logger, tracer))
 	cmd.AddCommand(newArbOnePollerCmd(logger, tracer))
 	cmd.AddCommand(newGenericEVMPollerCmd(logger, tracer))
+	cmd.AddCommand(newFirehoseTracerPollerCmd(logger, tracer))
 	return cmd
 }
 
@@ -66,6 +75,19 @@ func newGenericEVMPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Co
 		Short: "poll blocks from a generic EVM RPC endpoint",
 		Args:  cobra.ExactArgs(2),
 		RunE:  pollerRunE(logger, tracer),
+	}
+	cmd.Flags().Duration("interval-between-fetch", 0, "interval between fetch")
+	cmd.Flags().Duration("max-block-fetch-duration", 5*time.Second, "maximum delay before retrying a block fetch")
+
+	return cmd
+}
+
+func newFirehoseTracerPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "firehose-tracer-api <rpc-endpoint> <first-streamable-block>",
+		Short: "poll blocks using debug_traceFirehoseBlockByNumber",
+		Args:  cobra.ExactArgs(2),
+		RunE:  pollerRunEForTracer(logger),
 	}
 	cmd.Flags().Duration("interval-between-fetch", 0, "interval between fetch")
 	cmd.Flags().Duration("max-block-fetch-duration", 5*time.Second, "maximum delay before retrying a block fetch")
@@ -121,5 +143,114 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 		}
 
 		return nil
+	}
+}
+
+func pollerRunEForTracer(logger *zap.Logger) func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, args []string) error {
+		rpcEndpoint := args[0]
+		firstBlock, err := strconv.ParseUint(args[1], 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid block number: %w", err)
+		}
+
+		// Get flag values
+		intervalBetweenFetch := sflags.MustGetDuration(cmd, "interval-between-fetch")
+		maxBlockFetchDuration := sflags.MustGetDuration(cmd, "max-block-fetch-duration")
+
+		// Connect to the RPC endpoint
+		rpcClient := rpc.NewClient(rpcEndpoint)
+
+		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
+
+		for blockNum := firstBlock; ; blockNum++ {
+			select {
+			case <-cmd.Context().Done():
+				return nil
+			default:
+			}
+
+			// Create context with timeout for the RPC call
+			ctx, cancel := context.WithTimeout(cmd.Context(), maxBlockFetchDuration)
+
+			// Make the RPC call to trace the block
+			respStr, err := rpcClient.DoRequest(ctx, "debug_traceFirehoseBlockByNumber", []interface{}{fmt.Sprintf("0x%x", blockNum), nil})
+			cancel()
+
+			if err != nil {
+				logger.Warn("failed to trace block", zap.Uint64("block", blockNum), zap.Error(err))
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			// The response is base64-encoded, not hex-encoded
+			// First decode the base64 response
+			rawBytes, err := base64.StdEncoding.DecodeString(respStr)
+			if err != nil {
+				logger.Warn("failed to decode base64 response", zap.Uint64("block", blockNum), zap.Error(err))
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			// Remove trailing newline if present
+			if len(rawBytes) > 0 && rawBytes[len(rawBytes)-1] == '\n' {
+				rawBytes = rawBytes[:len(rawBytes)-1]
+			}
+
+			// Find the last space to separate the firehose line from the block data
+			lastSpace := bytes.LastIndexByte(rawBytes, ' ')
+			if lastSpace == -1 {
+				logger.Warn("invalid firehose block line", zap.Uint64("block", blockNum))
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			// The part after the last space is the base64-encoded block data
+			base64Part := rawBytes[lastSpace+1:]
+			blockData := make([]byte, base64.StdEncoding.DecodedLen(len(base64Part)))
+			n, err := base64.StdEncoding.Decode(blockData, base64Part)
+			if err != nil {
+				logger.Warn("failed to base64 decode block", zap.Uint64("block", blockNum), zap.Error(err))
+				time.Sleep(1 * time.Second)
+				continue
+			}
+			blockData = blockData[:n]
+
+			block := &pbeth.Block{}
+			if err := proto.Unmarshal(blockData, block); err != nil {
+				logger.Warn("failed to unmarshal traced block", zap.Uint64("block", blockNum), zap.Error(err))
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			blockBytes, err := proto.Marshal(block)
+			if err != nil {
+				logger.Warn("failed to marshal block", zap.Uint64("block", blockNum), zap.Error(err))
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			bstreamBlock := &pbbstream.Block{
+				Number:    block.Number,
+				Id:        hex.EncodeToString(block.Hash),
+				ParentNum: block.Number - 1,
+				ParentId:  hex.EncodeToString(block.Header.ParentHash),
+				LibNum:    0,
+				Timestamp: block.Header.Timestamp,
+				Payload: &anypb.Any{
+					TypeUrl: "type.googleapis.com/sf.ethereum.type.v2.Block",
+					Value:   blockBytes,
+				},
+			}
+
+			if err := handler.Handle(bstreamBlock); err != nil {
+				return fmt.Errorf("failed to handle block: %w", err)
+			}
+
+			// Apply interval between fetches if specified
+			if intervalBetweenFetch > 0 {
+				time.Sleep(intervalBetweenFetch)
+			}
+		}
 	}
 }
