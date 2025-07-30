@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Substreams
+
+* **Added** mechanism to immediately cancel pending requests that are doing an 'external call' (ex: eth_call) on a given block when it gets forked out (UNDO because of a reorg).
+* **Fixed** handling of invalid module kind: prevent heavy logging from recovered panic
+* Error considered deterministic which will cache the error forever are now suffixed with `<original message> (deterministic error)`.
+
 ## v2.12.2
 
 ### Substreams
