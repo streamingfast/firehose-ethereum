@@ -1,15 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"context"
-	"encoding/base64"
-	"encoding/hex"
 	"fmt"
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 	"path"
 	"strconv"
 	"strings"
@@ -96,6 +88,14 @@ func newFirehoseTracerPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobr
 }
 
 func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecutor {
+	return pollerRunEInternal(logger, tracer, false)
+}
+
+func pollerRunEForTracer(logger *zap.Logger) func(cmd *cobra.Command, args []string) error {
+	return pollerRunEInternal(logger, nil, true)
+}
+
+func pollerRunEInternal(logger *zap.Logger, tracer logging.Tracer, useTracer bool) firecore.CommandExecutor {
 	return func(cmd *cobra.Command, args []string) (err error) {
 		rpcEndpoint := args[0]
 		//dataDir := cmd.Flag("data-dir").Value.String()
@@ -133,7 +133,12 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 
 		rpcClients.Add(rpc.NewClient(rpcEndpoint, opts...))
 
-		fetcher := blockfetcher.NewGenericBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, sflags.MustGetBool(cmd, "allow-empty-receipts-on-block-0"), logger)
+		var fetcher blockpoller.BlockFetcher[*rpc.Client]
+		if useTracer {
+			fetcher = blockfetcher.NewTracerBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, sflags.MustGetBool(cmd, "allow-empty-receipts-on-block-0"), logger)
+		} else {
+			fetcher = blockfetcher.NewGenericBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, sflags.MustGetBool(cmd, "allow-empty-receipts-on-block-0"), logger)
+		}
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New[*rpc.Client](fetcher, handler, rpcClients, blockpoller.WithStoringState[*rpc.Client](stateDir), blockpoller.WithLogger[*rpc.Client](logger))
 
@@ -143,114 +148,5 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 		}
 
 		return nil
-	}
-}
-
-func pollerRunEForTracer(logger *zap.Logger) func(cmd *cobra.Command, args []string) error {
-	return func(cmd *cobra.Command, args []string) error {
-		rpcEndpoint := args[0]
-		firstBlock, err := strconv.ParseUint(args[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("invalid block number: %w", err)
-		}
-
-		// Get flag values
-		intervalBetweenFetch := sflags.MustGetDuration(cmd, "interval-between-fetch")
-		maxBlockFetchDuration := sflags.MustGetDuration(cmd, "max-block-fetch-duration")
-
-		// Connect to the RPC endpoint
-		rpcClient := rpc.NewClient(rpcEndpoint)
-
-		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
-
-		for blockNum := firstBlock; ; blockNum++ {
-			select {
-			case <-cmd.Context().Done():
-				return nil
-			default:
-			}
-
-			// Create context with timeout for the RPC call
-			ctx, cancel := context.WithTimeout(cmd.Context(), maxBlockFetchDuration)
-
-			// Make the RPC call to trace the block
-			respStr, err := rpcClient.DoRequest(ctx, "debug_traceFirehoseBlockByNumber", []interface{}{fmt.Sprintf("0x%x", blockNum), nil})
-			cancel()
-
-			if err != nil {
-				logger.Warn("failed to trace block", zap.Uint64("block", blockNum), zap.Error(err))
-				time.Sleep(1 * time.Second)
-				continue
-			}
-
-			// The response is base64-encoded, not hex-encoded
-			// First decode the base64 response
-			rawBytes, err := base64.StdEncoding.DecodeString(respStr)
-			if err != nil {
-				logger.Warn("failed to decode base64 response", zap.Uint64("block", blockNum), zap.Error(err))
-				time.Sleep(1 * time.Second)
-				continue
-			}
-
-			// Remove trailing newline if present
-			if len(rawBytes) > 0 && rawBytes[len(rawBytes)-1] == '\n' {
-				rawBytes = rawBytes[:len(rawBytes)-1]
-			}
-
-			// Find the last space to separate the firehose line from the block data
-			lastSpace := bytes.LastIndexByte(rawBytes, ' ')
-			if lastSpace == -1 {
-				logger.Warn("invalid firehose block line", zap.Uint64("block", blockNum))
-				time.Sleep(1 * time.Second)
-				continue
-			}
-
-			// The part after the last space is the base64-encoded block data
-			base64Part := rawBytes[lastSpace+1:]
-			blockData := make([]byte, base64.StdEncoding.DecodedLen(len(base64Part)))
-			n, err := base64.StdEncoding.Decode(blockData, base64Part)
-			if err != nil {
-				logger.Warn("failed to base64 decode block", zap.Uint64("block", blockNum), zap.Error(err))
-				time.Sleep(1 * time.Second)
-				continue
-			}
-			blockData = blockData[:n]
-
-			block := &pbeth.Block{}
-			if err := proto.Unmarshal(blockData, block); err != nil {
-				logger.Warn("failed to unmarshal traced block", zap.Uint64("block", blockNum), zap.Error(err))
-				time.Sleep(1 * time.Second)
-				continue
-			}
-
-			blockBytes, err := proto.Marshal(block)
-			if err != nil {
-				logger.Warn("failed to marshal block", zap.Uint64("block", blockNum), zap.Error(err))
-				time.Sleep(1 * time.Second)
-				continue
-			}
-
-			bstreamBlock := &pbbstream.Block{
-				Number:    block.Number,
-				Id:        hex.EncodeToString(block.Hash),
-				ParentNum: block.Number - 1,
-				ParentId:  hex.EncodeToString(block.Header.ParentHash),
-				LibNum:    0,
-				Timestamp: block.Header.Timestamp,
-				Payload: &anypb.Any{
-					TypeUrl: "type.googleapis.com/sf.ethereum.type.v2.Block",
-					Value:   blockBytes,
-				},
-			}
-
-			if err := handler.Handle(bstreamBlock); err != nil {
-				return fmt.Errorf("failed to handle block: %w", err)
-			}
-
-			// Apply interval between fetches if specified
-			if intervalBetweenFetch > 0 {
-				time.Sleep(intervalBetweenFetch)
-			}
-		}
 	}
 }
