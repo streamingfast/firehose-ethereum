@@ -1,7 +1,6 @@
 package blockfetcher
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -13,6 +12,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"strings"
 	"time"
 )
 
@@ -30,19 +30,19 @@ func (f *TracerBlockFetcher) Fetch(ctx context.Context, client *rpc.Client, blkN
 		return nil, false, fmt.Errorf("failed to trace block %d: %w", blkNum, err)
 	}
 
-	// The response is base64-encoded
-	lineBytes, err := base64.StdEncoding.DecodeString(respStr)
-	if err != nil {
-		return nil, false, fmt.Errorf("failed to decode base64 response for block %d: %w", blkNum, err)
+	// Parse the response string
+	if len(respStr) > 1 && respStr[0] == '"' && respStr[len(respStr)-1] == '"' {
+		respStr = respStr[1 : len(respStr)-1]
 	}
-	lineBytes = bytes.TrimRight(lineBytes, "\n")
-	lastSpace := bytes.LastIndexByte(lineBytes, ' ')
+	respStr = strings.TrimSuffix(respStr, "\n")
+	lastSpace := strings.LastIndex(respStr, " ")
 	if lastSpace == -1 {
 		return nil, false, fmt.Errorf("invalid firehose block line for block %d", blkNum)
 	}
-	blockBase64 := lineBytes[lastSpace+1:]
+	blockBase64 := respStr[lastSpace+1:]
 
-	blockData, err := base64.StdEncoding.DecodeString(string(blockBase64))
+	// Decode payload
+	blockData, err := base64.StdEncoding.DecodeString(blockBase64)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to decode block payload for block %d: %w", blkNum, err)
 	}
