@@ -30,26 +30,46 @@ func (f *TracerBlockFetcher) Fetch(ctx context.Context, client *rpc.Client, blkN
 		return nil, false, fmt.Errorf("failed to trace block %d: %w", blkNum, err)
 	}
 
-	// Parse the response string
+	// Remove surrounding quotes
 	if len(respStr) > 1 && respStr[0] == '"' && respStr[len(respStr)-1] == '"' {
 		respStr = respStr[1 : len(respStr)-1]
 	}
-	respStr = strings.TrimSuffix(respStr, "\n")
-	lastSpace := strings.LastIndex(respStr, " ")
-	if lastSpace == -1 {
-		return nil, false, fmt.Errorf("invalid firehose block line for block %d", blkNum)
-	}
-	blockBase64 := respStr[lastSpace+1:]
 
-	// Decode payload
-	blockData, err := base64.StdEncoding.DecodeString(blockBase64)
+	decodedBytes, err := base64.StdEncoding.DecodeString(respStr)
 	if err != nil {
-		return nil, false, fmt.Errorf("failed to decode block payload for block %d: %w", blkNum, err)
+		return nil, false, fmt.Errorf("failed to decode base64: %w", err)
+	}
+
+	decodedStr := string(decodedBytes)
+	lines := strings.Split(decodedStr, "\n")
+
+	var fireBlockLine string
+	for _, line := range lines {
+		if strings.HasPrefix(line, "FIRE BLOCK") {
+			fireBlockLine = line
+			break
+		}
+	}
+
+	if fireBlockLine == "" {
+		return nil, false, fmt.Errorf("no FIRE BLOCK line found in block %d", blkNum)
+	}
+
+	// Extract the base-64 encoded protobuf block
+	fields := strings.Fields(fireBlockLine)
+	if len(fields) < 7 {
+		return nil, false, fmt.Errorf("malformed FIRE BLOCK line in block %d", blkNum)
+	}
+
+	blockPayloadB64 := fields[len(fields)-1]
+	blockBytes, err := base64.StdEncoding.DecodeString(blockPayloadB64)
+	if err != nil {
+		return nil, false, fmt.Errorf("failed to decode FIRE BLOCK payload: %w", err)
 	}
 
 	ethBlock := &pbeth.Block{}
-	if err := proto.Unmarshal(blockData, ethBlock); err != nil {
-		return nil, false, fmt.Errorf("failed to unmarshal traced block %d: %w", blkNum, err)
+	if err := proto.Unmarshal(blockBytes, ethBlock); err != nil {
+		return nil, false, fmt.Errorf("failed to unmarshal protobuf block for block %d: %w", blkNum, err)
 	}
 
 	payload, err := anypb.New(ethBlock)
