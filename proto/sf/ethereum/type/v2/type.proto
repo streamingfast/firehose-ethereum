@@ -123,6 +123,16 @@ message Block {
   // Only available in DetailLevel: EXTENDED
   repeated Call system_calls = 21;
 
+  // Withdrawals represents the list of validator balance withdrawals processed in this block.
+  // Introduced in the Shanghai hard fork (EIP-4895).
+  //
+  // This field has been added because Geth blocks include withdrawals after Shanghai fork,
+  // but our previous Firehose model didn't capture this data. Currently experimental -
+  // NOT ready for production use yet as we validate the tracing implementation.
+  //
+  // Only available when Shanghai fork is active on the chain.
+  repeated Withdrawal withdrawals = 22;
+
   reserved 40; // bool filtering_applied = 40 [deprecated = true];
   reserved 41; // string filtering_include_filter_expr = 41 [deprecated = true];
   reserved 42; // string filtering_exclude_filter_expr = 42 [deprecated = true];
@@ -1044,4 +1054,20 @@ message TransactionRefs {
 message BlockRef {
   bytes hash = 1;
   uint64 number = 2;
+}
+
+// Withdrawal represents a validator withdrawal from the beacon chain to the EVM.
+// Introduced in EIP-4895 (Shanghai hard fork).
+message Withdrawal {
+  // Index is the monotonically increasing identifier of the withdrawal
+  uint64 index = 1;
+
+  // ValidatorIndex is the index of the validator that is withdrawing
+  uint64 validator_index = 2;
+
+  // Address is the Ethereum address receiving the withdrawn funds
+  bytes address = 3;
+
+  // Amount is the value of the withdrawal in gwei (1 gwei = 1e9 wei)
+  uint64 amount = 4;
 }
