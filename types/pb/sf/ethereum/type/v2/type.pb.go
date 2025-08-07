@@ -2527,9 +2527,13 @@ type BalanceChange struct {
 	Reason BalanceChange_Reason `protobuf:"varint,4,opt,name=reason,proto3,enum=sf.ethereum.type.v2.BalanceChange_Reason" json:"reason,omitempty"`
 	// The block's global ordinal when the balance change was recorded, refer to [Block]
 	// documentation for further information about ordinals and total ordering.
-	Ordinal       uint64 `protobuf:"varint,5,opt,name=ordinal,proto3" json:"ordinal,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Ordinal uint64 `protobuf:"varint,5,opt,name=ordinal,proto3" json:"ordinal,omitempty"`
+	// WithdrawalIndex links this balance change to a specific withdrawal when reason is REASON_WITHDRAWAL.
+	// This is the index in Block.withdrawals that caused this balance change.
+	// Only present for REASON_WITHDRAWAL balance changes.
+	WithdrawalIndex *uint64 `protobuf:"varint,6,opt,name=withdrawal_index,json=withdrawalIndex,proto3,oneof" json:"withdrawal_index,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *BalanceChange) Reset() {
@@ -2593,6 +2597,13 @@ func (x *BalanceChange) GetReason() BalanceChange_Reason {
 func (x *BalanceChange) GetOrdinal() uint64 {
 	if x != nil {
 		return x.Ordinal
+	}
+	return 0
+}
+
+func (x *BalanceChange) GetWithdrawalIndex() uint64 {
+	if x != nil && x.WithdrawalIndex != nil {
+		return *x.WithdrawalIndex
 	}
 	return 0
 }
@@ -3416,13 +3427,14 @@ const file_sf_ethereum_type_v2_type_proto_rawDesc = "" +
 	"\x03key\x18\x02 \x01(\fR\x03key\x12\x1b\n" +
 	"\told_value\x18\x03 \x01(\fR\boldValue\x12\x1b\n" +
 	"\tnew_value\x18\x04 \x01(\fR\bnewValue\x12\x18\n" +
-	"\aordinal\x18\x05 \x01(\x04R\aordinal\"\x95\x06\n" +
+	"\aordinal\x18\x05 \x01(\x04R\aordinal\"\xda\x06\n" +
 	"\rBalanceChange\x12\x18\n" +
 	"\aaddress\x18\x01 \x01(\fR\aaddress\x128\n" +
 	"\told_value\x18\x02 \x01(\v2\x1b.sf.ethereum.type.v2.BigIntR\boldValue\x128\n" +
 	"\tnew_value\x18\x03 \x01(\v2\x1b.sf.ethereum.type.v2.BigIntR\bnewValue\x12A\n" +
 	"\x06reason\x18\x04 \x01(\x0e2).sf.ethereum.type.v2.BalanceChange.ReasonR\x06reason\x12\x18\n" +
-	"\aordinal\x18\x05 \x01(\x04R\aordinal\"\x98\x04\n" +
+	"\aordinal\x18\x05 \x01(\x04R\aordinal\x12.\n" +
+	"\x10withdrawal_index\x18\x06 \x01(\x04H\x00R\x0fwithdrawalIndex\x88\x01\x01\"\x98\x04\n" +
 	"\x06Reason\x12\x12\n" +
 	"\x0eREASON_UNKNOWN\x10\x00\x12\x1c\n" +
 	"\x18REASON_REWARD_MINE_UNCLE\x10\x01\x12\x1c\n" +
@@ -3444,7 +3456,8 @@ const file_sf_ethereum_type_v2_type_proto_rawDesc = "" +
 	"\x11REASON_WITHDRAWAL\x10\x10\x12\x1a\n" +
 	"\x16REASON_REWARD_BLOB_FEE\x10\x11\x12\x18\n" +
 	"\x14REASON_INCREASE_MINT\x10\x12\x12\x11\n" +
-	"\rREASON_REVERT\x10\x13\"{\n" +
+	"\rREASON_REVERT\x10\x13B\x13\n" +
+	"\x11_withdrawal_index\"{\n" +
 	"\vNonceChange\x12\x18\n" +
 	"\aaddress\x18\x01 \x01(\fR\aaddress\x12\x1b\n" +
 	"\told_value\x18\x02 \x01(\x04R\boldValue\x12\x1b\n" +
@@ -3647,6 +3660,7 @@ func file_sf_ethereum_type_v2_type_proto_init() {
 	file_sf_ethereum_type_v2_type_proto_msgTypes[7].OneofWrappers = []any{}
 	file_sf_ethereum_type_v2_type_proto_msgTypes[8].OneofWrappers = []any{}
 	file_sf_ethereum_type_v2_type_proto_msgTypes[10].OneofWrappers = []any{}
+	file_sf_ethereum_type_v2_type_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
