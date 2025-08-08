@@ -883,11 +883,6 @@ message BalanceChange {
   // The block's global ordinal when the balance change was recorded, refer to [Block]
   // documentation for further information about ordinals and total ordering.
   uint64 ordinal = 5;
-
-  // WithdrawalIndex links this balance change to a specific withdrawal when reason is REASON_WITHDRAWAL.
-  // This is the index in Block.withdrawals that caused this balance change.
-  // Only present for REASON_WITHDRAWAL balance changes.
-  optional uint64 withdrawal_index = 6;
 }
 
 message NonceChange {

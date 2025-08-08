@@ -1,3 +1,3 @@
-generate.sh - Thu Aug  7 13:36:16 EDT 2025 - davidzh
+generate.sh - Fri Aug  8 16:11:57 EDT 2025 - davidzh
 streamingfast/proto revision: 
-streamingfast/firehose-ethereum/proto revision: 717f0e2
+streamingfast/firehose-ethereum/proto revision: 407fc26
