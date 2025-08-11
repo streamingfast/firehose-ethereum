@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/streamingfast/cli"
 	"path"
 	"strconv"
 	"strings"
@@ -78,8 +79,17 @@ func newFirehoseTracerPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobr
 	cmd := &cobra.Command{
 		Use:   "firehose-tracer-api <rpc-endpoint> <first-streamable-block>",
 		Short: "poll blocks using debug_traceFirehoseBlockByNumber",
-		Args:  cobra.ExactArgs(2),
-		RunE:  pollerRunEForTracer(logger),
+		Long: cli.Dedent(`
+			This poller connects to a Firehose-enabled RPC endpoint and fetches
+			blocks using the "debug_traceFirehoseBlockByNumber" method. It retrieves the
+			full Firehose block data along with execution traces, enabling advanced debugging
+			and block-level analysis.
+
+			*Experimental*: This tool is not production-ready. Intended for development
+			and debugging purposes only. 
+		`),
+		Args: cobra.ExactArgs(2),
+		RunE: pollerRunEForTracer(logger),
 	}
 	cmd.Flags().Duration("interval-between-fetch", 0, "interval between fetch")
 	cmd.Flags().Duration("max-block-fetch-duration", 5*time.Second, "maximum delay before retrying a block fetch")
