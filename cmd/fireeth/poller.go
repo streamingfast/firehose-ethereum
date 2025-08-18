@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/streamingfast/cli"
 	"path"
 	"strconv"
 	"strings"
@@ -31,6 +32,7 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	cmd.AddCommand(newOptimismPollerCmd(logger, tracer))
 	cmd.AddCommand(newArbOnePollerCmd(logger, tracer))
 	cmd.AddCommand(newGenericEVMPollerCmd(logger, tracer))
+	cmd.AddCommand(newFirehoseTracerPollerCmd(logger, tracer))
 	return cmd
 }
 
@@ -73,7 +75,37 @@ func newGenericEVMPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Co
 	return cmd
 }
 
+func newFirehoseTracerPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "firehose-tracer-api <rpc-endpoint> <first-streamable-block>",
+		Short: "poll blocks using debug_traceFirehoseBlockByNumber",
+		Long: cli.Dedent(`
+			This poller connects to a Firehose-enabled RPC endpoint and fetches
+			blocks using the "debug_traceFirehoseBlockByNumber" method. It retrieves the
+			full Firehose block data along with execution traces, enabling advanced debugging
+			and block-level analysis.
+
+			*Experimental*: This tool is not production-ready. Intended for development
+			and debugging purposes only. 
+		`),
+		Args: cobra.ExactArgs(2),
+		RunE: pollerRunEForTracer(logger),
+	}
+	cmd.Flags().Duration("interval-between-fetch", 0, "interval between fetch")
+	cmd.Flags().Duration("max-block-fetch-duration", 5*time.Second, "maximum delay before retrying a block fetch")
+
+	return cmd
+}
+
 func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecutor {
+	return pollerRunEInternal(logger, tracer, false)
+}
+
+func pollerRunEForTracer(logger *zap.Logger) func(cmd *cobra.Command, args []string) error {
+	return pollerRunEInternal(logger, nil, true)
+}
+
+func pollerRunEInternal(logger *zap.Logger, tracer logging.Tracer, useTracer bool) firecore.CommandExecutor {
 	return func(cmd *cobra.Command, args []string) (err error) {
 		rpcEndpoint := args[0]
 		//dataDir := cmd.Flag("data-dir").Value.String()
@@ -111,7 +143,12 @@ func pollerRunE(logger *zap.Logger, tracer logging.Tracer) firecore.CommandExecu
 
 		rpcClients.Add(rpc.NewClient(rpcEndpoint, opts...))
 
-		fetcher := blockfetcher.NewGenericBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, sflags.MustGetBool(cmd, "allow-empty-receipts-on-block-0"), logger)
+		var fetcher blockpoller.BlockFetcher[*rpc.Client]
+		if useTracer {
+			fetcher = blockfetcher.NewTracerBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, sflags.MustGetBool(cmd, "allow-empty-receipts-on-block-0"), logger)
+		} else {
+			fetcher = blockfetcher.NewGenericBlockFetcher(fetchInterval, 1*time.Second, parallelWorkers, sflags.MustGetBool(cmd, "allow-empty-receipts-on-block-0"), logger)
+		}
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New[*rpc.Client](fetcher, handler, rpcClients, blockpoller.WithStoringState[*rpc.Client](stateDir), blockpoller.WithLogger[*rpc.Client](logger))
 
