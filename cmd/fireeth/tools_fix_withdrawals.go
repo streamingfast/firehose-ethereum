@@ -118,6 +118,11 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 					ethBlock.Withdrawals = nil
 				}
 
+				balanceChangeWithdrawalCount := countBalanceChangeWithdrawal(ethBlock)
+				if balanceChangeWithdrawalCount > 0 && len(ethBlock.Withdrawals) != balanceChangeWithdrawalCount {
+					return fmt.Errorf("sanity check, mismatch between RPC withdrawals and balance changes: %w", err)
+				}
+
 				block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
 				if err != nil {
 					return fmt.Errorf("re-packing the block: %w", err)
@@ -186,4 +191,14 @@ func convertRPCWithdrawalsToPB(in interface{}) []*pbeth.Withdrawal {
 	}
 	// Fallback no-op if unexpected type
 	return nil
+}
+
+func countBalanceChangeWithdrawal(block *pbeth.Block) int {
+	count := 0
+	for _, bc := range block.BalanceChanges {
+		if bc.Reason == pbeth.BalanceChange_REASON_WITHDRAWAL {
+			count += 1
+		}
+	}
+	return count
 }
