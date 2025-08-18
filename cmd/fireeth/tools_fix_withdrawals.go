@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -93,7 +94,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 			i := 0
 			for {
 				block, err := br.Read()
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					break
 				}
 				if err != nil {

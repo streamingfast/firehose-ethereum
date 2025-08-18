@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -78,8 +79,11 @@ func createFixOrdinalsE(logger *zap.Logger) firecore.CommandExecutor {
 			i := 0
 			for {
 				block, err := br.Read()
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					break
+				}
+				if err != nil {
+					return fmt.Errorf("reading block from bundle %s: %w", filename, err)
 				}
 
 				ethBlock := &pbeth.Block{}
