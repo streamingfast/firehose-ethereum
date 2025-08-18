@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/streamingfast/eth-go"
 	"io"
 	"strings"
 
@@ -110,6 +111,10 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 				rpcBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.BlockNumber(ethBlock.Number), rpc.WithGetBlockFullTransaction())
 				if err != nil {
 					return fmt.Errorf("fetching rpc block %d: %w", ethBlock.Number, err)
+				}
+
+				if rpcBlock.Hash.String() != eth.Hash(ethBlock.Hash).String() {
+					return fmt.Errorf("rpc block hash mismatch for block %d: expected %s, got %s", ethBlock.Number, ethBlock.Hash, rpcBlock.Hash.String())
 				}
 
 				if rpcBlock.Withdrawals != nil {
