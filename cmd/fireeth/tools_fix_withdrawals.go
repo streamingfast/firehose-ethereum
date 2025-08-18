@@ -162,40 +162,20 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 }
 
 // convertRPCWithdrawalsToPB converts RPC block withdrawals to protobuf withdrawals
-func convertRPCWithdrawalsToPB(in interface{}) []*pbeth.Withdrawal {
-	// We accept interface{} here to avoid tight coupling on the exact rpc.Withdrawal type.
-	// However, we know eth-go exposes it as []rpc.Withdrawal. Perform a type assertion accordingly.
-	if in == nil {
+func convertRPCWithdrawalsToPB(ws []rpc.Withdrawal) []*pbeth.Withdrawal {
+	if ws == nil {
 		return nil
 	}
-	// Try common concrete types
-	if ws, ok := in.([]rpc.Withdrawal); ok {
-		out := make([]*pbeth.Withdrawal, len(ws))
-		for i := range ws {
-			out[i] = &pbeth.Withdrawal{
-				Index:          uint64(ws[i].Index),
-				ValidatorIndex: uint64(ws[i].Validator),
-				Address:        ws[i].Address.Bytes(),
-				Amount:         uint64(ws[i].Amount),
-			}
+	out := make([]*pbeth.Withdrawal, len(ws))
+	for i := range ws {
+		out[i] = &pbeth.Withdrawal{
+			Index:          uint64(ws[i].Index),
+			ValidatorIndex: uint64(ws[i].Validator),
+			Address:        ws[i].Address.Bytes(),
+			Amount:         uint64(ws[i].Amount),
 		}
-		return out
 	}
-	if wps, ok := in.(*[]rpc.Withdrawal); ok && wps != nil {
-		ws := *wps
-		out := make([]*pbeth.Withdrawal, len(ws))
-		for i := range ws {
-			out[i] = &pbeth.Withdrawal{
-				Index:          uint64(ws[i].Index),
-				ValidatorIndex: uint64(ws[i].Validator),
-				Address:        ws[i].Address.Bytes(),
-				Amount:         uint64(ws[i].Amount),
-			}
-		}
-		return out
-	}
-	// Fallback no-op if unexpected type
-	return nil
+	return out
 }
 
 func countBalanceChangeWithdrawal(block *pbeth.Block) int {
