@@ -108,7 +108,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 				}
 
 				// Fetch withdrawals from RPC and populate the block
-				rpcBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.BlockNumber(ethBlock.Number), rpc.WithGetBlockFullTransaction())
+				rpcBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.BlockNumber(ethBlock.Number))
 				if err != nil {
 					return fmt.Errorf("fetching rpc block %d: %w", ethBlock.Number, err)
 				}
