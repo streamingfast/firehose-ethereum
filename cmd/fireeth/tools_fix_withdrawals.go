@@ -135,7 +135,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 				blocks[i] = block
 				i++
 			}
-			if !(i == 99 || i == 100) {
+			if i != 100 {
 				fmt.Printf("ERROR: incorrect block count in merged file %s: read %d blocks, expected 100 (start_block=%d)\n", filename, i, startBlock)
 				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", i)
 			}
