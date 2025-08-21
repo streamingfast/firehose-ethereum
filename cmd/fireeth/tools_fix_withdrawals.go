@@ -3,9 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/streamingfast/eth-go"
 	"io"
+	"runtime"
 	"strings"
+	"sync"
+
+	"github.com/streamingfast/eth-go"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
@@ -26,7 +29,8 @@ func newFixWithdrawalsCmd(logger *zap.Logger) *cobra.Command {
 		RunE:  createFixWithdrawalsE(logger),
 	}
 
-	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each RPC request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
+	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "Headers to send with each RPC request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
+	cmd.PersistentFlags().Int("max-concurrency", 0, "Maximum number of concurrent block processing jobs within a file (0 = auto-detect: GOMAXPROCS)")
 	return cmd
 }
 
@@ -58,10 +62,27 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 
 		start := mustParseUint64(args[3])
 		stop := mustParseUint64(args[4])
+		maxConcurrency := sflags.MustGetInt(cmd, "max-concurrency")
+
+		if maxConcurrency == 0 {
+			maxConcurrency = runtime.GOMAXPROCS(0)
+			if maxConcurrency < 1 {
+				maxConcurrency = 1
+			}
+		}
 
 		if stop <= start {
 			return fmt.Errorf("stop block must be greater than start block")
 		}
+
+		logger.Info("starting fix withdrawals processing",
+			zap.String("src_store", args[0]),
+			zap.String("dest_store", args[1]),
+			zap.String("rpc_endpoint", rpcEndpoint),
+			zap.Uint64("start_block", start),
+			zap.Uint64("stop_block", stop),
+			zap.Int("max_concurrency", maxConcurrency),
+		)
 
 		lastFileProcessed := ""
 		startWalkFrom := fmt.Sprintf("%010d", start-(start%100))
@@ -91,8 +112,8 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 				return fmt.Errorf("creating block reader: %w", err)
 			}
 
-			blocks := make([]*pbbstream.Block, 100)
-			i := 0
+			// Read all blocks first
+			var rawBlocks []*pbbstream.Block
 			for {
 				block, err := br.Read()
 				if errors.Is(err, io.EOF) {
@@ -101,44 +122,80 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 				if err != nil {
 					return fmt.Errorf("reading block from bundle %s: %w", filename, err)
 				}
-
-				ethBlock := &pbeth.Block{}
-				if err := block.Payload.UnmarshalTo(ethBlock); err != nil {
-					return fmt.Errorf("unmarshaling eth block: %w", err)
-				}
-
-				// Fetch withdrawals from RPC and populate the block
-				rpcBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.BlockNumber(ethBlock.Number))
-				if err != nil {
-					return fmt.Errorf("fetching rpc block %d: %w", ethBlock.Number, err)
-				}
-
-				if rpcBlock.Hash.String() != eth.Hash(ethBlock.Hash).String() {
-					return fmt.Errorf("rpc block hash mismatch for block %d: expected %s, got %s", ethBlock.Number, ethBlock.Hash, rpcBlock.Hash.String())
-				}
-
-				if rpcBlock.Withdrawals != nil {
-					ethBlock.Withdrawals = convertRPCWithdrawalsToPB(rpcBlock.Withdrawals)
-				} else {
-					ethBlock.Withdrawals = nil
-				}
-
-				balanceChangeWithdrawalCount := countBalanceChangeWithdrawal(ethBlock)
-				if balanceChangeWithdrawalCount > 0 && len(ethBlock.Withdrawals) != balanceChangeWithdrawalCount {
-					return fmt.Errorf("sanity check, mismatch between RPC withdrawals and balance changes: %w", err)
-				}
-
-				block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
-				if err != nil {
-					return fmt.Errorf("re-packing the block: %w", err)
-				}
-				blocks[i] = block
-				i++
+				rawBlocks = append(rawBlocks, block)
 			}
-			if i != 100 {
-				fmt.Printf("ERROR: incorrect block count in merged file %s: read %d blocks, expected 100 (start_block=%d)\n", filename, i, startBlock)
-				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", i)
+
+			if len(rawBlocks) != 100 {
+				fmt.Printf("ERROR: incorrect block count in merged file %s: read %d blocks, expected 100 (start_block=%d)\n", filename, len(rawBlocks), startBlock)
+				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", len(rawBlocks))
 			}
+
+			// Process blocks in parallel
+			blocks := make([]*pbbstream.Block, 100)
+			semaphore := make(chan struct{}, maxConcurrency)
+			var wg sync.WaitGroup
+			errorCh := make(chan error, len(rawBlocks))
+
+			for i, rawBlock := range rawBlocks {
+				wg.Add(1)
+				go func(index int, block *pbbstream.Block) {
+					defer wg.Done()
+					semaphore <- struct{}{}        // Acquire semaphore
+					defer func() { <-semaphore }() // Release semaphore
+
+					ethBlock := &pbeth.Block{}
+					if err := block.Payload.UnmarshalTo(ethBlock); err != nil {
+						errorCh <- fmt.Errorf("unmarshaling eth block: %w", err)
+						return
+					}
+
+					// Fetch withdrawals from RPC and populate the block
+					rpcBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.BlockNumber(ethBlock.Number))
+					if err != nil {
+						errorCh <- fmt.Errorf("fetching rpc block %d: %w", ethBlock.Number, err)
+						return
+					}
+
+					if rpcBlock.Hash.String() != eth.Hash(ethBlock.Hash).String() {
+						errorCh <- fmt.Errorf("rpc block hash mismatch for block %d: expected %s, got %s", ethBlock.Number, ethBlock.Hash, rpcBlock.Hash.String())
+						return
+					}
+
+					if rpcBlock.Withdrawals != nil {
+						ethBlock.Withdrawals = convertRPCWithdrawalsToPB(rpcBlock.Withdrawals)
+					} else {
+						ethBlock.Withdrawals = nil
+					}
+
+					balanceChangeWithdrawalCount := countBalanceChangeWithdrawal(ethBlock)
+					if balanceChangeWithdrawalCount > 0 && len(ethBlock.Withdrawals) != balanceChangeWithdrawalCount {
+						errorCh <- fmt.Errorf("sanity check, mismatch between RPC withdrawals and balance changes for block %d", ethBlock.Number)
+						return
+					}
+
+					processedBlock, err := blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
+					if err != nil {
+						errorCh <- fmt.Errorf("re-packing the block: %w", err)
+						return
+					}
+
+					blocks[index] = processedBlock
+				}(i, rawBlock)
+			}
+
+			// Wait for all jobs to complete
+			wg.Wait()
+			close(errorCh)
+
+			// Check for errors
+			var allErrs error
+			for err := range errorCh {
+				allErrs = errors.Join(allErrs, err)
+			}
+			if allErrs != nil {
+				return fmt.Errorf("errors encountered while processing blocks: %w", allErrs)
+			}
+
 			if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
 				return fmt.Errorf("writing merged block %d: %w", startBlock, err)
 			}
