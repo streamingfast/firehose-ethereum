@@ -4,9 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.13.0
 
-### Substreams
+### Substreams (v1.16.4)
 
 #### Tier1 thread / memory leak
 
@@ -31,7 +31,7 @@ People using their own authentication layer will need to consider these changes 
 
 ## v2.12.4
 
-### Substreams (v1.6.2)
+### Substreams (v1.16.2)
 
 * **Added** mechanism to immediately cancel pending requests that are doing an 'external call' (ex: eth_call) on a given block when it gets forked out (UNDO because of a reorg).
 * **Fixed** handling of invalid module kind: prevent heavy logging from recovered panic
