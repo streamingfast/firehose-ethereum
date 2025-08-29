@@ -8,6 +8,7 @@ for instructions to keep up to date.
 
 ### Substreams
 
+* Fix a slow memory leak around metering plugin on tier2
 * Add a maximum execution time for a full tier2 segment. By default, this is 60 minutes. It will fail with `rpc error: code = DeadlineExceeded desc = request active for too long`.
   It can be configured from the --substreams-tier2-segment-execution-timeout flag
 * Improve log message for 'request active for a long time', adding stats.
