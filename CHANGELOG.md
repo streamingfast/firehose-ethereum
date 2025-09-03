@@ -11,8 +11,8 @@ for instructions to keep up to date.
 * Fix a slow memory leak around metering plugin on tier2
 * Add a maximum execution time for a full tier2 segment. By default, this is 60 minutes. It will fail with `rpc error: code = DeadlineExceeded desc = request active for too long`.
   It can be configured from the --substreams-tier2-segment-execution-timeout flag
+* Fix `subscription channel at max capacity` error: when the LIVE channel is full (ex: slow module execution or slow client reader), the request will be continued from merged files instead of failing, and gracefully recover if performance is restored.
 * Improve log message for 'request active for a long time', adding stats.
-
 
 ## v2.13.0
 
