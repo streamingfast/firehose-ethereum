@@ -8,6 +8,37 @@ for instructions to keep up to date.
 
 ### Substreams
 
+#### Metering
+
+* 'paymentgateway' metering plugin renamed to `tgm`,  now supports the `indexer-api-key` parameter.
+
+#### Session (stream + workers management)
+
+* Concurrent streams and workers limits are now handled under the new session plugin, available under `common-session-plugin` argument.
+
+* The following flags were removed, now handled by that session plugin
+  - `substreams-tier1-global-worker-pool-address`
+  - `substreams-tier1-global-request-pool-address`
+  - `substreams-tier1-global-worker-pool-keep-alive-delay`
+  - `substreams-tier1-global-request-pool-keep-alive-delay`
+  - `substreams-tier1-default-max-request-per-use`
+  - `substreams-tier1-default-minimal-request-life-time-second`
+
+* To use thegraph.market as a session plugin, use:
+  `--common-session-plugin=tgm://session.thegraph.market:443?indexer-api-key={your-api-key}` (requires specific indexer API key)
+  see https://github.com/streamingfast/tgm-gateway/tree/develop/session for details on the various flags
+
+* To use simple local session management, use:
+  `--common-session-plugin=local://?max_sessions=30&max_sessions_per_user=3&max_workers_per_user=10&max_workers_per_session=10`
+  see https://github.com/streamingfast/dsession/tree/main/local for details on those flags
+
+* Note: The 'max_sessions' parameter from the `common-session-plugin` is now also used to limit the number of firehose streams.
+
+* If you were using a custom GRPC implementation for `--substreams-tier1-global-worker-pool-address` and `--substreams-tier1-global-request-pool-address` (ex: localhost:9010),
+  simply use this value for the session plugin: `--common-session-plugin=tgm://localhost:9010?plaintext=true`, it is compatible.
+
+#### Stability
+
 * Fix a slow memory leak around metering plugin on tier2
 * Add a maximum execution time for a full tier2 segment. By default, this is 60 minutes. It will fail with `rpc error: code = DeadlineExceeded desc = request active for too long`.
   It can be configured from the --substreams-tier2-segment-execution-timeout flag

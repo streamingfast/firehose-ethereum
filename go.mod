@@ -23,14 +23,14 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20250609173504-95368d3441ee
 	github.com/streamingfast/eth-go v0.0.0-20250708154602-9bdf3066da2d
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.11.1-0.20250829190112-307c4ea1c82c
+	github.com/streamingfast/firehose-core v1.11.1-0.20250909174352-126dba718031
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250722143355-70c7a52801d0
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.16.5-0.20250903193207-0703a4be2984
-	github.com/stretchr/testify v1.10.0
+	github.com/streamingfast/substreams v1.16.5-0.20250909173306-f28c1dbdd21a
+	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
 	go.uber.org/multierr v1.10.0
@@ -177,13 +177,14 @@ require (
 	github.com/streamingfast/dgrpc v0.0.0-20250423172640-223250ed2391 // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20250606124734-944cf3e4959e // indirect
+	github.com/streamingfast/dsession v0.0.0-20250904235523-ffe9952a12d3 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
 	github.com/streamingfast/firehose-networks v0.2.1 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
-	github.com/streamingfast/payment-gateway v0.0.0-20250825184251-4c08f2a91f22 // indirect
+	github.com/streamingfast/payment-gateway v0.0.0-20250909154213-47fe68ec6f34 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20240430173521-888827872b90 // indirect
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
-	github.com/streamingfast/worker-pool-protocol v0.0.0-20250218145136-4ad271e36e39 // indirect
+	github.com/streamingfast/worker-pool-protocol v0.0.0-20250826200931-136a043ecece // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tetratelabs/wazero v1.8.0 // indirect
