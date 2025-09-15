@@ -470,7 +470,7 @@ func toFilledBytes(t testing.T, in string, length int) []byte {
 		copy(copied, out)
 		out = copied
 	} else {
-		// Necessarly longer
+		// Necessarily longer
 		out = out[0:length]
 	}
 
