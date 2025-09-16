@@ -4,6 +4,84 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.13.1
+
+### Substreams
+
+#### Metering
+
+* 'paymentgateway' metering plugin renamed to `tgm`,  now supports the `indexer-api-key` parameter.
+
+#### Session (stream + workers management)
+
+* Concurrent streams and workers limits are now handled under the new session plugin, available under `common-session-plugin` argument.
+
+* The following flags were removed, now handled by that session plugin
+  - `substreams-tier1-global-worker-pool-address`
+  - `substreams-tier1-global-request-pool-address`
+  - `substreams-tier1-global-worker-pool-keep-alive-delay`
+  - `substreams-tier1-global-request-pool-keep-alive-delay`
+  - `substreams-tier1-default-max-request-per-use`
+  - `substreams-tier1-default-minimal-request-life-time-second`
+
+* To use thegraph.market as a session plugin, use:
+  `--common-session-plugin=tgm://session.thegraph.market:443?indexer-api-key={your-api-key}` (requires specific indexer API key)
+  see https://github.com/streamingfast/tgm-gateway/tree/develop/session for details on the various flags
+
+* To use simple local session management, use:
+  `--common-session-plugin=local://?max_sessions=30&max_sessions_per_user=3&max_workers_per_user=10&max_workers_per_session=10`
+  see https://github.com/streamingfast/dsession/tree/main/local for details on those flags
+
+* Note: The 'max_sessions' parameter from the `common-session-plugin` is now also used to limit the number of firehose streams.
+
+* If you were using a custom GRPC implementation for `--substreams-tier1-global-worker-pool-address` and `--substreams-tier1-global-request-pool-address` (ex: localhost:9010),
+  simply use this value for the session plugin: `--common-session-plugin=tgm://localhost:9010?plaintext=true`, it is compatible.
+
+#### Stability
+
+* Fix a slow memory leak around metering plugin on tier2
+* Add a maximum execution time for a full tier2 segment. By default, this is 60 minutes. It will fail with `rpc error: code = DeadlineExceeded desc = request active for too long`.
+  It can be configured from the --substreams-tier2-segment-execution-timeout flag
+* Fix `subscription channel at max capacity` error: when the LIVE channel is full (ex: slow module execution or slow client reader), the request will be continued from merged files instead of failing, and gracefully recover if performance is restored.
+* Improve log message for 'request active for a long time', adding stats.
+
+## v2.13.0
+
+### Substreams (v1.16.4)
+
+#### Tier1 thread / memory leak
+
+* Fix thread leak on filereader (tier1)
+
+#### Authentication changes
+
+People using their own authentication layer will need to consider these changes before upgrading!
+
+* Renamed config headers that come from authentication layer:
+  - `x-sf-user-id` renamed to `x-user-id` (from dauth module)
+  - `x-sf-api-key-id` renamed to `x-api-key-id` (from dauth module)
+  - `x-sf-meta` renamed to `x-meta` (from dauth module)
+  - `x-sf-substreams-parallel-jobs` renamed to `x-substreams-parallel-workers`
+* Allow decreasing `x-substreams-parallel-workers` through an HTTP headers (auth layer determines higher bound)
+* Detect value for the 'stage layer parallel executor max count' based on the `x-plan-tier` header (removed `x-sf-substreams-stage-layer-parallel-executor-max-count` handling)
+
+#### New authentication plugin
+
+* Added `tgm://auth.thegraph.market?indexer-api-key=<API_KEY>&reissue-jwt-max-age-secs=600` plugin that allows an indexer to use The Graph Market as the authentication source.
+  An API key with special "indexer" feature is needed to allow repeated calls to the API without rate limiting (for Key-based authentication and reissuance of "untrusted long-lived JWTs").
+
+## v2.12.4
+
+### Substreams (v1.16.2)
+
+* **Added** mechanism to immediately cancel pending requests that are doing an 'external call' (ex: eth_call) on a given block when it gets forked out (UNDO because of a reorg).
+* **Fixed** handling of invalid module kind: prevent heavy logging from recovered panic
+* Error considered deterministic which will cache the error forever are now suffixed with `<original message> (deterministic error)`.
+
+## v2.12.3
+
+(removed release with wrong substreams version)
+
 ## v2.12.2
 
 ### Substreams

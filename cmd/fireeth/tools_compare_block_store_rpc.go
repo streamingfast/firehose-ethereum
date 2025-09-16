@@ -35,7 +35,7 @@ import (
 func newCompareBlocksStoreRPCCmd(logger *zap.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "compare-block-store-rpc <merged-blocks-store> <rpc-endpoint> <start-block> <stop-block>",
-		Short: "Checks for any differences between a merged blocks store and and RPC endpoint (get_block with full transactions) for a specified range.",
+		Short: "Checks for any differences between a merged blocks store and RPC endpoint (get_block with full transactions) for a specified range.",
 		Long: cli.Dedent(`
 			The 'compare-blocks-rpc' takes in a merged blocks store URL (local or in the cloud), an RPC endpoint URL and inclusive start/stop block numbers.
 		`),

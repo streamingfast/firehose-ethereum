@@ -415,7 +415,10 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 				} else {
 					lastErrorStr = "no errors"
 				}
-				return nil, false, fmt.Errorf("timeout while doing eth_call, waiting for rpc provider for %s (%d attempt(s), %s). Call details: %s", time.Since(lastRequestSince), attemptNumber, lastErrorStr, string(callDesc))
+
+				cancelCause := context.Cause(ctx)
+				return nil, false, fmt.Errorf("timeout while doing eth_call, waiting for rpc provider for %s (%d attempt(s), %s). Call details: %s, cause: %w", time.Since(lastRequestSince), attemptNumber, lastErrorStr, string(callDesc), cancelCause)
+
 			}
 
 			// Never retry on retry attempted max count
