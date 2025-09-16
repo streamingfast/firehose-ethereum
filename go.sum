@@ -2197,6 +2197,8 @@ github.com/streamingfast/bstream v0.0.2-0.20250903174843-9c884c3356fd h1:CXp4kPA
 github.com/streamingfast/bstream v0.0.2-0.20250903174843-9c884c3356fd/go.mod h1:YXtnOZbqcqU4fzGqdi8B7rMcp2iQePQGf4oTIPBnzgc=
 github.com/streamingfast/cli v0.0.4-0.20250424204306-678ec20cedec h1:7TZFCh5oGDoAA0+lWrYcPS3xRH7EC/cgaqiVxVhTA6E=
 github.com/streamingfast/cli v0.0.4-0.20250424204306-678ec20cedec/go.mod h1:qOksW3DPhHVYBo8dcYxS7K3Q09wlcOChSdopeOjLWng=
+github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b h1:ztYeX3/5rg2tV2EU7edcrcHzMz6wUbdJB+LqCrP5W8s=
+github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b/go.mod h1:o9R/tjNON01X2mgWL5qirl2MV6xQ4EZI5D504ST3K/M=
 github.com/streamingfast/dauth v0.0.0-20250821195214-8e2a3c300f97 h1:Lcack+Yv9KWBeKfRrjQ+KUegwHbh6/aFLJuDyYzcXZ4=
 github.com/streamingfast/dauth v0.0.0-20250821195214-8e2a3c300f97/go.mod h1:d8NTrjIoiqplrZEYOUXwwFaeB2C8fVeHYLvaJFfa9Xo=
 github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c h1:6WjE2yInE+5jnI7cmCcxOiGZiEs2FQm9Zsg2a9Ivp0Q=
@@ -2223,6 +2225,10 @@ github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd h1:t5n8dD
 github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd/go.mod h1:du6tys2Q6X2pRQ3JbCziWiy7Y7KrOcl4CSb9uiGsVxA=
 github.com/streamingfast/firehose-core v1.11.2-0.20250912122430-eb3fb55fe1e2 h1:XXd90gBEHlV3532uW9wdjZgnLefvG+9RaYc1OKeWVng=
 github.com/streamingfast/firehose-core v1.11.2-0.20250912122430-eb3fb55fe1e2/go.mod h1:I7pElWjDL9mExcEPk/Xhx3h71WMGw755TGSFwwEJyF0=
+github.com/streamingfast/firehose-core v1.11.2-0.20250915181842-3af941bd352c h1:2dOnyuY5K7sV5iGc7uqJmBzkJNPXm9XADMDzbRIRbR8=
+github.com/streamingfast/firehose-core v1.11.2-0.20250915181842-3af941bd352c/go.mod h1:iV7BiwfyGzcrLWNcQag+/qKMXNvFP51lh7zs2Bo5WwU=
+github.com/streamingfast/firehose-core v1.11.2-0.20250916142826-4a6f5b12c0f5 h1:MQ5D5YSwqJ+1vsK2cBnvli28jiNxDNJEx/Ej7BGqGzw=
+github.com/streamingfast/firehose-core v1.11.2-0.20250916142826-4a6f5b12c0f5/go.mod h1:iV7BiwfyGzcrLWNcQag+/qKMXNvFP51lh7zs2Bo5WwU=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20250818190452-3b0285ae9c58 h1:OvEq1FszYoqqmkD1aw2tM3vLG8jMe+aSJwoPv4AkbY0=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20250818190452-3b0285ae9c58/go.mod h1:CG22ObinxSbKIP19bAj0uro0a290kzZTiBbjL8VR0SE=
 github.com/streamingfast/firehose-networks v0.2.1 h1:+7CsJSi6HpjljRwRrLeJjrOGtJHfp6sCgdp7eh1DWDs=
@@ -2252,8 +2258,14 @@ github.com/streamingfast/shutter v1.5.0 h1:NpzDYzj0HVpSiDJVO/FFSL6QIK/YKOxY0gJAt
 github.com/streamingfast/shutter v1.5.0/go.mod h1:B/T6efqdeMGbGwjzPS1ToXzYZI4kDzI5/u4I+7qbjY8=
 github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 h1:Y15G1Z4fpEdm2b+/70owI7TLuXadlqBtGM7rk4Hxrzk=
 github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0/go.mod h1:/Rnz2TJvaShjUct0scZ9kKV2Jr9/+KBAoWy4UMYxgv4=
+github.com/streamingfast/substreams v1.15.9-0.20250704192321-19ee3ca8adbf h1:1Q5wR3W35EAmq8hObotk9OTgo1UHrsguuuTcwfwTZ4U=
+github.com/streamingfast/substreams v1.15.9-0.20250704192321-19ee3ca8adbf/go.mod h1:tPar3vTjNQoQkGVKOqa2W4OaFNAlHU3cdB++C/0OYnA=
 github.com/streamingfast/substreams v1.16.5 h1:5dES2ngYNHvyUjySeb/xtit8hDpxoH0l13EBHMGT8+s=
 github.com/streamingfast/substreams v1.16.5/go.mod h1:8uPvo6w5c9RFwSZkfRZ8HA8AzliC7/mHYv9oc7RweJk=
+github.com/streamingfast/substreams v1.16.6-0.20250912150824-d291f5f6c1c7 h1:cbT9E7KEuu+TND5zFGRlkBJbE/0AHORyfbtXqbpDIeY=
+github.com/streamingfast/substreams v1.16.6-0.20250912150824-d291f5f6c1c7/go.mod h1:HTkYK5N9Np887B/76+hAgf8+Xym9bNrBvD82dpsbB9w=
+github.com/streamingfast/substreams-foundational-store v0.1.1-0.20250912144020-b075d35bf78a h1:eSj5ghyD247ekt3QooQmIeBiXBkFuRYWkVNa1/303v4=
+github.com/streamingfast/substreams-foundational-store v0.1.1-0.20250912144020-b075d35bf78a/go.mod h1:J1CzU6dbj7VgGIc2L/nJKCQsjys3nhF+aTNWbyXw7OA=
 github.com/streamingfast/wazero v0.0.0-20241202185309-91287c3640ed h1:LU6/c376zP1cMAo9L6rFLyjo0W7RU+hIh7BegH8Zo5M=
 github.com/streamingfast/wazero v0.0.0-20241202185309-91287c3640ed/go.mod h1:yAI0XTsMBhREkM/YDAK/zNou3GoiAce1P6+rp/wQhjs=
 github.com/streamingfast/worker-pool-protocol v0.0.0-20250826200931-136a043ecece h1:TIVovgebbDP0JZBEn9PfDdSK+bze40to+gIZcxV7rsU=

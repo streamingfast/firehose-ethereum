@@ -17,19 +17,19 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	github.com/streamingfast/bstream v0.0.2-0.20250903174843-9c884c3356fd
-	github.com/streamingfast/cli v0.0.4-0.20250424204306-678ec20cedec
+	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250321151415-6b4fbbcb1bb5
 	github.com/streamingfast/dmetrics v0.0.0-20250711072030-f023e918a175
 	github.com/streamingfast/dstore v0.1.1-0.20250609173504-95368d3441ee
 	github.com/streamingfast/eth-go v0.0.0-20250914133932-bcf944f540f1
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.11.2-0.20250912122430-eb3fb55fe1e2
+	github.com/streamingfast/firehose-core v1.11.2-0.20250916142826-4a6f5b12c0f5
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250722143355-70c7a52801d0
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.16.5
+	github.com/streamingfast/substreams v1.16.6-0.20250912150824-d291f5f6c1c7
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -184,6 +184,7 @@ require (
 	github.com/streamingfast/payment-gateway v0.0.0-20250910205031-eaa05d2fd1b7 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20240430173521-888827872b90 // indirect
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
+	github.com/streamingfast/substreams-foundational-store v0.1.1-0.20250912144020-b075d35bf78a // indirect
 	github.com/streamingfast/worker-pool-protocol v0.0.0-20250826200931-136a043ecece // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
