@@ -1,6 +1,4 @@
-ARG COREVERSION="latest"
-
-FROM golang:1.24.2-bookworm AS build
+FROM golang:1.24-bookworm AS build
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -8,32 +6,34 @@ RUN go mod download
 
 COPY . ./
 
-# to get buildinfo in golang
-RUN apt-get update && apt-get -y install git
 ARG VERSION="dev"
-RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
-
-####
-
-FROM ghcr.io/streamingfast/firehose-core:${COREVERSION} as core
-
-####
+RUN apt-get update && apt-get install git
+RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/firecore
 
 FROM ubuntu:24.04
 
-ENV PATH "$PATH:/app"
+ARG TARGETPLATFORM
 
-COPY tools/fireeth/motd_generic /etc/motd
-COPY tools/fireeth/99-fireeth.sh /etc/profile.d/
-RUN echo ". /etc/profile.d/99-fireeth.sh" > /root/.bash_aliases
+# gettext-base is needed for envsubst
+RUN apt-get update && apt-get -y install ca-certificates htop iotop sysstat strace lsof curl jq tzdata file gettext-base
 
-RUN apt-get update && apt-get -y install ca-certificates htop iotop sysstat strace lsof curl jq tzdata
-
-RUN mkdir -p /app/ && curl -Lo /app/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.12/grpc_health_probe-linux-amd64 && chmod +x /app/grpc_health_probe
+RUN mkdir -p /app/ && \
+    export repository="https://github.com/grpc-ecosystem/grpc-health-probe/releases/download" && \
+    export version="v0.4.12" && \
+    curl --fail-with-body -Lo /app/grpc_health_probe "$repository/$version/grpc_health_probe-$(echo $TARGETPLATFORM | sed 's|/|-|')" && \
+    chmod +x /app/grpc_health_probe
 
 WORKDIR /app
 
 COPY --from=build /app/fireeth /app/fireeth
-COPY --from=core /app/firecore /app/firecore
 
-ENTRYPOINT ["/app/fireeth"]
+ENV PATH="$PATH:/app"
+
+#COPY docker/motd /etc/motd
+#COPY docker/motd_reader /etc/motd_reader
+#COPY docker/99-firehose-core.sh /etc/profile.d/
+#COPY docker/scripts/ /app/
+RUN chmod +x /app/reader-*
+RUN echo ". /etc/profile.d/99-firehose-core.sh" > /root/.bash_aliases
+
+ENTRYPOINT [ "/app/firecore" ]
