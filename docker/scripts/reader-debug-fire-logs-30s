@@ -1,0 +1,13 @@
+#!/bin/bash
+
+port="${FIREETH_READER_NODE_MANAGER_API_PORT:-10011}"
+
+# description: Stop reader-node process for maintenance, start it back with debug firehose enabled, wait 60s and remove the flag
+curl -sS -XPOST "http://localhost:$port/v1/maintenance?sync=true"
+curl -sS -XPOST -d "debug-firehose-logs=true" "http://localhost:$port/v1/resume?sync=true"
+
+# We give 10s more than 30s to account for startup time of reader node process
+sleep 40s
+
+curl -sS -XPOST "http://localhost:$port/v1/maintenance?sync=true"
+curl -sS -XPOST -d "debug-firehose-logs=false" "http://localhost:$port/v1/resume?sync=true"

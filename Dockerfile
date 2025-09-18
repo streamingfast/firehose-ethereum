@@ -8,7 +8,7 @@ COPY . ./
 
 ARG VERSION="dev"
 RUN apt-get update && apt-get install git
-RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/firecore
+RUN go build -v -ldflags "-X main.version=${VERSION}" ./cmd/fireeth
 
 FROM ubuntu:24.04
 
@@ -29,11 +29,11 @@ COPY --from=build /app/fireeth /app/fireeth
 
 ENV PATH="$PATH:/app"
 
-#COPY docker/motd /etc/motd
-#COPY docker/motd_reader /etc/motd_reader
-#COPY docker/99-firehose-core.sh /etc/profile.d/
-#COPY docker/scripts/ /app/
+COPY docker/motd /etc/motd
+COPY docker/motd_reader /etc/motd_reader
+COPY docker/99-firehose-ethereum.sh /etc/profile.d/
+COPY docker/scripts/ /app/
 RUN chmod +x /app/reader-*
 RUN echo ". /etc/profile.d/99-firehose-core.sh" > /root/.bash_aliases
 
-ENTRYPOINT [ "/app/firecore" ]
+ENTRYPOINT [ "/app/fireeth" ]

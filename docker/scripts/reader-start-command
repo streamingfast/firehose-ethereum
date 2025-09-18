@@ -1,0 +1,5 @@
+#!/bin/bash
+
+port="${FIREETH_READER_NODE_MANAGER_API_PORT:-10011}"
+
+curl -sS -XGET "http://localhost:$port/v1/start_command"

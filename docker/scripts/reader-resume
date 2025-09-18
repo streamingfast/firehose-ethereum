@@ -1,0 +1,6 @@
+#!/bin/bash
+# description: Start reader node subprocess after maintenance
+
+port="${FIREETH_READER_NODE_MANAGER_API_PORT:-10011}"
+
+curl -sS -XPOST "http://localhost:$port/v1/resume?sync=true"

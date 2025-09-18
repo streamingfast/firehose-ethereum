@@ -1,0 +1,10 @@
+#!/bin/bash
+
+port="${FIREETH_READER_NODE_MANAGER_API_PORT:-10011}"
+
+# description: prints either 'syncing' if this node is catching up with the network
+if curl "http://localhost:${port}/v1/is_running" 2> /dev/null | grep -q "true"; then
+	echo Running
+else
+	echo "Not running"
+fi

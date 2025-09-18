@@ -1,0 +1,6 @@
+#!/bin/bash
+# description: Stop reader-node process for maintenance
+
+port="${FIREETH_READER_NODE_MANAGER_API_PORT:-10011}"
+
+curl -sS -XPOST "http://localhost:$port/v1/maintenance?sync=true"
