@@ -23,13 +23,13 @@ require (
 	github.com/streamingfast/dstore v0.1.1-0.20250609173504-95368d3441ee
 	github.com/streamingfast/eth-go v0.0.0-20250914133932-bcf944f540f1
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.11.2-0.20250916142826-4a6f5b12c0f5
+	github.com/streamingfast/firehose-core v1.11.2-0.20250924130640-4cb707f7cec7
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250722143355-70c7a52801d0
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.16.6-0.20250912150824-d291f5f6c1c7
+	github.com/streamingfast/substreams v1.16.6-0.20250924125432-bee8c3d20e4c
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -78,7 +78,7 @@ require (
 	github.com/bobg/go-generics/v3 v3.5.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.5 // indirect
 	github.com/bufbuild/protocompile v0.4.0 // indirect
-	github.com/bytecodealliance/wasmtime-go/v30 v30.0.0 // indirect
+	github.com/bytecodealliance/wasmtime-go/v36 v36.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
