@@ -66,7 +66,7 @@ function checks() {
     echo "  go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26.0"
     echo "  go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0"
     echo ""
-    echo "If everything is working as expetcted, the command:"
+    echo "If everything is working as expected, the command:"
     echo ""
     echo "  protoc-gen-go --version"
     echo ""
