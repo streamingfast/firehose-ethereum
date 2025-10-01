@@ -1,6 +1,6 @@
 ARG CORE_VERSION=b2cf970
 
-FROM golang:1.23.4-alpine as build
+FROM golang:1.24.2-alpine as build
 WORKDIR /app
 
 COPY go.mod go.sum ./
