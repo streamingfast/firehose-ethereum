@@ -57,17 +57,27 @@ import "google/protobuf/timestamp.proto";
 // once they occur, regardless of transaction outcome.
 //
 // The following state changes are typically preserved even for failed transactions:
-// - Gas consumption (REASON_GAS_BUY, REASON_INTRINSIC_GAS): Gas is always consumed
+// - Gas consumption (BalanceChange.REASON_GAS_BUY, GasChange.REASON_INTRINSIC_GAS): Gas is always consumed
 //   when a transaction is processed, even if execution fails
-// - Gas refunds (REASON_GAS_REFUND): Gas refunds are processed regardless of transaction outcome
+// - Gas refunds (BalanceChange.REASON_GAS_REFUND): Gas refunds are processed regardless of transaction outcome
 // - Nonce increments: The sender's nonce is incremented to prevent replay attacks
-// - Transaction fees (REASON_REWARD_TRANSACTION_FEE): Miners receive fees regardless
+// - Transaction fees (BalanceChange.REASON_REWARD_TRANSACTION_FEE): Miners receive fees regardless
 //   of transaction success to compensate for computational work
 //
 // However, value transfers, contract state changes, and other application-level
 // modifications are reverted on transaction failure. When processing failed
 // transactions, applications should filter state changes appropriately based on
 // their specific requirements and the transaction's success status.
+//
+// ## SetCode Transaction Handling (EIP-7702)
+//
+// SetCode transactions (TRX_TYPE_SET_CODE) require special handling for nonce and code changes.
+// According to EIP-7702, nonce changes and code changes for each accepted authorization in the
+// transaction should be recorded in the state even if the transaction fails. When processing
+// SetCode transactions, both NonceChange and CodeChange entries will be present for each
+// authorized account, with the transaction sender's nonce change appearing first without a
+// corresponding code change. Applications must handle these state changes appropriately,
+// preserving them regardless of transaction success status to maintain EIP-7702 compliance.
 message Block {
   // Hash is the block's hash.
   bytes hash = 2;
