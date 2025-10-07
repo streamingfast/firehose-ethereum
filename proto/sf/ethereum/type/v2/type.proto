@@ -909,11 +909,13 @@ message BalanceChange {
     
     // REASON_GAS_BUY is spent to purchase gas for executing a transaction.
     // The transaction sender's balance is decreased by gasLimit * gasPrice at transaction start.
+    // Note: This balance change persists even for failed transactions (see Block documentation).
     // See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L306
     REASON_GAS_BUY = 7;
     
     // REASON_REWARD_TRANSACTION_FEE is the transaction tip increasing block builder's balance.
     // The coinbase (block miner) receives the transaction fees as a reward.
+    // Note: This balance change persists even for failed transactions (see Block documentation).
     // See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L560
     REASON_REWARD_TRANSACTION_FEE = 8;
     
@@ -1021,19 +1023,20 @@ message GasChange {
     REASON_UNKNOWN = 0;
     
     // REASON_CALL is the amount of gas that will be charged for a 'CALL' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+    // See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
     REASON_CALL = 1;
     
     // REASON_CALL_CODE is the amount of gas that will be charged for a 'CALLCODE' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_CALL_CODE = 2;
     
     // REASON_CALL_DATA_COPY is the amount of gas that will be charged for a 'CALLDATACOPY' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_CALL_DATA_COPY = 3;
     
     // REASON_CODE_COPY is the amount of gas that will be charged for a 'CODECOPY' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_CODE_COPY = 4;
     
     // REASON_CODE_STORAGE is the amount of gas that will be charged for code storage.
@@ -1052,15 +1055,15 @@ message GasChange {
     REASON_CONTRACT_CREATION2 = 7;
     
     // REASON_DELEGATE_CALL is the amount of gas that will be charged for a 'DELEGATECALL' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_DELEGATE_CALL = 8;
     
     // REASON_EVENT_LOG is the amount of gas that will be charged for a 'LOG<N>' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_EVENT_LOG = 9;
     
     // REASON_EXT_CODE_COPY is the amount of gas that will be charged for an 'EXTCODECOPY' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_EXT_CODE_COPY = 10;
     
     // REASON_FAILED_EXECUTION is the burning of the remaining gas when the execution failed without a revert.
@@ -1094,23 +1097,23 @@ message GasChange {
     REASON_REFUND_AFTER_EXECUTION = 14;
     
     // REASON_RETURN is the amount of gas that will be charged for a 'RETURN' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_RETURN = 15;
     
     // REASON_RETURN_DATA_COPY is the amount of gas that will be charged for a 'RETURNDATACOPY' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_RETURN_DATA_COPY = 16;
     
     // REASON_REVERT is the amount of gas that will be charged for a 'REVERT' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_REVERT = 17;
     
     // REASON_SELF_DESTRUCT is the amount of gas that will be charged for a 'SELFDESTRUCT' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_SELF_DESTRUCT = 18;
     
     // REASON_STATIC_CALL is the amount of gas that will be charged for a 'STATICCALL' opcode executed by the EVM.
-    // This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+    // This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
     REASON_STATIC_CALL = 19;
 
     // REASON_STATE_COLD_ACCESS is the amount of gas charged for a cold storage access as controlled by EIP2929 rules.
