@@ -282,30 +282,83 @@ func (TransactionTrace_Type) EnumDescriptor() ([]byte, []int) {
 type BalanceChange_Reason int32
 
 const (
-	BalanceChange_REASON_UNKNOWN                BalanceChange_Reason = 0
-	BalanceChange_REASON_REWARD_MINE_UNCLE      BalanceChange_Reason = 1
-	BalanceChange_REASON_REWARD_MINE_BLOCK      BalanceChange_Reason = 2
-	BalanceChange_REASON_DAO_REFUND_CONTRACT    BalanceChange_Reason = 3
-	BalanceChange_REASON_DAO_ADJUST_BALANCE     BalanceChange_Reason = 4
-	BalanceChange_REASON_TRANSFER               BalanceChange_Reason = 5
-	BalanceChange_REASON_GENESIS_BALANCE        BalanceChange_Reason = 6
-	BalanceChange_REASON_GAS_BUY                BalanceChange_Reason = 7
+	BalanceChange_REASON_UNKNOWN BalanceChange_Reason = 0
+	// REASON_REWARD_MINE_UNCLE is a reward for mining an uncle block.
+	// Triggered when uncle blocks are processed during block finalization.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/consensus/ethash/consensus.go#L589
+	BalanceChange_REASON_REWARD_MINE_UNCLE BalanceChange_Reason = 1
+	// REASON_REWARD_MINE_BLOCK is a reward for mining a block.
+	// Triggered when the block miner receives their mining reward.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/consensus/ethash/consensus.go#L594
+	BalanceChange_REASON_REWARD_MINE_BLOCK BalanceChange_Reason = 2
+	// REASON_DAO_REFUND_CONTRACT is ether sent to the DAO refund contract.
+	// Used during the DAO hard fork to move funds to the refund contract.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/consensus/misc/dao.go#L85
+	BalanceChange_REASON_DAO_REFUND_CONTRACT BalanceChange_Reason = 3
+	// REASON_DAO_ADJUST_BALANCE is ether taken from a DAO account to be moved to the refund contract.
+	// Used during the DAO hard fork to extract funds from DAO-related accounts.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/consensus/misc/dao.go#L86
+	BalanceChange_REASON_DAO_ADJUST_BALANCE BalanceChange_Reason = 4
+	// REASON_TRANSFER is ether transferred via a call.
+	// This is a decrease for the sender and an increase for the recipient during value transfers.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/evm.go#L144
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/evm.go#L145
+	BalanceChange_REASON_TRANSFER BalanceChange_Reason = 5
+	// REASON_GENESIS_BALANCE is ether allocated at the genesis block.
+	// Triggered when accounts are initialized with balances during genesis block creation.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/genesis.go#L154
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/genesis.go#L180
+	BalanceChange_REASON_GENESIS_BALANCE BalanceChange_Reason = 6
+	// REASON_GAS_BUY is spent to purchase gas for executing a transaction.
+	// The transaction sender's balance is decreased by gasLimit * gasPrice at transaction start.
+	// Note: This balance change persists even for failed transactions (see Block documentation).
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L306
+	BalanceChange_REASON_GAS_BUY BalanceChange_Reason = 7
+	// REASON_REWARD_TRANSACTION_FEE is the transaction tip increasing block builder's balance.
+	// The coinbase (block miner) receives the transaction fees as a reward.
+	// Note: This balance change persists even for failed transactions (see Block documentation).
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L560
 	BalanceChange_REASON_REWARD_TRANSACTION_FEE BalanceChange_Reason = 8
-	BalanceChange_REASON_REWARD_FEE_RESET       BalanceChange_Reason = 14
-	BalanceChange_REASON_GAS_REFUND             BalanceChange_Reason = 9
-	BalanceChange_REASON_TOUCH_ACCOUNT          BalanceChange_Reason = 10
-	BalanceChange_REASON_SUICIDE_REFUND         BalanceChange_Reason = 11
-	BalanceChange_REASON_SUICIDE_WITHDRAW       BalanceChange_Reason = 13
-	BalanceChange_REASON_CALL_BALANCE_OVERRIDE  BalanceChange_Reason = 12
+	// REASON_GAS_REFUND is ether returned for unused gas at the end of execution.
+	// Any unused gas from the transaction is refunded to the sender.
+	// Note: This balance change persists even for failed transactions (see Block documentation).
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L658
+	BalanceChange_REASON_GAS_REFUND BalanceChange_Reason = 9
+	// REASON_TOUCH_ACCOUNT is a transfer of zero value. It is only there to touch-create an account.
+	// Used to create an account without transferring value, often for contract interactions.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L442
+	BalanceChange_REASON_TOUCH_ACCOUNT BalanceChange_Reason = 10
+	// REASON_SUICIDE_REFUND is added to the recipient as indicated by a selfdestructing account.
+	// When a contract self-destructs, its remaining balance is sent to a designated recipient.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L890
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L910
+	BalanceChange_REASON_SUICIDE_REFUND BalanceChange_Reason = 11
+	// REASON_CALL_BALANCE_OVERRIDE represents a balance change due to call balance override.
+	// This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+	BalanceChange_REASON_CALL_BALANCE_OVERRIDE BalanceChange_Reason = 12
+	// REASON_SUICIDE_WITHDRAW is deducted from a contract due to self-destruct.
+	// The self-destructing contract's balance is reduced to zero.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L909
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state/statedb_hooked.go#L230
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state/statedb_hooked.go#L256
+	BalanceChange_REASON_SUICIDE_WITHDRAW BalanceChange_Reason = 13
+	// REASON_REWARD_FEE_RESET represents a fee reset reward.
+	// This is a Firehose-specific reason not directly mapped to Geth tracing reasons.
+	BalanceChange_REASON_REWARD_FEE_RESET BalanceChange_Reason = 14
 	// Used on chain(s) where some Ether burning happens
-	BalanceChange_REASON_BURN       BalanceChange_Reason = 15
+	// This represents ether that is effectively burned when sent to a destroyed contract.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state/statedb_hooked.go#L288
+	BalanceChange_REASON_BURN BalanceChange_Reason = 15
+	// REASON_WITHDRAWAL is ether withdrawn from the beacon chain.
+	// Used for validator withdrawals from the Ethereum 2.0 beacon chain to the execution layer.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/consensus/beacon/consensus.go#L339
 	BalanceChange_REASON_WITHDRAWAL BalanceChange_Reason = 16
 	// Rewards for Blob processing on BNB chain added in Tycho hard-fork, refers
 	// to BNB documentation to check the timestamp at which it was activated.
 	BalanceChange_REASON_REWARD_BLOB_FEE BalanceChange_Reason = 17
-	// This reason is used only on Optimism chain.
+	// This reason is used only on Optimism chain for minting operations.
 	BalanceChange_REASON_INCREASE_MINT BalanceChange_Reason = 18
-	// This reason is used only on Optimism chain.
+	// This reason is used only on Optimism chain for balance reverts.
 	BalanceChange_REASON_REVERT BalanceChange_Reason = 19
 )
 
@@ -321,12 +374,12 @@ var (
 		6:  "REASON_GENESIS_BALANCE",
 		7:  "REASON_GAS_BUY",
 		8:  "REASON_REWARD_TRANSACTION_FEE",
-		14: "REASON_REWARD_FEE_RESET",
 		9:  "REASON_GAS_REFUND",
 		10: "REASON_TOUCH_ACCOUNT",
 		11: "REASON_SUICIDE_REFUND",
-		13: "REASON_SUICIDE_WITHDRAW",
 		12: "REASON_CALL_BALANCE_OVERRIDE",
+		13: "REASON_SUICIDE_WITHDRAW",
+		14: "REASON_REWARD_FEE_RESET",
 		15: "REASON_BURN",
 		16: "REASON_WITHDRAWAL",
 		17: "REASON_REWARD_BLOB_FEE",
@@ -343,12 +396,12 @@ var (
 		"REASON_GENESIS_BALANCE":        6,
 		"REASON_GAS_BUY":                7,
 		"REASON_REWARD_TRANSACTION_FEE": 8,
-		"REASON_REWARD_FEE_RESET":       14,
 		"REASON_GAS_REFUND":             9,
 		"REASON_TOUCH_ACCOUNT":          10,
 		"REASON_SUICIDE_REFUND":         11,
-		"REASON_SUICIDE_WITHDRAW":       13,
 		"REASON_CALL_BALANCE_OVERRIDE":  12,
+		"REASON_SUICIDE_WITHDRAW":       13,
+		"REASON_REWARD_FEE_RESET":       14,
 		"REASON_BURN":                   15,
 		"REASON_WITHDRAWAL":             16,
 		"REASON_REWARD_BLOB_FEE":        17,
@@ -388,87 +441,141 @@ type GasChange_Reason int32
 
 const (
 	GasChange_REASON_UNKNOWN GasChange_Reason = 0
-	// REASON_CALL is the amount of gas that will be charged for a 'CALL' opcode executed by the EVM
+	// REASON_CALL is the amount of gas that will be charged for a 'CALL' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_CALL GasChange_Reason = 1
-	// REASON_CALL_CODE is the amount of gas that will be charged for a 'CALLCODE' opcode executed by the EVM
+	// REASON_CALL_CODE is the amount of gas that will be charged for a 'CALLCODE' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_CALL_CODE GasChange_Reason = 2
-	// REASON_CALL_DATA_COPY is the amount of gas that will be charged for a 'CALLDATACOPY' opcode executed by the EVM
+	// REASON_CALL_DATA_COPY is the amount of gas that will be charged for a 'CALLDATACOPY' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_CALL_DATA_COPY GasChange_Reason = 3
-	// REASON_CODE_COPY is the amount of gas that will be charged for a 'CALLDATACOPY' opcode executed by the EVM
+	// REASON_CODE_COPY is the amount of gas that will be charged for a 'CODECOPY' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_CODE_COPY GasChange_Reason = 4
-	// REASON_CODE_STORAGE is the amount of gas that will be charged for code storage
+	// REASON_CODE_STORAGE is the amount of gas that will be charged for code storage.
+	// Triggered when storing contract code during contract creation.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L593
 	GasChange_REASON_CODE_STORAGE GasChange_Reason = 5
-	// REASON_CONTRACT_CREATION is the amount of gas that will be charged for a 'CREATE' opcode executed by the EVM and for the gas
-	// burned for a CREATE, today controlled by EIP150 rules
+	// REASON_CONTRACT_CREATION is the amount of gas that will be burned for a CREATE opcode.
+	// Triggered during contract creation via CREATE opcode, controlled by EIP150 rules.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L672
 	GasChange_REASON_CONTRACT_CREATION GasChange_Reason = 6
-	// REASON_CONTRACT_CREATION2 is the amount of gas that will be charged for a 'CREATE2' opcode executed by the EVM and for the gas
-	// burned for a CREATE2, today controlled by EIP150 rules
+	// REASON_CONTRACT_CREATION2 is the amount of gas that will be burned for a CREATE2 opcode.
+	// Triggered during contract creation via CREATE2 opcode, controlled by EIP150 rules.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L712
 	GasChange_REASON_CONTRACT_CREATION2 GasChange_Reason = 7
-	// REASON_DELEGATE_CALL is the amount of gas that will be charged for a 'DELEGATECALL' opcode executed by the EVM
+	// REASON_DELEGATE_CALL is the amount of gas that will be charged for a 'DELEGATECALL' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_DELEGATE_CALL GasChange_Reason = 8
-	// REASON_EVENT_LOG is the amount of gas that will be charged for a 'LOG<N>' opcode executed by the EVM
+	// REASON_EVENT_LOG is the amount of gas that will be charged for a 'LOG<N>' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_EVENT_LOG GasChange_Reason = 9
-	// REASON_EXT_CODE_COPY is the amount of gas that will be charged for a 'LOG<N>' opcode executed by the EVM
+	// REASON_EXT_CODE_COPY is the amount of gas that will be charged for an 'EXTCODECOPY' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_EXT_CODE_COPY GasChange_Reason = 10
-	// REASON_FAILED_EXECUTION is the burning of the remaining gas when the execution failed without a revert
+	// REASON_FAILED_EXECUTION is the burning of the remaining gas when the execution failed without a revert.
+	// Triggered when a call fails and all remaining gas is consumed.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L308
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L363
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L407
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L462
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L521
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L567
 	GasChange_REASON_FAILED_EXECUTION GasChange_Reason = 11
-	// REASON_INTRINSIC_GAS is the amount of gas that will be charged for the intrinsic cost of the transaction, there is
-	// always exactly one of those per transaction
+	// REASON_INTRINSIC_GAS is the amount of gas charged for the intrinsic cost of the transaction.
+	// There is always exactly one of these per transaction, representing the base cost.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L464
 	GasChange_REASON_INTRINSIC_GAS GasChange_Reason = 12
-	// GasChangePrecompiledContract is the amount of gas that will be charged for a precompiled contract execution
+	// REASON_PRECOMPILED_CONTRACT is the amount of gas charged for a precompiled contract execution.
+	// Triggered when calling precompiled contracts (addresses 0x01-0x09, etc.).
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/contracts.go#L271
 	GasChange_REASON_PRECOMPILED_CONTRACT GasChange_Reason = 13
-	// REASON_REFUND_AFTER_EXECUTION is the amount of gas that will be refunded to the caller after the execution of the call,
-	// if there is left over at the end of execution
+	// REASON_REFUND_AFTER_EXECUTION is the amount of gas refunded to the caller after call execution.
+	// Triggered when gas is refunded after a successful call completes.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L688
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L724
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L764
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L797
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L826
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/instructions.go#L855
 	GasChange_REASON_REFUND_AFTER_EXECUTION GasChange_Reason = 14
-	// REASON_RETURN is the amount of gas that will be charged for a 'RETURN' opcode executed by the EVM
+	// REASON_RETURN is the amount of gas that will be charged for a 'RETURN' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_RETURN GasChange_Reason = 15
-	// REASON_RETURN_DATA_COPY is the amount of gas that will be charged for a 'RETURNDATACOPY' opcode executed by the EVM
+	// REASON_RETURN_DATA_COPY is the amount of gas that will be charged for a 'RETURNDATACOPY' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_RETURN_DATA_COPY GasChange_Reason = 16
-	// REASON_REVERT is the amount of gas that will be charged for a 'REVERT' opcode executed by the EVM
+	// REASON_REVERT is the amount of gas that will be charged for a 'REVERT' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_REVERT GasChange_Reason = 17
-	// REASON_SELF_DESTRUCT is the amount of gas that will be charged for a 'SELFDESTRUCT' opcode executed by the EVM
+	// REASON_SELF_DESTRUCT is the amount of gas that will be charged for a 'SELFDESTRUCT' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_SELF_DESTRUCT GasChange_Reason = 18
-	// REASON_STATIC_CALL is the amount of gas that will be charged for a 'STATICALL' opcode executed by the EVM
+	// REASON_STATIC_CALL is the amount of gas that will be charged for a 'STATICCALL' opcode executed by the EVM.
+	// This is an opcode-related gas change mapped from Geth tracing via OnGasChange(gasCopy, gasCopy-cost, tracing.GasChangeCallOpCode).
+	// See: https://github.com/streamingfast/go-ethereum/blob/firehose-fh3.0/eth/tracers/firehose.go#L1247-L1264
 	GasChange_REASON_STATIC_CALL GasChange_Reason = 19
-	// REASON_STATE_COLD_ACCESS is the amount of gas that will be charged for a cold storage access as controlled by EIP2929 rules
-	//
+	// REASON_STATE_COLD_ACCESS is the amount of gas charged for a cold storage access as controlled by EIP2929 rules.
+	// Triggered when accessing storage slots or accounts that haven't been accessed in the current transaction.
 	// Added in Berlin fork (Geth 1.10+)
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/operations_acl.go#L167
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/operations_acl.go#L268
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/operations_acl.go#L283
 	GasChange_REASON_STATE_COLD_ACCESS GasChange_Reason = 20
-	// REASON_TX_INITIAL_BALANCE is the initial balance for the call which will be equal to the gasLimit of the call
-	//
-	// Added as new tracing reason in Geth, available only on some chains
+	// REASON_TX_INITIAL_BALANCE is the initial gas balance for the transaction equal to the gasLimit.
+	// There is only one such gas change per transaction, representing the initial gas allocation.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L300
 	GasChange_REASON_TX_INITIAL_BALANCE GasChange_Reason = 21
-	// REASON_TX_REFUNDS is the sum of all refunds which happened during the tx execution (e.g. storage slot being cleared)
-	// this generates an increase in gas. There is only one such gas change per transaction.
-	//
-	// Added as new tracing reason in Geth, available only on some chains
+	// REASON_TX_REFUNDS is the sum of all refunds during transaction execution (e.g. storage slot clearing).
+	// This generates an increase in gas. There is only one such gas change per transaction.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L648
 	GasChange_REASON_TX_REFUNDS GasChange_Reason = 22
-	// REASON_TX_LEFT_OVER_RETURNED is the amount of gas left over at the end of transaction's execution that will be returned
-	// to the chain. This change will always be a negative change as we "drain" left over gas towards 0. If there was no gas
-	// left at the end of execution, no such even will be emitted. The returned gas's value in Wei is returned to caller.
-	// There is at most one of such gas change per transaction.
-	//
-	// Added as new tracing reason in Geth, available only on some chains
+	// REASON_TX_LEFT_OVER_RETURNED is the amount of gas left over at transaction end that will be returned.
+	// This change will always be negative as we "drain" left over gas towards 0. If there was no gas
+	// left at the end of execution, no such event will be emitted. There is at most one per transaction.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L661
 	GasChange_REASON_TX_LEFT_OVER_RETURNED GasChange_Reason = 23
-	// REASON_CALL_INITIAL_BALANCE is the initial balance for the call which will be equal to the gasLimit of the call. There is only
-	// one such gas change per call.
-	//
-	// Added as new tracing reason in Geth, available only on some chains
+	// REASON_CALL_INITIAL_BALANCE is the initial gas balance for a call equal to the gasLimit of the call.
+	// There is only one such gas change per call.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L662
 	GasChange_REASON_CALL_INITIAL_BALANCE GasChange_Reason = 24
-	// REASON_CALL_LEFT_OVER_RETURNED is the amount of gas left over that will be returned to the caller, this change will always
-	// be a negative change as we "drain" left over gas towards 0. If there was no gas left at the end of execution, no such even
-	// will be emitted.
+	// REASON_CALL_LEFT_OVER_RETURNED is the amount of gas left over that will be returned to the caller.
+	// This change will always be negative as we "drain" left over gas towards 0. If there was no gas
+	// left at the end of execution, no such event will be emitted.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L669
 	GasChange_REASON_CALL_LEFT_OVER_RETURNED GasChange_Reason = 25
-	// REASON_WITNESS_CONTRACT_INIT flags the event of adding to the witness during the contract creation initialization step.
+	// REASON_WITNESS_CONTRACT_INIT flags the event of adding to the witness during contract creation initialization.
+	// Used in stateless Ethereum (Verkle trees) for witness data collection.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L548
 	GasChange_REASON_WITNESS_CONTRACT_INIT GasChange_Reason = 26
-	// REASON_WITNESS_CONTRACT_CREATION flags the event of adding to the witness during the contract creation finalization step.
+	// REASON_WITNESS_CONTRACT_CREATION flags the event of adding to the witness during contract creation finalization.
+	// Used in stateless Ethereum (Verkle trees) for witness data collection.
+	// This is a Firehose-specific reason not directly mapped to current Geth tracing reasons.
 	GasChange_REASON_WITNESS_CONTRACT_CREATION GasChange_Reason = 27
 	// REASON_WITNESS_CODE_CHUNK flags the event of adding one or more contract code chunks to the witness.
+	// Used in stateless Ethereum (Verkle trees) for witness data collection.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L598
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/interpreter.go#L179
 	GasChange_REASON_WITNESS_CODE_CHUNK GasChange_Reason = 28
 	// REASON_WITNESS_CONTRACT_COLLISION_CHECK flags the event of adding to the witness when checking for contract address collision.
+	// Used in stateless Ethereum (Verkle trees) for witness data collection.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/vm/evm.go#L500
 	GasChange_REASON_WITNESS_CONTRACT_COLLISION_CHECK GasChange_Reason = 29
-	// REASON_TX_DATA_FLOOR is the amount of extra gas the transaction has to pay to reach the minimum gas requirement for the
-	// transaction data. This change will always be a negative change.
+	// REASON_TX_DATA_FLOOR is the amount of extra gas the transaction has to pay to reach the minimum gas requirement.
+	// This change will always be negative and represents additional gas cost for transaction data.
+	// See: https://github.com/ethereum/go-ethereum/blob/v1.16.4/core/state_transition.go#L538
 	GasChange_REASON_TX_DATA_FLOOR GasChange_Reason = 30
 )
 
@@ -611,6 +718,36 @@ func (GasChange_Reason) EnumDescriptor() ([]byte, []int) {
 // is not reliable and should not be used to order the element against other
 // elements in the block as those element might have 0 as the ordinal. Only
 // successful calls have a reliable `ordinal` field.
+//
+// ## Failed Transaction State Changes
+//
+// An important edge case to understand when processing Firehose blocks is that
+// certain state changes persist even when a transaction fails. This behavior
+// follows Ethereum's execution model where some operations are irreversible
+// once they occur, regardless of transaction outcome.
+//
+// The following state changes are typically preserved even for failed transactions:
+//   - Gas consumption (BalanceChange.REASON_GAS_BUY, GasChange.REASON_INTRINSIC_GAS): Gas is always consumed
+//     when a transaction is processed, even if execution fails
+//   - Gas refunds (BalanceChange.REASON_GAS_REFUND): Gas refunds are processed regardless of transaction outcome
+//   - Nonce increments: The sender's nonce is incremented to prevent replay attacks
+//   - Transaction fees (BalanceChange.REASON_REWARD_TRANSACTION_FEE): Miners receive fees regardless
+//     of transaction success to compensate for computational work
+//
+// However, value transfers, contract state changes, and other application-level
+// modifications are reverted on transaction failure. When processing failed
+// transactions, applications should filter state changes appropriately based on
+// their specific requirements and the transaction's success status.
+//
+// ## SetCode Transaction Handling (EIP-7702)
+//
+// SetCode transactions (TRX_TYPE_SET_CODE) require special handling for nonce and code changes.
+// According to EIP-7702, nonce changes and code changes for each accepted authorization in the
+// transaction should be recorded in the state even if the transaction fails. When processing
+// SetCode transactions, both NonceChange and CodeChange entries will be present for each
+// authorized account, with the transaction sender's nonce change appearing first without a
+// corresponding code change. Applications must handle these state changes appropriately,
+// preserving them regardless of transaction success status to maintain EIP-7702 compliance.
 type Block struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Hash is the block's hash.
@@ -1258,6 +1395,8 @@ func (x *BigInt) GetBytes() []byte {
 // within it could have been reverted internally, if this is important to you, you must
 // check the field `state_reverted` on the `Call` to determine if it was fully committed
 // to the chain or not.
+//
+// Note: Some state changes may be present even for failed transactions (see Block documentation for details).
 type TransactionTrace struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// consensus
@@ -2493,6 +2632,7 @@ func (x *StorageChange) GetOrdinal() uint64 {
 	return 0
 }
 
+// Note: Balance changes may occur even for failed transactions in certain cases (see Block documentation for details).
 type BalanceChange struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Address is the address of the account that has changed balance.
@@ -2597,6 +2737,7 @@ func (x *BalanceChange) GetOrdinal() uint64 {
 	return 0
 }
 
+// Note: Nonce changes typically persist even for failed transactions (see Block documentation for details).
 type NonceChange struct {
 	state    protoimpl.MessageState `protogen:"open.v1"`
 	Address  []byte                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
@@ -2721,6 +2862,7 @@ func (x *AccountCreation) GetOrdinal() uint64 {
 	return 0
 }
 
+// Note: Code changes may have special handling for failed transactions (see Block documentation for details).
 type CodeChange struct {
 	state   protoimpl.MessageState `protogen:"open.v1"`
 	Address []byte                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
@@ -3631,17 +3773,17 @@ var file_sf_ethereum_type_v2_type_proto_rawDesc = string([]byte{
 	0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x47, 0x41, 0x53, 0x5f, 0x42, 0x55, 0x59, 0x10, 0x07,
 	0x12, 0x21, 0x0a, 0x1d, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x52, 0x45, 0x57, 0x41, 0x52,
 	0x44, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53, 0x41, 0x43, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x46, 0x45,
-	0x45, 0x10, 0x08, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x52, 0x45,
-	0x57, 0x41, 0x52, 0x44, 0x5f, 0x46, 0x45, 0x45, 0x5f, 0x52, 0x45, 0x53, 0x45, 0x54, 0x10, 0x0e,
-	0x12, 0x15, 0x0a, 0x11, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x47, 0x41, 0x53, 0x5f, 0x52,
-	0x45, 0x46, 0x55, 0x4e, 0x44, 0x10, 0x09, 0x12, 0x18, 0x0a, 0x14, 0x52, 0x45, 0x41, 0x53, 0x4f,
-	0x4e, 0x5f, 0x54, 0x4f, 0x55, 0x43, 0x48, 0x5f, 0x41, 0x43, 0x43, 0x4f, 0x55, 0x4e, 0x54, 0x10,
-	0x0a, 0x12, 0x19, 0x0a, 0x15, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x53, 0x55, 0x49, 0x43,
-	0x49, 0x44, 0x45, 0x5f, 0x52, 0x45, 0x46, 0x55, 0x4e, 0x44, 0x10, 0x0b, 0x12, 0x1b, 0x0a, 0x17,
-	0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x53, 0x55, 0x49, 0x43, 0x49, 0x44, 0x45, 0x5f, 0x57,
-	0x49, 0x54, 0x48, 0x44, 0x52, 0x41, 0x57, 0x10, 0x0d, 0x12, 0x20, 0x0a, 0x1c, 0x52, 0x45, 0x41,
-	0x53, 0x4f, 0x4e, 0x5f, 0x43, 0x41, 0x4c, 0x4c, 0x5f, 0x42, 0x41, 0x4c, 0x41, 0x4e, 0x43, 0x45,
-	0x5f, 0x4f, 0x56, 0x45, 0x52, 0x52, 0x49, 0x44, 0x45, 0x10, 0x0c, 0x12, 0x0f, 0x0a, 0x0b, 0x52,
+	0x45, 0x10, 0x08, 0x12, 0x15, 0x0a, 0x11, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x47, 0x41,
+	0x53, 0x5f, 0x52, 0x45, 0x46, 0x55, 0x4e, 0x44, 0x10, 0x09, 0x12, 0x18, 0x0a, 0x14, 0x52, 0x45,
+	0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x54, 0x4f, 0x55, 0x43, 0x48, 0x5f, 0x41, 0x43, 0x43, 0x4f, 0x55,
+	0x4e, 0x54, 0x10, 0x0a, 0x12, 0x19, 0x0a, 0x15, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x53,
+	0x55, 0x49, 0x43, 0x49, 0x44, 0x45, 0x5f, 0x52, 0x45, 0x46, 0x55, 0x4e, 0x44, 0x10, 0x0b, 0x12,
+	0x20, 0x0a, 0x1c, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x43, 0x41, 0x4c, 0x4c, 0x5f, 0x42,
+	0x41, 0x4c, 0x41, 0x4e, 0x43, 0x45, 0x5f, 0x4f, 0x56, 0x45, 0x52, 0x52, 0x49, 0x44, 0x45, 0x10,
+	0x0c, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x53, 0x55, 0x49, 0x43,
+	0x49, 0x44, 0x45, 0x5f, 0x57, 0x49, 0x54, 0x48, 0x44, 0x52, 0x41, 0x57, 0x10, 0x0d, 0x12, 0x1b,
+	0x0a, 0x17, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x52, 0x45, 0x57, 0x41, 0x52, 0x44, 0x5f,
+	0x46, 0x45, 0x45, 0x5f, 0x52, 0x45, 0x53, 0x45, 0x54, 0x10, 0x0e, 0x12, 0x0f, 0x0a, 0x0b, 0x52,
 	0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x42, 0x55, 0x52, 0x4e, 0x10, 0x0f, 0x12, 0x15, 0x0a, 0x11,
 	0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x57, 0x49, 0x54, 0x48, 0x44, 0x52, 0x41, 0x57, 0x41,
 	0x4c, 0x10, 0x10, 0x12, 0x1a, 0x0a, 0x16, 0x52, 0x45, 0x41, 0x53, 0x4f, 0x4e, 0x5f, 0x52, 0x45,
