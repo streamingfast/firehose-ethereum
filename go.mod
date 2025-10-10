@@ -20,11 +20,11 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250321151415-6b4fbbcb1bb5
 	github.com/streamingfast/dmetrics v0.0.0-20250711072030-f023e918a175
-	github.com/streamingfast/dstore v0.1.1-0.20250609173504-95368d3441ee
+	github.com/streamingfast/dstore v0.1.1-0.20250929131642-07e4d13f2fda
 	github.com/streamingfast/eth-go v0.0.0-20250914133932-bcf944f540f1
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.11.2-0.20250924130640-4cb707f7cec7
-	github.com/streamingfast/firehose-ethereum/types v0.0.0-20250722143355-70c7a52801d0
+	github.com/streamingfast/firehose-core v1.11.3-0.20251010181913-979462e9b7a4
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20251010181802-6e5caccf1699
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/streamingfast/pbgo v0.0.6-0.20250114182320-0b43084f4000
@@ -179,7 +179,7 @@ require (
 	github.com/streamingfast/dmetering v0.0.0-20250606124734-944cf3e4959e // indirect
 	github.com/streamingfast/dsession v0.0.0-20250904235523-ffe9952a12d3 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20220305214756-b5c0e8699839 // indirect
-	github.com/streamingfast/firehose-networks v0.2.1 // indirect
+	github.com/streamingfast/firehose-networks v0.2.2 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/streamingfast/payment-gateway v0.0.0-20250910205031-eaa05d2fd1b7 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20240430173521-888827872b90 // indirect
