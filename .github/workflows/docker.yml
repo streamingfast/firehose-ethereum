@@ -64,8 +64,8 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=
-            type=sha,prefix=,suffix=-${{ matrix.platform_suffix }}
+            type=sha,prefix=,priority=300
+            type=sha,prefix=,suffix=-${{ matrix.platform_suffix }},priority=300
             type=raw,value=${{ steps.extract-version.outputs.GO_PSEUDOHASH }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: |
@@ -115,7 +115,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=
+            type=sha,prefix=,priority=300
             type=raw,value=${{ steps.extract-version.outputs.GO_PSEUDOHASH }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: |
