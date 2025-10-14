@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.13.3
+
+* Bumped to [firehose-core v1.11.3](https://github.com/streamingfast/firehose-core/releases/tag/v1.11.3)
+  * Improved panic message when reader node encounter a block whose finality is bigger than the block itself to include `lib_num`, `block_num`, `distance`, and `max_distance` for easier debugging.
+
+  * Updated `firehose-networks` dependency to `v0.2.2` (latest).
+
+  * Fixed `common-one-block-store-url` flag not expanding environment variables in all apps.
+
 ## v2.13.2
 
 ### Substreams v1.16.6
