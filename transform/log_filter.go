@@ -74,16 +74,8 @@ func (p *LogFilter) matchEventSignature(topics [][]byte) bool {
 }
 
 func (p *LogFilter) matches(trace *pbeth.TransactionTrace) bool {
-	if trace == nil {
-		fmt.Println("Transaction trace is nil")
-	}
-
 	if trace.Receipt == nil {
-		fmt.Println("Transaction trace receipt is nil")
-	}
-
-	if trace.Receipt.Logs == nil {
-		fmt.Println("Transaction trace receipt logs is nil")
+		fmt.Println("Transaction trace receipt is nil for hash ", eth.Hash(trace.Hash).String())
 	}
 
 	for _, log := range trace.Receipt.Logs {

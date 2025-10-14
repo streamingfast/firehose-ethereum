@@ -217,6 +217,8 @@ func (f *CombinedFilter) Transform(readOnlyBlk *pbbstream.Block, in transform.In
 		return nil, fmt.Errorf("mashalling block: %w", err)
 	}
 
+	fmt.Println("Processing block ", ethBlock.Number, " with ", len(ethBlock.TransactionTraces), " traces")
+
 	traces := []*pbeth.TransactionTrace{}
 	for _, trace := range ethBlock.TransactionTraces {
 		if f.matches(trace) {
