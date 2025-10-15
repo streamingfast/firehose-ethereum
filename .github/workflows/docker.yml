@@ -8,6 +8,7 @@ on:
       - "develop"
       - "release/v*"
       - "feature/*"
+      - "fix/*"
   workflow_dispatch:
 
 env:
