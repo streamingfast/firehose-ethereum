@@ -2254,6 +2254,8 @@ github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 h1:Y15G1
 github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0/go.mod h1:/Rnz2TJvaShjUct0scZ9kKV2Jr9/+KBAoWy4UMYxgv4=
 github.com/streamingfast/substreams v1.16.7-0.20251014211437-f0440644412a h1:4D1tvtWn53pMkNa/5A6od40PwDoeWt8y7XVIODbTKj0=
 github.com/streamingfast/substreams v1.16.7-0.20251014211437-f0440644412a/go.mod h1:LO69NYY7WoBXtJV2jZ7h0LN7SsgSQRWwiDJKWnPLK3o=
+github.com/streamingfast/substreams v1.16.7-0.20251016152516-b490d786d2c8 h1:tzkAGk600vOo5p5z9/GzLulPCVTv2twCTA+D8QEGwPA=
+github.com/streamingfast/substreams v1.16.7-0.20251016152516-b490d786d2c8/go.mod h1:LO69NYY7WoBXtJV2jZ7h0LN7SsgSQRWwiDJKWnPLK3o=
 github.com/streamingfast/substreams-foundational-store v0.1.1-0.20250930145106-2f2a893cbf56 h1:Zzt/1poc41vi+almr174yKB7+2w7h7TsCYIKsxi/zfc=
 github.com/streamingfast/substreams-foundational-store v0.1.1-0.20250930145106-2f2a893cbf56/go.mod h1:J1CzU6dbj7VgGIc2L/nJKCQsjys3nhF+aTNWbyXw7OA=
 github.com/streamingfast/wazero v0.0.0-20241202185309-91287c3640ed h1:LU6/c376zP1cMAo9L6rFLyjo0W7RU+hIh7BegH8Zo5M=
