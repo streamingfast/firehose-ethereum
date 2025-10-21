@@ -4,6 +4,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Substreams v1.17.0
+
+#### New sf.substreams.rpc.v3.Stream/Blocks endpoint added
+
+* This new endpoint removes the need for complex "mangling" of the package on the client side.
+* Instead of expecting `sf.substreams.v1.Modules` (with the client having to apply parameters, network, etc.), the `sf.substreams.rpc.v3.Request` now expects:
+  - a `sf.substreams.v1.Package`.
+  - a `map<string, string>` of `params`
+  - the `network` string
+  which will all be applied to the package server-side.
+* It returns the same object as the v2 endpoint, i.e. a stream of `sf.substreams.rpc.v2.Response`
+* It is added on top of the existing 'v2' endpoint, both being active at the same time.
+* To enable it, operators will simply need to ensure that their routing allows the `/sf.substreams.rpc.v3.Stream/*` path.
+* Cached spkg on the server will now contain protobuf definitions, simplifying debugging of user requests.
+* Emitted metrics for requests can now be `sf.substreams.rpc.v3/Blocks` instead of always `sf.substreams.rpc.v2/Blocks`, make sure that your metering endpoint can support it.
+
+Note: recent substreams clients will support both endpoints, first trying the v3 and automatically falling back to v2 if they hit a "404 Not Found" or "Not Implemented" error.
+
+#### Bug fixes
+
+* Fixed a bug with BlockFilter: a skipped module would send BlockScopedData (in dev or near HEAD, to follow progress) with an empty module name, breaking some sinks. Module name was present if requesting a module dependent on that skipped module. Now the module name is always included.
+
 ## v2.13.3
 
 * Bumped to [firehose-core v1.11.3](https://github.com/streamingfast/firehose-core/releases/tag/v1.11.3)
