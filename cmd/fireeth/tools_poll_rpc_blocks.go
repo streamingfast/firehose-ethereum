@@ -98,7 +98,7 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 			b64Cnt := base64.StdEncoding.EncodeToString(cnt)
 			lineCnt := fmt.Sprintf("FIRE BLOCK %d %s %d %s %s", blockNum, hex.EncodeToString(ethBlock.Hash), libNum, hex.EncodeToString(ethBlock.Header.ParentHash), b64Cnt)
 			if _, err := fmt.Println(lineCnt); err != nil {
-				return fmt.Errorf("failed to write log line (char lenght %d): %w", len(lineCnt), err)
+				return fmt.Errorf("failed to write log line (char length %d): %w", len(lineCnt), err)
 			}
 			blockNum++
 		}

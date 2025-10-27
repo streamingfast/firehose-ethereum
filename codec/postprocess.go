@@ -41,7 +41,7 @@ func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, first
 	}
 
 	// We reconstruct the state reverted value per call, for each transaction traces. We also
-	// normalize signature curve points since we were not setting to be alwasy 32 bytes long and
+	// normalize signature curve points since we were not setting to be always 32 bytes long and
 	// sometimes, it would have been only 31 bytes long.
 	for _, trx := range block.TransactionTraces {
 		populateTrxStatus(trx)

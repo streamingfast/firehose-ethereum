@@ -246,7 +246,7 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		// We are trying to order the lines based on the amount of time they occur in average
 		// in a sample of lines.
 		//
-		// Easiest way is to use the battelfield dmlog test file we have in the project:
+		// Easiest way is to use the battlefield dmlog test file we have in the project:
 		//
 		//     cat codec/testdata/firehose-logs.dmlog | grep -Eo "(DMLOG|FIRE) ([^ ]+)" | sort | uniq -c | sort -nr
 		//
