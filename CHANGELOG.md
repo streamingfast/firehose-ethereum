@@ -6,11 +6,16 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Substreams
+
+* Fix egress bytes calculation when running in noop or dev mode with specified output debug modules
+
 ## v2.14.1
+
 ### Substreams
 
 * Add store size to substreams starts
-* Add store and foundational-store list to incoming request stats 
+* Add store and foundational-store list to incoming request stats
 * Fix a panic (nil pointer) when skipping blocks via indexes on stores on tier2
 
 ## v2.14.0
