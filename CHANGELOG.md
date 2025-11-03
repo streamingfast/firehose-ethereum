@@ -9,6 +9,7 @@ for instructions to keep up to date.
 ### Substreams
 
 * Fix egress bytes calculation when running in noop or dev mode with specified output debug modules
+* Added Foundational store v2 protocol support
 
 ## v2.14.1
 
