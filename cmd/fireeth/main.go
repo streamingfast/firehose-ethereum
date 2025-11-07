@@ -92,6 +92,15 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				}
 				return false
 			}
+			hasEndpoints := func(ss []string) bool {
+				for _, s := range ss {
+					if s != "" {
+						return true
+					}
+				}
+				return false
+			}
+
 			if commaCheck(rpcEndpoints) {
 				return nil, fmt.Errorf("rpc endpoints cannot contain commas")
 			}
@@ -103,10 +112,15 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			rpcData := fmt.Sprintf("%d,%s", rpcGasLimit, strings.Join(rpcEndpoints, ","))
 			balData := strings.Join(balanceEndpoints, ",")
 
-			return ethss.NewRPCExtensioner(map[string]string{
-				"rpc_eth_call":        rpcData,
-				"rpc_eth_get_balance": balData,
-			}), nil
+			extensions := make(map[string]string)
+			if hasEndpoints(rpcEndpoints) {
+				extensions["rpc_eth_call"] = rpcData
+			}
+
+			if hasEndpoints(balanceEndpoints) {
+				extensions["rpc_eth_get_balance"] = balData
+			}
+			return ethss.NewRPCExtensioner(extensions), nil
 		},
 
 		ReaderNodeBootstrapperFactory: firecore.DefaultReaderNodeBootstrapper(newReaderNodeBootstrapper),
