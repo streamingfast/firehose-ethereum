@@ -405,7 +405,7 @@ message TransactionTrace {
     TRX_TYPE_OPTIMISM_DEPOSIT = 126;
 
     // Polygon(bor)-specific
-    TRX_TYPE_BOR_STATE_SYNC = 200;
+    TRX_TYPE_POLYGON_STATE_SYNC = 200;
   }
 
   // AccessList represents the storage access this transaction has agreed to do in which case those storage
