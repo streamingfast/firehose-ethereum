@@ -153,6 +153,11 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 			out.Status = toFirehoseReceiptStatus(uint64(*receipt.Status))
 		}
 		out.Type = pbeth.TransactionTrace_Type(receipt.Type)
+		// Polygon 127 is state sync
+		if out.Type == 127 {
+			out.Type = pbeth.TransactionTrace_TRX_TYPE_POLYGON_STATE_SYNC
+		}
+
 		out.GasUsed = uint64(receipt.GasUsed)
 	}
 	out.EndOrdinal = ordinal.next()
