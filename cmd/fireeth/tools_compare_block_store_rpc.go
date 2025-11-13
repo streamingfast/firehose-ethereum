@@ -47,6 +47,7 @@ func newCompareBlocksStoreRPCCmd(logger *zap.Logger) *cobra.Command {
 		`),
 	}
 
+	cmd.Flags().Bool("ignore-td", true, "Ignore TotalDifficulty in comparison")
 	cmd.PersistentFlags().Bool("save-files", false, cli.Dedent(`
 		When activated, block files with difference are saved.
 		Format will be fh_{block_num}.json and rpc_{block_num}.json
@@ -75,6 +76,7 @@ func createCompareBlocksStoreRPCE(logger *zap.Logger) firecore.CommandExecutor {
 		}
 
 		saveFiles := sflags.MustGetBool(cmd, "save-files")
+		ignoreTD := sflags.MustGetBool(cmd, "ignore-td")
 
 		mergedBlocksStore, err := dstore.NewDBinStore(mergedBlocksStoreURL)
 		if err != nil {
@@ -102,7 +104,7 @@ func createCompareBlocksStoreRPCE(logger *zap.Logger) firecore.CommandExecutor {
 				panic(err)
 			}
 
-			identical, diffs := CompareFirehoseToRPC(ethBlock, rpcBlock, receipts, saveFiles)
+			identical, diffs := CompareFirehoseToRPC(ethBlock, rpcBlock, receipts, saveFiles, ignoreTD)
 
 			fmt.Println("Comparing block", ethBlock.Number)
 

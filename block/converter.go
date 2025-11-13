@@ -38,7 +38,10 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 	if in.WithdrawalsHash != nil {
 		withdrawalHash = in.WithdrawalsHash.Bytes()
 	}
-
+	totalDiff := BigIntFromEthUint256(in.TotalDifficulty)
+	if totalDiff.String() == "" {
+		totalDiff = nil
+	}
 	out := &pbeth.Block{
 		DetailLevel:       pbeth.Block_DETAILLEVEL_BASE,
 		Hash:              in.Hash.Bytes(),
@@ -58,7 +61,7 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 			ReceiptRoot:      in.ReceiptsRoot.Bytes(),
 			LogsBloom:        in.LogsBloom.Bytes(),
 			Difficulty:       BigIntFromEthUint256(in.Difficulty),
-			TotalDifficulty:  BigIntFromEthUint256(in.TotalDifficulty),
+			TotalDifficulty:  totalDiff,
 			Number:           uint64(in.Number),
 			GasLimit:         uint64(in.GasLimit),
 			GasUsed:          uint64(in.GasUsed),

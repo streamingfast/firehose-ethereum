@@ -44,6 +44,7 @@ func compareOneblockRPCCmd() *cobra.Command {
 	`),
 	}
 
+	cmd.Flags().Bool("ignore-td", true, "Ignore TotalDifficulty in comparison")
 	cmd.PersistentFlags().Bool("save-files", false, cli.Dedent(`
 	When activated, block files with difference are saved.
 	Format will be fh_{block_num}.json and rpc_{block_num}.json
@@ -65,6 +66,7 @@ func compareOneblockRPCE() firecore.CommandExecutor {
 		}
 
 		saveFiles := sflags.MustGetBool(cmd, "save-files")
+		ignoreTD := sflags.MustGetBool(cmd, "ignore-td")
 
 		cli := rpc.NewClient(rpcEndpoint)
 
@@ -78,7 +80,7 @@ func compareOneblockRPCE() firecore.CommandExecutor {
 			return err
 		}
 
-		identical, diffs := CompareFirehoseToRPC(fhBlock, rpcBlock, receipts, saveFiles)
+		identical, diffs := CompareFirehoseToRPC(fhBlock, rpcBlock, receipts, saveFiles, ignoreTD)
 		if !saveFiles {
 			if !identical {
 				fmt.Println("different", diffs)

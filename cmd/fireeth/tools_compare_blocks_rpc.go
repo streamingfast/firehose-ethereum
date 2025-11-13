@@ -64,6 +64,7 @@ func newCompareBlocksRPCCmd(logger *zap.Logger) *cobra.Command {
 		Format will be fh_{block_num}.json and rpc_{block_num}.json
 		diff fh_{block_num}.json and rpc_{block_num}.json
 	`))
+	cmd.Flags().Bool("ignore-td", true, "Ignore TotalDifficulty in comparison")
 	cmd.Flags().BoolP("plaintext", "p", false, "Use plaintext connection to Firehose")
 	cmd.Flags().BoolP("insecure", "k", false, "Use SSL connection to Firehose but skip SSL certificate validation")
 	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
@@ -105,6 +106,7 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 		plaintext := sflags.MustGetBool(cmd, "plaintext")
 		insecure := sflags.MustGetBool(cmd, "insecure")
 		saveFiles := sflags.MustGetBool(cmd, "save-files")
+		ignoreTD := sflags.MustGetBool(cmd, "ignore-td")
 
 		firehoseClient, connClose, grpcCallOpts, err := client.NewFirehoseClient(firehoseEndpoint, jwt, insecure, plaintext)
 		if err != nil {
@@ -151,7 +153,7 @@ func createCompareBlocksRPCE(logger *zap.Logger) firecore.CommandExecutor {
 					panic(err)
 				}
 
-				identical, diffs := CompareFirehoseToRPC(firehoseBlock, rpcBlock, receipts, saveFiles)
+				identical, diffs := CompareFirehoseToRPC(firehoseBlock, rpcBlock, receipts, saveFiles, ignoreTD)
 
 				if !saveFiles {
 					if !identical {
@@ -337,6 +339,7 @@ func stripFirehoseBlock(in *pbeth.Block, hashesWithoutTo map[string]bool) {
 	stripFirehoseHeader(in.Header)
 	stripFirehoseUncles(in.Uncles)
 	stripFirehoseTransactionTraces(in.TransactionTraces, hashesWithoutTo)
+	in.SystemCalls = nil // rpc gets no system calls
 
 	// ARB-ONE FIX
 	if in.Header.TotalDifficulty.Uint64() == 2 { // arb-one-specific
@@ -388,13 +391,17 @@ func stripFirehoseTrxReceipt(in *pbeth.TransactionReceipt) {
 	in.StateRoot = nil // only available on getTransactionReceipt
 }
 
-func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, receipts map[string]*rpc.TransactionReceipt, saveFiles bool) (isEqual bool, differences []string) {
+func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, receipts map[string]*rpc.TransactionReceipt, saveFiles bool, ignoreTD bool) (isEqual bool, differences []string) {
 	if fhBlock == nil && rpcBlock == nil {
 		return true, nil
 	}
 
 	rpcAsPBEth, hashesWithoutTo := block.RpcToEthBlock(rpcBlock, receipts, nil, zap.NewNop())
 	stripFirehoseBlock(fhBlock, hashesWithoutTo)
+	if ignoreTD {
+		fhBlock.Header.TotalDifficulty = nil
+		rpcAsPBEth.Header.TotalDifficulty = nil
+	}
 
 	// tweak that new block for comparison
 	for _, tx := range rpcAsPBEth.TransactionTraces {
