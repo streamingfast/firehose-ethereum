@@ -338,7 +338,11 @@ func stripFirehoseBlock(in *pbeth.Block, hashesWithoutTo map[string]bool) {
 	in.Ver = 3
 	stripFirehoseHeader(in.Header)
 	stripFirehoseUncles(in.Uncles)
-	stripFirehoseTransactionTraces(in.TransactionTraces, hashesWithoutTo)
+	if in.Number == 0 {
+		in.TransactionTraces = nil // no transaction on genesis block, but in firehose we create a fake one to hold the state changes...
+	} else {
+		stripFirehoseTransactionTraces(in.TransactionTraces, hashesWithoutTo)
+	}
 	in.SystemCalls = nil // rpc gets no system calls
 
 	// ARB-ONE FIX
