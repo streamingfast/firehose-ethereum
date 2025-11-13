@@ -372,6 +372,9 @@ func stripFirehoseTransactionTraces(in []*pbeth.TransactionTrace, hashesWithoutT
 		trace.MaxPriorityFeePerGas = nil // not available on RPC
 		trace.ReturnData = nil           // not available on RPC
 		trace.PublicKey = nil            // not available on RPC
+		if trace.Status == pbeth.TransactionTraceStatus_REVERTED {
+			trace.Status = pbeth.TransactionTraceStatus_FAILED // 'reverted' not available on RPC
+		}
 
 		stripFirehoseTrxReceipt(trace.Receipt)
 		trace.Calls = nil // not available on RPC
