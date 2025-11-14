@@ -10,6 +10,11 @@ for instructions to keep up to date.
 
 * Fix egress bytes calculation when running in noop or dev mode with specified output debug modules
 * Added Foundational store v2 protocol support
+* Added opt-in memory limits related to loading FullKV stores, gated by environment variables:
+  - "SUBSTREAMS_STORE_SIZE_LIMIT_PER_REQUEST" (default allows 5GiB: `5368709120`): limit size of all loaded stores for a single request, in bytes. Set to a numeric value in bytes.
+  - "SUBSTREAMS_ENFORCE_STORE_SIZE_LIMIT_PER_REQUEST" (default false): if set to `true`, enforce the limit above instead of just logging a warning
+  - "SUBSTREAMS_TOTAL_STORE_SIZE_LIMIT_PERCENT" (default: 75): limit the size in-memory of all loaded stores concurrently on the instance, in percentage of usable memory (cgroup or system total -- regardless of free or available)
+  - "SUBSTREAMS_ENFORCE_TOTAL_STORE_SIZE_LIMIT" (default: false): if set to `true`, enforce the limit above instead of just logging a warning
 
 ## v2.14.1
 

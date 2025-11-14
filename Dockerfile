@@ -34,6 +34,6 @@ COPY docker/motd_reader /etc/motd_reader
 COPY docker/99-firehose-ethereum.sh /etc/profile.d/
 COPY docker/scripts/ /app/
 RUN chmod +x /app/reader-*
-RUN echo ". /etc/profile.d/99-firehose-core.sh" > /root/.bash_aliases
+RUN echo ". /etc/profile.d/99-firehose-ethereum.sh" > /root/.bash_aliases
 
 ENTRYPOINT [ "/app/fireeth" ]
