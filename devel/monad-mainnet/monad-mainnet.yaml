@@ -1,0 +1,16 @@
+start:
+  args:
+    - merger
+    - firehose
+    - reader-node-stdin
+    - relayer
+  flags:
+    common-first-streamable-block: 36215077
+    data-dir: "./firehose-data-monad"
+
+    # merger-time-between-store-pruning: 10m
+    # merger-prune-forked-blocks-after: 50000
+
+    firehose-grpc-listen-addr: ":10015"
+
+    advertise-chain-name: "monad-mainnet"
