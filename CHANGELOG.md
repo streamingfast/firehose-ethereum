@@ -4,12 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.14.2
 
 ### Substreams
 
 * Fix egress bytes calculation when running in noop or dev mode with specified output debug modules
 * Added Foundational store v2 protocol support
+* Reduced memory usage when loading large stores
 * Added opt-in memory limits related to loading FullKV stores, gated by environment variables:
   - "SUBSTREAMS_STORE_SIZE_LIMIT_PER_REQUEST" (default allows 5GiB: `5368709120`): limit size of all loaded stores for a single request, in bytes. Set to a numeric value in bytes.
   - "SUBSTREAMS_ENFORCE_STORE_SIZE_LIMIT_PER_REQUEST" (default false): if set to `true`, enforce the limit above instead of just logging a warning
