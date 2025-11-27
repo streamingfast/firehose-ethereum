@@ -51,7 +51,7 @@ func parseFilters(callFilters, logFilters string, sendAllBlockHeaders bool) (*pb
 		return nil, nil
 	}
 	if callFilters != "" {
-		for _, filter := range strings.Split(callFilters, ",") {
+		for filter := range strings.SplitSeq(callFilters, ",") {
 			if filter == "" {
 				continue
 			}
@@ -60,14 +60,14 @@ func parseFilters(callFilters, logFilters string, sendAllBlockHeaders bool) (*pb
 				return nil, fmt.Errorf("option --call-filters must be of type address_hash+address_hash+address_hash:event_sig_hash+event_sig_hash (repeated, separated by comma)")
 			}
 			var addrs []eth.Address
-			for _, a := range strings.Split(parts[0], "+") {
+			for a := range strings.SplitSeq(parts[0], "+") {
 				if a != "" {
 					addr := eth.MustNewAddressLoose(a)
 					addrs = append(addrs, addr)
 				}
 			}
 			var sigs []eth.Hash
-			for _, s := range strings.Split(parts[1], "+") {
+			for s := range strings.SplitSeq(parts[1], "+") {
 				if s != "" {
 					sig := eth.MustNewHash(s)
 					sigs = append(sigs, sig)
@@ -79,7 +79,7 @@ func parseFilters(callFilters, logFilters string, sendAllBlockHeaders bool) (*pb
 	}
 
 	if logFilters != "" {
-		for _, filter := range strings.Split(logFilters, ",") {
+		for filter := range strings.SplitSeq(logFilters, ",") {
 			if filter == "" {
 				continue
 			}
@@ -88,14 +88,14 @@ func parseFilters(callFilters, logFilters string, sendAllBlockHeaders bool) (*pb
 				return nil, fmt.Errorf("option --log-filters must be of type address_hash+address_hash+address_hash:event_sig_hash+event_sig_hash (repeated, separated by comma)")
 			}
 			var addrs []eth.Address
-			for _, a := range strings.Split(parts[0], "+") {
+			for a := range strings.SplitSeq(parts[0], "+") {
 				if a != "" {
 					addr := eth.MustNewAddress(a)
 					addrs = append(addrs, addr)
 				}
 			}
 			var sigs []eth.Hash
-			for _, s := range strings.Split(parts[1], "+") {
+			for s := range strings.SplitSeq(parts[1], "+") {
 				if s != "" {
 					sig := eth.MustNewHash(s)
 					sigs = append(sigs, sig)
