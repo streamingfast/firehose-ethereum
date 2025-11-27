@@ -455,7 +455,7 @@ func decodeAnyPB(in *anypb.Any) (*pbbstream.Block, error) {
 	}
 
 	// We are downloading only final blocks from the Firehose connection which means the LIB for them
-	// can be set to themself (althought we use `- 1` to ensure problem would occur if codde don't like
+	// can be set to themself (although we use `- 1` to ensure problem would occur if code don't like
 	// `LIBNum == self.BlockNum`).
 	return blockEncoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: block.Number - 1})
 }
