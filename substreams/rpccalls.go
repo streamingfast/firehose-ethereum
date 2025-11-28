@@ -22,6 +22,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+const EthCallFallbackDurationEnvVar = "ETH_CALL_FALLBACK_TO_LATEST_DURATION"
+
 // interfaces, living in `streamingfast/substreams:extensions.go`
 
 type RPCExtensioner struct {
@@ -153,10 +155,10 @@ func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit ui
 		balanceClients: balanceClients,
 	}
 
-	if value := os.Getenv("LATEST_FALL_BACK_DURATION"); value != "" {
+	if value := os.Getenv(EthCallFallbackDurationEnvVar); value != "" {
 		d, err := time.ParseDuration(value)
 		if err != nil {
-			return nil, fmt.Errorf("parsing LATEST_FALL_BACK_DURATION env var: %w", err)
+			return nil, fmt.Errorf("parsing %s env var: %w", EthCallFallbackDurationEnvVar, err)
 		}
 		engine.LastestFallbackDuration = &d
 	}
@@ -353,7 +355,7 @@ func (e *RPCEngine) rpcDoWithRetry(
 		}
 
 		if e.LastestFallbackDuration != nil {
-			// Check for invalid params error (-32602), if found, retry with latest block
+			//In that case we consider that -32602 mean block not found
 			retryWithLatest := false
 			for _, r := range rpcResps {
 				if r.Err != nil {
@@ -368,7 +370,7 @@ func (e *RPCEngine) rpcDoWithRetry(
 				for _, req := range reqs {
 					req.Params[1] = "latest"
 				}
-				zlog.Warn("retrying eth_getBalance with latest block due to invalid params error (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
+				zlog.Warn("retrying eth_getBalance with latest block due to missing block (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
 				continue
 			}
 		}
@@ -479,7 +481,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 		}
 
 		if e.LastestFallbackDuration != nil {
-			// Check for invalid params error (-32602), if found, retry with latest block
+			//In that case we consider that -32602 mean block not found
 			retryWithLatest := false
 			for _, resp := range out {
 				if resp.Err != nil {

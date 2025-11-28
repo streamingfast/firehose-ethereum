@@ -269,9 +269,9 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 }
 
 func TestRPCEngine_rpcCalls_retryWithLatestOnInvalidParams(t *testing.T) {
-	err := os.Setenv("LATEST_FALL_BACK_DURATION", "1h")
+	err := os.Setenv(EthCallFallbackDurationEnvVar, "1h")
 	require.NoError(t, err)
-	defer os.Unsetenv("LATEST_FALL_BACK_DURATION")
+	defer os.Unsetenv(EthCallFallbackDurationEnvVar)
 
 	invokedCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -422,9 +422,9 @@ func TestRPCEngine_ethGetBalance_retry(t *testing.T) {
 }
 
 func TestRPCEngine_ethGetBalance_retryWithLatestOnInvalidParams(t *testing.T) {
-	err := os.Setenv("LATEST_FALL_BACK_DURATION", "1h")
+	err := os.Setenv(EthCallFallbackDurationEnvVar, "1h")
 	require.NoError(t, err)
-	defer os.Unsetenv("LATEST_FALL_BACK_DURATION")
+	defer os.Unsetenv(EthCallFallbackDurationEnvVar)
 
 	count := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
