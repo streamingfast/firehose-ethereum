@@ -4,14 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## [Unreleased]
+## v2.14.3
 
 ### Substreams
 
-* Enhanced RPC error handling: when RPC calls return error code -32602 (invalid params), all calls are retried using the latest block reference instead of the original block hash.
-* Introduced a constant for the ETH_CALL_FALLBACK_TO_LATEST_DURATION environment variable to improve code maintainability.
+* Fixed substreams regression from v2.14.2 where some jobs would not get scheduled correctly, resulting in failure with the mssage  `get size of store "...": opening file: not found`.
+* Introduced ETH_CALL_FALLBACK_TO_LATEST_DURATION environment variable. When set, all RPC calls older than that duration will be done targeting "latest" block instead of current.
+  Calls that return error code -32602 (invalid params) will also be retried using the latest block reference instead of the original block hash.
+  This is to support chains where "archive nodes" do not exist, allowing serving recent data nonetheless.
 
 ## v2.14.2
+
+> [!IMPORTANT]
+> This version contains a bug in scheduling of substreams stages which can cause some requests to fail with the message `get size of store "...": opening file: not found`.
+> Operators are advised to upgrade to v2.14.3 as soon as possible.
 
 ### Substreams
 
