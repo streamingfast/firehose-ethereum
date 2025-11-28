@@ -3,8 +3,10 @@ package substreams
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,6 +19,7 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // interfaces, living in `streamingfast/substreams:extensions.go`
@@ -109,6 +112,7 @@ type RPCEngine struct {
 
 	balanceClients            []*rpc.Client
 	currentBalanceClientIndex int
+	LastestFallbackDuration   *time.Duration
 }
 
 func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
@@ -143,11 +147,22 @@ func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit ui
 	if len(balanceClients) == 1 {
 		zlog.Debug("eth_get_balance balancing disabled (only 1 endpoint)")
 	}
-	return &RPCEngine{
+	engine := &RPCEngine{
 		gasLimit:       gasLimit,
 		callClients:    callClients,
 		balanceClients: balanceClients,
-	}, nil
+	}
+
+	if value := os.Getenv("LATEST_FALL_BACK_DURATION"); value != "" {
+		d, err := time.ParseDuration(value)
+		if err != nil {
+			return nil, fmt.Errorf("parsing LATEST_FALL_BACK_DURATION env var: %w", err)
+		}
+		engine.LastestFallbackDuration = &d
+	}
+
+	return engine, nil
+
 }
 
 func (e *RPCEngine) callClient() *rpc.Client {
@@ -195,7 +210,7 @@ func (e *RPCEngine) ethCall(ctx context.Context, retryCount int, traceID string,
 		return nil, true, err
 	}
 
-	res, deterministic, err := e.rpcCalls(ctx, traceID, retryCount, clock.Id, calls)
+	res, deterministic, err := e.rpcCalls(ctx, traceID, retryCount, clock.Id, clock.Timestamp, calls)
 	if err != nil {
 		return nil, deterministic, err
 	}
@@ -381,14 +396,24 @@ var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(
 //
 // Note that the `retryCount` value should be set to something else than -1 only for testing purposes, production
 // code paths should always set it to -1 (infinite retry).
-func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int, blockHash string, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
+func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int, blockHash string, blockTimestamp *timestamppb.Timestamp, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
 	reqs := make([]*rpc.RPCRequest, len(calls.Calls))
+
+	blockRef := rpc.BlockHash(blockHash)
+	if e.LastestFallbackDuration != nil {
+		blockTime := blockTimestamp.AsTime()
+		blockAge := time.Since(blockTime)
+		if blockAge > *e.LastestFallbackDuration {
+			blockRef = rpc.LatestBlock
+		}
+	}
+
 	for i, call := range calls.Calls {
 		reqs[i] = rpc.NewRawETHCall(rpc.CallParams{
 			To:       call.ToAddr,
 			GasLimit: e.gasLimit,
 			Data:     call.Data,
-		}, rpc.BlockHash(blockHash)).ToRequest()
+		}, blockRef).ToRequest()
 	}
 
 	var lastError error
@@ -430,6 +455,34 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 			zlog.Warn("retrying RPCCall on RPC error", zap.String("trace_id", traceID), zap.Error(err), zap.String("at_block", blockHash), zap.Stringer("endpoint", client), zap.Reflect("request", reqs[0]))
 			lastError = err
 			continue
+		}
+
+		if e.LastestFallbackDuration != nil {
+			// Check for invalid params error (-32602), if found, retry with latest block
+			retryWithLatest := false
+			for _, resp := range out {
+				if resp.Err != nil {
+					var rpcErr *rpc.ErrResponse
+					if errors.As(resp.Err, &rpcErr) && rpcErr.Code == -32602 {
+						retryWithLatest = true
+						break
+					}
+				}
+			}
+			if retryWithLatest && blockRef != rpc.LatestBlock {
+				blockRef = rpc.LatestBlock
+				// Rebuild reqs with latest block
+				for i, call := range calls.Calls {
+					reqs[i] = rpc.NewRawETHCall(rpc.CallParams{
+						To:       call.ToAddr,
+						GasLimit: e.gasLimit,
+						Data:     call.Data,
+					}, blockRef).ToRequest()
+				}
+				zlog.Warn("retrying RPCCall with latest block due to invalid params error (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
+				continue
+			}
+
 		}
 
 		deterministicResp := true

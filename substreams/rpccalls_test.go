@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/streamingfast/eth-go"
@@ -16,6 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var clockBlock1 = &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"}
@@ -264,6 +266,57 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			}, responses)
 		})
 	}
+}
+
+func TestRPCEngine_rpcCalls_retryWithLatestOnInvalidParams(t *testing.T) {
+	err := os.Setenv("LATEST_FALL_BACK_DURATION", "1h")
+	require.NoError(t, err)
+	defer os.Unsetenv("LATEST_FALL_BACK_DURATION")
+
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		if invokedCount == 1 {
+			// First call: return -32602 error
+			assert.Contains(t, buffer.String(), `"blockHash":"0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"`)
+			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","error":{"code":-32602,"message":"Block requested not found. Request might be querying historical state that is not available. If possible, reformulate query to point to more recent blocks"}}`))
+		} else {
+			// Second call: should have "latest"
+			assert.Contains(t, buffer.String(), `"latest"`)
+			assert.NotContains(t, buffer.String(), `"blockHash"`)
+			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+		}
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: timestamppb.Now()}
+	out, deterministic, err := engine.ethCall(context.Background(), 1, traceID, clock, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
 }
 
 func TestRPCEngine_ethGetBalance(t *testing.T) {
