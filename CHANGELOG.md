@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## [Unreleased]
+
+### Substreams
+
+* Enhanced RPC error handling: when RPC calls return error code -32602 (invalid params), all calls are retried using the latest block reference instead of the original block hash.
+* Introduced a constant for the ETH_CALL_FALLBACK_TO_LATEST_DURATION environment variable to improve code maintainability.
+
 ## v2.14.2
 
 ### Substreams
