@@ -352,6 +352,27 @@ func (e *RPCEngine) rpcDoWithRetry(
 			}
 		}
 
+		if e.LastestFallbackDuration != nil {
+			// Check for invalid params error (-32602), if found, retry with latest block
+			retryWithLatest := false
+			for _, r := range rpcResps {
+				if r.Err != nil {
+					if rpcErr, ok := r.Err.(*rpc.ErrResponse); ok && rpcErr.Code == -32602 {
+						retryWithLatest = true
+						break
+					}
+				}
+			}
+			if retryWithLatest {
+				// Rebuild reqs with latest block
+				for _, req := range reqs {
+					req.Params[1] = "latest"
+				}
+				zlog.Warn("retrying eth_getBalance with latest block due to invalid params error (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
+				continue
+			}
+		}
+
 		if retryCount == 0 || deterministic {
 			return out, deterministic, nil
 		}
