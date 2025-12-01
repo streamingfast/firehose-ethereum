@@ -2,6 +2,8 @@ module github.com/streamingfast/firehose-ethereum
 
 go 1.24.2
 
+replace github.com/streamingfast/substreams => ../substreams
+
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
 	github.com/abourget/llerrgroup v0.2.0
