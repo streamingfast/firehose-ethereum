@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/streamingfast/eth-go/rpc"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
+	"github.com/streamingfast/substreams/reqctx"
 	"github.com/streamingfast/substreams/wasm"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
@@ -114,7 +114,6 @@ type RPCEngine struct {
 
 	balanceClients            []*rpc.Client
 	currentBalanceClientIndex int
-	LastestFallbackDuration   *time.Duration
 }
 
 func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
@@ -155,14 +154,6 @@ func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit ui
 		balanceClients: balanceClients,
 	}
 
-	if value := os.Getenv(EthCallFallbackDurationEnvVar); value != "" {
-		d, err := time.ParseDuration(value)
-		if err != nil {
-			return nil, fmt.Errorf("parsing %s env var: %w", EthCallFallbackDurationEnvVar, err)
-		}
-		engine.LastestFallbackDuration = &d
-	}
-
 	return engine, nil
 
 }
@@ -198,6 +189,7 @@ func (e *RPCEngine) ETHCall(ctx context.Context, traceID string, clock *pbsubstr
 }
 
 func (e *RPCEngine) ethCall(ctx context.Context, retryCount int, traceID string, clock *pbsubstreams.Clock, in []byte) (out []byte, deterministic bool, err error) {
+
 	calls := &pbethss.RpcCalls{}
 	if err := proto.Unmarshal(in, calls); err != nil {
 		return nil, false, fmt.Errorf("unmarshal rpc calls proto: %w", err)
@@ -353,8 +345,8 @@ func (e *RPCEngine) rpcDoWithRetry(
 				break
 			}
 		}
-
-		if e.LastestFallbackDuration != nil {
+		fallbackDuration := reqctx.EthCallFallbackToLatestDuration(ctx)
+		if fallbackDuration > 0 {
 			//In that case we consider that -32602 mean block not found
 			retryWithLatest := false
 			for _, r := range rpcResps {
@@ -422,11 +414,13 @@ var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(
 func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int, blockHash string, blockTimestamp *timestamppb.Timestamp, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
 	reqs := make([]*rpc.RPCRequest, len(calls.Calls))
 
+	fallbackDuration := reqctx.EthCallFallbackToLatestDuration(ctx)
+
 	blockRef := rpc.BlockHash(blockHash)
-	if e.LastestFallbackDuration != nil {
+	if fallbackDuration != 0 {
 		blockTime := blockTimestamp.AsTime()
 		blockAge := time.Since(blockTime)
-		if blockAge > *e.LastestFallbackDuration {
+		if blockAge > fallbackDuration {
 			blockRef = rpc.LatestBlock
 		}
 	}
@@ -480,7 +474,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 			continue
 		}
 
-		if e.LastestFallbackDuration != nil {
+		if fallbackDuration > 0 {
 			//In that case we consider that -32602 mean block not found
 			retryWithLatest := false
 			for _, resp := range out {
