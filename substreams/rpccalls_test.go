@@ -9,10 +9,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/streamingfast/eth-go"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
+	"github.com/streamingfast/substreams/reqctx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -273,6 +275,9 @@ func TestRPCEngine_rpcCalls_retryWithLatestOnInvalidParams(t *testing.T) {
 	require.NoError(t, err)
 	defer os.Unsetenv(EthCallFallbackDurationEnvVar)
 
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallFallbackToLatestDuration(ctx, 1*time.Hour)
+
 	invokedCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		buffer := bytes.NewBuffer(nil)
@@ -304,7 +309,7 @@ func TestRPCEngine_rpcCalls_retryWithLatestOnInvalidParams(t *testing.T) {
 	require.NoError(t, err)
 
 	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: timestamppb.Now()}
-	out, deterministic, err := engine.ethCall(context.Background(), 1, traceID, clock, protoCalls)
+	out, deterministic, err := engine.ethCall(ctx, 1, traceID, clock, protoCalls)
 	require.NoError(t, err)
 	require.True(t, deterministic)
 
@@ -421,10 +426,13 @@ func TestRPCEngine_ethGetBalance_retry(t *testing.T) {
 	)
 }
 
-func TestRPCEngine_ethGetBalance_retryWithLatestOnInvalidParams(t *testing.T) {
+func TestRPCEngine_ethGetBalance_retryWithFallback(t *testing.T) {
 	err := os.Setenv(EthCallFallbackDurationEnvVar, "1h")
 	require.NoError(t, err)
 	defer os.Unsetenv(EthCallFallbackDurationEnvVar)
+
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallFallbackToLatestDuration(ctx, 1*time.Hour)
 
 	count := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -459,7 +467,7 @@ func TestRPCEngine_ethGetBalance_retryWithLatestOnInvalidParams(t *testing.T) {
 	in, err := proto.Marshal(reqProto)
 	require.NoError(t, err)
 
-	out, det, err := engine.ethGetBalance(context.Background(), 1, "traceID", clockBlock1, in)
+	out, det, err := engine.ethGetBalance(ctx, 1, "traceID", clockBlock1, in)
 	require.NoError(t, err)
 	require.True(t, det)
 
