@@ -417,7 +417,7 @@ func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int
 	fallbackDuration := reqctx.EthCallFallbackToLatestDuration(ctx)
 
 	blockRef := rpc.BlockHash(blockHash)
-	if fallbackDuration > 0 {
+	if fallbackDuration != 0 {
 		blockTime := blockTimestamp.AsTime()
 		blockAge := time.Since(blockTime)
 		if blockAge > fallbackDuration {
