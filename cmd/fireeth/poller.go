@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/streamingfast/cli"
 	"path"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/streamingfast/cli"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/cli/sflags"
