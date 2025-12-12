@@ -2179,8 +2179,8 @@ github.com/spiffe/go-spiffe/v2 v2.5.0 h1:N2I01KCUkv1FAjZXJMwh95KK1ZIQLYbPfhaxw8W
 github.com/spiffe/go-spiffe/v2 v2.5.0/go.mod h1:P+NxobPc6wXhVtINNtFjNWGBTreew1GBUCwT2wPmb7g=
 github.com/stoewer/go-strcase v1.2.0/go.mod h1:IBiWB2sKIp3wVVQ3Y035++gc+knqhUQag1KpM8ahLw8=
 github.com/stoewer/go-strcase v1.3.0/go.mod h1:fAH5hQ5pehh+j3nZfvwdk2RgEgQjAoM8wodgtPmh1xo=
-github.com/streamingfast/bstream v0.0.2-0.20251212160916-8d0947b253b0 h1:nJfjoUnNgdX6s0Ge+1PM6LTMZ5FHvhYwfVmRSFmu7z0=
-github.com/streamingfast/bstream v0.0.2-0.20251212160916-8d0947b253b0/go.mod h1:YXtnOZbqcqU4fzGqdi8B7rMcp2iQePQGf4oTIPBnzgc=
+github.com/streamingfast/bstream v0.0.2-0.20251212211832-6ab9ddb5a59e h1:FzpZWUwdNHlFCA/LUBMdzFh7oPSd/9Tw0SqngUJwmag=
+github.com/streamingfast/bstream v0.0.2-0.20251212211832-6ab9ddb5a59e/go.mod h1:YXtnOZbqcqU4fzGqdi8B7rMcp2iQePQGf4oTIPBnzgc=
 github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b h1:ztYeX3/5rg2tV2EU7edcrcHzMz6wUbdJB+LqCrP5W8s=
 github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b/go.mod h1:o9R/tjNON01X2mgWL5qirl2MV6xQ4EZI5D504ST3K/M=
 github.com/streamingfast/dauth v0.0.0-20251029141649-15559a9f457b h1:DiqXq0mOCXQ8VG3d8GnNoxCI49jyjEVpvO//9v9d9H8=
