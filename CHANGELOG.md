@@ -6,12 +6,20 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Partial blocks
+
 Added experimental support for partial blocks (e.g. Flashblocks on Base)
 
 See https://docs.substreams.dev/reference-material/chains-and-endpoints/flashblocks for details about how they work in Substreams.
 
 * `SUBSTREAMS_BIGGEST_PARTIAL_BLOCK_INDEX` environment variable to specify the index to use when bundling the "last partial block" from the full block. (default: 10, for Base)
 * Added flag `--include-partial-blocks` on `tools firehose-client`
+
+
+### Eth calls
+
+* Introduced ETH_CALL_USE_BLOCK_NUMBER_DURATION environment variable. When set, all RPC calls older than that duration will be done targeting the block by number instead of hash.
+  The ETH_CALL_FALLBACK_TO_LATEST_DURATION mechanism can still be applied over this, as it has precedence.
 
 ## v2.14.3
 

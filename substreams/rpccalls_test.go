@@ -529,3 +529,307 @@ func TestRPCEngine_ethGetBalance_retryWithFallback(t *testing.T) {
 		got,
 	)
 }
+
+func TestRPCEngine_rpcCalls_useBlockNumber_olderThanDuration(t *testing.T) {
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallUseBlockNumberDuration(ctx, 1*time.Hour)
+
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		// Should use block number instead of block hash for old blocks
+		assert.Contains(t, buffer.String(), `"0x1"`)
+		assert.NotContains(t, buffer.String(), `"blockHash"`)
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	// Create a clock with timestamp 2 hours ago (older than 1 hour duration)
+	oldTimestamp := timestamppb.New(time.Now().Add(-2 * time.Hour))
+	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: oldTimestamp}
+
+	out, deterministic, err := engine.ethCall(ctx, 1, traceID, clock, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+	require.Equal(t, 1, invokedCount)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
+}
+
+func TestRPCEngine_rpcCalls_useBlockHash_newerThanDuration(t *testing.T) {
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallUseBlockNumberDuration(ctx, 1*time.Hour)
+
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		// Should use block hash for recent blocks
+		assert.Contains(t, buffer.String(), `"blockHash":"0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"`)
+		assert.NotContains(t, buffer.String(), `,"0x1"]`)
+		assert.NotContains(t, buffer.String(), `"latest"`)
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	// Create a clock with recent timestamp (newer than 1 hour duration)
+	recentTimestamp := timestamppb.New(time.Now().Add(-30 * time.Minute))
+	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: recentTimestamp}
+
+	out, deterministic, err := engine.ethCall(ctx, 1, traceID, clock, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+	require.Equal(t, 1, invokedCount)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
+}
+
+func TestRPCEngine_rpcCalls_useBlockHash_zeroDuration(t *testing.T) {
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallUseBlockNumberDuration(ctx, 0)
+
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		// Should always use block hash when duration is 0, regardless of block age
+		assert.Contains(t, buffer.String(), `"blockHash":"0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5"`)
+		assert.NotContains(t, buffer.String(), `,"0x1"]`)
+		assert.NotContains(t, buffer.String(), `"latest"`)
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	// Even with very old timestamp, should still use block hash when duration is 0
+	oldTimestamp := timestamppb.New(time.Now().Add(-24 * time.Hour))
+	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: oldTimestamp}
+
+	out, deterministic, err := engine.ethCall(ctx, 1, traceID, clock, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+	require.Equal(t, 1, invokedCount)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
+}
+
+func TestRPCEngine_rpcCalls_blockNumberWithoutFallback(t *testing.T) {
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallUseBlockNumberDuration(ctx, 30*time.Minute)
+	// No fallback duration set
+
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		// Should use block number since block is older than 30min and no fallback is set
+		assert.Contains(t, buffer.String(), `"0x1"`)
+		assert.NotContains(t, buffer.String(), `"blockHash"`)
+		assert.NotContains(t, buffer.String(), `"latest"`)
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	// Block is 60 minutes old - older than blockNumber duration (30min)
+	timestamp := timestamppb.New(time.Now().Add(-60 * time.Minute))
+	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: timestamp}
+
+	out, deterministic, err := engine.ethCall(ctx, 1, traceID, clock, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+	require.Equal(t, 1, invokedCount)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
+}
+
+func TestRPCEngine_rpcCalls_blockNumberWithFallbackRetry(t *testing.T) {
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallUseBlockNumberDuration(ctx, 30*time.Minute)
+	ctx = reqctx.WithEthCallFallbackToLatestDuration(ctx, 2*time.Hour)
+
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		if invokedCount == 1 {
+			// First call: should use block number (block is older than 30min but newer than 2h)
+			assert.Contains(t, buffer.String(), `"0x1"`)
+			assert.NotContains(t, buffer.String(), `"blockHash"`)
+			assert.NotContains(t, buffer.String(), `"latest"`)
+			// Return -32602 error to trigger fallback
+			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","error":{"code":-32602,"message":"Block requested not found"}}`))
+		} else {
+			// Second call: should fallback to latest
+			assert.Contains(t, buffer.String(), `"latest"`)
+			assert.NotContains(t, buffer.String(), `"blockHash"`)
+			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+		}
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	// Block is 60 minutes old - older than blockNumber duration (30min) but newer than fallback duration (2h)
+	timestamp := timestamppb.New(time.Now().Add(-60 * time.Minute))
+	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: timestamp}
+
+	out, deterministic, err := engine.ethCall(ctx, 1, traceID, clock, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+	require.Equal(t, 2, invokedCount)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
+}
+
+func TestRPCEngine_rpcCalls_fallbackOverridesBlockNumber(t *testing.T) {
+	ctx := context.Background()
+	ctx = reqctx.WithEthCallUseBlockNumberDuration(ctx, 2*time.Hour)
+	ctx = reqctx.WithEthCallFallbackToLatestDuration(ctx, 1*time.Hour)
+
+	invokedCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		invokedCount++
+		// Should use latest due to fallback duration being shorter and taking precedence
+		assert.Contains(t, buffer.String(), `"latest"`)
+		assert.NotContains(t, buffer.String(), `"blockHash"`)
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	traceID := "someTraceID"
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	// Block is 90 minutes old - older than fallback duration (1h) but newer than blockNumber duration (2h)
+	// Fallback should take precedence and use "latest"
+	timestamp := timestamppb.New(time.Now().Add(-90 * time.Minute))
+	clock := &pbsubstreams.Clock{Number: 1, Id: "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5", Timestamp: timestamp}
+
+	out, deterministic, err := engine.ethCall(ctx, 1, traceID, clock, protoCalls)
+	require.NoError(t, err)
+	require.True(t, deterministic)
+	require.Equal(t, 1, invokedCount)
+
+	responses := &pbethss.RpcResponses{}
+	err = proto.Unmarshal(out, responses)
+	require.NoError(t, err)
+
+	assertProtoEqual(t, &pbethss.RpcResponses{
+		Responses: []*pbethss.RpcResponse{
+			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
+		},
+	}, responses)
+}

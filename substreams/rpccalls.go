@@ -204,7 +204,7 @@ func (e *RPCEngine) ethCall(ctx context.Context, retryCount int, traceID string,
 		return nil, true, err
 	}
 
-	res, deterministic, err := e.rpcCalls(ctx, traceID, retryCount, clock.Id, clock.Timestamp, calls)
+	res, deterministic, err := e.rpcCalls(ctx, traceID, retryCount, clock.Id, clock.Number, clock.Timestamp, calls)
 	if err != nil {
 		return nil, deterministic, err
 	}
@@ -411,15 +411,20 @@ var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(
 //
 // Note that the `retryCount` value should be set to something else than -1 only for testing purposes, production
 // code paths should always set it to -1 (infinite retry).
-func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int, blockHash string, blockTimestamp *timestamppb.Timestamp, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
+func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int, blockHash string, blockNumber uint64, blockTimestamp *timestamppb.Timestamp, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
 	reqs := make([]*rpc.RPCRequest, len(calls.Calls))
 
 	fallbackDuration := reqctx.EthCallFallbackToLatestDuration(ctx)
+	numberDuration := reqctx.EthCallUseBlockNumberDuration(ctx)
 
-	blockRef := rpc.BlockHash(blockHash)
+	blockAge := time.Since(blockTimestamp.AsTime())
+	var blockRef *rpc.BlockRef
+	if numberDuration != 0 && blockAge > numberDuration {
+		blockRef = rpc.BlockNumber(blockNumber)
+	} else {
+		blockRef = rpc.BlockHash(blockHash)
+	}
 	if fallbackDuration != 0 {
-		blockTime := blockTimestamp.AsTime()
-		blockAge := time.Since(blockTime)
 		if blockAge > fallbackDuration {
 			blockRef = rpc.LatestBlock
 		}
