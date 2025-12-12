@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+Added experimental support for partial blocks (e.g. Flashblocks on Base)
+
+See https://docs.substreams.dev/reference-material/chains-and-endpoints/flashblocks for details about how they work in Substreams.
+
+* `SUBSTREAMS_BIGGEST_PARTIAL_BLOCK_INDEX` environment variable to specify the index to use when bundling the "last partial block" from the full block. (default: 10, for Base)
+* Added flag `--include-partial-blocks` on `tools firehose-client`
+
 ## v2.14.3
 
 ### Substreams
