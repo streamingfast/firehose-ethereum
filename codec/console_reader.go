@@ -170,11 +170,12 @@ func (s *parsingStats) inc(key string) {
 }
 
 type parseCtx struct {
-	blockVersion         int32
-	fhVersion            string
-	fhMajorVersion       int
-	readTransactionIndex bool
-	readBlobGasUsed      bool
+	blockVersion          int32
+	fhVersion             string
+	fhMajorVersion        int
+	readTransactionIndex  bool
+	readPartialBlockIndex bool
+	readBlobGasUsed       bool
 
 	currentBlock         *pbeth.Block
 	currentTrace         *pbeth.TransactionTrace
@@ -1104,6 +1105,7 @@ func (ctx *parseCtx) readCreateAccount(line string) error {
 current geth instrumented nodes: FIRE INIT 2.x polygon 1.10.17-fh+hotfix (deadbeef) ...
 new rpc poller:                  FIRE INIT 1.0 sf.ethereum.v1.block
 future poller/trace-geth:        FIRE INIT 3.0 sf.ethereum.v1.block 1.10.17-fh+hotfix (deadbeef) ...
+with partial blocks:               FIRE INIT 3.1 sf.ethereum.v1.block 1.10.17-fh+hotfix (deadbeef) ...
 */
 func (ctx *parseCtx) readInit(line string) error {
 
@@ -1156,6 +1158,10 @@ func (ctx *parseCtx) readInit(line string) error {
 	case "3.0":
 		ctx.blockVersion = 3
 		ctx.fhMajorVersion = 3
+	case "3.1":
+		ctx.blockVersion = 3
+		ctx.fhMajorVersion = 3
+		ctx.readPartialBlockIndex = true
 	default:
 		return fmt.Errorf("major version of Firehose exchange protocol is unsupported (expected: one of [2.0, 2.1, 2.2, 2.3, 2.4, 2.5], found %s), you are most probably running an incompatible version of the Firehose instrumented 'geth' client", ctx.fhVersion)
 	}
@@ -1259,42 +1265,63 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 }
 
 // readBlockForProtocolVersion3 reads the new format of blocks, the one exported by rpc pollers and tracer-based instrumented geth
-// [block_num:342342342] [block_hash] [parent_num] [parent_hash] [lib:123123123] [timestamp:unix_nano] B64ENCODED_any
+// [block_num:342342342] [block_hash] [parent_num] [parent_hash] [lib:123123123] [timestamp:unix_nano] B64ENCODED_any {3.0}
+// [block_num:342342342] [partial_block_idx] [block_hash] [parent_num] [parent_hash] [lib:123123123] [timestamp:unix_nano] B64ENCODED_any {3.1}
 func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block, error) {
 	start := time.Now()
 
-	chunks, err := SplitInBoundedChunks(line, 8)
+	chunkCount := 8
+	if ctx.readPartialBlockIndex {
+		chunkCount = 9
+	}
+	chunks, err := SplitInBoundedChunks(line, chunkCount)
 	if err != nil {
 		return nil, fmt.Errorf("splitting block log line: %w", err)
 	}
 
-	blockNum, err := strconv.ParseUint(chunks[0], 10, 64)
+	i := 0
+
+	blockNum, err := strconv.ParseUint(chunks[i], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("parsing block num %q: %w", chunks[0], err)
+		return nil, fmt.Errorf("parsing block num %q: %w", chunks[i], err)
+	}
+	i++
+
+	var partialBlockIndex int64
+	if ctx.readPartialBlockIndex {
+		partialBlockIndex, err = strconv.ParseInt(chunks[i], 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parsing partial block index %q: %w", chunks[i], err)
+		}
+		i++
 	}
 
-	blockHash := chunks[1]
+	blockHash := chunks[i]
+	i++
 
-	parentNum, err := strconv.ParseUint(chunks[2], 10, 64)
+	parentNum, err := strconv.ParseUint(chunks[i], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("parsing parent num %q: %w", chunks[2], err)
+		return nil, fmt.Errorf("parsing parent num %q: %w", chunks[i], err)
 	}
+	i++
 
-	parentHash := chunks[3]
+	parentHash := chunks[i]
+	i++
 
-	libNum, err := strconv.ParseUint(chunks[4], 10, 64)
+	libNum, err := strconv.ParseUint(chunks[i], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("parsing lib num %q: %w", chunks[4], err)
+		return nil, fmt.Errorf("parsing lib num %q: %w", chunks[i], err)
 	}
+	i++
 
-	timestampUnixNano, err := strconv.ParseUint(chunks[5], 10, 64)
+	timestampUnixNano, err := strconv.ParseUint(chunks[i], 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("parsing timestamp %q: %w", chunks[5], err)
+		return nil, fmt.Errorf("parsing timestamp %q: %w", chunks[i], err)
 	}
+	i++
 
 	timestamp := time.Unix(0, int64(timestampUnixNano))
-
-	payload, err := base64.StdEncoding.DecodeString(chunks[6])
+	payload, err := base64.StdEncoding.DecodeString(chunks[i])
 	if err != nil {
 		return nil, fmt.Errorf("decoding base64 block payload: %w", err)
 	}
@@ -1305,13 +1332,14 @@ func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block
 	}
 
 	block := &pbbstream.Block{
-		Id:        blockHash,
-		Number:    blockNum,
-		ParentId:  parentHash,
-		ParentNum: parentNum,
-		Timestamp: timestamppb.New(timestamp),
-		LibNum:    libNum,
-		Payload:   blockPayload,
+		Id:           blockHash,
+		Number:       blockNum,
+		ParentId:     parentHash,
+		ParentNum:    parentNum,
+		Timestamp:    timestamppb.New(timestamp),
+		LibNum:       libNum,
+		Payload:      blockPayload,
+		PartialIndex: int32(partialBlockIndex),
 	}
 
 	BlockReadCount.Inc()
