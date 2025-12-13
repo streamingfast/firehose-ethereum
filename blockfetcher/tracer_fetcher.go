@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/eth-go/rpc"
 	"github.com/streamingfast/firehose-ethereum/block"
 	"go.uber.org/zap"
-	"time"
 )
 
 type TracerBlockFetcher struct {
