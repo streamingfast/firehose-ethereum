@@ -7,9 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/streamingfast/cli"
-
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/cli"
 	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/eth-go/rpc"
 	firecore "github.com/streamingfast/firehose-core"
