@@ -37,17 +37,17 @@ Transaction Links
 Performing pure 'transfer' transactions
 Pushed transaction 'https://localhost:8080/tx/0x5a215c52d4626649d12dd5ba78d6c04ab43e80d6a25e61f50d091562c2b06ad3' (pure transfer: existing address)
 Pushed transaction 'https://localhost:8080/tx/0xec6ab9a187d19e7d20c80508440f9cebdb308decf08a336e7e43b66298af433c' (pure transfer: existing address with custom gas limit & price)
-Pushed transaction 'https://localhost:8080/tx/0x3558864e9075d94a8577a69123bee4cfd0a48dbc162b7a9258aa0ef004c2874f' (pure transfer: inexistant address creates account and has an EVM call)
-Pushed transaction 'https://localhost:8080/tx/0xbcb126cbe64f2286ba3a7ad4b30d0744c58a9dff21f38a2f1e59b0ea9867d0c3' (pure transfer: transfer of 0 ETH to inexistant address generates a transaction with no EVM call)
+Pushed transaction 'https://localhost:8080/tx/0x3558864e9075d94a8577a69123bee4cfd0a48dbc162b7a9258aa0ef004c2874f' (pure transfer: inexistent address creates account and has an EVM call)
+Pushed transaction 'https://localhost:8080/tx/0xbcb126cbe64f2286ba3a7ad4b30d0744c58a9dff21f38a2f1e59b0ea9867d0c3' (pure transfer: transfer of 0 ETH to inexistent address generates a transaction with no EVM call)
 
 Performing 'transfer' through contract transactions
-Pushed transaction 'https://localhost:8080/tx/0x89d172b5866cfa05a6c6dbc6f4587323a2f1342827d35a62383cb2e610820ea3' (nested transfer through contract: existing addresss)
-Pushed transaction 'https://localhost:8080/tx/0x656a5158873ae03b2bd132bdc322d032abdcc8520e17f7485276f4d9c90b47dd' (transfer through contract: existing addresss)
-Pushed transaction 'https://localhost:8080/tx/0x47f09a08c3fff93c48c141ed4d3b6199802fa7f051104922ecd18ef1884f7412' (transfer through contract: inexistant address creates account and has an EVM call)
-Pushed transaction 'https://localhost:8080/tx/0xad2450f84f9d9e547490b41bd26c3920bdfc3ac2a179bb1a454e58a30b1801cb' (nested transfer through contract: inexistant address creates account and has an EVM call)
+Pushed transaction 'https://localhost:8080/tx/0x89d172b5866cfa05a6c6dbc6f4587323a2f1342827d35a62383cb2e610820ea3' (nested transfer through contract: existing address)
+Pushed transaction 'https://localhost:8080/tx/0x656a5158873ae03b2bd132bdc322d032abdcc8520e17f7485276f4d9c90b47dd' (transfer through contract: existing address)
+Pushed transaction 'https://localhost:8080/tx/0x47f09a08c3fff93c48c141ed4d3b6199802fa7f051104922ecd18ef1884f7412' (transfer through contract: inexistent address creates account and has an EVM call)
+Pushed transaction 'https://localhost:8080/tx/0xad2450f84f9d9e547490b41bd26c3920bdfc3ac2a179bb1a454e58a30b1801cb' (nested transfer through contract: inexistent address creates account and has an EVM call)
 
 Performing failing 'transfer' through contract transactions
-Pushed transaction 'https://localhost:8080/tx/0x286e35168fa508e6541918467b48b6d1ef92676d406067c51556348609b6eb93' (transfer through contract: existing addresss correctly failed with EVM reverted without reason)
+Pushed transaction 'https://localhost:8080/tx/0x286e35168fa508e6541918467b48b6d1ef92676d406067c51556348609b6eb93' (transfer through contract: existing address correctly failed with EVM reverted without reason)
 
 Performing 'log' transactions
 Pushed transaction 'https://localhost:8080/tx/0x29ed9a5610fa22a02e76ab11995a755d7d6dcda8f21cbe0120d50a9fee9b5705' (log: all)
@@ -77,7 +77,7 @@ Pushed transaction 'https://localhost:8080/tx/0x079db4d6a2ff3ba54560c1dda350a22f
 Pushed transaction 'https://localhost:8080/tx/0x26559f7e7db6be409c59250fbc089a8d6a411231906daaefcf47cc37792e40dd' (call: complete call tree)
 Pushed transaction 'https://localhost:8080/tx/0xf9e326c37a9cf03ddad4f192d244d2a40ec53767e2c91335c1e5633564f1a47d' (call: nested fail with native transfer)
 Pushed transaction 'https://localhost:8080/tx/0x42d7249dcafe9b8ca62c372dacb42bf844966bc95e5f92f2d488be83fa4a0ec5' (call: contract creation from call, without a constructor)
-Pushed transaction 'https://localhost:8080/tx/0x1e247b520f49343173f53d4df399ff65a7334bde116eba0ae2d16af20d4e55a6' (call: contract with create2, succesful creation)
+Pushed transaction 'https://localhost:8080/tx/0x1e247b520f49343173f53d4df399ff65a7334bde116eba0ae2d16af20d4e55a6' (call: contract with create2, successful creation)
 Pushed transaction 'https://localhost:8080/tx/0xb6a7e281deeacc0d0c9fd1d4f2285813c1d1ef401c6cbc6860a0e6750818cc66' (call: contract with create2, inner call fail due to insufficient funds (transaction succeed though))
 Pushed transaction 'https://localhost:8080/tx/0x0323420a7e3ed35bed5a7b89211548ab6e47b6f5aeddc340c1bd708cd106697c' (call: contract with create2, inner call fail due to insufficient funds then revert correctly failed with EVM reverted without reason)
 Pushed transaction 'https://localhost:8080/tx/0x7ed7333c2067e3cfaa218ef8dee79a0b35681754c2cd004ace2be554e7c2edca' (call: assert failure root call correctly failed with EVM reverted without reason)

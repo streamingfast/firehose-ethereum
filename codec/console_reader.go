@@ -1463,7 +1463,7 @@ func computeProofOfStakeLIBNum(blockNum uint64, finalizedBlockNum uint64, firstS
 }
 
 // Formats
-// STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESSS> <KEY> <OLD_VALUE> <NEW_VALUE> <ORDINAL>
+// STORAGE_CHANGE <CALL_INDEX> <CONTRACT_ADDRESS> <KEY> <OLD_VALUE> <NEW_VALUE> <ORDINAL>
 func (ctx *parseCtx) readStorageChange(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
@@ -1495,7 +1495,7 @@ func (ctx *parseCtx) readStorageChange(line string) error {
 }
 
 // Formats
-// BALANCE_CHANGE <CALL_INDEX> <ADDRESSS> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
+// BALANCE_CHANGE <CALL_INDEX> <ADDRESS> <OLD_VALUE> <NEW_VALUE> <REASON> <ORDINAL>
 func (ctx *parseCtx) readBalanceChange(line string) error {
 	chunks, err := SplitInChunks(line, 7)
 	if err != nil {
