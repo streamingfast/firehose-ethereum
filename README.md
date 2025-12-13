@@ -10,11 +10,11 @@
 Quick start with Firehose for Ethereum can be found in the official Firehose docs. Here some quick links to it:
 
 - [Firehose Overview](https://firehose.streamingfast.io/introduction/firehose-overview)
-- [Concepts & Architectures](https://firehose.streamingfast.io/concepts-and-architeceture)
-  - [Components](https://firehose.streamingfast.io/concepts-and-architeceture/components)
-  - [Data Flow](https://firehose.streamingfast.io/concepts-and-architeceture/data-flow)
-  - [Data Storage](https://firehose.streamingfast.io/concepts-and-architeceture/data-storage)
-  - [Design Principles](https://firehose.streamingfast.io/concepts-and-architeceture/design-principles)
+- [Concepts & Architectures](https://firehose.streamingfast.io/concepts-and-architecture)
+  - [Components](https://firehose.streamingfast.io/concepts-and-architecture/components)
+  - [Data Flow](https://firehose.streamingfast.io/concepts-and-architecture/data-flow)
+  - [Data Storage](https://firehose.streamingfast.io/concepts-and-architecture/data-storage)
+  - [Design Principles](https://firehose.streamingfast.io/concepts-and-architecture/design-principles)
 - [Ethereum Syncing](https://firehose.streamingfast.io/firehose-setup/ethereum)
 
 ## Installation
