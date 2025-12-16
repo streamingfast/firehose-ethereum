@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.14.4
 
 ### Partial blocks
 
@@ -15,11 +15,14 @@ See https://docs.substreams.dev/reference-material/chains-and-endpoints/flashblo
 * `SUBSTREAMS_BIGGEST_PARTIAL_BLOCK_INDEX` environment variable to specify the index to use when bundling the "last partial block" from the full block. (default: 10, for Base)
 * Added flag `--include-partial-blocks` on `tools firehose-client`
 
-
 ### Eth calls
 
 * Introduced ETH_CALL_USE_BLOCK_NUMBER_DURATION environment variable. When set, all RPC calls older than that duration will be done targeting the block by number instead of hash.
   The ETH_CALL_FALLBACK_TO_LATEST_DURATION mechanism can still be applied over this, as it has precedence.
+
+### Bugfixes
+
+* Substreams: fixed issue where "live backfiller" would not create segments after reconnecting with a cursor starting from a previous quicksave, causing delays in future reconnection
 
 ## v2.14.3
 
