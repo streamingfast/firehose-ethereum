@@ -34,11 +34,11 @@ func assertProtoEqual(t *testing.T, expected proto.Message, actual proto.Message
 		actualAsJSON, err := protojson.Marshal(actual)
 		require.NoError(t, err)
 
-		expectedAsMap := map[string]interface{}{}
+		expectedAsMap := map[string]any{}
 		err = json.Unmarshal(expectedAsJSON, &expectedAsMap)
 		require.NoError(t, err)
 
-		actualAsMap := map[string]interface{}{}
+		actualAsMap := map[string]any{}
 		err = json.Unmarshal(actualAsJSON, &actualAsMap)
 		require.NoError(t, err)
 
@@ -228,7 +228,7 @@ func TestRPCEngine_rpcCalls_determisticErrorMessages(t *testing.T) {
 			rpcCall("aa", eth.MustNewMethodDef("any()").MethodID()),
 			`{"code":-32602,"message":"invalid request"}`,
 			want{deterministic: true, response: &pbethss.RpcResponse{Failed: false}},
-			func(tt require.TestingT, err error, _ ...interface{}) {
+			func(tt require.TestingT, err error, _ ...any) {
 				require.EqualError(tt, err, "invalid call #0: 'ToAddr' should contain 20 bytes, got 1 bytes")
 			},
 		},

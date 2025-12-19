@@ -21,7 +21,7 @@ func (f *TracerBlockFetcher) IsBlockAvailable(requested uint64) bool {
 }
 
 func (f *TracerBlockFetcher) Fetch(ctx context.Context, client *rpc.Client, blkNum uint64) (b *pbbstream.Block, skipped bool, err error) {
-	respStr, err := client.DoRequest(ctx, "debug_traceFirehoseBlockByNumber", []interface{}{fmt.Sprintf("0x%x", blkNum), nil})
+	respStr, err := client.DoRequest(ctx, "debug_traceFirehoseBlockByNumber", []any{fmt.Sprintf("0x%x", blkNum), nil})
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to trace block %d: %w", blkNum, err)
 	}

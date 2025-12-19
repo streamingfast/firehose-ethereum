@@ -83,7 +83,7 @@ func createCompareBlocksStoreRPCE(logger *zap.Logger) firecore.CommandExecutor {
 			return fmt.Errorf("creating merged blocks store: %w", err)
 		}
 
-		handler := bstream.HandlerFunc(func(blk *pbbstream.Block, obj interface{}) error {
+		handler := bstream.HandlerFunc(func(blk *pbbstream.Block, obj any) error {
 			if blk.Number > stop {
 				return nil
 			}

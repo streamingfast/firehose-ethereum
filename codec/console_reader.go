@@ -46,7 +46,7 @@ type ConsoleReader struct {
 	close func()
 
 	ctx   *parseCtx
-	done  chan interface{}
+	done  chan any
 	stats *consoleReaderStats
 
 	logger *zap.Logger
@@ -61,7 +61,7 @@ func NewConsoleReader(lines chan string, blockEncoder firecore.BlockEncoder, log
 		close: func() {},
 
 		ctx:   &parseCtx{logger: logger, globalStats: globalStats, normalizationFeatures: &normalizationFeatures{}, encoder: blockEncoder},
-		done:  make(chan interface{}),
+		done:  make(chan any),
 		stats: globalStats,
 
 		logger: logger,
@@ -71,7 +71,7 @@ func NewConsoleReader(lines chan string, blockEncoder firecore.BlockEncoder, log
 }
 
 // todo: WTF?
-func (l *ConsoleReader) Done() <-chan interface{} {
+func (l *ConsoleReader) Done() <-chan any {
 	return l.done
 }
 
@@ -227,7 +227,7 @@ const (
 	readTransaction = 2
 )
 
-func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
+func (c *ConsoleReader) next(readType int) (out any, err error) {
 	ctx := c.ctx
 
 	c.logger.Debug("next", zap.Int("read_type", readType))

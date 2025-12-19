@@ -82,7 +82,7 @@ func TestParseFromFile(t *testing.T) {
 
 			cr := testFileConsoleReader(t, test.deepMindFile)
 
-			var reader ObjectReader = func() (interface{}, error) {
+			var reader ObjectReader = func() (any, error) {
 				out, err := cr.ReadBlock()
 				if err != nil {
 					if err == io.EOF {
@@ -99,7 +99,7 @@ func TestParseFromFile(t *testing.T) {
 			}
 
 			if test.readTransaction {
-				reader = func() (interface{}, error) {
+				reader = func() (any, error) {
 					return cr.ReadTransaction()
 				}
 			}
@@ -139,7 +139,7 @@ func TestParseFromFile(t *testing.T) {
 			}
 			buf.Write([]byte("]"))
 
-			var out interface{}
+			var out any
 			err := json.Unmarshal(buf.Bytes(), &out)
 			require.NoError(t, err)
 
@@ -169,7 +169,7 @@ func TestParseFromFile(t *testing.T) {
 	}
 }
 
-func isNil(v interface{}) bool {
+func isNil(v any) bool {
 	if v == nil {
 		return true
 	}
