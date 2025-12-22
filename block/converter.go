@@ -34,6 +34,11 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 		parentBeaconRoot = (*in.ParentBeaconBlockRoot).Bytes()
 	}
 
+	var requestsHash []byte
+	if in.RequestsHash != nil {
+		requestsHash = (*in.RequestsHash).Bytes()
+	}
+
 	var withdrawalHash []byte
 	if in.WithdrawalsHash != nil {
 		withdrawalHash = in.WithdrawalsHash.Bytes()
@@ -75,6 +80,7 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 			BlobGasUsed:      blobGasUsed,
 			ExcessBlobGas:    excessBlobGas,
 			ParentBeaconRoot: parentBeaconRoot,
+			RequestsHash:     requestsHash,
 			TxDependency:     nil, // not available
 		},
 	}
