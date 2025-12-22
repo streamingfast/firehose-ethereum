@@ -256,6 +256,10 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		// It's a micro-optimization but's worth it.
 		switch {
 		case strings.HasPrefix(line, "BLOCK"):
+			if ctx.fhMajorVersion == 0 {
+				return nil, fmt.Errorf("got 'FIRE BLOCK ...' line before receiving 'FIRE INIT ...' line, cannot proceed (received full line %q)", line)
+			}
+
 			ctx.stats.inc("BLOCK")
 			if ctx.fhMajorVersion != 3 {
 				return nil, fmt.Errorf("got 'FIRE BLOCK ...' line while Firehose protocol major version reported by 'FIRE INIT ...' was actually %d, this is invalid as 'FIRE BLOCK ...' can be emitted only if Firehose protocol major version is 3", ctx.fhMajorVersion)
