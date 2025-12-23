@@ -4,6 +4,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Substreams partial blocks with cursor
+
+* Partial blocks sent by substreams now include a cursor. Handling of "partial blocks cursors" will now start with an "UNDO" up to the parent block, before sending you the full blocks as partial until it catches up to head.
+  This allows using "partial_blocks_only" as a source of truth without needing to double your egress.
+
+### RPC Poller
+
+* Added `requests_hash` (EIP-7685) field handling to the RPC poller.
+
 ## v2.14.4
 
 ### Partial blocks
