@@ -73,7 +73,7 @@ require (
 	github.com/ShinyTrinkets/meta-logger v0.2.0 // indirect
 	github.com/ShinyTrinkets/overseer v0.3.0 // indirect
 	github.com/alecthomas/participle v0.7.1 // indirect
-	github.com/aws/aws-sdk-go v1.49.6 // indirect
+	github.com/aws/aws-sdk-go v1.55.8 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.12.0 // indirect
@@ -162,7 +162,7 @@ require (
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/protocolbuffers/protoscope v0.0.0-20221109213918-8e7a6aafa2c9 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/rs/cors v1.10.0 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/sercand/kuberesolver/v5 v5.1.1 // indirect
