@@ -1,4 +1,4 @@
-FROM golang:1.24.11-bookworm AS build
+FROM golang:1.25-bookworm AS build
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get -y install ca-certificates htop iotop sysstat stra
 
 RUN mkdir -p /app/ && \
     export repository="https://github.com/grpc-ecosystem/grpc-health-probe/releases/download" && \
-    export version="v0.4.12" && \
+    export version=$(curl -s https://api.github.com/repos/grpc-ecosystem/grpc-health-probe/releases/latest | jq -r .tag_name) && \
     curl --fail-with-body -Lo /app/grpc_health_probe "$repository/$version/grpc_health_probe-$(echo $TARGETPLATFORM | sed 's|/|-|')" && \
     chmod +x /app/grpc_health_probe
 
