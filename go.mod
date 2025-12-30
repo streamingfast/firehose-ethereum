@@ -1,6 +1,6 @@
 module github.com/streamingfast/firehose-ethereum
 
-go 1.24.2
+go 1.24.11
 
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
