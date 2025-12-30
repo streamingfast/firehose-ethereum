@@ -11,6 +11,16 @@ for instructions to keep up to date.
 * Partial blocks sent by substreams now include a cursor. Handling of "partial blocks cursors" will now start with an "UNDO" up to the parent block, before sending you the full blocks as partial until it catches up to head.
   This allows using "partial_blocks_only" as a source of truth without needing to double your egress.
 
+### Azure store
+
+* Added support for "workload identity credentials" in Azure. Order of preference is:
+  - If `AZURE_STORAGE_KEY` is set, use shared key credential (previous behavior)
+	- Otherwise, use DefaultAzureCredential which supports:
+	  - Managed Identity (for Azure resources)
+	  - Service Principal (via AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID)
+	  - Azure CLI credentials
+	  - Visual Studio Code credentials
+
 ### RPC Poller
 
 * Added `requests_hash` (EIP-7685) field handling to the RPC poller.
