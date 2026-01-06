@@ -6,10 +6,14 @@ for instructions to keep up to date.
 
 ## Unreleased
 
-### Substreams partial blocks with cursor
+### Substreams 
 
 * Partial blocks sent by substreams now include a cursor. Handling of "partial blocks cursors" will now start with an "UNDO" up to the parent block, before sending you the full blocks as partial until it catches up to head.
   This allows using "partial_blocks_only" as a source of truth without needing to double your egress.
+* Prevent "panic" when log messages are too large: instead, they will be truncated with a 'some logs were truncated' message.
+* Raise max individual log message size from 128k to 512k
+* Raise max log message size for a full block from 128k to 5MiB
+* Reduce log level from Warn to Debug when we fail to get or set the store size (for backends that don't support it)
 
 ### AWS Store
 
