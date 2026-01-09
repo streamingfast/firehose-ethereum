@@ -4,16 +4,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.15.5
 
-### Substreams 
+### Substreams fixes
 
-* Partial blocks sent by substreams now include a cursor. Handling of "partial blocks cursors" will now start with an "UNDO" up to the parent block, before sending you the full blocks as partial until it catches up to head.
-  This allows using "partial_blocks_only" as a source of truth without needing to double your egress.
+* Fix issue where "live backfiller" would not create segments after reconnecting with a cursor starting from a previous quicksave, causing delays in future reconnection
 * Prevent "panic" when log messages are too large: instead, they will be truncated with a 'some logs were truncated' message.
 * Raise max individual log message size from 128k to 512k
 * Raise max log message size for a full block from 128k to 5MiB
 * Reduce log level from Warn to Debug when we fail to get or set the store size (for backends that don't support it)
+
+### Substreams Partial blocks (experimental)
+
+* Removed PartialsData message and brought back this data inside the good old BlockScopedData
+* added the following fields to BlockScopedData:
+  - bool `is_partial` to indicate if this block is a partial block. The following two fields are only present when `is_partial==true`
+  - optional bool `is_last_partial` to indicate if this is the last partial of a given block (with correct block hash)
+  - optional uint32 `partial_index` to indicate the index of this partial block within the full block
+* renamed `partial_blocks_only` flag to `partial_blocks` on substreams Blocks request
+* removed `include_partial_blocks` flag from substreams Blocks request
 
 ### AWS Store
 
