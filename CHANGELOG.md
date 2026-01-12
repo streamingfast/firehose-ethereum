@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+* Added bucketed prometheus metrics `head_block_relative_time_sum` to help investigate latency and pipeline performance:
+  - "app=firehose_output" and "app=substreams_output" that shows latency between outputing live blocks and their blocktime.
+  - "app=relayer" for latency at relayer's input
+* Substreams: Fixed underflow in 'FailedPrecondition desc = request needs to process a total of x blocks' error when running from 'substreams run' with a start-block in the future.
+
 ## v2.15.5
 
 ### Substreams fixes
