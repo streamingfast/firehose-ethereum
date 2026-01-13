@@ -20,10 +20,10 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250814163534-bd7407bd89d7
 	github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62
-	github.com/streamingfast/dstore v0.1.3-0.20260113181007-4f744789047a
+	github.com/streamingfast/dstore v0.1.3-0.20260113210117-94d66eda2027
 	github.com/streamingfast/eth-go v0.0.0-20251222203320-40564c69a33a
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.12.6-0.20260113192606-f97841ecff22
+	github.com/streamingfast/firehose-core v1.12.6-0.20260113210159-a1534944fb1a
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20251113151010-c9c94d64348a
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v0.0.0-20260108192805-38f96de0a641
