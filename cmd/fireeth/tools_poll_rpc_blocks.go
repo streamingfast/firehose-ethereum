@@ -1,11 +1,12 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/emmansun/base64" // benchmarked 3x faster than standard encoding/base64
 
 	"github.com/streamingfast/firehose-ethereum/blockfetcher"
 
@@ -14,7 +15,6 @@ import (
 	firecore "github.com/streamingfast/firehose-core"
 	"github.com/streamingfast/firehose-ethereum/block"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 )
 
 func newPollRPCBlocksCmd(logger *zap.Logger) *cobra.Command {
@@ -86,7 +86,7 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 			}
 
 			ethBlock, _ := block.RpcToEthBlock(rpcBlock, receipts, nil, logger)
-			cnt, err := proto.Marshal(ethBlock)
+			cnt, err := ethBlock.MarshalVT()
 			if err != nil {
 				return fmt.Errorf("failed to proto  marshal pb sol block: %w", err)
 			}
