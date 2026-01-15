@@ -13,3 +13,9 @@ plugins:
     opt:
       - paths=import
       - module=github.com/streamingfast/firehose-ethereum/types/pb
+
+  - remote: buf.build/community/planetscale-vtprotobuf:v0.6.0
+    out: types/pb
+    opt:
+      - paths=source_relative
+      - features=marshal+unmarshal+size

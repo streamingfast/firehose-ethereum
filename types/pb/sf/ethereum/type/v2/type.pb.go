@@ -1009,7 +1009,7 @@ type BlockHeader struct {
 	//	  mix_hash,
 	//	  nonce,
 	//	  base_fee_per_gas (to be included only if London fork is active)
-	//	  withdrawals_root (to be included only if Shangai fork is active)
+	//	  withdrawals_root (to be included only if Shanghai fork is active)
 	//	  blob_gas_used (to be included only if Cancun fork is active)
 	//	  excess_blob_gas (to be included only if Cancun fork is active)
 	//	  parent_beacon_root (to be included only if Cancun fork is active)
@@ -1018,7 +1018,7 @@ type BlockHeader struct {
 	Hash []byte `protobuf:"bytes,16,opt,name=hash,proto3" json:"hash,omitempty"`
 	// Base fee per gas according to EIP-1559 (e.g. London Fork) rules, only set if London is present/active on the chain.
 	BaseFeePerGas *BigInt `protobuf:"bytes,18,opt,name=base_fee_per_gas,json=baseFeePerGas,proto3" json:"base_fee_per_gas,omitempty"`
-	// Withdrawals root hash according to EIP-4895 (e.g. Shangai Fork) rules, only set if Shangai is present/active on the chain.
+	// Withdrawals root hash according to EIP-4895 (e.g. Shanghai Fork) rules, only set if Shanghai is present/active on the chain.
 	//
 	// Only available in DetailLevel: EXTENDED
 	WithdrawalsRoot []byte `protobuf:"bytes,19,opt,name=withdrawals_root,json=withdrawalsRoot,proto3" json:"withdrawals_root,omitempty"`
