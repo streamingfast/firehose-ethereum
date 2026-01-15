@@ -1,11 +1,12 @@
 module github.com/streamingfast/firehose-ethereum
 
-go 1.24.11
+go 1.25.0
 
 require (
 	github.com/RoaringBitmap/roaring v1.9.1
 	github.com/abourget/llerrgroup v0.2.0
 	github.com/bobg/go-generics/v2 v2.2.2
+	github.com/emmansun/base64 v0.8.0
 	github.com/go-json-experiment/json v0.0.0-20231013223334-54c864be5b8d
 	github.com/golang/protobuf v1.5.4
 	github.com/holiman/uint256 v1.2.0
