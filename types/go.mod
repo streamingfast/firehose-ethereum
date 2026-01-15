@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/mitchellh/go-testing-interface v1.14.1
+	github.com/planetscale/vtprotobuf v0.6.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/protobuf v1.33.0
 )
