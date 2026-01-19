@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.15.6
 
 ### Added
 
@@ -12,6 +12,8 @@ for instructions to keep up to date.
   - "app=firehose_output" and "app=substreams_output" that shows latency between outputing live blocks and their blocktime.
   - "app=relayer" for latency at relayer's input
 * Substreams: Fixed underflow in 'FailedPrecondition desc = request needs to process a total of x blocks' error when running from 'substreams run' with a start-block in the future.
+* Bump base64 library to use a much faster one in reader
+* dstore: bumped google storage lib to v1.59.1 to fix a bug in their multi-range downloader, in case it affects us
 
 ## v2.15.5
 
