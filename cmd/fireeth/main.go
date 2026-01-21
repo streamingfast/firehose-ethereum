@@ -138,6 +138,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				parent.AddCommand(newPollerCmd(zlog, tracer))
 				parent.AddCommand(newOptimismPollerCmd(zlog, tracer))
 				parent.AddCommand(newScanForUnknownStatusCmd(zlog))
+				parent.AddCommand(addCompareLastPartialToFullBlockInStreamCmd(chain, zlog))
 
 				registerGethEnforcePeersCmd(parent, chain.BinaryName(), zlog, tracer)
 
