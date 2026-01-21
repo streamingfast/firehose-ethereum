@@ -4,9 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.15.7
 
-* Substreams: Fix issue where a retry on dstore while writing a fullKV would corrupt the file, making it unreadable. Fix prevents this and also now deletes affected files when they are detected
+* Bump Golang to build to 1.25
+
+### Substreams
+
+* Fix issue where a retry on dstore while writing a fullKV would corrupt the file, making it unreadable. Fix prevents this and also now deletes affected files when they are detected
+* Fix bug where so request could get stuck forever (until the clients drops or server restarts).
+* Fix issue where transient HTTP/2 stream errors (e.g., `INTERNAL_ERROR`) from `dstore` were being treated as fatal errors instead of being retried. These transient network errors are now detected and retried with exponential backoff.
 
 ## v2.15.6
 
