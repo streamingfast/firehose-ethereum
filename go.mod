@@ -7,7 +7,6 @@ require (
 	github.com/abourget/llerrgroup v0.2.0
 	github.com/bobg/go-generics/v2 v2.2.2
 	github.com/emmansun/base64 v0.8.0
-	github.com/go-json-experiment/json v0.0.0-20231013223334-54c864be5b8d
 	github.com/golang/protobuf v1.5.4
 	github.com/holiman/uint256 v1.3.1
 	github.com/josephburnett/jd v1.7.1
@@ -22,7 +21,7 @@ require (
 	github.com/streamingfast/derr v0.0.0-20250814163534-bd7407bd89d7
 	github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62
 	github.com/streamingfast/dstore v0.1.3-0.20260119134532-ee504d6a2655
-	github.com/streamingfast/eth-go v0.0.0-20251222203320-40564c69a33a
+	github.com/streamingfast/eth-go v0.0.0-20260122020943-6eb1ccd92c8d
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
 	github.com/streamingfast/firehose-core v1.12.7
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260115210153-dd3a798b41c9
@@ -117,6 +116,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-json-experiment/json v0.0.0-20231013223334-54c864be5b8d // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect

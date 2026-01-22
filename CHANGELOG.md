@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.15.8
+
+* Fix eth poller issue with marshalling block number (regression in v2.15.5)
+
 ## v2.15.7
 
 * Bump Golang to build to 1.25
