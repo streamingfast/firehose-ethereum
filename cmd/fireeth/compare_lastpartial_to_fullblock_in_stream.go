@@ -15,6 +15,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"sort"
@@ -39,7 +40,7 @@ func addCompareLastPartialToFullBlockInStreamCmd(chain *firecore.Chain[*pbeth.Bl
 		Use:   "compare-lastpartial-to-fullblock-in-stream <source> [<stop>]",
 		Short: "Compare partial blocks (partialIndex==10) to full blocks (partialIndex==0)",
 		Long: cli.Dedent(`
-			Connects to a 'relayer' source and compares partial blocks with partialIndex==10
+			Connects to a 'relayer' source and compares "last seen" partial blocks of a given number
 			to full blocks with partialIndex==0 using proto.Equal().
 
 			The connection is done over gRPC on the 'sf.bstream.v1.BlockStream/Blocks'
@@ -89,9 +90,8 @@ func createRelayerStreamE(chain *firecore.Chain[*pbeth.Block], logger *zap.Logge
 		}
 
 		blockCount := 0
-		var lastPartial10Block *pbeth.Block
-		var lastPartial10BlockNum uint64
 		seenIndices := make(map[uint64][]int32) // blockNum -> list of partial indices seen
+		seenBlocks := make(map[uint64]*pbeth.Block)
 
 		source := blockstream.NewSource(
 			ctx,
@@ -101,21 +101,12 @@ func createRelayerStreamE(chain *firecore.Chain[*pbeth.Block], logger *zap.Logge
 				// Track all partial indices seen for each block
 				if blk.PartialIndex != 0 {
 					seenIndices[blk.Number] = append(seenIndices[blk.Number], blk.PartialIndex)
-				}
 
-				// Only process blocks with partialIndex 0 or 10
-				if blk.PartialIndex != 0 && blk.PartialIndex != 10 {
-					return nil
-				}
-
-				// Store blocks with partialIndex == 10
-				if blk.PartialIndex == 10 {
 					ethBlock := &pbeth.Block{}
 					if err := blk.Payload.UnmarshalTo(ethBlock); err != nil {
 						return fmt.Errorf("unable to unmarshal block payload: %w", err)
 					}
-					lastPartial10Block = ethBlock
-					lastPartial10BlockNum = blk.Number
+					seenBlocks[blk.Number] = ethBlock
 					return nil
 				}
 
@@ -138,41 +129,43 @@ func createRelayerStreamE(chain *firecore.Chain[*pbeth.Block], logger *zap.Logge
 					}
 
 					// Check if we have a partial block to compare
-					if lastPartial10Block == nil || lastPartial10BlockNum != blk.Number {
-						fmt.Printf("Block %d: No partialIndex==10 seen for this block%s\n", blk.Number, seenIdxStr)
+					lastPartialBlock, ok := seenBlocks[blk.Number]
+					if !ok {
+						fmt.Printf("Block %d: No lastPartial seen for this block%s\n", blk.Number, seenIdxStr)
 					} else {
 						// Compare the blocks
-						if proto.Equal(lastPartial10Block, ethBlock) {
-							fmt.Printf("Block %d: ✓ MATCH - partialIndex==10 matches full block%s\n", blk.Number, seenIdxStr)
+						if proto.Equal(lastPartialBlock, ethBlock) {
+							fmt.Printf("Block %d: ✓ MATCH - lastPartial matches full block%s\n", blk.Number, seenIdxStr)
 						} else {
-							fmt.Printf("Block %d: ✗ DIFFER - partialIndex==10 differs from full block%s\n", blk.Number, seenIdxStr)
+							fmt.Printf("Block %d: ✗ DIFFER - lastPartial differs from full block%s\n", blk.Number, seenIdxStr)
 
-							// Generate and print diff
-							partial10JSON, err := rpc.MarshalJSONRPCIndent(lastPartial10Block, "", "  ")
-							if err != nil {
-								return fmt.Errorf("cannot marshal partial10 block to JSON: %w", err)
-							}
-							fullJSON, err := rpc.MarshalJSONRPCIndent(ethBlock, "", "  ")
-							if err != nil {
-								return fmt.Errorf("cannot marshal full block to JSON: %w", err)
-							}
+							if hex.EncodeToString(lastPartialBlock.Hash) != hex.EncodeToString(ethBlock.Hash) {
+								fmt.Printf("Hashes differ: %s != %s\n", hex.EncodeToString(lastPartialBlock.Hash), hex.EncodeToString(ethBlock.Hash))
+							} else {
 
-							partial10Doc, err := jd.ReadJsonString(string(partial10JSON))
-							if err != nil {
-								return fmt.Errorf("cannot read partial10 JSON: %w", err)
-							}
-							fullDoc, err := jd.ReadJsonString(string(fullJSON))
-							if err != nil {
-								return fmt.Errorf("cannot read full JSON: %w", err)
-							}
+								// Generate and print diff
+								partial10JSON, err := rpc.MarshalJSONRPCIndent(lastPartialBlock, "", "  ")
+								if err != nil {
+									return fmt.Errorf("cannot marshal partial10 block to JSON: %w", err)
+								}
+								fullJSON, err := rpc.MarshalJSONRPCIndent(ethBlock, "", "  ")
+								if err != nil {
+									return fmt.Errorf("cannot marshal full block to JSON: %w", err)
+								}
 
-							diff := partial10Doc.Diff(fullDoc)
-							fmt.Printf("Diff (partial10 -> full):\n%s\n", diff.Render())
+								partial10Doc, err := jd.ReadJsonString(string(partial10JSON))
+								if err != nil {
+									return fmt.Errorf("cannot read partial10 JSON: %w", err)
+								}
+								fullDoc, err := jd.ReadJsonString(string(fullJSON))
+								if err != nil {
+									return fmt.Errorf("cannot read full JSON: %w", err)
+								}
+
+								diff := partial10Doc.Diff(fullDoc)
+								fmt.Printf("Diff (lastPartial -> full):\n%s\n", diff.Render())
+							}
 						}
-
-						// Clear the stored partial block after comparison
-						lastPartial10Block = nil
-						lastPartial10BlockNum = 0
 					}
 
 					// Clean up seen indices for this block
