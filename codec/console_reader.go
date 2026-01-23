@@ -1292,10 +1292,15 @@ func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block
 	i++
 
 	var partialBlockIndex int64
+	var lastPartial bool
 	if ctx.readPartialBlockIndex {
 		partialBlockIndex, err = strconv.ParseInt(chunks[i], 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("parsing partial block index %q: %w", chunks[i], err)
+		}
+		if partialBlockIndex >= 1000 {
+			partialBlockIndex -= 1000
+			lastPartial = true
 		}
 		i++
 	}
@@ -1344,6 +1349,7 @@ func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block
 		LibNum:       libNum,
 		Payload:      blockPayload,
 		PartialIndex: int32(partialBlockIndex),
+		LastPartial:  lastPartial,
 	}
 
 	BlockReadCount.Inc()
