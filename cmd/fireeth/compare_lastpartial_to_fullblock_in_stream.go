@@ -38,7 +38,7 @@ import (
 func addCompareLastPartialToFullBlockInStreamCmd(chain *firecore.Chain[*pbeth.Block], logger *zap.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "compare-lastpartial-to-fullblock-in-stream <source> [<stop>]",
-		Short: "Compare partial blocks (partialIndex==10) to full blocks (partialIndex==0)",
+		Short: "Compare 'last' partial block to full blocks (partialIndex==0)",
 		Long: cli.Dedent(`
 			Connects to a 'relayer' source and compares "last seen" partial blocks of a given number
 			to full blocks with partialIndex==0 using proto.Equal().
@@ -47,8 +47,8 @@ func addCompareLastPartialToFullBlockInStreamCmd(chain *firecore.Chain[*pbeth.Bl
 			endpoint of the source.
 
 			For each full block received (partialIndex==0), it prints whether it matched
-			the previous partialIndex==10, differs from it (with diff), or if the
-			partialIndex==10 was not seen for that block.
+			the previous lastPartialBlock, differs from it (with diff), or if there was
+			no lastPartialBlock seen for that block.
 
 			You can pass a stop block to the command, can be absolute or relative. If relative,
 			only +N is supported, where N is the number of blocks seen so far. Default is
@@ -102,11 +102,13 @@ func createRelayerStreamE(chain *firecore.Chain[*pbeth.Block], logger *zap.Logge
 				if blk.PartialIndex != 0 {
 					seenIndices[blk.Number] = append(seenIndices[blk.Number], blk.PartialIndex)
 
-					ethBlock := &pbeth.Block{}
-					if err := blk.Payload.UnmarshalTo(ethBlock); err != nil {
-						return fmt.Errorf("unable to unmarshal block payload: %w", err)
+					if blk.LastPartial {
+						ethBlock := &pbeth.Block{}
+						if err := blk.Payload.UnmarshalTo(ethBlock); err != nil {
+							return fmt.Errorf("unable to unmarshal block payload: %w", err)
+						}
+						seenBlocks[blk.Number] = ethBlock
 					}
-					seenBlocks[blk.Number] = ethBlock
 					return nil
 				}
 
