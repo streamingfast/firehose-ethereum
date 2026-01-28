@@ -74,6 +74,9 @@ func (p *LogFilter) matchEventSignature(topics [][]byte) bool {
 }
 
 func (p *LogFilter) matches(trace *pbeth.TransactionTrace) bool {
+	if trace.Receipt == nil {
+		return false
+	}
 	for _, log := range trace.Receipt.Logs {
 		if p.matchAddress(log.Address) && p.matchEventSignature(log.Topics) {
 			return true

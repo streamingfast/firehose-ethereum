@@ -334,9 +334,11 @@ func populateLogBlockIndices(block *pbeth.Block, systemTransactionHashes hashes)
 	// numbering receipts logs
 	receiptLogBlockIndex := uint32(0)
 	for _, trace := range block.TransactionTraces {
-		for _, log := range trace.Receipt.Logs {
-			log.BlockIndex = receiptLogBlockIndex
-			receiptLogBlockIndex++
+		if trace.Receipt != nil {
+			for _, log := range trace.Receipt.Logs {
+				log.BlockIndex = receiptLogBlockIndex
+				receiptLogBlockIndex++
+			}
 		}
 	}
 
@@ -361,7 +363,7 @@ func populateLogBlockIndices(block *pbeth.Block, systemTransactionHashes hashes)
 	var callLogsToNumber []*pbeth.Log
 	var systemTransactionLogs []*pbeth.Log
 	for _, trace := range block.TransactionTraces {
-		if systemTransactionHashes.Contains(trace.Hash) { // this system transaction must not have its logs reordered, we omit them for now
+		if systemTransactionHashes.Contains(trace.Hash) && trace.Receipt != nil { // this system transaction must not have its logs reordered, we omit them for now
 			systemTransactionLogs = append(systemTransactionLogs, trace.Receipt.Logs...)
 			continue
 		}
@@ -398,31 +400,35 @@ func populateLogBlockIndices(block *pbeth.Block, systemTransactionHashes hashes)
 	// append Ordinal and Index to the receipt log
 	var receiptLogCount int
 	for _, trace := range block.TransactionTraces {
-		for _, log := range trace.Receipt.Logs {
-			receiptLogCount++
-			traceLog, ok := blockIndexToTraceLog[log.BlockIndex]
-			if !ok {
-				return fmt.Errorf("missing tracelog at blockIndex in tweak function")
-			}
-			log.Ordinal = traceLog.Ordinal
-			log.Index = traceLog.Index
-			if !proto.Equal(log, traceLog) {
-				// Will not error, worse case it fails and we end up with empty strings
-				actualLog, _ := json.Marshal(log)
-				remappedLog, _ := json.Marshal(traceLog)
-
-				receiptLogCount := 0
-				for _, trace := range block.TransactionTraces {
-					receiptLogCount += len(trace.Receipt.Logs)
+		if trace.Receipt != nil {
+			for _, log := range trace.Receipt.Logs {
+				receiptLogCount++
+				traceLog, ok := blockIndexToTraceLog[log.BlockIndex]
+				if !ok {
+					return fmt.Errorf("missing tracelog at blockIndex in tweak function")
 				}
+				log.Ordinal = traceLog.Ordinal
+				log.Index = traceLog.Index
+				if !proto.Equal(log, traceLog) {
+					// Will not error, worse case it fails and we end up with empty strings
+					actualLog, _ := json.Marshal(log)
+					remappedLog, _ := json.Marshal(traceLog)
 
-				return fmt.Errorf("error in tweak function for transaction %q (%d receipt logs, %d re-mapped logs): log %s proto not equal re-mapped log %s",
-					eth.Hex(trace.Hash),
-					receiptLogCount,
-					len(blockIndexToTraceLog),
-					string(actualLog),
-					string(remappedLog),
-				)
+					receiptLogCount := 0
+					for _, trace := range block.TransactionTraces {
+						if trace.Receipt != nil {
+							receiptLogCount += len(trace.Receipt.Logs)
+						}
+					}
+
+					return fmt.Errorf("error in tweak function for transaction %q (%d receipt logs, %d re-mapped logs): log %s proto not equal re-mapped log %s",
+						eth.Hex(trace.Hash),
+						receiptLogCount,
+						len(blockIndexToTraceLog),
+						string(actualLog),
+						string(remappedLog),
+					)
+				}
 			}
 		}
 	}
