@@ -18,7 +18,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -122,7 +122,7 @@ func createRelayerStreamE(chain *firecore.Chain[*pbeth.Block], logger *zap.Logge
 					// Format seen indices
 					seenIdxStr := ""
 					if indices, ok := seenIndices[blk.Number]; ok && len(indices) > 0 {
-						sort.Slice(indices, func(i, j int) bool { return indices[i] < indices[j] })
+						slices.Sort(indices)
 						idxStrings := make([]string, len(indices))
 						for i, idx := range indices {
 							idxStrings[i] = fmt.Sprintf("%d", idx)
