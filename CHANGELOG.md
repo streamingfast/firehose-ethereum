@@ -4,9 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.15.9
 
 * Substreams: Improved 'partial blocks': support new pbbstream's "LastPartial" field, fix 'undo' scenarios for stores
+* Reduce RAM usage with partial blocks (relayer, substreams, firehose)
 * Prevent panic if transactionTrace.receipt is nil in LogFilter (even if it is not a normal scenario)
 
 ## v2.15.8
