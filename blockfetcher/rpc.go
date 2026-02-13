@@ -81,6 +81,14 @@ func (f *BlockFetcher) FetchPBEth(ctx context.Context, rpcClient *rpc.Client, bl
 		return nil, fmt.Errorf("fetching block %d: %w", blockNum, err)
 	}
 
+	if rpcBlock == nil {
+		return nil, fmt.Errorf("block %d not found: rpc returned nil block", blockNum)
+	}
+
+	if rpcBlock.Hash == nil {
+		return nil, fmt.Errorf("block %d has nil hash", blockNum)
+	}
+
 	blockHash := eth.Bytes(rpcBlock.Hash.Bytes())
 	var receipts map[string]*rpc.TransactionReceipt
 	var logs map[string][]eth.Log
