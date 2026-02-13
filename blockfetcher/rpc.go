@@ -82,7 +82,7 @@ func (f *BlockFetcher) FetchPBEth(ctx context.Context, rpcClient *rpc.Client, bl
 	}
 
 	if rpcBlock == nil {
-		return nil, fmt.Errorf("block %d not found: rpc returned nil block", blockNum)
+		return nil, fmt.Errorf("block %d not found or unavailable", blockNum)
 	}
 
 	if rpcBlock.Hash == nil {
