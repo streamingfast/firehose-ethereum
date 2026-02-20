@@ -4,7 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.16.0
+
+### Substreams Performance (RPC V4, New blocks from last partial)
+
+* **RPC V4 protocol with `BlockScopedDatas` batching**: Multiple `BlockScopedData` messages are now batched into a single `BlockScopedDatas` response, reducing gRPC round-trips and message framing overhead during backfill. Clients automatically fall back V4 → V3 → V2 when connecting to older servers, so no flag changes are required.
+* **S2 compression is now the default**: Replaces gzip as the default compression algorithm, providing ~3-5x faster compression/decompression with comparable ratios. The client automatically negotiates compression with the server.
+* **VTProtobuf fast serialization**: Both client and server now use [vtprotobuf](https://github.com/planetscale/vtprotobuf) for protobuf marshaling/unmarshaling, providing ~2-3x faster serialization with reduced memory allocations.
+* **Server-side message buffering**: Configurable via `--substreams-tier1-output-buffer-size` flag (default: 100 blocks) or `MESSAGE_BUFFER_MAX_DATA_SIZE` environment variable (default: 10MB).
+* **Improved Connect/gRPC protocol selection**: Server now efficiently routes requests to the appropriate handler based on content-type, improving performance by ~15% for pure gRPC clients.
+* **New blocks from last partial**: "Last partial blocks" are now accepted interchangeably with `new` blocks, allowing faster full blocks for requests that do not ask for partial blocks.
+
+### Added
+
+* Add `firecore tools substreams logs connections <user_id>` command to query Cloud Logging and show Substreams connections for an organization. Correlates incoming requests with stats by trace ID and presents a summary table showing active, closed, and error connections with details like network, source IP, module, duration, and blocks processed.
+
+### Removed
 
 * Remove alpha partial blocks support in firehose service (only exposed via substreams)
 
