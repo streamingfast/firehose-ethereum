@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Fix substreams/firehose endpoints detection of supported compression: do not fail on 'algo;q=x.y' syntax
+
 ## v2.16.0
 
 ### Substreams Performance (RPC V4, New blocks from last partial)
