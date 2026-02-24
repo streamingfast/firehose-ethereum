@@ -29,7 +29,7 @@ require (
 	github.com/streamingfast/logging v0.0.0-20260108192805-38f96de0a641
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.18.1
+	github.com/streamingfast/substreams v1.18.2-0.20260224131541-3bc8d286c236
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -197,7 +197,7 @@ require (
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/streamingfast/dauth v0.0.0-20251218134044-fb716c7172b4 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
-	github.com/streamingfast/dgrpc v0.0.0-20260223203944-32f0b38f8f35 // indirect
+	github.com/streamingfast/dgrpc v0.0.0-20260224131243-afbfd5ee1081 // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20251027175535-4fd530934b97 // indirect
 	github.com/streamingfast/dsession v0.0.0-20251029144057-b94d1030e142 // indirect
