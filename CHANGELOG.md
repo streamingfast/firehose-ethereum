@@ -7,6 +7,7 @@ for instructions to keep up to date.
 ## Unreleased
 
 * Fix substreams/firehose endpoints detection of supported compression: do not fail on 'algo;q=x.y' syntax
+* Fix relayer failing to get back to live if reader blocks are unlinkable after a long period, and merger has removed one-blocks: it will now shutdown in that case, so it can be restarted.
 
 ## v2.16.0
 
