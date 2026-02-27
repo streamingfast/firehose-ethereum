@@ -9,19 +9,39 @@ on:
       - release/v*
       - feature/*
 
-permissions:
-  contents: read
-  pull-requests: read
-
 jobs:
   buf:
     runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Buf CI
-        uses: bufbuild/buf-action@v1
+      - name: Setup buf
+        uses: bufbuild/buf-setup-action@v1
         with:
-          token: ${{ secrets.BUF_TOKEN }}
-          lint: false  # Disable lint since it was previously disabled
+          github_token: ${{ github.token }}
+
+      - name: Check for breaking changes
+        uses: bufbuild/buf-breaking-action@v1
+        with:
+          input: proto
+          against: "https://github.com/${{ github.repository }}.git#branch=${{ github.base_ref }}"
+
+      - name: Push to Buf registry
+        env:
+          BUF_TOKEN: ${{ secrets.BUF_TOKEN }}
+        run: |
+          # --git-metadata automatically sets labels based on git branches/tags
+          # and source-control-url from the git remote
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            # For tags, also push to 'main' label so docs stay up to date
+            echo "Running: buf push proto --git-metadata --label main"
+            buf push proto --error-format=github-actions --git-metadata --label=main
+          else
+            echo "Running: buf push proto --git-metadata"
+            buf push proto --error-format=github-actions --git-metadata
+          fi
