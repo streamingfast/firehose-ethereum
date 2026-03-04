@@ -983,6 +983,9 @@ message BalanceChange {
 
     // This reason is used only on Optimism chain for balance reverts.
     REASON_REVERT = 19;
+
+    // This reason is used only on Monad chain for post-execution balance state changes.
+    REASON_MONAD_TX_POST_STATE = 20;
   }
 
   // The block's global ordinal when the balance change was recorded, refer to [Block]
