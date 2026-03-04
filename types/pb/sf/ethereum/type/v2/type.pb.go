@@ -364,7 +364,11 @@ const (
 	BalanceChange_REASON_INCREASE_MINT BalanceChange_Reason = 18
 	// This reason is used only on Optimism chain for balance reverts.
 	BalanceChange_REASON_REVERT BalanceChange_Reason = 19
-	// This reason is used only on Monad chain for post-execution balance state changes.
+	// This reason is used only on Monad chain. The Monad execution layer does not report the reason
+	// for a balance change, only the pre and post-execution state per account. Because of Monad's
+	// parallel execution model, there is always exactly one balance change per modified address per
+	// transaction, representing the state change. Consumers should not expect granular per-operation
+	// entries (i.e. GAS_BUY, TRANSFER, GAS_REFUND, REWARD_TRANSACTION_FEE) because of this.
 	BalanceChange_REASON_MONAD_TX_POST_STATE BalanceChange_Reason = 20
 )
 
