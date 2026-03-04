@@ -983,6 +983,13 @@ message BalanceChange {
 
     // This reason is used only on Optimism chain for balance reverts.
     REASON_REVERT = 19;
+
+    // This reason is used only on Monad chain. The Monad execution layer does not report the reason
+    // for a balance change, only the pre and post-execution state per account. Because of Monad's
+    // parallel execution model, there is always exactly one balance change per modified address per
+    // transaction, representing the state change. Consumers should not expect granular per-operation
+    // entries (i.e. GAS_BUY, TRANSFER, GAS_REFUND, REWARD_TRANSACTION_FEE) because of this.
+    REASON_MONAD_TX_POST_STATE = 20;
   }
 
   // The block's global ordinal when the balance change was recorded, refer to [Block]
