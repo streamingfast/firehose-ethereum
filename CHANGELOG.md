@@ -8,6 +8,10 @@ for instructions to keep up to date.
 
 * Fix substreams/firehose endpoints detection of supported compression: do not fail on 'algo;q=x.y' syntax
 * Fix relayer failing to get back to live if reader blocks are unlinkable after a long period, and merger has removed one-blocks: it will now shutdown in that case, so it can be restarted.
+* Add `substreams-tier2-authenticator` flag to specify the authenticator to use for tier2 requests. Can be 'trust://' (default, same as previous behavior) or 'secret://<key>'
+* Add `substreams-tier1-subrequests-secret-key` flag to specify the secret key to use for tier1 subrequests authentication when using 'secret://' authenticator on tier2
+* Add `reader-node-grpc-secret-key` flag to specify the secret key to use for reader node gRPC authentication
+* Add `?secret=...` parsing to `relayer-source`s
 
 ## v2.16.0
 
