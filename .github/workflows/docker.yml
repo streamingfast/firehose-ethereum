@@ -16,7 +16,32 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  setup:
+    runs-on: ubuntu-24.04
+
+    env:
+      SLACK_IDS: ${{ vars.SLACK_IDS }}
+
+    outputs:
+      slack_id: ${{ steps.get-slack-id.outputs.SLACK_ID }}
+
+    steps:
+      - name: Check SLACK_IDS env variable
+        run: |
+          if [ -z "${SLACK_IDS}" ]; then
+            echo "The secret 'vars.SLACK_IDS' is empty"
+            exit 1
+          fi
+
+      - name: Get Slack ID
+        id: get-slack-id
+        run: |
+          SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
+          SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
+          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
+
   build:
+    needs: [setup]
     strategy:
       matrix:
         include:
@@ -86,8 +111,27 @@ jobs:
           build-args: |
             VERSION=${{ steps.extract-version.outputs.VERSION }}
 
+      - name: Get Job ID from GH API
+        id: get_job_id
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
+          job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
+          echo "job_id=$job_id" >> $GITHUB_OUTPUT
+
+      - name: Notify build failure on Slack
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        uses: Ilshidur/action-slack@2.1.0
+        with:
+          args: |
+            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker image (${{ matrix.platform_suffix }}) from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
+
   push:
-    needs: build
+    needs: [setup, build]
     runs-on: ubuntu-24.04
 
     outputs:
@@ -136,18 +180,33 @@ jobs:
           images: "${{ steps.image.outputs.ID }}-amd64, ${{ steps.image.outputs.ID }}-arm64"
           push: true
 
+      - name: Get Job ID from GH API
+        id: get_job_id
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jobs=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs")
+          job_id=$(echo "$jobs" | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
+          echo "job_id=$job_id" >> $GITHUB_OUTPUT
+
+      - name: Notify manifest push failure on Slack
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        uses: Ilshidur/action-slack@2.1.0
+        with:
+          args: |
+            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed pushing docker manifest from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
+
   slack-notifications:
-    needs: [push]
+    needs: [setup, push]
     runs-on: ubuntu-24.04
     steps:
-      - name: Extract Metadata Tags
-        id: metadata
-        run: echo "tags=${{ needs.push.outputs.tags }}" | sed 's/,/ /g' >> "$GITHUB_OUTPUT"
-
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        uses: Ilshidur/action-slack@2.0.2
+        uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :done: *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ steps.metadata.outputs.tags }}```
+            :done: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Success building docker image from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}) :sparkling_heart: ```${{ needs.push.outputs.tags }}```
