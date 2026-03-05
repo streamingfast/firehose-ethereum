@@ -80,7 +80,6 @@ jobs:
             version=${GITHUB_REF#refs/tags/}
           fi
 
-          echo "GO_PSEUDOHASH=$(go list -f '{{.Version}}' -m github.com/streamingfast/firehose-ethereum@${{ github.sha }})" >> "$GITHUB_OUTPUT"
           echo "VERSION=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Generate docker tags/labels from github build context
@@ -93,7 +92,6 @@ jobs:
             type=ref,event=tag,suffix=-${{ matrix.platform_suffix }}
             type=sha,prefix=,priority=300
             type=sha,prefix=,suffix=-${{ matrix.platform_suffix }},priority=300
-            type=raw,value=${{ steps.extract-version.outputs.GO_PSEUDOHASH }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: |
             latest=${{ startsWith(github.ref, 'refs/tags/') }}
@@ -149,10 +147,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version
-        id: extract-version
-        run: |
-          echo "GO_PSEUDOHASH=$(go list -f '{{.Version}}' -m github.com/streamingfast/firehose-ethereum@${{ github.sha }})" >> "$GITHUB_OUTPUT"
 
       - name: Generate docker tags/labels from github build context
         id: meta
@@ -162,7 +156,6 @@ jobs:
           tags: |
             type=ref,event=tag
             type=sha,prefix=,priority=300
-            type=raw,value=${{ steps.extract-version.outputs.GO_PSEUDOHASH }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: |
             latest=${{ startsWith(github.ref, 'refs/tags/') }}
