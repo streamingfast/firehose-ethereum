@@ -4,14 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.16.1
 
 * Fix substreams/firehose endpoints detection of supported compression: do not fail on 'algo;q=x.y' syntax
 * Fix relayer failing to get back to live if reader blocks are unlinkable after a long period, and merger has removed one-blocks: it will now shutdown in that case, so it can be restarted.
+* Fix substreams tier2 jobs behind load balancer: will now retry forever on 'Unavailable: no healthy upstream' errors
 * Add `substreams-tier2-authenticator` flag to specify the authenticator to use for tier2 requests. Can be 'trust://' (default, same as previous behavior) or 'secret://<key>'
 * Add `substreams-tier1-subrequests-secret-key` flag to specify the secret key to use for tier1 subrequests authentication when using 'secret://' authenticator on tier2
 * Add `reader-node-grpc-secret-key` flag to specify the secret key to use for reader node gRPC authentication
 * Add `?secret=...` parsing to `relayer-source`s
+* Add Prometheus metrics for reader test mode: track blocks compared, success/failure counts, and success/failure percentages for easy monitoring at interval stats.
 
 ## v2.16.0
 
