@@ -149,6 +149,44 @@ func FetchLogs(ctx context.Context, blockHash eth.Bytes, client *rpc.Client) (ou
 }
 
 func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int, allowEmptyReceiptsOnBlock0 bool) (out map[string]*rpc.TransactionReceipt, err error) {
+	out, err = fetchBlockReceipts(ctx, block, client, allowEmptyReceiptsOnBlock0)
+	if err == nil {
+		return out, nil
+	}
+
+	return fetchReceiptsIndividually(ctx, block, client, parallelTrxWorkers, allowEmptyReceiptsOnBlock0)
+}
+
+// fetchBlockReceipts fetches all receipts for a block in a single RPC call using eth_getBlockReceipts.
+func fetchBlockReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, allowEmptyReceiptsOnBlock0 bool) (out map[string]*rpc.TransactionReceipt, err error) {
+	receipts, err := client.BlockReceipts(ctx, rpc.BlockNumber(uint64(block.Number)))
+	if err != nil {
+		return nil, fmt.Errorf("fetching block receipts: %w", err)
+	}
+
+	out = make(map[string]*rpc.TransactionReceipt)
+	for i, receipt := range receipts {
+		if receipt == nil {
+			if block.Number == 0 && allowEmptyReceiptsOnBlock0 {
+				receipt = &rpc.TransactionReceipt{
+					TransactionHash: block.Transactions.Transactions[i].Hash,
+					BlockHash:       block.Hash,
+					BlockNumber:     block.Number,
+					From:            block.Transactions.Transactions[i].From,
+					To:              block.Transactions.Transactions[i].To,
+				}
+			} else {
+				return nil, fmt.Errorf("receipt is nil for transaction %s", block.Transactions.Transactions[i].Hash.Pretty())
+			}
+		}
+		out[receipt.TransactionHash.Pretty()] = receipt
+	}
+
+	return out, nil
+}
+
+// fetchReceiptsIndividually fetches receipts one per transaction, used as fallback when eth_getBlockReceipts is not supported.
+func fetchReceiptsIndividually(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int, allowEmptyReceiptsOnBlock0 bool) (out map[string]*rpc.TransactionReceipt, err error) {
 	out = make(map[string]*rpc.TransactionReceipt)
 	lock := sync.Mutex{}
 
