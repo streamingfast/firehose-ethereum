@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+* Removed parallel preloading of one-block-files to reduce RAM usage when merging big blocks.
+
+> [!NOTE]
+> With this change, HEAD block timestamp is now updated maximum every 5 seconds instead of at every block, by reading the first 500 bytes of the last one-block-file
+
 ## v2.16.2
 
 * Fix substreams support for requests with 'application/grpc-web*' content-type (old connectweb library)
