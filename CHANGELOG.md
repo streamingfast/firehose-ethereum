@@ -4,14 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.17.0
+
+* Added `--shift-ports` global flag that shifts all Firehose service port numbers by a given offset, useful for running multiple instances on the same machine without port conflicts. Both server listen addresses and internal client connection addresses are shifted so wiring stays consistent. Infrastructure ports (Prometheus metrics, pprof, log-level-switcher) are also shifted. Example: `fire{chain} start --shift-ports 100` shifts all ports by +100.
+* Added `--merger-max-merging-threads` (defaults: 4) so that the merger can merge blocks in parallel (still using way less RAM than previous one-block-preloading method)
+* S3 store: configurable HTTP connection pool via `DSTORE_S3_MAX_IDLE_CONNS`, `DSTORE_S3_MAX_IDLE_CONNS_PER_HOST`, `DSTORE_S3_IDLE_CONN_TIMEOUT` env vars
+
+### Changed
 
 * Removed parallel preloading of one-block-files to reduce RAM usage when merging big blocks.
-* Added '--merger-max-merging-threads' (defaults: 4) so that the merger can merge blocks in parallel (still using way less RAM than previous one-block-preloading method)
-* Added `--shift-ports` global flag that shifts all Firehose service port numbers by a given offset, useful for running multiple instances on the same machine without port conflicts. Both server listen addresses and internal client connection addresses are shifted so wiring stays consistent. Infrastructure ports (Prometheus metrics, pprof, log-level-switcher) are also shifted. Example: `fire{chain} start --shift-ports 100` shifts all ports by +100.
 
 > [!NOTE]
-> With this change, HEAD block timestamp is now updated maximum every 5 seconds instead of at every block, by reading the first 500 bytes of the last one-block-file
+> With this change, HEAD block timestamp is now updated maximum every 5 seconds instead of at every block, by reading the first 500 bytes of the last one-block-file.
+
+### Fixed
+
+* S3 store: fixed goroutine leak caused by connection pool exhaustion on single-host S3 stores (e.g. MinIO); HTTP body is now explicitly drained and closed, and the transport is configured with `MaxIdleConnsPerHost=100` by default
 
 ## v2.16.2
 

@@ -2003,8 +2003,8 @@ github.com/gorilla/context v1.1.1/go.mod h1:kBGZzfjB9CEq2AlWe17Uuf7NDRt0dE0s8S51
 github.com/gorilla/mux v1.6.2/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
-github.com/graphprotocol/substreams-data-service v0.0.0-20260224031909-c6ca40569c63 h1:33HLb6g30RAT+ZRXbIjIpd8P5uI/v/Ioa2L22tPbmSg=
-github.com/graphprotocol/substreams-data-service v0.0.0-20260224031909-c6ca40569c63/go.mod h1:xn+E7yOgaCvH9Bmyz0BXs0EcqdL2P9Icaf33MpZDo1w=
+github.com/graphprotocol/substreams-data-service v0.0.0-20260323141224-141602015bcf h1:pZcMNqBUHBhJQJN5Pn2Vk86uwRgA0YcAT4n1GdtMoJI=
+github.com/graphprotocol/substreams-data-service v0.0.0-20260323141224-141602015bcf/go.mod h1:SUs1YMAfHQoxUA8Wx3s7IP+WKK4hX8men7SxrkxxxCs=
 github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 h1:UH//fgunKIs4JdUbpDl1VZCDaL56wXCB/5+wF6uHfaI=
 github.com/grpc-ecosystem/go-grpc-middleware v1.4.0/go.mod h1:g5qyo/la0ALbONm6Vbp88Yd8NsDy6rZz+RcrMPxvld8=
 github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 h1:Ovs26xHkKqVztRpIrF/92BcuyuQ/YW4NSIpoGtfXNho=
@@ -2312,8 +2312,8 @@ github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62 h1:Tb4T34Im
 github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62/go.mod h1:JbxEDbzWRG1dHdNIPrYfuPllEkktZMgm40AwVIBENcw=
 github.com/streamingfast/dsession v0.0.0-20251029144057-b94d1030e142 h1:mgPawX0VOgrG2LHSc6EfY15r0x3AO/GK6LY58io3/+4=
 github.com/streamingfast/dsession v0.0.0-20251029144057-b94d1030e142/go.mod h1:ldDwFqr20xXyaLhwDm7XlMaf2vvoZNOrjgsMcFJGtrw=
-github.com/streamingfast/dstore v0.1.3-0.20260119134532-ee504d6a2655 h1:bVW3XYoXWozOOdaMcfjergmoH+xtUOtxOSW+UTS46CU=
-github.com/streamingfast/dstore v0.1.3-0.20260119134532-ee504d6a2655/go.mod h1:X6f2SJo6plTiJ8/NExv9Qfky6mtm9JrXC/Hes3QJe/8=
+github.com/streamingfast/dstore v0.2.0 h1:T60EC5TB5L2eHccUjT37nOACdbYaF/Tde6fvaoSW354=
+github.com/streamingfast/dstore v0.2.0/go.mod h1:X6f2SJo6plTiJ8/NExv9Qfky6mtm9JrXC/Hes3QJe/8=
 github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9 h1:RaMv0J2e30vQpJiKdWOGB1HObWtJ4/w4vEUkUhTYE+c=
 github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9/go.mod h1:huOJyjMYS6K8upTuxDxaNd+emD65RrXoVBvh8f1/7Ns=
 github.com/streamingfast/dummy-blockchain v1.7.3 h1:rPheajbwc+hwh4XVRMaroET/p/lvlI7WGfqETBkIL18=
@@ -2322,8 +2322,8 @@ github.com/streamingfast/eth-go v0.0.0-20260216202159-4e2b7501894a h1:jHKRM0gM5G
 github.com/streamingfast/eth-go v0.0.0-20260216202159-4e2b7501894a/go.mod h1:1szIYZI+rTjWWVYd1kFJomFiPCMvcZfBmylCwRaK8yY=
 github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd h1:t5n8dDcgUi7t36Qwxm19K4H2vyOLJfY6MHxTbOvK1z8=
 github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd/go.mod h1:du6tys2Q6X2pRQ3JbCziWiy7Y7KrOcl4CSb9uiGsVxA=
-github.com/streamingfast/firehose-core v1.13.4-0.20260320213007-e265762ba419 h1:4r1DtA1jdfUB6CkNp7yTuW0227EoSfLeB0eykkJZVhQ=
-github.com/streamingfast/firehose-core v1.13.4-0.20260320213007-e265762ba419/go.mod h1:1+QUZDEz/xm8q+E1TFss1Fi4wSjzO9Kx8dXhjkpfegI=
+github.com/streamingfast/firehose-core v1.14.0 h1:ArvAPXRkcfmhAqFZdRtSulgPCysOcnfxkfgrVohxlfw=
+github.com/streamingfast/firehose-core v1.14.0/go.mod h1:oempnGhORrIFLsMz6Jz78cUVjxoDLFlDwhE/P9X53T0=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20260115210153-dd3a798b41c9 h1:ZGQWgqCcTOgCvqpxK6TEk7X9W0huLRUKA3fI/pPh4VA=
 github.com/streamingfast/firehose-ethereum/types v0.0.0-20260115210153-dd3a798b41c9/go.mod h1:+ala1ZHyPZy6QZwTw3k7V6tHQ2bXFKP8wIldp2SUJ9Y=
 github.com/streamingfast/firehose-networks v0.2.2 h1:araNCSHVa9C8+7hGrxNJYt8TlbK65kNDxQMBJuzBjxA=
@@ -2335,8 +2335,8 @@ github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0/go.mod h1:cTN
 github.com/streamingfast/logging v0.0.0-20210811175431-f3b44b61606a/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/logging v0.0.0-20220304183711-ddba33d79e27/go.mod h1:4GdqELhZOXj4xwc4IaBmzofzdErGynnaSzuzxy0ZIBo=
 github.com/streamingfast/logging v0.0.0-20220304214715-bc750a74b424/go.mod h1:VlduQ80JcGJSargkRU4Sg9Xo63wZD/l8A5NC/Uo1/uU=
-github.com/streamingfast/logging v0.0.0-20260108192805-38f96de0a641 h1:dI+b2TyFS0rJw1xVGzxBBvn/RrSgBpqM/RjwDInxEfo=
-github.com/streamingfast/logging v0.0.0-20260108192805-38f96de0a641/go.mod h1:fJ5nP7ZSMB4MQQ6RM7cF+LiSQ43b5cVletcSUNL8z2M=
+github.com/streamingfast/logging v1.2.2 h1:hybYz/jtI+5PdGAAVLT+cGvSYo2Zi9dYpjTMRAvxjCQ=
+github.com/streamingfast/logging v1.2.2/go.mod h1:fJ5nP7ZSMB4MQQ6RM7cF+LiSQ43b5cVletcSUNL8z2M=
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 h1:xlWSfi1BoPfsHtPb0VEHGUcAdBF208LUiFCwfaVPfLA=
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308/go.mod h1:K1p8Bj/wG34KJvYzPUqtzpndffmpkrVY11u2hkyxCWQ=
 github.com/streamingfast/overseer v0.2.1-0.20210326144022-ee491780e3ef h1:9IVFHRsqvI+vKJwgF1OMV6L55jHbaV/ZLoU4IAG/dME=

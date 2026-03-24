@@ -20,13 +20,13 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250814163534-bd7407bd89d7
 	github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62
-	github.com/streamingfast/dstore v0.1.3-0.20260119134532-ee504d6a2655
+	github.com/streamingfast/dstore v0.2.0
 	github.com/streamingfast/eth-go v0.0.0-20260216202159-4e2b7501894a
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.13.4-0.20260320213007-e265762ba419
+	github.com/streamingfast/firehose-core v1.14.0
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260115210153-dd3a798b41c9
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
-	github.com/streamingfast/logging v0.0.0-20260108192805-38f96de0a641
+	github.com/streamingfast/logging v1.2.2
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
 	github.com/streamingfast/substreams v1.18.3-0.20260312163334-e27b44bd1c9d
@@ -136,7 +136,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.7 // indirect
 	github.com/googleapis/gax-go/v2 v2.16.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/graphprotocol/substreams-data-service v0.0.0-20260224031909-c6ca40569c63 // indirect
+	github.com/graphprotocol/substreams-data-service v0.0.0-20260323141224-141602015bcf // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
