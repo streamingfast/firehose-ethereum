@@ -2,6 +2,7 @@ package blockfetcher
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -148,11 +149,25 @@ func FetchLogs(ctx context.Context, blockHash eth.Bytes, client *rpc.Client) (ou
 	return out, nil
 }
 
+// jsonRPCMethodNotFound is the JSON-RPC error code for "method not found", indicating
+// the RPC endpoint does not support the called method.
+const jsonRPCMethodNotFound = -32601
+
 func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int, allowEmptyReceiptsOnBlock0 bool) (out map[string]*rpc.TransactionReceipt, err error) {
 	out, err = fetchBlockReceipts(ctx, block, client, allowEmptyReceiptsOnBlock0)
 	if err == nil {
 		return out, nil
 	}
+
+	// Only fall back to individual fetching when the RPC endpoint does not support
+	// eth_getBlockReceipts (method not found). Any other error is returned directly.
+	var rpcErr *rpc.ErrResponse
+	if !errors.As(err, &rpcErr) || rpcErr.Code != jsonRPCMethodNotFound {
+		return nil, err
+	}
+
+	// FIXME: Cache the fact that this client doesn't support eth_getBlockReceipts so
+	// subsequent invocations skip the batch call and go straight to individual fetching.
 
 	return fetchReceiptsIndividually(ctx, block, client, parallelTrxWorkers, allowEmptyReceiptsOnBlock0)
 }
