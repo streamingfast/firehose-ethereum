@@ -179,7 +179,7 @@ func fetchBlockReceipts(ctx context.Context, block *rpc.Block, client *rpc.Clien
 		return nil, fmt.Errorf("fetching block receipts: %w", err)
 	}
 
-	out = make(map[string]*rpc.TransactionReceipt)
+	out = make(map[string]*rpc.TransactionReceipt, len(receipts))
 	for i, receipt := range receipts {
 		if receipt == nil {
 			if block.Number == 0 && allowEmptyReceiptsOnBlock0 {
