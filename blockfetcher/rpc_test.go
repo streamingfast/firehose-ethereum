@@ -105,6 +105,22 @@ func TestFetchReceipts_FallbackToIndividual(t *testing.T) {
 	assert.GreaterOrEqual(t, callCount, 3)
 }
 
+func TestFetchReceipts_NonMethodNotFoundErrorReturnedDirectly(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Simulate a server error (not a method-not-found)
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","error":{"code":-32000,"message":"internal server error"}}`))
+	}))
+	defer server.Close()
+
+	client := rpc.NewClient(server.URL)
+	block := testBlock(10)
+
+	_, err := FetchReceipts(context.Background(), block, client, 2, false)
+	require.Error(t, err)
+	// Should NOT fall back to individual fetching — error returned directly
+	assert.Contains(t, err.Error(), "internal server error")
+}
+
 func TestFetchReceipts_BatchSuccess(t *testing.T) {
 	batchCalled := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
