@@ -105,6 +105,44 @@ func TestFetchReceipts_FallbackToIndividual(t *testing.T) {
 	assert.GreaterOrEqual(t, callCount, 3)
 }
 
+func TestFetchReceipts_FallbackOnMethodNotSupported(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		var req map[string]interface{}
+		err = json.Unmarshal(buffer.Bytes(), &req)
+		require.NoError(t, err)
+
+		switch req["method"].(string) {
+		case "eth_getBlockReceipts":
+			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","error":{"code":-32004,"message":"method not supported"}}`))
+		case "eth_getTransactionReceipt":
+			params := req["params"].([]interface{})
+			txHash := params[0].(string)
+			switch txHash {
+			case testTxHash1.Pretty():
+				w.Write([]byte(txReceiptResponse(testTxHash1.Pretty(), 0, "0x5208")))
+			case testTxHash2.Pretty():
+				w.Write([]byte(txReceiptResponse(testTxHash2.Pretty(), 1, "0xa410")))
+			default:
+				t.Fatalf("unexpected tx hash: %s", txHash)
+			}
+		default:
+			t.Fatalf("unexpected method: %s", req["method"].(string))
+		}
+	}))
+	defer server.Close()
+
+	client := rpc.NewClient(server.URL)
+	out, err := FetchReceipts(context.Background(), testBlock(10), client, 2, false)
+	require.NoError(t, err)
+	require.Len(t, out, 2)
+	assert.Contains(t, out, testTxHash1.Pretty())
+	assert.Contains(t, out, testTxHash2.Pretty())
+}
+
 func TestFetchReceipts_NonMethodNotFoundErrorReturnedDirectly(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Simulate a server error (not a method-not-found)

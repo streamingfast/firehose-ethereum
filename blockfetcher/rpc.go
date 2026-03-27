@@ -149,9 +149,11 @@ func FetchLogs(ctx context.Context, blockHash eth.Bytes, client *rpc.Client) (ou
 	return out, nil
 }
 
-// jsonRPCMethodNotFound is the JSON-RPC error code for "method not found", indicating
-// the RPC endpoint does not support the called method.
-const jsonRPCMethodNotFound = -32601
+// JsonRPCMethodNotFound "method not found".
+const JsonRPCMethodNotFound = -32601
+
+// JsonRPCMethodNotSupported "method not supported"
+const JsonRPCMethodNotSupported = -32004
 
 func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, parallelTrxWorkers int, allowEmptyReceiptsOnBlock0 bool) (out map[string]*rpc.TransactionReceipt, err error) {
 	out, err = fetchBlockReceipts(ctx, block, client, allowEmptyReceiptsOnBlock0)
@@ -160,9 +162,9 @@ func FetchReceipts(ctx context.Context, block *rpc.Block, client *rpc.Client, pa
 	}
 
 	// Only fall back to individual fetching when the RPC endpoint does not support
-	// eth_getBlockReceipts (method not found). Any other error is returned directly.
+	// eth_getBlockReceipts. Any other error is returned directly.
 	var rpcErr *rpc.ErrResponse
-	if !errors.As(err, &rpcErr) || rpcErr.Code != jsonRPCMethodNotFound {
+	if !errors.As(err, &rpcErr) || (rpcErr.Code != JsonRPCMethodNotFound && rpcErr.Code != JsonRPCMethodNotSupported) {
 		return nil, err
 	}
 
