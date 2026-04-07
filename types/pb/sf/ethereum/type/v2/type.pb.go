@@ -2248,6 +2248,7 @@ type Call struct {
 	ExecutedCode *bool `protobuf:"varint,15,opt,name=executed_code,json=executedCode,proto3,oneof" json:"executed_code,omitempty"`
 	Suicide      bool  `protobuf:"varint,16,opt,name=suicide,proto3" json:"suicide,omitempty"`
 	// hex representation of the hash -> preimage
+	// Note: not populated by the Monad tracer, the Monad execution layer does not emit keccak preimage events
 	KeccakPreimages map[string]string `protobuf:"bytes,20,rep,name=keccak_preimages,json=keccakPreimages,proto3" json:"keccak_preimages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Known Issues
 	//
