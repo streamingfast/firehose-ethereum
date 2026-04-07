@@ -733,7 +733,8 @@ message Call {
   optional bool executed_code = 15;
   bool suicide = 16;
 
-  /* hex representation of the hash -> preimage */
+  // hex representation of the hash -> preimage
+  // Note: not populated by the Monad tracer, the Monad execution layer does not emit keccak preimage events
   map<string, string> keccak_preimages = 20;
 
   // Known Issues
