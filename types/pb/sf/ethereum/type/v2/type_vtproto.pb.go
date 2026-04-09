@@ -1285,9 +1285,9 @@ func (m *Call) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x80
 	}
-	if m.ExecutedCode != nil {
+	if m.ExecutedCode {
 		i--
-		if *m.ExecutedCode {
+		if m.ExecutedCode {
 			dAtA[i] = 1
 		} else {
 			dAtA[i] = 0
@@ -2663,7 +2663,7 @@ func (m *Call) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
-	if m.ExecutedCode != nil {
+	if m.ExecutedCode {
 		n += 2
 	}
 	if m.Suicide {
@@ -6631,8 +6631,7 @@ func (m *Call) UnmarshalVT(dAtA []byte) error {
 					break
 				}
 			}
-			b := bool(v != 0)
-			m.ExecutedCode = &b
+			m.ExecutedCode = bool(v != 0)
 		case 16:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Suicide", wireType)

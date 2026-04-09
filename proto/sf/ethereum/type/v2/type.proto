@@ -715,13 +715,6 @@ message Call {
 
   // Indicates whether the call executed code.
   //
-  // When set to `true`, the call executed EVM bytecode, including precompiles.
-  // When set to `false`, no code ran.
-  // When absent (`None` / `nil`), the tracer does not have enough information to determine
-  // whether code was executed. This is the case for chain-specific tracers (e.g. Monad) that
-  // receive pre-aggregated call frame events without per-opcode visibility, making it
-  // impossible to distinguish "code ran" from "no code ran" without additional heuristics.
-  //
   // Known Issues
   // - Version 3:
   //    This may be incorrectly set to `false` for accounts with code handling native value transfers,
@@ -730,7 +723,7 @@ message Call {
   //    and later adjusted if the tracer detects an account without code.
   //
   //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
-  optional bool executed_code = 15;
+  bool executed_code = 15;
   bool suicide = 16;
 
   // hex representation of the hash -> preimage
