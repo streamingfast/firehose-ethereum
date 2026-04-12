@@ -20,11 +20,11 @@ func assertProtoEqual(t *testing.T, expected proto.Message, actual proto.Message
 		actualAsJSON, err := protojson.Marshal(actual)
 		require.NoError(t, err)
 
-		expectedAsMap := map[string]interface{}{}
+		expectedAsMap := map[string]any{}
 		err = json.Unmarshal(expectedAsJSON, &expectedAsMap)
 		require.NoError(t, err)
 
-		actualAsMap := map[string]interface{}{}
+		actualAsMap := map[string]any{}
 		err = json.Unmarshal(actualAsJSON, &actualAsMap)
 		require.NoError(t, err)
 

@@ -10,4 +10,4 @@ func init() {
 	logging.InstantiateLoggers()
 }
 
-type ObjectReader func() (interface{}, error)
+type ObjectReader func() (any, error)

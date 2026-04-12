@@ -251,7 +251,7 @@ func (e *RPCEngine) ethGetBalance(
 
 		rpcReqs[i] = &rpc.RPCRequest{
 			Method: "eth_getBalance",
-			Params: []interface{}{addrHex, blockParam},
+			Params: []any{addrHex, blockParam},
 		}
 	}
 
@@ -385,7 +385,7 @@ func (c *RPCCall) ToString() string {
 }
 
 type RPCResponse struct {
-	Decoded       []interface{}
+	Decoded       []any
 	Raw           string
 	DecodingError error
 	CallError     error // always deterministic
