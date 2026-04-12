@@ -473,17 +473,17 @@ func (s *GethMonitor) runOnce() error {
 // cannot use ReadAll on an IPC socket
 func readString(r io.Reader) (string, error) {
 	br := bufio.NewReader(r)
-	var line string
+	var line strings.Builder
 	for {
 		l, err := br.ReadString('\n')
 		if len(l) > 0 {
-			line += l
+			line.WriteString(l)
 		}
 		switch err {
 		case bufio.ErrBufferFull:
 			continue
 		case io.EOF, nil:
-			return line, nil
+			return line.String(), nil
 		default:
 			return "", err
 		}
