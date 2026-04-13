@@ -726,7 +726,8 @@ message Call {
   bool executed_code = 15;
   bool suicide = 16;
 
-  /* hex representation of the hash -> preimage */
+  // hex representation of the hash -> preimage
+  // Note: not populated by the Monad tracer, the Monad execution layer does not emit keccak preimage events
   map<string, string> keccak_preimages = 20;
 
   // Known Issues
@@ -1263,4 +1264,14 @@ message Withdrawal {
 
   // Amount is the value of the withdrawal in gwei (1 gwei = 1e9 wei)
   uint64 amount = 4;
+}
+
+// BoolOptional and BoolRequired are test messages used to verify the wire-encoding
+// difference between optional bool (state: true / false / nil) and plain bool
+message BoolOptional {
+  optional bool state = 1;
+}
+
+message BoolRequired {
+  bool state = 1;
 }

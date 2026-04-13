@@ -4,6 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.17.1
+
+### Updated
+
+* Library `dstore` bumped to latest version which brings these changes:
+  * GCS store: opt-in gRPC transport via `client_protocol=grpc` query parameter (e.g. `gs://bucket/path?client_protocol=grpc`). Defaults to the existing HTTP client; the gRPC client is selected only when this parameter is explicitly set.
+  * S3 store: `storageClass` query parameter is deprecated in favour of `storage_class`; a warning is logged when the old form is used. `storage_class` query parameter as the canonical snake_case name for `storageClass`.
+  * S3 store: each store clone now gets its own transport for failure isolation; adds `ResponseHeaderTimeout` to prevent hung requests and configures HTTP/2 health checks via `x/net/http2`; default connection pool sizes are reduced.
+  
+### Fixed
+
+* Substreams: Fix server-side bug that would prevent forkableHub from correctly updating metrics when receiving partial or out-of-order blocks
+
 ## v2.17.0
 
 * Added `--shift-ports` global flag that shifts all Firehose service port numbers by a given offset, useful for running multiple instances on the same machine without port conflicts. Both server listen addresses and internal client connection addresses are shifted so wiring stays consistent. Infrastructure ports (Prometheus metrics, pprof, log-level-switcher) are also shifted. Example: `fire{chain} start --shift-ports 100` shifts all ports by +100.
