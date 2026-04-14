@@ -239,14 +239,23 @@ func (e *RPCEngine) ethGetBalance(
 		return []byte{}, true, nil
 	}
 
+	fallbackDuration := reqctx.EthCallFallbackToLatestDuration(ctx)
+	numberDuration := reqctx.EthCallUseBlockNumberDuration(ctx)
+	blockAge := time.Since(clock.Timestamp.AsTime())
+
 	rpcReqs := make([]*rpc.RPCRequest, len(reqMsg.Requests))
 	for i, r := range reqMsg.Requests {
 		addrHex := "0x" + hex.EncodeToString(r.Address)
 
-		// Add 0x prefix to block hash
 		blockParam := r.Block
 		if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
 			blockParam = "0x" + blockParam
+		}
+
+		if fallbackDuration != 0 && blockAge > fallbackDuration {
+			blockParam = "latest"
+		} else if numberDuration != 0 && blockAge > numberDuration {
+			blockParam = strconv.FormatUint(clock.Number, 10)
 		}
 
 		rpcReqs[i] = &rpc.RPCRequest{
