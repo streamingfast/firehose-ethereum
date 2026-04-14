@@ -272,14 +272,21 @@ message BlockHeader {
   // BlobGasUsed was added by EIP-4844 and is ignored in legacy headers.
   optional uint64 blob_gas_used = 22;
 
-  // ExcessBlobGas was added by EIP-4844 and is ignored in legacy headers.
+  // ExcessBlobGas was added by EIP-4844 and is ignored in legacy headers, this has been added
+  // in Cancun hard fork.
   optional uint64 excess_blob_gas = 23;
 
-  // ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers.
-  bytes parent_beacon_root = 24;
+  // ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers, this has been added
+  // in Cancun hard fork.
+  optional bytes parent_beacon_root = 24;
 
-  // RequestsHash was added by EIP-7685 and is ignored in legacy headers.
-  bytes requests_hash = 25;
+  // RequestsHash was added by EIP-7685 and is ignored in legacy headers, this has been added in
+  // Prague hard fork.
+  optional bytes requests_hash = 25;
+
+  // SlotNumber was added by EIP-7843 and is ignored in legacy headers, it is scheduled to
+  // be added in Amsterdam hard fork.
+  optional uint64 slot_number = 26;
 }
 
 message Uint64NestedArray {

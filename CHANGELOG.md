@@ -4,6 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+* The `sf.ethereum.type.v2.BlockHeader` Ethereum Block message has been enhanced with support for `slot_number` field scheduled to inclusion in upcoming hard-fork.
+
+### Changed
+
+* Made `sf.ethereum.type.v2.BlockHeader#parent_beacon_root` `optional` like it should have been since the beginning. On chains without Prague active, this will be empty `nil/null/None`.
+  * This will change the generated Protobuf language bindings usually to become a pointer type (or `Optional` in Rust), handle it properly usually the same way you would with if it was an empty array of bytes.
+
+* Made `sf.ethereum.type.v2.BlockHeader#requests_hash` `optional` like it should have been since the beginning. On chains without Prague active, this will be empty `nil/null/None`.
+  * This will change the generated Protobuf language bindings usually to become a pointer type (or `Optional` in Rust), handle it properly usually the same way you would with if it was an empty array of bytes.
+
 ## v2.17.1
 
 ### Updated
@@ -12,7 +26,7 @@ for instructions to keep up to date.
   * GCS store: opt-in gRPC transport via `client_protocol=grpc` query parameter (e.g. `gs://bucket/path?client_protocol=grpc`). Defaults to the existing HTTP client; the gRPC client is selected only when this parameter is explicitly set.
   * S3 store: `storageClass` query parameter is deprecated in favour of `storage_class`; a warning is logged when the old form is used. `storage_class` query parameter as the canonical snake_case name for `storageClass`.
   * S3 store: each store clone now gets its own transport for failure isolation; adds `ResponseHeaderTimeout` to prevent hung requests and configures HTTP/2 health checks via `x/net/http2`; default connection pool sizes are reduced.
-  
+
 ### Fixed
 
 * Substreams: Fix server-side bug that would prevent forkableHub from correctly updating metrics when receiving partial or out-of-order blocks
