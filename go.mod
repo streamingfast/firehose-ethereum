@@ -7,7 +7,6 @@ require (
 	github.com/abourget/llerrgroup v0.2.0
 	github.com/bobg/go-generics/v2 v2.2.2
 	github.com/emmansun/base64 v0.8.0
-	github.com/golang/protobuf v1.5.4
 	github.com/holiman/uint256 v1.3.2
 	github.com/josephburnett/jd v1.7.1
 	github.com/klauspost/compress v1.18.3
@@ -23,9 +22,8 @@ require (
 	github.com/streamingfast/dstore v0.2.2
 	github.com/streamingfast/eth-go v0.0.0-20260216202159-4e2b7501894a
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.14.1-0.20260403101320-ab8c96ef5856
-	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260414175349-8e74da4aba2d
-	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
+	github.com/streamingfast/firehose-core v1.14.2-0.20260416183016-0686072ad8cb
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260115210153-dd3a798b41c9
 	github.com/streamingfast/logging v1.2.2
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
@@ -129,6 +127,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
