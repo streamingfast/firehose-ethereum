@@ -72,7 +72,7 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 			}
 
 			blocks := make([]*pbbstream.Block, 100)
-			i := 0
+			blocksRead := 0
 			for {
 				block, err := br.Read()
 				if err == io.EOF {
@@ -94,11 +94,11 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 				if err != nil {
 					return fmt.Errorf("re-packing the block: %w", err)
 				}
-				blocks[i] = block
-				i++
+				blocks[blocksRead] = block
+				blocksRead++
 			}
-			if i != 100 {
-				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", i)
+			if blocksRead != 100 {
+				return fmt.Errorf("block count mismatch: expected 100 blocks, got %d", blocksRead)
 			}
 			if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
 				return fmt.Errorf("writing merged block %d: %w", startBlock, err)
