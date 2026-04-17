@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io"
+	"slices"
+	"sort"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
@@ -127,6 +129,9 @@ func removeGasChangesFromEthereumBlock(block *pbeth.Block) {
 		return
 	}
 
+	removedOrdinals := collectRemovedGasChangeOrdinals(block)
+	shiftBlockOrdinals(block, removedOrdinals)
+
 	for _, systemCall := range block.SystemCalls {
 		systemCall.GasChanges = nil
 	}
@@ -136,4 +141,115 @@ func removeGasChangesFromEthereumBlock(block *pbeth.Block) {
 			call.GasChanges = nil
 		}
 	}
+}
+
+func collectRemovedGasChangeOrdinals(block *pbeth.Block) []uint64 {
+	if block == nil {
+		return nil
+	}
+
+	var out []uint64
+	for _, systemCall := range block.SystemCalls {
+		for _, gasChange := range systemCall.GasChanges {
+			if gasChange.Ordinal > 0 {
+				out = append(out, gasChange.Ordinal)
+			}
+		}
+	}
+
+	for _, trace := range block.TransactionTraces {
+		for _, call := range trace.Calls {
+			for _, gasChange := range call.GasChanges {
+				if gasChange.Ordinal > 0 {
+					out = append(out, gasChange.Ordinal)
+				}
+			}
+		}
+	}
+
+	if len(out) == 0 {
+		return nil
+	}
+
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return slices.Compact(out)
+}
+
+func shiftBlockOrdinals(block *pbeth.Block, removedGasOrdinals []uint64) {
+	if len(removedGasOrdinals) == 0 {
+		return
+	}
+
+	for _, balanceChange := range block.BalanceChanges {
+		balanceChange.Ordinal = shiftOrdinal(balanceChange.Ordinal, removedGasOrdinals)
+	}
+
+	for _, codeChange := range block.CodeChanges {
+		codeChange.Ordinal = shiftOrdinal(codeChange.Ordinal, removedGasOrdinals)
+	}
+
+	for _, systemCall := range block.SystemCalls {
+		shiftCallOrdinals(systemCall, removedGasOrdinals)
+	}
+
+	for _, trace := range block.TransactionTraces {
+		trace.BeginOrdinal = shiftOrdinal(trace.BeginOrdinal, removedGasOrdinals)
+		trace.EndOrdinal = shiftOrdinal(trace.EndOrdinal, removedGasOrdinals)
+
+		if trace.Receipt != nil {
+			for _, log := range trace.Receipt.Logs {
+				log.Ordinal = shiftOrdinal(log.Ordinal, removedGasOrdinals)
+			}
+		}
+
+		for _, call := range trace.Calls {
+			shiftCallOrdinals(call, removedGasOrdinals)
+		}
+	}
+}
+
+func shiftCallOrdinals(call *pbeth.Call, removedGasOrdinals []uint64) {
+	if call == nil {
+		return
+	}
+
+	call.BeginOrdinal = shiftOrdinal(call.BeginOrdinal, removedGasOrdinals)
+	call.EndOrdinal = shiftOrdinal(call.EndOrdinal, removedGasOrdinals)
+
+	for _, storageChange := range call.StorageChanges {
+		storageChange.Ordinal = shiftOrdinal(storageChange.Ordinal, removedGasOrdinals)
+	}
+
+	for _, balanceChange := range call.BalanceChanges {
+		balanceChange.Ordinal = shiftOrdinal(balanceChange.Ordinal, removedGasOrdinals)
+	}
+
+	for _, nonceChange := range call.NonceChanges {
+		nonceChange.Ordinal = shiftOrdinal(nonceChange.Ordinal, removedGasOrdinals)
+	}
+
+	for _, log := range call.Logs {
+		log.Ordinal = shiftOrdinal(log.Ordinal, removedGasOrdinals)
+	}
+
+	for _, codeChange := range call.CodeChanges {
+		codeChange.Ordinal = shiftOrdinal(codeChange.Ordinal, removedGasOrdinals)
+	}
+
+	for _, accountCreation := range call.AccountCreations {
+		accountCreation.Ordinal = shiftOrdinal(accountCreation.Ordinal, removedGasOrdinals)
+	}
+}
+
+func shiftOrdinal(value uint64, removedOrdinals []uint64) uint64 {
+	if value == 0 || len(removedOrdinals) == 0 {
+		return value
+	}
+
+	shift := sort.Search(len(removedOrdinals), func(i int) bool { return removedOrdinals[i] > value })
+	if shift == 0 {
+		return value
+	}
+
+	return value - uint64(shift)
 }
