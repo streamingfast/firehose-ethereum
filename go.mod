@@ -13,8 +13,8 @@ require (
 	github.com/klauspost/compress v1.18.4
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.2.3
-	github.com/spf13/cobra v1.7.0
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/cobra v1.9.1
+	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.15.0
 	github.com/streamingfast/bstream v0.0.2-0.20260402095814-607e840ece3d
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
@@ -23,13 +23,13 @@ require (
 	github.com/streamingfast/dstore v0.2.2
 	github.com/streamingfast/eth-go v0.0.0-20260216202159-4e2b7501894a
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.14.2-0.20260420141852-66c95ee2143c
+	github.com/streamingfast/firehose-core v1.14.2-0.20260420194800-36c2eac50403
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260115210153-dd3a798b41c9
 	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
 	github.com/streamingfast/logging v1.2.2
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.18.5-0.20260420140914-1f7e1d7a2ede
+	github.com/streamingfast/substreams v1.18.5-0.20260420190245-482e5fdfcd54
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -199,7 +199,7 @@ require (
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/streamingfast/dauth v0.0.0-20260318230957-4ab1e1d2ebc3 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
-	github.com/streamingfast/dgrpc v0.0.0-20260224192836-e5cd6cffceff // indirect
+	github.com/streamingfast/dgrpc v0.0.0-20260420180129-8b81f2664993 // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20251027175535-4fd530934b97 // indirect
 	github.com/streamingfast/dsession v0.0.0-20251029144057-b94d1030e142 // indirect
