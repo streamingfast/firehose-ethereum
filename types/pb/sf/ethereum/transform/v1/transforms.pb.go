@@ -310,7 +310,7 @@ func (x *CallToFilter) GetSignatures() [][]byte {
 //
 // The structure that would will have access to after:
 //
-// ```
+// ```ignore
 //
 //	Block {
 //	 int32 ver = 1;
