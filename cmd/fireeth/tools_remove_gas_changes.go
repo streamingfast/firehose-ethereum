@@ -18,7 +18,7 @@ import (
 func newRemoveGasChangesCmd(logger *zap.Logger) *cobra.Command {
 	return &cobra.Command{
 		Use:   "remove-gas-changes <src-blocks-store> <dest-blocks-store> <start-block> <stop-block>",
-		Short: "remove call gas changes from blocks and rewrite the affected 100-block files to destination",
+		Short: "remove call gas changes from blocks and rewrite the affected 100-block files to destination. Changes block version to v5",
 		Args:  cobra.ExactArgs(4),
 		RunE:  createRemoveGasChangesE(logger),
 	}
@@ -91,6 +91,9 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 				}
 
 				removeGasChangesFromEthereumBlock(ethBlock)
+				if ethBlock.Ver < 5 {
+					ethBlock.Ver = 5
+				}
 
 				block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
 				if err != nil {
