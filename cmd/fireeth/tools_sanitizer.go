@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
+
+var ignoreOrdinals = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS") == "true"
 
 func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	untypedEthBlock, err := block.Payload.UnmarshalNew()
@@ -35,7 +38,19 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 		ethBlock.Header.LogsBloom = nil
 	}
 
+	if ignoreOrdinals {
+		for _, c := range ethBlock.BalanceChanges {
+			c.Ordinal = 0
+		}
+		for _, c := range ethBlock.CodeChanges {
+			c.Ordinal = 0
+		}
+	}
 	for _, tx := range ethBlock.TransactionTraces {
+		if ignoreOrdinals {
+			tx.BeginOrdinal = 0
+			tx.EndOrdinal = 0
+		}
 		var hasLogBloom bool
 		for _, byte := range tx.Receipt.LogsBloom {
 			if byte != '0' {
@@ -46,8 +61,37 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 		if !hasLogBloom {
 			tx.Receipt.LogsBloom = nil
 		}
+		if ignoreOrdinals {
+			for _, l := range tx.Receipt.Logs {
+				l.Ordinal = 0
+			}
+		}
+
 		tx.Receipt.LogsBloom = nil
 		for _, call := range tx.Calls {
+			if ignoreOrdinals {
+				call.BeginOrdinal = 0
+				call.EndOrdinal = 0
+				for _, l := range call.Logs {
+					l.Ordinal = 0
+				}
+				for _, c := range call.BalanceChanges {
+					c.Ordinal = 0
+				}
+				for _, c := range call.GasChanges {
+					c.Ordinal = 0
+				}
+				for _, c := range call.NonceChanges {
+					c.Ordinal = 0
+				}
+				for _, c := range call.CodeChanges {
+					c.Ordinal = 0
+				}
+				for _, c := range call.StorageChanges {
+					c.Ordinal = 0
+				}
+			}
+
 			if call.FailureReason != "" {
 				call.FailureReason = "<error replaced for comparison>"
 			}
