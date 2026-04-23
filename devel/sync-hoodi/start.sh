@@ -31,7 +31,7 @@ main() {
     rm -rf sf-data &> /dev/null || true
   fi
 
-  exec $fireeth -c $(basename $ROOT).yaml start "$@"
+  exec $fireeth -c $(basename $ROOT).yaml --shift-ports=20000 start "$@"
 }
 
 usage_error() {

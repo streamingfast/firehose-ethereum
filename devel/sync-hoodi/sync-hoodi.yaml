@@ -6,26 +6,28 @@ start:
   - firehose
   - index-builder
   flags:
+    common-merged-blocks-store-url: gs://dfuseio-global-blocks-uscentral/eth-hoodi/v2
+
     # We have set `authrpc.addr` and `http.addr` to `0.0.0.0` so that RPC listen on all interfaces, we also
     # set `authrpc.vhosts` and `http.vhosts` to `*` to accept connections from any hosts. You are responsible
     # to ensure foreign access to these connection are protected.
     reader-node-arguments:
       --vmtrace=firehose
-      --synctarget=0x98f7cde1a4ad487e780b4e7bc3af248256d9bb1825cc73d2a7e392e057099caf
+      --synctarget=0xa3e98478bb402a1d0880dd2b9db71cd9d361b1a29ead3917379fcd3d0f1fa899
       --syncmode=full
-      --holesky
+      --hoodi
       --datadir={node-data-dir}
       --db.engine=pebble
       --state.scheme=path
-      --port=30305
+      --port=40305
       --authrpc.jwtsecret=jwt.txt
       --authrpc.addr=0.0.0.0
-      --authrpc.port=9551
+      --authrpc.port=29551
       --authrpc.vhosts=*
       --http
       --http.addr=0.0.0.0
       --http.api=eth,net,web3
-      --http.port=9545
+      --http.port=29545
       --http.vhosts=*
       --port=40303
-      --ws.port=9546
+      --ws.port=29546
