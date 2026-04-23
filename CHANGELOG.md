@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.17.2
 
 ### Added
 
@@ -17,6 +17,13 @@ for instructions to keep up to date.
 
 * Made `sf.ethereum.type.v2.BlockHeader#requests_hash` `optional` like it should have been since the beginning. On chains without Prague active, this will be empty `nil/null/None`.
   * This will change the generated Protobuf language bindings usually to become a pointer type (or `Optional` in Rust), handle it properly usually the same way you would with if it was an empty array of bytes.
+
+* Library `dsession` bumped to latest version which brings:
+  * Bug fixes around session handling at scale.
+
+* Library `dstore` bumped to latest version `v0.2.3` which brings these changes:
+  * GCS store: disable gRPC DirectPath when both a project is set and `client_protocol=grpc` is used, preventing connection issues in that configuration.
+  * S3 store: share a single HTTP transport across all store clones for proper HTTP/2 multiplexing, replacing the previous per-clone transport that broke connection sharing.
 
 ## v2.17.1
 
