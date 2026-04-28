@@ -71,6 +71,18 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 			call.BeginOrdinal = 0
 			call.EndOrdinal = 0
 			call.Index = 1
+			for _, c := range call.StorageChanges {
+				c.Ordinal = 0
+			}
+			for _, c := range call.CodeChanges {
+				c.Ordinal = 0
+			}
+			for _, c := range call.NonceChanges {
+				c.Ordinal = 0
+			}
+			for _, log := range call.Logs {
+				log.Ordinal = 0
+			}
 		}
 	}
 	for _, tx := range ethBlock.TransactionTraces {
