@@ -19,10 +19,10 @@ require (
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250814163534-bd7407bd89d7
 	github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62
-	github.com/streamingfast/dstore v0.2.3
+	github.com/streamingfast/dstore v0.2.4-0.20260427175250-c0d9ab9f857e
 	github.com/streamingfast/eth-go v0.0.0-20260216202159-4e2b7501894a
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.14.2
+	github.com/streamingfast/firehose-core v1.14.4-0.20260428134422-1375348802c2
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260420191823-8b3fce4bf77a
 	github.com/streamingfast/logging v1.2.2
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
@@ -200,6 +200,7 @@ require (
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20260224192836-e5cd6cffceff // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
+	github.com/streamingfast/diffx v0.0.0-20260428032925-db795b0d8333 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20251027175535-4fd530934b97 // indirect
 	github.com/streamingfast/dsession v0.0.0-20260414190543-79b9846e7c58 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9 // indirect
@@ -241,8 +242,8 @@ require (
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.259.0 // indirect
