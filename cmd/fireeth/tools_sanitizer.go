@@ -13,6 +13,7 @@ import (
 
 var ignoreOrdinals = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS") == "true"
 var ignoreOPStackSystemCallsOrder = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_CALLS_ORDER") == "true"
+var ignoreGas = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_GAS") == "true"
 
 func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	untypedEthBlock, err := block.Payload.UnmarshalNew()
@@ -49,6 +50,11 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 			c.Ordinal = 0
 		}
 	}
+	if ignoreGas {
+		removeGasChangesFromEthereumBlock(ethBlock)
+		ethBlock.Ver = 5
+	}
+
 	if ignoreOPStackSystemCallsOrder {
 		// reorder system calls by using all the fields as sorting keys
 		sort.Slice(ethBlock.SystemCalls, func(i, j int) bool {
