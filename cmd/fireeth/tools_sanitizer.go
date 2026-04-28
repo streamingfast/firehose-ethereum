@@ -14,6 +14,9 @@ import (
 var ignoreOrdinals = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS") == "true"
 var ignoreOPStackSystemCallsOrder = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_CALLS_ORDER") == "true"
 var ignoreGas = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_GAS") == "true"
+var ignoreNoopCodeChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES") == "true"
+var ignoreKeccak = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_KECCAK") == "true"
+var ignoreRevertedCallStorageChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES") == "true"
 
 func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	untypedEthBlock, err := block.Payload.UnmarshalNew()
@@ -52,7 +55,13 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	}
 	if ignoreGas {
 		removeGasChangesFromEthereumBlock(ethBlock)
-		ethBlock.Ver = 5
+		ethBlock.Ver = 5 // with removedgas, we are at ver=5
+	}
+	if ignoreNoopCodeChanges {
+		removeNoopCodeChangesFromEthereumBlock(ethBlock)
+	}
+	if ignoreRevertedCallStorageChanges {
+		removeRevertedCallStorageChangesFromEthereumBlock(ethBlock)
 	}
 
 	if ignoreOPStackSystemCallsOrder {
@@ -137,6 +146,9 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 				}
 			}
 
+			if ignoreKeccak {
+				call.KeccakPreimages = nil
+			}
 			if call.FailureReason != "" {
 				call.FailureReason = "<error replaced for comparison>"
 			}
