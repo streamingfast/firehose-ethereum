@@ -55,7 +55,6 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	}
 	if ignoreGas {
 		removeGasChangesFromEthereumBlock(ethBlock)
-		ethBlock.Ver = 5 // with removedgas, we are at ver=5
 	}
 	if ignoreNoopCodeChanges {
 		removeNoopCodeChangesFromEthereumBlock(ethBlock)
@@ -154,6 +153,8 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 			}
 		}
 	}
+
+	ethBlock.Ver = 5 // we don't want errors on version differences
 
 	out, err := firecore.EncodeBlock(firecore.BlockEnveloppe{
 		Block:  ethBlock,
