@@ -17,7 +17,7 @@ func removeRevertedCallStorageChangesFromEthereumBlock(block *pbeth.Block) {
 
 	for _, trace := range block.TransactionTraces {
 		for _, call := range trace.Calls {
-			if call.StateReverted && call.Index != 0 {
+			if call.StatusReverted && call.Index != 0 {
 				call.StorageChanges = nil
 			}
 		}
@@ -32,7 +32,7 @@ func collectRevertedCallStorageChangeOrdinals(block *pbeth.Block) []uint64 {
 	var out []uint64
 	for _, trace := range block.TransactionTraces {
 		for _, call := range trace.Calls {
-			if call.StateReverted && call.Index != 0 {
+			if call.StatusReverted && call.Index != 0 {
 				for _, storageChange := range call.StorageChanges {
 					if storageChange.Ordinal > 0 {
 						out = append(out, storageChange.Ordinal)
