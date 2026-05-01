@@ -7,29 +7,27 @@ require (
 	github.com/abourget/llerrgroup v0.2.0
 	github.com/bobg/go-generics/v2 v2.2.2
 	github.com/emmansun/base64 v0.8.0
-	github.com/golang/protobuf v1.5.4
 	github.com/holiman/uint256 v1.3.2
 	github.com/josephburnett/jd v1.7.1
-	github.com/klauspost/compress v1.18.3
+	github.com/klauspost/compress v1.18.4
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.2.3
-	github.com/spf13/cobra v1.7.0
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/cobra v1.9.1
+	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.15.0
 	github.com/streamingfast/bstream v0.0.2-0.20260402095814-607e840ece3d
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250814163534-bd7407bd89d7
 	github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62
-	github.com/streamingfast/dstore v0.2.2
+	github.com/streamingfast/dstore v0.2.4-0.20260427175250-c0d9ab9f857e
 	github.com/streamingfast/eth-go v0.0.0-20260318130445-6d6ccaf27155
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.14.1-0.20260403101320-ab8c96ef5856
-	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260115210153-dd3a798b41c9
-	github.com/streamingfast/jsonpb v0.0.0-20210811021341-3670f0aa02d0
+	github.com/streamingfast/firehose-core v1.14.4-0.20260430125124-d4bc484456f4
+	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260420191823-8b3fce4bf77a
 	github.com/streamingfast/logging v1.2.2
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.18.4
+	github.com/streamingfast/substreams v1.18.5-0.20260430124711-3cba2e3fae86
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -129,6 +127,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
@@ -136,7 +135,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.7 // indirect
 	github.com/googleapis/gax-go/v2 v2.16.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/graphprotocol/substreams-data-service v0.0.0-20260323141224-141602015bcf // indirect
+	github.com/graphprotocol/substreams-data-service v0.0.0-20260428173539-9a5b28a88fb5 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
@@ -199,10 +198,11 @@ require (
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/streamingfast/dauth v0.0.0-20260318230957-4ab1e1d2ebc3 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
-	github.com/streamingfast/dgrpc v0.0.0-20260224192836-e5cd6cffceff // indirect
+	github.com/streamingfast/dgrpc v0.0.0-20260420180129-8b81f2664993 // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
+	github.com/streamingfast/diffx v0.0.0-20260428032925-db795b0d8333 // indirect
 	github.com/streamingfast/dmetering v0.0.0-20251027175535-4fd530934b97 // indirect
-	github.com/streamingfast/dsession v0.0.0-20251029144057-b94d1030e142 // indirect
+	github.com/streamingfast/dsession v0.0.0-20260414190543-79b9846e7c58 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9 // indirect
 	github.com/streamingfast/dummy-blockchain v1.7.3 // indirect
 	github.com/streamingfast/firehose-networks v0.2.2 // indirect
@@ -235,16 +235,16 @@ require (
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/automaxprocs v1.5.1 // indirect
-	go.uber.org/mock v0.5.0 // indirect
+	go.uber.org/mock v0.5.2 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
 	golang.org/x/exp v0.0.0-20250813145105-42675adae3e6 // indirect
 	golang.org/x/mod v0.33.0 // indirect
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/term v0.41.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.259.0 // indirect
 	google.golang.org/genproto v0.0.0-20251202230838-ff82c1b0f217 // indirect

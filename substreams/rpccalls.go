@@ -239,14 +239,23 @@ func (e *RPCEngine) ethGetBalance(
 		return []byte{}, true, nil
 	}
 
+	fallbackDuration := reqctx.EthCallFallbackToLatestDuration(ctx)
+	numberDuration := reqctx.EthCallUseBlockNumberDuration(ctx)
+	blockAge := time.Since(clock.Timestamp.AsTime())
+
 	rpcReqs := make([]*rpc.RPCRequest, len(reqMsg.Requests))
 	for i, r := range reqMsg.Requests {
 		addrHex := "0x" + hex.EncodeToString(r.Address)
 
-		// Add 0x prefix to block hash
 		blockParam := r.Block
 		if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
 			blockParam = "0x" + blockParam
+		}
+
+		if fallbackDuration != 0 && blockAge > fallbackDuration {
+			blockParam = "latest"
+		} else if numberDuration != 0 && blockAge > numberDuration {
+			blockParam = strconv.FormatUint(clock.Number, 10)
 		}
 
 		rpcReqs[i] = &rpc.RPCRequest{
@@ -404,12 +413,12 @@ func (e *RPCEngine) validateCalls(calls *pbethss.RpcCalls) (err error) {
 var evmExecutionExecutionTimeoutRegex = regexp.MustCompile(`execution aborted \(timeout\s*=\s*[^\)]+\)`)
 
 // rpcCalls performs the RPC calls retrying forever on error if `retryCount` is set to -1. If `retryCount`
-// is sets to 0, no retry is attempted. If `retryCount` is > 0, it will retry `retryCount` times.
+// is set to 0, no retry is attempted. If `retryCount` is > 0, it will retry `retryCount` times.
 //
-// If there is no retry or if partial retry, deterministic will be always `false`. Otherwise, it can only
+// If there is no retry or if partial retry, deterministic will always be `false`. Otherwise, it can only
 // be `true` (since we retry either forever or until we hit a deterministic error).
 //
-// Note that the `retryCount` value should be set to something else than -1 only for testing purposes, production
+// Note that the `retryCount` value should be set to something other than -1 only for testing purposes, production
 // code paths should always set it to -1 (infinite retry).
 func (e *RPCEngine) rpcCalls(ctx context.Context, traceID string, retryCount int, blockHash string, blockNumber uint64, blockTimestamp *timestamppb.Timestamp, calls *pbethss.RpcCalls) (out *pbethss.RpcResponses, deterministic bool, err error) {
 	reqs := make([]*rpc.RPCRequest, len(calls.Calls))

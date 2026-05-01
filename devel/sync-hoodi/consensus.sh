@@ -28,17 +28,15 @@ main() {
     beacon\
     --datadir="$ROOT/cs-data"\
     --debug-level=info\
-    --network=sepolia\
+    --network=hoodi\
     --listen-address=0.0.0.0\
-    --port=9090\
+    --port=19090\
     --http\
     --http-address=0.0.0.0\
-    --http-port=5052\
-    --metrics-address=0.0.0.0\
-    --metrics-port=9102\
+    --http-port=15052\
     --execution-jwt-id=\
     --checkpoint-sync-url="${CHECKPOINT_SYNC_URL}"\
-    --execution-endpoint=http://localhost:9551\
+    --execution-endpoint=http://localhost:29551\
     --execution-jwt="$ROOT/jwt.txt" "$@"
 }
 

@@ -99,7 +99,7 @@ func upgradeBlockV2ToV3(block *pbeth.Block) {
 
 func reorderTransactionsAndRenumberOrdinals(block *pbeth.Block, firstTransactionOrdinal uint64) {
 	sort.Slice(block.TransactionTraces, func(i, j int) bool {
-		return block.TransactionTraces[i].Index < block.TransactionTraces[j].Index // FIXME currently this is not a good value, the index is always the order in which it was received
+		return block.TransactionTraces[i].Index < block.TransactionTraces[j].Index // FIXME: currently this is not a good value, the index is always the order in which it was received
 	})
 
 	baseline := firstTransactionOrdinal
@@ -107,7 +107,7 @@ func reorderTransactionsAndRenumberOrdinals(block *pbeth.Block, firstTransaction
 		trx.BeginOrdinal += baseline
 		for _, call := range trx.Calls {
 			if call.BeginOrdinal != 0 {
-				call.BeginOrdinal += baseline // consistent with a known small bug: root call has beginOrdinal set to 0
+				call.BeginOrdinal += baseline // consistent with a known bug: root call has beginOrdinal set to 0
 			}
 			call.EndOrdinal += baseline
 			for _, log := range call.Logs {

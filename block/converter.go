@@ -185,7 +185,7 @@ func toFirehoseReceiptStatus(in uint64) pbeth.TransactionTraceStatus {
 func toFirehoseTraces(in *rpc.BlockTransactions, receipts map[string]*rpc.TransactionReceipt, logs map[string][]eth.Log, logger *zap.Logger) (traces []*pbeth.TransactionTrace, hashesWithoutTo map[string]bool) {
 	ordinal := &counter{}
 
-	transactions, _ := in.Receipts() //todo: this is confusing, Why is it not call Transactions?
+	transactions, _ := in.Receipts() //todo: this is confusing, Why is it not called Transactions?
 	out := make([]*pbeth.TransactionTrace, len(transactions))
 	hashesWithoutTo = make(map[string]bool)
 	loggedUnknownReceiptStatus := false
