@@ -622,7 +622,7 @@ func decodeAccessList(b []byte) (out []*pbeth.AccessTuple, err error) {
 
 		for j := uint64(0); j < storageKeyCount; j++ {
 			if len(b) < 32 {
-				return nil, fmt.Errorf("access list at index %d: read straoge key: not enough bytes left, expected at least 32 bytes but there is only %d bytes", i, len(b))
+				return nil, fmt.Errorf("access list at index %d: read storage key: not enough bytes left, expected at least 32 bytes but there is only %d bytes", i, len(b))
 			}
 
 			out[i].StorageKeys[j] = b[0:32]
@@ -800,7 +800,7 @@ func (ctx *parseCtx) readEVMCallFailed(line string) error {
 	gasLeft := FromUint64(chunks[1], "EVM_CALL_FAILED gasLeft")
 	failureReason := chunks[2]
 
-	// FIXME: This would be overwritten by endCall below, check if
+	// FIXME: This will be overwritten by endCall below, check if
 	//        we need to make endCall aware of failure/revert and
 	//        act accordingly on gas consumed.
 	evmCall.GasConsumed = evmCall.GasLimit - gasLeft
@@ -1131,7 +1131,7 @@ func (ctx *parseCtx) readInit(line string) error {
 
 	switch ctx.fhVersion {
 	// The protocol version 1.0 was erroneously used by very first implementation of the Ethereum RPC Poller
-	// which is incorrect because there were actually implementing the Firehose 3.0 protocol. This is why we
+	// which is incorrect because they were actually implementing the Firehose 3.0 protocol. This is why we
 	// are treating 1.0 as 3.0 here for backward compatibility (which is most probably not needed anymore since
 	// I think not such version is used anymore, let's still wait a bit before removing this backward compatibility
 	// code).
@@ -1486,7 +1486,7 @@ func (ctx *parseCtx) readStorageChange(line string) error {
 	callIndex := chunks[0]
 	if callIndex == "0" {
 		if ctx.currentBlock == nil || ctx.currentTrace == nil {
-			// FIXME: Fow now, let's just skip them, but maybe we should store them at the block level?
+			// FIXME: For now, let's just skip them, but maybe we should store them at the block level?
 			return nil
 		}
 	}
