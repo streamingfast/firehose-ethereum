@@ -17,13 +17,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
-      - name: Check out code
-        uses: actions/checkout@v3
 
       - name: Cache Go modules
         uses: actions/cache@v3
