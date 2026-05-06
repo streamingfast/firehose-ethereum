@@ -1,14 +1,12 @@
 name: Build docker image
 
 on:
+  pull_request:
   push:
     tags:
       - "v*"
     branches:
       - "develop"
-      - "release/v*"
-      - "feature/*"
-      - "fix/*"
   workflow_dispatch:
 
 env:
@@ -44,20 +42,14 @@ jobs:
     needs: [setup]
     strategy:
       matrix:
-        include:
-          - platform: linux/amd64
-            platform_suffix: amd64
-            runner: ubuntu-24.04
+        architecture: [amd64, arm64]
 
-          - platform: linux/arm64
-            platform_suffix: arm64
-            runner: ubuntu-24.04-arm
-
-    runs-on: ["${{ matrix.runner }}"]
+    runs-on: ${{ matrix.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
     permissions:
       contents: read
       packages: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +67,7 @@ jobs:
       - name: Extract version
         id: extract-version
         run: |
-          version="edge-${GITHUB_SHA::7}"
+          version="${GITHUB_SHA::7}"
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             version=${GITHUB_REF#refs/tags/}
           fi
@@ -89,9 +81,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=ref,event=tag,suffix=-${{ matrix.platform_suffix }}
-            type=sha,prefix=,priority=300
-            type=sha,prefix=,suffix=-${{ matrix.platform_suffix }},priority=300
+            type=ref,event=tag,suffix=-${{ matrix.architecture }}
+            type=sha,prefix=
+            type=sha,prefix=,suffix=-${{ matrix.architecture }}
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: |
             latest=${{ startsWith(github.ref, 'refs/tags/') }}
@@ -101,13 +93,27 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: ${{ matrix.platform }}
-          push: true
+          platforms: linux/${{ matrix.architecture }}
+          load: ${{ github.event_name == 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           build-args: |
             VERSION=${{ steps.extract-version.outputs.VERSION }}
+
+      - name: Docker Scout
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: docker/scout-action@v1
+        with:
+          dockerhub-user: ${{ secrets.DOCKER_SCOUT_USER }}
+          dockerhub-password: ${{ secrets.DOCKER_SCOUT_PASSWORD }}
+          command: cves
+          only-severities: critical,high
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.extract-version.outputs.VERSION }}-${{ matrix.architecture }}
+          github-token: ${{ secrets.PR_COMMENTER }}
+          write-comment: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          exit-code: true
 
       - name: Get Job ID from GH API
         id: get_job_id
@@ -126,56 +132,11 @@ jobs:
         uses: Ilshidur/action-slack@2.1.0
         with:
           args: |
-            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker image (${{ matrix.platform_suffix }}) from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
-
-  docker-scout:
-    needs: [build]
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-24.04
-
-    permissions:
-      contents: read
-      packages: read
-      pull-requests: write
-
-    steps:
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compute short SHA
-        id: sha
-        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-
-      - name: Docker Scout AMD64
-        uses: docker/scout-action@v1
-        with:
-          dockerhub-user: ${{ secrets.DOCKER_SCOUT_USER }}
-          dockerhub-password: ${{ secrets.DOCKER_SCOUT_PASSWORD }}
-          command: cves
-          only-severities: critical,high
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.sha.outputs.short }}-amd64
-          github-token: ${{ secrets.PR_COMMENTER }}
-          exit-code: true
-          write-comment: true
-
-      - name: Docker Scout ARM64
-        uses: docker/scout-action@v1
-        with:
-          dockerhub-user: ${{ secrets.DOCKER_SCOUT_USER }}
-          dockerhub-password: ${{ secrets.DOCKER_SCOUT_PASSWORD }}
-          command: cves
-          only-severities: critical,high
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.sha.outputs.short }}-arm64
-          github-token: ${{ secrets.PR_COMMENTER }}
-          exit-code: true
-          write-comment: true
+            :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker image (${{ matrix.architecture }}) from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
   push:
-    needs: [setup, build]
+    needs: [setup, docker_build]
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-24.04
 
     outputs:
@@ -200,7 +161,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=sha,prefix=,priority=300
+            type=sha,prefix=
             type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
           flavor: |
             latest=${{ startsWith(github.ref, 'refs/tags/') }}
