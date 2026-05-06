@@ -128,6 +128,52 @@ jobs:
           args: |
             :x: <@${{ needs.setup.outputs.slack_id }}> *${{ github.repository }}* Failed building docker image (${{ matrix.platform_suffix }}) from ${{ github.ref_type }} _${{ github.ref_name }}_ (${{ github.actor }}, <https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}/job/${{ steps.get_job_id.outputs.job_id }}|See Actions Logs>) :broken_heart:
 
+  docker-scout:
+    needs: [build]
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+
+    steps:
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Docker Scout AMD64
+        uses: docker/scout-action@v1
+        with:
+          dockerhub-user: ${{ secrets.DOCKER_SCOUT_USER }}
+          dockerhub-password: ${{ secrets.DOCKER_SCOUT_PASSWORD }}
+          command: cves
+          only-severities: critical,high
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.sha.outputs.short }}-amd64
+          github-token: ${{ secrets.PR_COMMENTER }}
+          exit-code: true
+          write-comment: true
+
+      - name: Docker Scout ARM64
+        uses: docker/scout-action@v1
+        with:
+          dockerhub-user: ${{ secrets.DOCKER_SCOUT_USER }}
+          dockerhub-password: ${{ secrets.DOCKER_SCOUT_PASSWORD }}
+          command: cves
+          only-severities: critical,high
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.sha.outputs.short }}-arm64
+          github-token: ${{ secrets.PR_COMMENTER }}
+          exit-code: true
+          write-comment: true
+
   push:
     needs: [setup, build]
     runs-on: ubuntu-24.04
@@ -146,7 +192,6 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
 
       - name: Generate docker tags/labels from github build context
         id: meta
