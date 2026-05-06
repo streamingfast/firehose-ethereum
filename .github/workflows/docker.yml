@@ -40,7 +40,7 @@ jobs:
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
 
-  build:
+  docker_build:
     needs: [setup]
     strategy:
       matrix:
