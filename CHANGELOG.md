@@ -18,6 +18,7 @@ for instructions to keep up to date.
 
 * **Index optimisation**: Optimized `ClockDistributor` to skip blocks earlier and faster when using block filter.
 * Fix server-side bug that would cause Blocks request to fail after a few retries with 'load full store (...) load store stream: opening file for streaming: not found' when depending on a store that is being merged slowly
+* add substreams_tier2_max_concurrent_requests and substreams_tier1_active_requests_hard_limit metrics to prometheus
 
 ## v2.17.2
 
