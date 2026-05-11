@@ -4,6 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.17.3
+
+### Removed from docker image
+
+* The 'grpc_health_probe' binary is no longer included in the docker image. You can use the HTTP '/healthz' endpoints instead or use your own GRPC poller.
+
+### Added
+
+- `merger` and `relayer` now expose an HTTP `/healthz` endpoint on a dedicated port via the new `--merger-http-healthz-addr` (default `:10013`) and `--relayer-http-healthz-addr` (default `:10018`) flags. Set the flag to an empty string to disable. The endpoint returns HTTP 200 when the service is ready and 503 otherwise (including during the `common-system-shutdown-signal-delay` graceful-shutdown window).
+
+### Substreams
+
+* **Index optimisation**: Optimized `ClockDistributor` to skip blocks earlier and faster when using block filter.
+* Fix server-side bug that would cause Blocks request to fail after a few retries with 'load full store (...) load store stream: opening file for streaming: not found' when depending on a store that is being merged slowly
+* add substreams_tier2_max_concurrent_requests and substreams_tier1_active_requests_hard_limit metrics to prometheus
+
 ## v2.17.2
 
 ### Added
