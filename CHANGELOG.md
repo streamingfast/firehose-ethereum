@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.17.3
+
+### Substreams
+
+* **Index optimisation**: Optimized `ClockDistributor` to skip blocks earlier and faster when using block filter.
+* Fix server-side bug that would cause Blocks request to fail after a few retries with 'load full store (...) load store stream: opening file for streaming: not found' when depending on a store that is being merged slowly
+
 ## v2.17.2
 
 ### Added
