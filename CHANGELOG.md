@@ -6,6 +6,14 @@ for instructions to keep up to date.
 
 ## v2.17.3
 
+### Removed from docker image
+
+* The 'grpc_health_probe' binary is no longer included in the docker image. You can use the HTTP '/healthz' endpoints instead or use your own GRPC poller.
+
+### Added
+
+- `merger` and `relayer` now expose an HTTP `/healthz` endpoint on a dedicated port via the new `--merger-http-healthz-addr` (default `:10013`) and `--relayer-http-healthz-addr` (default `:10018`) flags. Set the flag to an empty string to disable. The endpoint returns HTTP 200 when the service is ready and 503 otherwise (including during the `common-system-shutdown-signal-delay` graceful-shutdown window).
+
 ### Substreams
 
 * **Index optimisation**: Optimized `ClockDistributor` to skip blocks earlier and faster when using block filter.

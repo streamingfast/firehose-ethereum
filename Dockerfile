@@ -17,12 +17,6 @@ ARG TARGETPLATFORM
 # gettext-base is needed for envsubst
 RUN apt-get update && apt-get -y install ca-certificates htop iotop sysstat strace lsof curl jq tzdata file gettext-base
 
-RUN mkdir -p /app/ && \
-    export repository="https://github.com/grpc-ecosystem/grpc-health-probe/releases/download" && \
-    export version=$(curl -s https://api.github.com/repos/grpc-ecosystem/grpc-health-probe/releases/latest | jq -r .tag_name) && \
-    curl --fail-with-body -Lo /app/grpc_health_probe "$repository/$version/grpc_health_probe-$(echo $TARGETPLATFORM | sed 's|/|-|')" && \
-    chmod +x /app/grpc_health_probe
-
 WORKDIR /app
 
 COPY --from=build /app/fireeth /app/fireeth
