@@ -210,7 +210,7 @@ require (
 	github.com/streamingfast/dummy-blockchain v1.7.3 // indirect
 	github.com/streamingfast/firehose-networks v0.2.2 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
-	github.com/streamingfast/payment-gateway v0.0.0-20251124143836-60d98e3546f5 // indirect
+	github.com/streamingfast/payment-gateway v0.0.0-20260527144655-d0576d2a4ee3 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20251218140752-bafd5572499f // indirect
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
 	github.com/streamingfast/worker-pool-protocol v0.0.0-20251029142144-b539534f3eb1 // indirect
@@ -242,15 +242,15 @@ require (
 	go.uber.org/mock v0.5.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/exp v0.0.0-20250813145105-42675adae3e6 // indirect
-	golang.org/x/mod v0.34.0 // indirect
-	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/mod v0.35.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/term v0.42.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.274.0 // indirect
 	google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7 // indirect
