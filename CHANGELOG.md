@@ -6,6 +6,10 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Changed
+
+- Bumped `dstore`: S3 store now suppresses the SDK's checksum validation warnings (sets `DisableLogOutputChecksumValidationSkipped` to `true`) and updates the AWS S3 SDK to a newer version.
+
 ## v2.17.4
 
 ### Changed
