@@ -9,6 +9,17 @@ for instructions to keep up to date.
 ### Changed
 
 - Bumped `dstore`: S3 store now suppresses the SDK's checksum validation warnings (sets `DisableLogOutputChecksumValidationSkipped` to `true`) and updates the AWS S3 SDK to a newer version.
+- Substreams: the tier1 job scheduler no longer slows down on very large reprocessings (100_000s of segments). `NextJob` and `AllStoresCompleted` used to rescan the whole completed-segment prefix on every scheduling event (O(segments²) over a run) and now advance a forward-only cursor (O(1) amortized). Progress reporting (`UpdateStats`) builds each stage's ranges in a single sort-free pass, the scheduler event loop drops per-message overhead (debug-state env var read once at startup, debug log fields built only when debug logging is enabled), and the cached-output streaming buffer appends and checks for flushing under a single lock per block.
+- Substreams: `SUBSTREAMS_STORE_SIZE_LIMIT` is now passed from tier1 to tier2; when set on tier1 it overrides the tier2 env var value.
+
+### Added
+
+- Reader: two prometheus gauges to watch how close blocks read out of the node are to the `reader-node-line-buffer-size` hard limit: `reader_node_max_read_block_size_bytes` (high-water mark of the largest line/block read) and `reader_node_line_buffer_size_bytes` (the configured limit).
+
+### Fixed
+
+- Substreams: fix `Sinker.requestActiveStartBlock` not being set when the handler implements `SinkerSessionInitHandler`, which previously caused `ProgressMessageLastContiguousBlock` to be incorrect for production-mode mapper stages.
+- Substreams: detect reorgs in executed partial blocks even when the transaction hashes are identical. Previously a recomputed block whose only difference was its state (same, equally-ordered transactions) was not detected as replaced, so no reorg was triggered; more block fields are now validated to catch this.
 
 ## v2.17.4
 
