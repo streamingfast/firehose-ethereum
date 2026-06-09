@@ -24,6 +24,10 @@ for instructions to keep up to date.
 - Substreams: fix `Sinker.requestActiveStartBlock` not being set when the handler implements `SinkerSessionInitHandler`, which previously caused `ProgressMessageLastContiguousBlock` to be incorrect for production-mode mapper stages.
 - Substreams: detect reorgs in executed partial blocks even when the transaction hashes are identical. Previously a recomputed block whose only difference was its state (same, equally-ordered transactions) was not detected as replaced, so no reorg was triggered; more block fields are now validated to catch this.
 
+### Added
+
+- `tools poller`: new `--block-fetch-batch-size` flag (default 1) that fetches multiple blocks in parallel ahead of the cursor, while still firing them to stdout strictly in order. Speeds up ingestion on chains with large blocks.
+
 ## v2.17.4
 
 ### Changed
