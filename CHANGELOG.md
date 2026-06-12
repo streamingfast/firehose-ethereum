@@ -14,6 +14,7 @@ for instructions to keep up to date.
 
 ### Added
 
+- Relayer: new per-source prometheus gauge `source_head_block_time_drift{app="relayer",source=...}` reporting the number of seconds since the last block received from each source. The drift is computed at scrape time, so it keeps growing while a source is silent.
 - Reader: two prometheus gauges to watch how close blocks read out of the node are to the `reader-node-line-buffer-size` hard limit: `reader_node_max_read_block_size_bytes` (high-water mark of the largest line/block read) and `reader_node_line_buffer_size_bytes` (the configured limit).
 
 ### Fixed
