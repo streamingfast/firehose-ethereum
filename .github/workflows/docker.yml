@@ -103,7 +103,7 @@ jobs:
             VERSION=${{ steps.extract-version.outputs.VERSION }}
 
       - name: Docker Scout
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: docker/scout-action@v1
         with:
           dockerhub-user: ${{ secrets.DOCKER_SCOUT_USER }}
