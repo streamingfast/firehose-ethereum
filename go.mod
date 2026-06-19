@@ -3,13 +3,13 @@ module github.com/streamingfast/firehose-ethereum
 go 1.26.0
 
 require (
-	github.com/RoaringBitmap/roaring v1.9.1
+	github.com/RoaringBitmap/roaring v1.9.4
 	github.com/abourget/llerrgroup v0.2.0
 	github.com/bobg/go-generics/v2 v2.2.2
-	github.com/emmansun/base64 v0.8.0
+	github.com/emmansun/base64 v0.9.0
 	github.com/holiman/uint256 v1.3.2
-	github.com/josephburnett/jd v1.7.1
-	github.com/klauspost/compress v1.18.5
+	github.com/josephburnett/jd v1.9.2
+	github.com/klauspost/compress v1.18.6
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.2.3
 	github.com/spf13/cobra v1.10.2
@@ -30,10 +30,10 @@ require (
 	github.com/streamingfast/substreams v1.18.6-0.20260610212907-656cf69d398d
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
-	github.com/tidwall/gjson v1.18.0
+	github.com/tidwall/gjson v1.19.0
 	go.uber.org/multierr v1.11.0
-	go.uber.org/zap v1.27.1
-	google.golang.org/grpc v1.80.0
+	go.uber.org/zap v1.28.0
+	google.golang.org/grpc v1.81.1
 	google.golang.org/protobuf v1.36.11
 )
 
@@ -116,8 +116,8 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
-	github.com/envoyproxy/go-control-plane/envoy v1.36.0 // indirect
-	github.com/envoyproxy/protoc-gen-validate v1.3.0 // indirect
+	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
+	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
