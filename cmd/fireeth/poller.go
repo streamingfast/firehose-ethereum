@@ -26,6 +26,7 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	}
 
 	cmd.PersistentFlags().Uint("parallel-workers", 20, "number of parallel workers to fetch transaction receipts")
+	cmd.PersistentFlags().Uint("block-fetch-batch-size", 1, "number of blocks to fetch (and serialize) in parallel")
 	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
 	cmd.PersistentFlags().Bool("allow-empty-receipts-on-block-0", false, "whether to accept empty receipts on block 0, filling them with 'empty' transactions (useful for TRON-EVM)")
 
@@ -86,7 +87,7 @@ func newFirehoseTracerPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobr
 			and block-level analysis.
 
 			*Experimental*: This tool is not production-ready. Intended for development
-			and debugging purposes only. 
+			and debugging purposes only.
 		`),
 		Args: cobra.ExactArgs(2),
 		RunE: pollerRunEForTracer(logger),
@@ -111,6 +112,7 @@ func pollerRunEInternal(logger *zap.Logger, tracer logging.Tracer, useTracer boo
 		//dataDir := cmd.Flag("data-dir").Value.String()
 		fetchInterval := sflags.MustGetDuration(cmd, "interval-between-fetch")
 		parallelWorkers := sflags.MustGetInt(cmd, "parallel-workers")
+		blockFetchBatchSize := sflags.MustGetInt(cmd, "block-fetch-batch-size")
 		maxBlockFetchDuration := sflags.MustGetDuration(cmd, "max-block-fetch-duration")
 
 		dataDir := sflags.MustGetString(cmd, "data-dir")
@@ -128,6 +130,7 @@ func pollerRunEInternal(logger *zap.Logger, tracer logging.Tracer, useTracer boo
 			zap.Duration("fetch_interval", fetchInterval),
 			zap.Duration("max_block_fetch_duration", maxBlockFetchDuration),
 			zap.Uint64("first_streamable_block", firstStreamableBlock),
+			zap.Int("block_fetch_batch_size", blockFetchBatchSize),
 		)
 		rpcClients := firecorerpc.NewClients[*rpc.Client](maxBlockFetchDuration, firecorerpc.NewStickyRollingStrategy[*rpc.Client](), logger)
 
@@ -152,7 +155,7 @@ func pollerRunEInternal(logger *zap.Logger, tracer logging.Tracer, useTracer boo
 		handler := blockpoller.NewFireBlockHandler("type.googleapis.com/sf.ethereum.type.v2.Block")
 		poller := blockpoller.New[*rpc.Client](fetcher, handler, rpcClients, blockpoller.WithStoringState[*rpc.Client](stateDir), blockpoller.WithLogger[*rpc.Client](logger))
 
-		err = poller.Run(firstStreamableBlock, nil, 1)
+		err = poller.Run(firstStreamableBlock, nil, blockFetchBatchSize)
 		if err != nil {
 			return fmt.Errorf("running poller: %w", err)
 		}

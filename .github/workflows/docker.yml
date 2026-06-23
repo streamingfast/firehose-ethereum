@@ -27,13 +27,16 @@ jobs:
       - name: Check SLACK_IDS env variable
         run: |
           if [ -z "${SLACK_IDS}" ]; then
-            echo "The secret 'vars.SLACK_IDS' is empty"
-            exit 1
+            echo "The variable 'vars.SLACK_IDS' is empty (expected on forks); skipping Slack ID lookup"
           fi
 
       - name: Get Slack ID
         id: get-slack-id
         run: |
+          if [ -z "${SLACK_IDS}" ]; then
+            echo "SLACK_ID=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           SLACK_IDS=$(echo "$SLACK_IDS" | sed 's/\\//g')
           SLACK_ID=$(echo "$SLACK_IDS" | jq -r '.["${{ github.actor }}"]')
           echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
@@ -126,7 +129,7 @@ jobs:
           echo "job_id=$job_id" >> $GITHUB_OUTPUT
 
       - name: Notify build failure on Slack
-        if: ${{ failure() }}
+        if: ${{ failure() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
@@ -190,7 +193,7 @@ jobs:
           echo "job_id=$job_id" >> $GITHUB_OUTPUT
 
       - name: Notify manifest push failure on Slack
-        if: ${{ failure() }}
+        if: ${{ failure() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         uses: Ilshidur/action-slack@2.1.0
