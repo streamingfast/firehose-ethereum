@@ -17,6 +17,15 @@ var ignoreGas = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_GAS") == "true"
 var ignoreNoopCodeChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES") == "true"
 var ignoreKeccak = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_KECCAK") == "true"
 var ignoreRevertedCallStorageChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES") == "true"
+var ignoreOPStackSystemGasLimit = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_GAS_LIMIT") == "true"
+
+// opStackSystemCaller is the well-known caller (0xffff...fffe) used for OP-Stack system transactions.
+var opStackSystemCaller = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}
+
+const (
+	opStackSystemGasLimitOld = 30000000
+	opStackSystemGasLimitNew = 31566720
+)
 
 func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	untypedEthBlock, err := block.Payload.UnmarshalNew()
@@ -61,6 +70,17 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	}
 	if ignoreRevertedCallStorageChanges {
 		removeRevertedCallStorageChangesFromEthereumBlock(ethBlock)
+	}
+
+	if ignoreOPStackSystemGasLimit {
+		for _, call := range ethBlock.SystemCalls {
+			normalizeOPStackSystemGasLimit(call)
+		}
+		for _, tx := range ethBlock.TransactionTraces {
+			for _, call := range tx.Calls {
+				normalizeOPStackSystemGasLimit(call)
+			}
+		}
 	}
 
 	if ignoreOPStackSystemCallsOrder {
@@ -165,4 +185,10 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	}
 
 	return out
+}
+
+func normalizeOPStackSystemGasLimit(call *pbeth.Call) {
+	if call.GasLimit == opStackSystemGasLimitOld && bytes.Equal(call.Caller, opStackSystemCaller) {
+		call.GasLimit = opStackSystemGasLimitNew
+	}
 }
