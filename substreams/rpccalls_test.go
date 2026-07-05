@@ -530,6 +530,57 @@ func TestRPCEngine_ethGetBalance_retryWithFallback(t *testing.T) {
 	)
 }
 
+func TestRPCEngine_ethGetBalance_useBlockNumber_hexEncoding(t *testing.T) {
+	ctx := reqctx.WithEthCallUseBlockNumberDuration(context.Background(), 1*time.Hour)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		// Block number must be hex encoded ("0x..."), like the eth_call path, not decimal
+		assert.Equal(t,
+			`[{"params":["0xea674fdde714fd979de3edf0f56aa9716b898ec8","0xbc614e"],"method":"eth_getBalance","jsonrpc":"2.0","id":"0x1"}]`,
+			buffer.String(),
+		)
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x01"}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	reqProto := &pbethss.RpcGetBalanceRequests{
+		Requests: []*pbethss.RpcGetBalanceRequest{{
+			Address: eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8"),
+			Block:   "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5",
+		}},
+	}
+	in, err := proto.Marshal(reqProto)
+	require.NoError(t, err)
+
+	// Block is 2 hours old, older than the 1 hour block-number duration
+	clock := &pbsubstreams.Clock{
+		Number:    12345678,
+		Id:        "0x10155bcb0fab82ccdc5edc8577f0f608ae059f93720172d11ca0fc01438b08a5",
+		Timestamp: timestamppb.New(time.Now().Add(-2 * time.Hour)),
+	}
+
+	out, det, err := engine.ethGetBalance(ctx, 1, "traceID", clock, in)
+	require.NoError(t, err)
+	require.True(t, det)
+
+	got := &pbethss.RpcGetBalanceResponses{}
+	require.NoError(t, proto.Unmarshal(out, got))
+
+	assertProtoEqual(t,
+		&pbethss.RpcGetBalanceResponses{Responses: []*pbethss.RpcGetBalanceResponse{
+			{Balance: eth.MustNewBytes("0x01"), Failed: false},
+		}},
+		got,
+	)
+}
+
 func TestRPCEngine_rpcCalls_useBlockNumber_olderThanDuration(t *testing.T) {
 	ctx := context.Background()
 	ctx = reqctx.WithEthCallUseBlockNumberDuration(ctx, 1*time.Hour)
