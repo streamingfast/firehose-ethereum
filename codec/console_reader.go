@@ -1025,6 +1025,9 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 	ctx.transactionTraces = nil
 	ctx.currentTrace = nil
 	ctx.currentTraceLogCount = 0
+	ctx.currentRootCall = nil
+	ctx.inSystemCall = false
+	ctx.systemCalls = nil
 	ctx.finalizing = false
 
 	return nil
