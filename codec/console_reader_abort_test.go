@@ -108,3 +108,50 @@ func TestConsoleReader_FailedApplyTrxDoesNotLeakSystemCallsIntoNextBlock(t *test
 	// The system call belonged to aborted block 1, it must not leak into block 2
 	assert.Empty(t, block.SystemCalls, "system calls from the aborted block must not leak into the next block")
 }
+
+func TestConsoleReader_CancelBlockResetsEVMCallStack(t *testing.T) {
+	trxHash := repeatHexByte("cc", 32)
+
+	lines := []string{
+		testInitLine,
+
+		// Block 1: a transaction with two nested calls still running (no
+		// EVM_END_CALL yet) when the block is cancelled mid-transaction.
+		"FIRE BEGIN_BLOCK 1",
+		beginApplyTrxLine(trxHash, "10"),
+		"FIRE EVM_RUN_CALL CALL 1 11",
+		"FIRE EVM_RUN_CALL CALL 2 12",
+		"FIRE CANCEL_BLOCK 1 failing validation",
+
+		// Block 2: clean transaction with a root call and one nested call.
+		"FIRE BEGIN_BLOCK 2",
+		beginApplyTrxLine(trxHash, "20"),
+		"FIRE EVM_RUN_CALL CALL 1 21",
+		"FIRE EVM_RUN_CALL CALL 2 22",
+		"FIRE EVM_END_CALL 2 0 . 23",
+		"FIRE EVM_END_CALL 1 0 . 24",
+		"FIRE END_APPLY_TRX 21000 . 21000 . 25 []",
+		"FIRE FINALIZE_BLOCK 2",
+		endBlockLine("2"),
+	}
+
+	blocks := readAllBlocksFromLines(t, lines)
+	require.Len(t, blocks, 1)
+
+	block := blocks[0]
+	require.Equal(t, uint64(2), block.Number)
+	require.Len(t, block.TransactionTraces, 1)
+
+	calls := block.TransactionTraces[0].Calls
+	require.Len(t, calls, 2)
+
+	rootCall := calls[0]
+	assert.Equal(t, uint32(1), rootCall.Index)
+	assert.Equal(t, uint32(0), rootCall.ParentIndex, "root call must have no parent")
+	assert.Equal(t, uint32(0), rootCall.Depth, "root call must be at depth 0")
+
+	nestedCall := calls[1]
+	assert.Equal(t, uint32(2), nestedCall.Index)
+	assert.Equal(t, uint32(1), nestedCall.ParentIndex, "nested call's parent must be the root call")
+	assert.Equal(t, uint32(1), nestedCall.Depth, "nested call must be at depth 1")
+}
