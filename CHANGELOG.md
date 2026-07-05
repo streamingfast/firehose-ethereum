@@ -6,6 +6,11 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Added
+
+- `fireeth tools fix-ordinals|fix-any-type|remove-gas-changes|fix-withdrawals|find-unknown-status`: new `--bundle-size` flag (default `100`) so these tools can operate on merged-blocks stores with non-100 bundle sizes.
+- New `--common-merged-blocks-bundle-size` flag and `fireeth tools resize-merged-blocks` command via `firehose-core` (see its changelog).
+
 - Bumped `substreams` to latest `develop`.
   - Server: store quicksave/quickload now run up to 8 stores concurrently instead of one at a time, and quicksave streams the store lazily and unsorted (one KV entry at a time, no key sort/allocation) instead of buffering the whole serialized store, lowering peak memory and save time for large stores. On-disk format is unchanged; quickload is order-independent.
   - Server: tier1 store loading at request start now loads up to 8 stores concurrently (size probe + download/decode) instead of one at a time.
