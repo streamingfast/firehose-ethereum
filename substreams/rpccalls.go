@@ -255,7 +255,7 @@ func (e *RPCEngine) ethGetBalance(
 		if fallbackDuration != 0 && blockAge > fallbackDuration {
 			blockParam = "latest"
 		} else if numberDuration != 0 && blockAge > numberDuration {
-			blockParam = strconv.FormatUint(clock.Number, 10)
+			blockParam = fmt.Sprintf("0x%x", clock.Number)
 		}
 
 		rpcReqs[i] = &rpc.RPCRequest{
