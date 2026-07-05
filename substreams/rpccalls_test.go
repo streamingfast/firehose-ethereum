@@ -536,6 +536,52 @@ func TestRPCEngine_ethGetBalance_retryWithFallback(t *testing.T) {
 	)
 }
 
+func TestRPCEngine_ethGetBalance_blockTagPassthrough(t *testing.T) {
+	for _, tag := range []string{"latest", "pending", "earliest", "safe", "finalized"} {
+		t.Run(tag, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				buffer := bytes.NewBuffer(nil)
+				_, err := buffer.ReadFrom(r.Body)
+				require.NoError(t, err)
+
+				// Block tags must be passed through unchanged, not mangled into "0x<tag>"
+				assert.Equal(t,
+					`[{"params":["0xea674fdde714fd979de3edf0f56aa9716b898ec8","`+tag+`"],"method":"eth_getBalance","jsonrpc":"2.0","id":"0x1"}]`,
+					buffer.String(),
+				)
+				w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x01"}`))
+			}))
+			defer server.Close()
+
+			engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+			require.NoError(t, err)
+
+			reqProto := &pbethss.RpcGetBalanceRequests{
+				Requests: []*pbethss.RpcGetBalanceRequest{{
+					Address: eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8"),
+					Block:   tag,
+				}},
+			}
+			in, err := proto.Marshal(reqProto)
+			require.NoError(t, err)
+
+			out, det, err := engine.ethGetBalance(context.Background(), 1, "traceID", clockBlock1, in)
+			require.NoError(t, err)
+			require.True(t, det)
+
+			got := &pbethss.RpcGetBalanceResponses{}
+			require.NoError(t, proto.Unmarshal(out, got))
+
+			assertProtoEqual(t,
+				&pbethss.RpcGetBalanceResponses{Responses: []*pbethss.RpcGetBalanceResponse{
+					{Balance: eth.MustNewBytes("0x01"), Failed: false},
+				}},
+				got,
+			)
+		})
+	}
+}
+
 func TestRPCEngine_ethGetBalance_persistent32602_noInfiniteLoop(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
