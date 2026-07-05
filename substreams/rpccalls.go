@@ -248,8 +248,13 @@ func (e *RPCEngine) ethGetBalance(
 		addrHex := "0x" + hex.EncodeToString(r.Address)
 
 		blockParam := r.Block
-		if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
-			blockParam = "0x" + blockParam
+		switch blockParam {
+		case "latest", "pending", "earliest", "safe", "finalized":
+			// known block tags are passed through unchanged
+		default:
+			if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
+				blockParam = "0x" + blockParam
+			}
 		}
 
 		if fallbackDuration != 0 && blockAge > fallbackDuration {
