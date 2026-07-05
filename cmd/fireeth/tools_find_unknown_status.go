@@ -10,18 +10,21 @@ import (
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 
 	"github.com/spf13/cobra"
+	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/dstore"
 	firecore "github.com/streamingfast/firehose-core"
 	"go.uber.org/zap"
 )
 
 func newScanForUnknownStatusCmd(logger *zap.Logger) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "find-unknown-status <src-blocks-store> <dst-store> <start-block> <stop-block>",
 		Short: "look for blocks with empty receipts",
 		Args:  cobra.ExactArgs(4),
 		RunE:  scanForUnknownStatusE(logger),
 	}
+	cmd.Flags().Uint64("bundle-size", 100, "Number of blocks per merged-blocks file in the source store")
+	return cmd
 }
 
 func scanForUnknownStatusE(logger *zap.Logger) firecore.CommandExecutor {
@@ -40,12 +43,13 @@ func scanForUnknownStatusE(logger *zap.Logger) firecore.CommandExecutor {
 
 		start := mustParseUint64(args[2])
 		stop := mustParseUint64(args[3])
+		bundleSize := sflags.MustGetUint64(cmd, "bundle-size")
 
 		if stop <= start {
 			return fmt.Errorf("stop block must be greater than start block")
 		}
 
-		startWalkFrom := fmt.Sprintf("%010d", start-(start%100))
+		startWalkFrom := fmt.Sprintf("%010d", start-(start%bundleSize))
 		err = srcStore.WalkFrom(ctx, "", startWalkFrom, func(filename string) error {
 			logger.Debug("checking merged block file", zap.String("filename", filename))
 
@@ -56,7 +60,7 @@ func scanForUnknownStatusE(logger *zap.Logger) firecore.CommandExecutor {
 				return io.EOF
 			}
 
-			if startBlock+100 < start {
+			if startBlock+bundleSize < start {
 				logger.Debug("skipping merged block file below start block", zap.String("filename", filename))
 				return nil
 			}
@@ -72,7 +76,7 @@ func scanForUnknownStatusE(logger *zap.Logger) firecore.CommandExecutor {
 				return fmt.Errorf("creating block reader: %w", err)
 			}
 
-			blocks := make([]uint64, 0, 100)
+			blocks := make([]uint64, 0, bundleSize)
 			for {
 				block, err := br.Read()
 				if err == io.EOF {

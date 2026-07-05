@@ -24,13 +24,14 @@ import (
 func newFixWithdrawalsCmd(logger *zap.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fix-withdrawals <src-blocks-store> <dest-blocks-store> <rpc-endpoint> <start-block> <stop-block>",
-		Short: "populate the Block.withdrawals field by fetching blocks from RPC and rewrite the corrected 100-block files to destination",
+		Short: "populate the Block.withdrawals field by fetching blocks from RPC and rewrite the corrected merged-blocks files to destination",
 		Args:  cobra.ExactArgs(5),
 		RunE:  createFixWithdrawalsE(logger),
 	}
 
 	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "Headers to send with each RPC request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
 	cmd.PersistentFlags().Int("max-concurrency", 0, "Maximum number of concurrent block processing jobs within a file (0 = auto-detect: GOMAXPROCS)")
+	cmd.Flags().Uint64("bundle-size", 100, "Number of blocks per merged-blocks file in the source store")
 	return cmd
 }
 
@@ -62,6 +63,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 
 		start := mustParseUint64(args[3])
 		stop := mustParseUint64(args[4])
+		bundleSize := sflags.MustGetUint64(cmd, "bundle-size")
 		maxConcurrency := sflags.MustGetInt(cmd, "max-concurrency")
 
 		if maxConcurrency == 0 {
@@ -85,7 +87,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 		)
 
 		lastFileProcessed := ""
-		startWalkFrom := fmt.Sprintf("%010d", start-(start%100))
+		startWalkFrom := fmt.Sprintf("%010d", start-(start%bundleSize))
 		err = srcStore.WalkFrom(ctx, "", startWalkFrom, func(filename string) error {
 			logger.Debug("checking merged block file", zap.String("filename", filename))
 
@@ -96,7 +98,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 				return io.EOF
 			}
 
-			if startBlock+100 < start {
+			if startBlock+bundleSize < start {
 				logger.Debug("skipping merged block file below start block", zap.String("filename", filename))
 				return nil
 			}
@@ -125,13 +127,13 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 				rawBlocks = append(rawBlocks, block)
 			}
 
-			if len(rawBlocks) != 100 {
-				fmt.Printf("ERROR: incorrect block count in merged file %s: read %d blocks, expected 100 (start_block=%d)\n", filename, len(rawBlocks), startBlock)
-				return fmt.Errorf("expected to have read 100 blocks, we have read %d. Bailing out.", len(rawBlocks))
+			if uint64(len(rawBlocks)) != bundleSize {
+				fmt.Printf("ERROR: incorrect block count in merged file %s: read %d blocks, expected %d (start_block=%d)\n", filename, len(rawBlocks), bundleSize, startBlock)
+				return fmt.Errorf("expected to have read %d blocks, we have read %d. Bailing out.", bundleSize, len(rawBlocks))
 			}
 
 			// Process blocks in parallel
-			blocks := make([]*pbbstream.Block, 100)
+			blocks := make([]*pbbstream.Block, bundleSize)
 			semaphore := make(chan struct{}, maxConcurrency)
 			var wg sync.WaitGroup
 			errorCh := make(chan error, len(rawBlocks))
