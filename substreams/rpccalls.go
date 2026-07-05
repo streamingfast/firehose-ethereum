@@ -367,12 +367,19 @@ func (e *RPCEngine) rpcDoWithRetry(
 				}
 			}
 			if retryWithLatest {
-				// Rebuild reqs with latest block
+				// Rebuild reqs with latest block, but only if we are not already
+				// querying "latest": otherwise a persistent -32602 would retry forever.
+				fallbackApplied := false
 				for _, req := range reqs {
-					req.Params[1] = "latest"
+					if req.Params[1] != "latest" {
+						req.Params[1] = "latest"
+						fallbackApplied = true
+					}
 				}
-				zlog.Warn("retrying eth_getBalance with latest block due to missing block (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
-				continue
+				if fallbackApplied {
+					zlog.Warn("retrying eth_getBalance with latest block due to missing block (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
+					continue
+				}
 			}
 		}
 

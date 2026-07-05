@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -488,7 +489,8 @@ func TestRPCEngine_ethGetBalance_retryWithFallback(t *testing.T) {
 
 		count++
 		if count == 1 {
-			// Return -32602 error
+			// First call uses the block hash, return -32602 error
+			assert.Contains(t, buffer.String(), clockBlock1.Id)
 			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","error":{"code":-32602,"message":"Invalid params"}}`))
 		} else {
 			// Second call should use "latest"
@@ -513,9 +515,13 @@ func TestRPCEngine_ethGetBalance_retryWithFallback(t *testing.T) {
 	in, err := proto.Marshal(reqProto)
 	require.NoError(t, err)
 
-	out, det, err := engine.ethGetBalance(ctx, 1, "traceID", clockBlock1, in)
+	// Recent block: initial request uses the block hash, the -32602 answer
+	// triggers a single fallback retry with "latest"
+	clock := &pbsubstreams.Clock{Number: 1, Id: clockBlock1.Id, Timestamp: timestamppb.Now()}
+	out, det, err := engine.ethGetBalance(ctx, 1, "traceID", clock, in)
 	require.NoError(t, err)
 	require.True(t, det)
+	require.Equal(t, 2, count)
 
 	got := &pbethss.RpcGetBalanceResponses{}
 	require.NoError(t, proto.Unmarshal(out, got))
@@ -526,6 +532,73 @@ func TestRPCEngine_ethGetBalance_retryWithFallback(t *testing.T) {
 				{Balance: eth.MustNewBytes("0x01"), Failed: false},
 			},
 		},
+		got,
+	)
+}
+
+func TestRPCEngine_ethGetBalance_persistent32602_noInfiniteLoop(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ctx = reqctx.WithEthCallFallbackToLatestDuration(ctx, 1*time.Hour)
+
+	var mu sync.Mutex
+	count := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		count++
+		mu.Unlock()
+		// Endpoint persistently answers -32602, even for "latest"
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","error":{"code":-32602,"message":"Invalid params"}}`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	reqProto := &pbethss.RpcGetBalanceRequests{
+		Requests: []*pbethss.RpcGetBalanceRequest{{
+			Address: eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8"),
+			Block:   clockBlock1.Id,
+		}},
+	}
+	in, err := proto.Marshal(reqProto)
+	require.NoError(t, err)
+
+	// Recent block so the initial request uses the block hash, then falls back to "latest"
+	clock := &pbsubstreams.Clock{Number: 1, Id: clockBlock1.Id, Timestamp: timestamppb.Now()}
+
+	var out []byte
+	var det bool
+	var callErr error
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		out, det, callErr = engine.ethGetBalance(ctx, 1, "traceID", clock, in)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(20 * time.Second):
+		cancel()
+		<-done
+		t.Fatal("ethGetBalance never returned: infinite -32602 fallback retry loop")
+	}
+
+	require.NoError(t, callErr)
+	require.True(t, det)
+
+	// One attempt with the block hash, one with "latest", then stop
+	mu.Lock()
+	require.Equal(t, 2, count)
+	mu.Unlock()
+
+	got := &pbethss.RpcGetBalanceResponses{}
+	require.NoError(t, proto.Unmarshal(out, got))
+
+	assertProtoEqual(t,
+		&pbethss.RpcGetBalanceResponses{Responses: []*pbethss.RpcGetBalanceResponse{
+			{Failed: true},
+		}},
 		got,
 	)
 }
