@@ -7,8 +7,8 @@ for instructions to keep up to date.
 ## Unreleased
 
 - Bumped `substreams` to latest `develop`.
-  - Server: store quicksave/quickload now run up to 8 stores concurrently instead of one at a time, and the streaming store marshaller serializes lazily (one KV entry at a time as the upload consumes it) instead of buffering the whole serialized store, lowering peak memory and latency when quicksaving large stores. On-disk format is unchanged.
-  - Server: new quicksave perf toggles — `SUBSTREAMS_QUICKSAVE_UNSORTED=true` skips the key sort/allocation (safe; quickload is order-independent), and `SUBSTREAMS_QUICKSAVE_COMPRESSION=none` disables zstd on the ephemeral quicksave store. Both off by default.
+  - Server: store quicksave/quickload now run up to 8 stores concurrently instead of one at a time, and quicksave streams the store lazily and unsorted (one KV entry at a time, no key sort/allocation) instead of buffering the whole serialized store, lowering peak memory and save time for large stores. On-disk format is unchanged; quickload is order-independent.
+  - Server: tier1 store loading at request start now loads up to 8 stores concurrently (size probe + download/decode) instead of one at a time.
   - Server: store quicksave now also triggers on client disconnect (context canceled), not only on graceful server shutdown, so a reconnecting client can resume without reprocessing. Only applies to production-mode requests.
   - Server: quicksave block count now counts settled blocks (normal or last-partial) instead of skipping partials entirely, so quicksave arms correctly on flash-block chains; the minimum sent-block threshold before a quicksave triggers was raised from 25 to 50.
   - Server: the `substreams request stats` log now includes the last block sent to the client (`last_sent_block_num`, `last_sent_block_id`, `last_sent_block_time`), and quicksave/quickload logs now report their duration (`save_duration` / `load_duration`).
