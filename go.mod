@@ -27,7 +27,7 @@ require (
 	github.com/streamingfast/logging v1.2.2
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.19.1-0.20260703191612-042ed978a2bc
+	github.com/streamingfast/substreams v1.19.1-0.20260706152812-c539b4a4f5dc
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
