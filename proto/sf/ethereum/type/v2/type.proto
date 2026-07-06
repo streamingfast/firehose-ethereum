@@ -998,6 +998,10 @@ message BalanceChange {
     // transaction, representing the state change. Consumers should not expect granular per-operation
     // entries (i.e. GAS_BUY, TRANSFER, GAS_REFUND, REWARD_TRANSACTION_FEE) because of this.
     REASON_MONAD_TX_POST_STATE = 20;
+
+    // This reason is used only on Monad chain for block prologue/epilogue post-state
+    // balance changes that are not attributable to a transaction.
+    REASON_MONAD_BLOCK_POST_STATE = 21;
   }
 
   // The block's global ordinal when the balance change was recorded, refer to [Block]
