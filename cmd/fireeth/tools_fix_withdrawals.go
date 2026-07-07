@@ -31,7 +31,6 @@ func newFixWithdrawalsCmd(logger *zap.Logger) *cobra.Command {
 
 	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "Headers to send with each RPC request (ex: '-H \"key1: value1\" -H \"key2: value2\"')")
 	cmd.PersistentFlags().Int("max-concurrency", 0, "Maximum number of concurrent block processing jobs within a file (0 = auto-detect: GOMAXPROCS)")
-	cmd.Flags().Uint64("bundle-size", 100, "Number of blocks per merged-blocks file in the source store")
 	return cmd
 }
 
@@ -63,7 +62,10 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 
 		start := mustParseUint64(args[3])
 		stop := mustParseUint64(args[4])
-		bundleSize := sflags.MustGetUint64(cmd, "bundle-size")
+		bundleSize, err := firecore.GetMergedBlocksBundleSizeFlag(cmd)
+		if err != nil {
+			return err
+		}
 		maxConcurrency := sflags.MustGetInt(cmd, "max-concurrency")
 
 		if maxConcurrency == 0 {

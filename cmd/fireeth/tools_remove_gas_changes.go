@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/dstore"
 	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
@@ -23,7 +22,6 @@ func newRemoveGasChangesCmd(logger *zap.Logger) *cobra.Command {
 		Args:  cobra.ExactArgs(4),
 		RunE:  createRemoveGasChangesE(logger),
 	}
-	cmd.Flags().Uint64("bundle-size", 100, "Number of blocks per merged-blocks file in the source store")
 	return cmd
 }
 
@@ -43,7 +41,10 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 
 		start := mustParseUint64(args[2])
 		stop := mustParseUint64(args[3])
-		bundleSize := sflags.MustGetUint64(cmd, "bundle-size")
+		bundleSize, err := firecore.GetMergedBlocksBundleSizeFlag(cmd)
+		if err != nil {
+			return err
+		}
 
 		if stop <= start {
 			return fmt.Errorf("stop block must be greater than start block")
