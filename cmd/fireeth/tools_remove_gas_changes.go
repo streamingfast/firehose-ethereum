@@ -16,12 +16,13 @@ import (
 )
 
 func newRemoveGasChangesCmd(logger *zap.Logger) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "remove-gas-changes <src-blocks-store> <dest-blocks-store> <start-block> <stop-block>",
-		Short: "remove call gas changes from blocks and rewrite the affected 100-block files to destination. Changes block version to v5",
+		Short: "remove call gas changes from blocks and rewrite the affected merged-blocks files to destination. Changes block version to v5",
 		Args:  cobra.ExactArgs(4),
 		RunE:  createRemoveGasChangesE(logger),
 	}
+	return cmd
 }
 
 func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
@@ -40,13 +41,17 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 
 		start := mustParseUint64(args[2])
 		stop := mustParseUint64(args[3])
+		bundleSize, err := firecore.GetMergedBlocksBundleSizeFlag(cmd)
+		if err != nil {
+			return err
+		}
 
 		if stop <= start {
 			return fmt.Errorf("stop block must be greater than start block")
 		}
 
 		lastFileProcessed := ""
-		startWalkFrom := fmt.Sprintf("%010d", start-(start%100))
+		startWalkFrom := fmt.Sprintf("%010d", start-(start%bundleSize))
 		err = srcStore.WalkFrom(ctx, "", startWalkFrom, func(filename string) error {
 			logger.Debug("checking merged block file", zap.String("filename", filename))
 
@@ -57,7 +62,7 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 				return io.EOF
 			}
 
-			if startBlock+100 < start {
+			if startBlock+bundleSize < start {
 				logger.Debug("skipping merged block file below start block", zap.String("filename", filename))
 				return nil
 			}
@@ -73,7 +78,7 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 				return fmt.Errorf("creating block reader: %w", err)
 			}
 
-			blocks := make([]*pbbstream.Block, 100)
+			blocks := make([]*pbbstream.Block, bundleSize)
 			blocksRead := 0
 			for {
 				block, err := br.Read()
@@ -102,8 +107,8 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 				blocks[blocksRead] = block
 				blocksRead++
 			}
-			if blocksRead != 100 {
-				return fmt.Errorf("block count mismatch: expected 100 blocks, got %d", blocksRead)
+			if uint64(blocksRead) != bundleSize {
+				return fmt.Errorf("block count mismatch: expected %d blocks, got %d", bundleSize, blocksRead)
 			}
 			if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
 				return fmt.Errorf("writing merged block %d: %w", startBlock, err)
