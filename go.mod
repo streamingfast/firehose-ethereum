@@ -15,7 +15,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/streamingfast/bstream v0.0.2-0.20260707150341-487b28967227
+	github.com/streamingfast/bstream v0.0.2-0.20260709191130-aecaf73e1c32
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250814163534-bd7407bd89d7
 	github.com/streamingfast/dmetrics v0.0.0-20260109212625-35256f512c62
