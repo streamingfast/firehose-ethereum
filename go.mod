@@ -22,12 +22,12 @@ require (
 	github.com/streamingfast/dstore v0.2.4-0.20260520032149-6421410d7faa
 	github.com/streamingfast/eth-go v0.0.0-20260318130445-6d6ccaf27155
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.15.1-0.20260707190949-bae2bd775b2a
+	github.com/streamingfast/firehose-core v1.15.1-0.20260709184851-a4e2267c98ac
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260420191823-8b3fce4bf77a
 	github.com/streamingfast/logging v1.2.2
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.19.1-0.20260707172051-1f7ee904ffff
+	github.com/streamingfast/substreams v1.19.1-0.20260708214419-2ebbfa21ce57
 	github.com/stretchr/testify v1.11.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.18.0
@@ -221,6 +221,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yourbasic/graph v0.0.0-20210606180040-8ecfec1c2869 // indirect
+	go.etcd.io/bbolt v1.4.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.42.0 // indirect
