@@ -2304,6 +2304,8 @@ github.com/streamingfast/dsession v0.0.0-20260414190543-79b9846e7c58 h1:at7VPRhG
 github.com/streamingfast/dsession v0.0.0-20260414190543-79b9846e7c58/go.mod h1:ldDwFqr20xXyaLhwDm7XlMaf2vvoZNOrjgsMcFJGtrw=
 github.com/streamingfast/dstore v0.2.4-0.20260520032149-6421410d7faa h1:0J6uKpYH4mdDp8LkYB4YqZyrhNDuQmFCLxOmKgBojxU=
 github.com/streamingfast/dstore v0.2.4-0.20260520032149-6421410d7faa/go.mod h1:TMunfchUOefhTu+X2a81fPMW0F4/cGNNdihXIaChpJI=
+github.com/streamingfast/dstore v0.2.4-0.20260709193311-122163592902 h1:vmSOeUk0Q56YLeVuYqYwmQEfPvq6guLbRRuVrWo8j2Y=
+github.com/streamingfast/dstore v0.2.4-0.20260709193311-122163592902/go.mod h1:TMunfchUOefhTu+X2a81fPMW0F4/cGNNdihXIaChpJI=
 github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9 h1:RaMv0J2e30vQpJiKdWOGB1HObWtJ4/w4vEUkUhTYE+c=
 github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9/go.mod h1:huOJyjMYS6K8upTuxDxaNd+emD65RrXoVBvh8f1/7Ns=
 github.com/streamingfast/dummy-blockchain v1.7.3 h1:rPheajbwc+hwh4XVRMaroET/p/lvlI7WGfqETBkIL18=
