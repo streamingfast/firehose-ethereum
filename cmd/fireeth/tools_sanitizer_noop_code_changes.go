@@ -54,7 +54,6 @@ func collectNoopCodeChangeOrdinals(block *pbeth.Block) []uint64 {
 		for _, call := range trace.Calls {
 			for _, codeChange := range call.CodeChanges {
 				if codeChange.Ordinal > 0 && isNoopCodeChange(codeChange) {
-					call.ExecutedCode = true
 					out = append(out, codeChange.Ordinal)
 				}
 			}

@@ -37,6 +37,8 @@ for instructions to keep up to date.
 
 ### Fixed
 
+- `fireeth tools compare-blocks` with `FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES=true` no longer reports spurious `executed_code` differences. The noop-code-change sanitizer was force-setting `call.ExecutedCode = true` on any call carrying a noop code change (`OldHash == NewHash`, e.g. an EIP-7702 delegation revoke/re-delegate). Because the sanitizer runs per-block on each stream independently, this fired only on the side that actually emitted the noop code change, manufacturing an `executed_code` diff where the raw blocks agreed.
+- Bumped `dstore` to send S3 request checksums when the target bucket/endpoint requires them, fixing writes that failed against S3-compatible stores enforcing `x-amz-sdk-checksum-algorithm` on uploads.
 - `fireeth tools print merged-blocks <store>` no longer truncates its output when a merged-blocks file is missing (open range with no explicit stop, or a bounded range extending past the last available file): with the bumped `bstream` dependency it now prints every available block first, instead of discarding in-flight files on an async shutdown. On an open range it caps the stream at the last available merged-blocks file (found with an `O(log n)` existence probe rather than a full store listing) so it stops cleanly instead of erroring on the expected-missing next file. Also fixes an off-by-one that stopped one block early on a closed range, and a potential unsigned underflow when a closed range ends at block 0.
 
 ## v2.18.0
