@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.19.0
 
 ### Added
 
@@ -21,7 +21,8 @@ for instructions to keep up to date.
 
 - The firehose and substreams-tier1 hubs now keep `max(500|200, 2 x merged-blocks bundle size)` final blocks in memory so the joining source can hand off from a merged-blocks file boundary.
 - A merged-blocks reader now fails fast with a clear error when a file contains blocks beyond the configured bundle size (e.g. reading a 1000-blocks store with the default of 100).
-- Bumped `substreams` to latest `develop`.
+- Bumped `firehose-core` to [v1.16.0](https://github.com/streamingfast/firehose-core/releases/tag/v1.16.0).
+- Bumped `substreams` to [v1.20.1](https://github.com/streamingfast/substreams/releases/tag/v1.20.1).
   - Server: new opt-in mmap (bbolt-backed) store backend, selectable via `--substreams-stores-backend=mmap` (default `memory`). It keeps FullKV store data in a memory-mapped file so cold pages are reclaimable by the kernel under memory pressure, instead of pinning everything on the non-reclaimable Go heap — this addresses production OOMs with large or highly concurrent stores. The in-memory backend remains the default and is byte-for-byte unchanged; mmap is validated to produce identical output. **The scratch-space directory holding the bbolt files (`--substreams-stores-scratch-space`) must live on a local NVMe SSD**: the store is continuously read and written through the mmap and the kernel pages it straight to that file, so a slow or network-backed disk (EBS-class, NFS) turns store operations into an I/O bottleneck and negates the benefit.
   - Server: store quicksave/quickload now run up to 8 stores concurrently instead of one at a time, and quicksave streams the store lazily and unsorted (one KV entry at a time, no key sort/allocation) instead of buffering the whole serialized store, lowering peak memory and save time for large stores. On-disk format is unchanged; quickload is order-independent.
   - Server: tier1 store loading at request start now loads up to 8 stores concurrently (size probe + download/decode) instead of one at a time.
@@ -34,6 +35,7 @@ for instructions to keep up to date.
   - Server: the `substreams request stats` log now includes the last block sent to the client (`last_sent_block_num`, `last_sent_block_id`, `last_sent_block_time`), and quicksave/quickload logs now report their duration (`save_duration` / `load_duration`).
   - Server: `tier1` calls to hosted foundational stores now forward the `x-organization-id` identity header (alongside the existing trusted headers), so a store's internal trust-based listener can authorize the request without an end-user JWT. This fixes `Unauthenticated: required authorization token not found` errors when reading from hosted foundational stores resolved via the control-plane registry.
   - Server: foundational store calls that fail with authentication errors, organization id mismatch, or prolonged unreachability now bubble up to the user as a non-deterministic (uncached) error instead of retrying until the global deadline. Transient unavailability is still retried (~30s) to absorb blips and rolling restarts.
+  - Server: on a linear resume from a cursor, tier1 now emits the client session (trace id) and starts keepalives *before* streaming the quicksave files into the stores, instead of after. Decoding a large store from a cold/remote quicksave can take a long time and previously ran with zero output, risking a gateway/client idle-timeout before the trace id ever arrived; the store files are opened (existence-checked) first, then streamed once the session is sent.
 
 ### Fixed
 
