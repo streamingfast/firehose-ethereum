@@ -83,13 +83,12 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=tag
             type=ref,event=tag,suffix=-${{ matrix.architecture }}
-            type=sha,prefix=
             type=sha,prefix=,suffix=-${{ matrix.architecture }}
-            type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=sha,prefix=,enable=${{ matrix.architecture == 'amd64' }}
+            type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop,suffix=-${{ matrix.architecture }}
           flavor: |
-            latest=${{ startsWith(github.ref, 'refs/tags/') }}
+            latest=false
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
