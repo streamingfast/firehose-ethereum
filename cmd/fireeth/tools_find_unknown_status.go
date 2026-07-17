@@ -83,6 +83,9 @@ func scanForUnknownStatusE(logger *zap.Logger) firecore.CommandExecutor {
 				if err == io.EOF {
 					break
 				}
+				if err != nil {
+					return fmt.Errorf("reading block from %s: %w", filename, err)
+				}
 
 				ethBlock := &pbeth.Block{}
 				err = block.Payload.UnmarshalTo(ethBlock)

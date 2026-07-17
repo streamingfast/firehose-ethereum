@@ -44,8 +44,8 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 		ethBlock.Header.TotalDifficulty = nil
 	}
 	var hasLogBloom bool
-	for _, byte := range ethBlock.Header.LogsBloom {
-		if byte != '0' {
+	for _, b := range ethBlock.Header.LogsBloom {
+		if b != 0 {
 			hasLogBloom = true
 			break
 		}
@@ -124,22 +124,14 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 			tx.BeginOrdinal = 0
 			tx.EndOrdinal = 0
 		}
-		var hasLogBloom bool
-		for _, byte := range tx.Receipt.LogsBloom {
-			if byte != '0' {
-				hasLogBloom = true
-				break
-			}
-		}
-		if !hasLogBloom {
-			tx.Receipt.LogsBloom = nil
-		}
 		if ignoreOrdinals {
 			for _, l := range tx.Receipt.Logs {
 				l.Ordinal = 0
 			}
 		}
 
+		// Receipt logs blooms are always removed for comparison, some producers
+		// don't fill them at all.
 		tx.Receipt.LogsBloom = nil
 		for _, call := range tx.Calls {
 			if ignoreOrdinals {

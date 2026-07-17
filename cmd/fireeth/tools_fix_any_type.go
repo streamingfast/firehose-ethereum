@@ -87,6 +87,9 @@ func createFixAnyTypeE(logger *zap.Logger) firecore.CommandExecutor {
 				if err == io.EOF {
 					break
 				}
+				if err != nil {
+					return fmt.Errorf("reading block from %s: %w", filename, err)
+				}
 				if !strings.HasPrefix(block.Payload.TypeUrl, "type.googleapis.com/") {
 					fmt.Println("found block with missing type url prefix", block.Payload.TypeUrl)
 					block.Payload.TypeUrl = "type.googleapis.com/" + block.Payload.TypeUrl
