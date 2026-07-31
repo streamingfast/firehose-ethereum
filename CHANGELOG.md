@@ -4,6 +4,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Changed
+
+- Substreams RPC calls (`eth_call` and `eth_getBalance`) now reuse their HTTP connections instead of opening a new one for every batch.
+
+  Connections were explicitly never reused, so each batch paid a full DNS resolution, TCP handshake and TLS handshake before the endpoint did any work, which on a remote provider easily adds 100ms or more per batch. The connection pool is now also held by the extension itself rather than by the RPC engine, since Substreams builds a new engine for every tier2 job: a per engine pool could never be reused across jobs, and left its idle connections behind when the job ended.
+
+  Use `--substreams-rpc-max-idle-conns-per-host` (default `100`) and `--substreams-rpc-idle-conn-timeout` (default `90s`) to size the pool. Note that Go's own default of 2 idle connections per host is far too low for this workload, hence the higher default.
+
+  Set `--substreams-rpc-disable-keep-alives` to restore the previous behavior. This is only needed when a single endpoint hostname fronts a pool of nodes through round-robin DNS and spreading the load across them matters more than the handshake cost.
+
 ## v2.19.1
 
 ### Added
