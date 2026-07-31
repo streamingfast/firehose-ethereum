@@ -4,6 +4,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.19.1
+
+### Added
+
+- New `finalized_block_number{app}` metric, reported by `reader-node`, `reader-node-stdin`, `reader-node-firehose`, `relayer`, `firehose`, `merger` and `block-indexer`. Paired with the existing `head_block_number{app}`, it lets dashboards show how far behind finality each app's head is, as `head_block_number - finalized_block_number`. The `merger` and `block-indexer` only ever process final blocks, so they report the same value for both.
+
+- `tools substreams logs connection`: new final `Logs` section which asks whether the full logs should be printed (defaults to yes when you just hit enter) and, when declined or when running non-interactively, shows a Cloud Logging console link scoped to the request's own time window instead.
+
+- `tools substreams logs connection`: new `--logs` flag printing every log line of the request (tier1 and tier2 alike) in the final `Logs` section instead of the console link, rendered as `<time> <severity> <logger> <message>` with the remaining fields listed one `<key>: <value>` per line under it, numeric duration fields (`duration`, `parallel_duration`, `time_to_first_data`, ...) being shown as human durations. Use `--logs-limit` (default `500`, `0` disables) to control how many of the most recent lines are printed.
+
+### Changed
+
+- Bump `substreams` to [v1.20.3](https://github.com/streamingfast/substreams/releases/tag/v1.20.3).
+
+- Bumped `bstream` for `forkable.WithFinalizedBlockNumMetric`, the option backing the new `finalized_block_number` metric on the `relayer`.
+
+### Security
+
+- Bumped `google.golang.org/grpc` to `v1.82.1`, fixing GHSA-hrxh-6v49-42gf (HIGH, CVSS 8.8), an uncaught exception reachable from the network.
+
 ## v2.19.0
 
 ### Added
