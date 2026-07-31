@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -77,6 +78,10 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			flags.StringArray("substreams-rpc-get-balance-endpoints", nil, "Endpoints to contact to satisfy Substreams 'eth_get_balance's")
 			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")
+
+			flags.Int("substreams-rpc-max-idle-conns-per-host", 100, "Maximum number of idle connections kept alive per Substreams RPC endpoint, raise it if you serve more concurrent requests than that per endpoint")
+			flags.Duration("substreams-rpc-idle-conn-timeout", 90*time.Second, "How long an unused connection to a Substreams RPC endpoint is kept alive before being closed")
+			flags.Bool("substreams-rpc-disable-keep-alives", false, "Never reuse a connection to a Substreams RPC endpoint, making every batch pay a new TCP and TLS handshake. Only needed when a single endpoint hostname fronts a pool of nodes through round-robin DNS")
 		},
 
 		RegisterSubstreamsExtensions: func() (wasm.WASMExtensioner, error) {
@@ -120,7 +125,11 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			if hasEndpoints(balanceEndpoints) {
 				extensions["rpc_eth_get_balance"] = balData
 			}
-			return ethss.NewRPCExtensioner(extensions), nil
+			return ethss.NewRPCExtensioner(extensions, ethss.ConnectionOptions{
+				MaxIdleConnsPerHost: viper.GetInt("substreams-rpc-max-idle-conns-per-host"),
+				IdleConnTimeout:     viper.GetDuration("substreams-rpc-idle-conn-timeout"),
+				DisableKeepAlives:   viper.GetBool("substreams-rpc-disable-keep-alives"),
+			}), nil
 		},
 
 		ReaderNodeBootstrapperFactory: firecore.DefaultReaderNodeBootstrapper(newReaderNodeBootstrapper),

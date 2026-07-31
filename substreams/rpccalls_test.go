@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -1002,4 +1003,96 @@ func TestRPCEngine_rpcCalls_fallbackOverridesBlockNumber(t *testing.T) {
 			{Raw: eth.MustNewBytes("0x0000000000000000000000000000000000000000000000000000000000000012"), Failed: false},
 		},
 	}, responses)
+}
+
+// countingConnServer is an HTTP test server counting how many distinct TCP connections it
+// accepted, which is what tells connection reuse apart from connection churn.
+func countingConnServer(t *testing.T) (*httptest.Server, func() int) {
+	t.Helper()
+
+	var mutex sync.Mutex
+	connections := map[net.Conn]bool{}
+
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0x0000000000000000000000000000000000000000000000000000000000000012"}`))
+	}))
+
+	server.Config.ConnState = func(conn net.Conn, state http.ConnState) {
+		if state != http.StateNew {
+			return
+		}
+
+		mutex.Lock()
+		defer mutex.Unlock()
+		connections[conn] = true
+	}
+
+	server.Start()
+	t.Cleanup(server.Close)
+
+	return server, func() int {
+		mutex.Lock()
+		defer mutex.Unlock()
+		return len(connections)
+	}
+}
+
+func callEngineTimes(t *testing.T, engine *RPCEngine, times int) {
+	t.Helper()
+
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	protoCalls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{{ToAddr: address, Data: data}}})
+	require.NoError(t, err)
+
+	for range times {
+		_, _, err := engine.ethCall(context.Background(), 0, "someTraceID", clockBlock1, protoCalls)
+		require.NoError(t, err)
+	}
+}
+
+func TestRPCEngineReusesConnections(t *testing.T) {
+	server, connectionCount := countingConnServer(t)
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	callEngineTimes(t, engine, 5)
+
+	assert.Equal(t, 1, connectionCount(), "the 5 batches should all have gone through a single connection")
+}
+
+func TestRPCEngineDisableKeepAlives(t *testing.T) {
+	server, connectionCount := countingConnServer(t)
+
+	httpClient := NewHTTPClient(ConnectionOptions{DisableKeepAlives: true})
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000, WithHTTPClient(httpClient))
+	require.NoError(t, err)
+
+	callEngineTimes(t, engine, 5)
+
+	assert.Equal(t, 5, connectionCount(), "opting out of keep-alives must go back to one connection per batch")
+}
+
+// Substreams builds a new engine for every tier2 job, so the pool only ever gets reused if it
+// lives on the extensioner rather than on the engine.
+func TestRPCExtensionerSharesConnectionsAcrossEngines(t *testing.T) {
+	server, connectionCount := countingConnServer(t)
+
+	extensioner := NewRPCExtensioner(map[string]string{
+		"rpc_eth_call": fmt.Sprintf("50000000,%s", server.URL),
+	}, DefaultConnectionOptions())
+
+	for range 3 {
+		_, err := extensioner.WASMExtensions(extensioner.Params())
+		require.NoError(t, err)
+
+		engine, err := NewRPCEngine([]string{server.URL}, nil, 50_000_000, WithHTTPClient(extensioner.httpClient))
+		require.NoError(t, err)
+
+		callEngineTimes(t, engine, 2)
+	}
+
+	assert.Equal(t, 1, connectionCount(), "engines built from the same extensioner must share the connection pool")
 }
