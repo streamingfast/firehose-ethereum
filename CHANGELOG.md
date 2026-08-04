@@ -10,9 +10,37 @@ for instructions to keep up to date.
 
 - New `--substreams-tier2-segment-stall-timeout` flag (default `10m`) on `substreams-tier2`: a segment is now killed when it stops processing blocks for that long, the deadline resetting on every block processed. See the `substreams` bump below for why this replaces the fixed execution budget as the primary guard.
 
+- `tools poller`: new repeatable `--provider=<url>[#<name>]` flag, declaring the RPC providers to poll blocks from. The flag order is the priority order: the first provider is the preferred one and the next ones are used as fallback when it errors out. The name, taken after the last `#` of the value, defaults to the URL's host and is what identifies the provider in logs and in `--headers`.
+
+  The `<rpc-endpoint>` positional argument is now optional, so both forms work and can be combined, a positional endpoint always being the highest priority provider, named `default`:
+
+  ```
+  fireeth tools poller optimism https://endpoint.example.com 1000
+
+  fireeth tools poller optimism 1000 \
+    --provider=https://primary.example.com/v1/key#primary \
+    --provider=https://fallback.example.com/key#fallback
+  ```
+
+  Duplicate provider names are refused at startup.
+
+- `tools poller`: new `--providers-failback-interval` flag (default `10m`) which periodically re-prefers the declared provider order. The rolling strategy used by the poller is sticky forever, so a single transient error on the preferred provider used to move polling to a fallback provider until the process was restarted, which for a paid fallback endpoint meant paying for it full-time after a momentary blip. Set it to `0` to keep the previous behavior.
+
 ### Changed
 
 - **Operators** the default of `--substreams-tier2-segment-execution-timeout` moves from `1h` to `4h`. It is now only an absolute backstop, the new `--substreams-tier2-segment-stall-timeout` being the guard that actually kills wedged segments. If you pinned the flag to a value of your own, raise it or drop the override, otherwise expensive-but-healthy segments keep being killed.
+
+- `tools poller`: `--headers` entries can now be scoped to a single provider by suffixing them with `#<provider-name>`, as in `--headers="Authorization: Bearer xyz#fallback"`. Entries without a `#` keep applying to every provider, so existing invocations are unchanged. An entry scoped to an unknown provider name is refused at startup rather than being silently dropped.
+
+  The provider name is taken after the **last** `#` of the value, so a header value legitimately ending with `#<something>` is going to be mis-parsed. There is no escaping syntax.
+
+- `tools poller`: a malformed `--headers` entry (no `:` separator, or an empty key) is now refused at startup instead of being silently ignored, which used to make the endpoint reject requests for a missing credential that looked like it had been provided.
+
+- `tools poller`: `--headers` no longer splits its value on commas, it declares a single header and is repeated to send more than one. A header with a comma in its value (`-H "Accept-Encoding: gzip, deflate"`) used to be split into `Accept-Encoding: gzip` and a ` deflate` fragment that was silently dropped, which combined with the startup validation above would now have refused to start. Passing several headers in a single comma-separated `--headers` value no longer works, use one flag per header.
+
+- `tools poller`: block fetch errors now name the provider they came from (`provider "primary": ...`) and rolling to a fallback provider is logged as `rolling to next RPC provider` with the `from_provider` and `to_provider` names.
+
+- `tools poller`: the `launching firehose-ethereum poller` log line now reports the providers by name with their URL redacted (`rpc_providers: ["primary=https://primary.example.com/redacted"]`) instead of printing the full endpoint URL, which leaked the API key embedded in it in cleartext.
 
 - Bumped `firehose-core` to [v1.17.0](https://github.com/streamingfast/firehose-core/releases/tag/v1.17.0):
 
