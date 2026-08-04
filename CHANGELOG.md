@@ -32,6 +32,8 @@ for instructions to keep up to date.
 
 - `tools poller`: a malformed `--headers` entry (no `:` separator, or an empty key) is now refused at startup instead of being silently ignored, which used to make the endpoint reject requests for a missing credential that looked like it had been provided.
 
+- `tools poller`: `--headers` no longer splits its value on commas, it declares a single header and is repeated to send more than one. A header with a comma in its value (`-H "Accept-Encoding: gzip, deflate"`) used to be split into `Accept-Encoding: gzip` and a ` deflate` fragment that was silently dropped, which combined with the startup validation above would now have refused to start. Passing several headers in a single comma-separated `--headers` value no longer works, use one flag per header.
+
 - `tools poller`: block fetch errors now name the provider they came from (`provider "primary": ...`) and rolling to a fallback provider is logged as `rolling to next RPC provider` with the `from_provider` and `to_provider` names.
 
 - `tools poller`: the `launching firehose-ethereum poller` log line now reports the providers by name with their URL redacted (`rpc_providers: ["primary=https://primary.example.com/redacted"]`) instead of printing the full endpoint URL, which leaked the API key embedded in it in cleartext.

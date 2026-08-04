@@ -42,6 +42,9 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 			    --headers="X-Api-Key: shared"                  sent to every provider
 			    --headers="Authorization: Bearer xyz#primary"  sent only to the "primary" provider
 
+			'--headers' declares a single header and is repeated to send more than one, its value
+			being taken verbatim, commas included.
+
 			Since both suffixes are taken after the last '#', a URL or a header value legitimately
 			ending with '#<something>' is going to be mis-parsed, there is no escaping syntax. A
 			'#' anywhere else in the value, like in the middle of an API key, is left alone.
@@ -60,7 +63,7 @@ func newPollerCmd(logger *zap.Logger, tracer logging.Tracer) *cobra.Command {
 	cmd.PersistentFlags().Uint("parallel-workers", 20, "number of parallel workers to fetch transaction receipts")
 	cmd.PersistentFlags().Uint("block-fetch-batch-size", 1, "number of blocks to fetch (and serialize) in parallel")
 	cmd.PersistentFlags().StringArray("provider", nil, "RPC provider to poll blocks from, in the form '<url>[#<name>]', repeat the flag to declare multiple providers, the flag order being the priority order (first one preferred, next ones used as fallback). The name defaults to the URL's host and is what identifies the provider in logs and in '--headers'. It is taken after the last '#' of the value")
-	cmd.PersistentFlags().StringSliceP("headers", "H", nil, "headers to send with each request, either 'Key: Value' to send it to every provider or 'Key: Value#<provider-name>' to send it only to that provider (ex: '-H \"key1: value1\" -H \"Authorization: Bearer xyz#fallback\"'). The provider name is taken after the last '#' of the value, so a header value legitimately ending with '#<something>' is going to be mis-parsed, there is no escaping syntax")
+	cmd.PersistentFlags().StringArrayP("headers", "H", nil, "header to send with each request, either 'Key: Value' to send it to every provider or 'Key: Value#<provider-name>' to send it only to that provider, repeat the flag to send multiple headers (ex: '-H \"key1: value1\" -H \"Authorization: Bearer xyz#fallback\"'). The value is taken verbatim, commas included. The provider name is taken after the last '#' of the value, so a header value legitimately ending with '#<something>' is going to be mis-parsed, there is no escaping syntax")
 	cmd.PersistentFlags().Duration("providers-failback-interval", 10*time.Minute, "interval at which the declared provider order is re-preferred, moving polling back to the preferred provider after a transient error moved it to a fallback one. Set to 0 to stick to the fallback provider until the process is restarted")
 	cmd.PersistentFlags().Bool("allow-empty-receipts-on-block-0", false, "whether to accept empty receipts on block 0, filling them with 'empty' transactions (useful for TRON-EVM)")
 
@@ -166,7 +169,7 @@ func pollerRunEInternal(logger *zap.Logger, tracer logging.Tracer, useTracer boo
 			return fmt.Errorf("unable to parse first streamable block %q: %w", firstStreamableBlockArg, err)
 		}
 
-		providers, err := rpcprovider.Parse(rpcEndpoint, sflags.MustGetStringArray(cmd, "provider"), sflags.MustGetStringSlice(cmd, "headers"))
+		providers, err := rpcprovider.Parse(rpcEndpoint, sflags.MustGetStringArray(cmd, "provider"), sflags.MustGetStringArray(cmd, "headers"))
 		if err != nil {
 			return err
 		}
