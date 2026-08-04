@@ -4,9 +4,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.20.0
+
+### Added
+
+- New `--substreams-tier2-segment-stall-timeout` flag (default `10m`) on `substreams-tier2`: a segment is now killed when it stops processing blocks for that long, the deadline resetting on every block processed. See the `substreams` bump below for why this replaces the fixed execution budget as the primary guard.
 
 ### Changed
+
+- **Operators** the default of `--substreams-tier2-segment-execution-timeout` moves from `1h` to `4h`. It is now only an absolute backstop, the new `--substreams-tier2-segment-stall-timeout` being the guard that actually kills wedged segments. If you pinned the flag to a value of your own, raise it or drop the override, otherwise expensive-but-healthy segments keep being killed.
+
+- Bumped `firehose-core` to [v1.17.0](https://github.com/streamingfast/firehose-core/releases/tag/v1.17.0):
+
+  - RPC: `rpc.Clients` now tracks a provider name per client (`AddNamed`, `Names()`), failed attempts are attributed to their provider in the returned error (`provider "<name>": <error>`), and each roll to another provider is logged at `warn` with `from_provider`/`to_provider`. A given `from -> to` roll only warns again after 30s have elapsed, so a permanently down provider does not warn on every single call.
+
+  - RPC: new `rpc.Clients.Reset()` bringing the rolling strategy back to the pool's declared order, so the next call goes to the primary provider again. Without it, a `StickyRollingStrategy` that rolled to a fallback after a single transient error stayed on that fallback until the process restarted.
+
+  - RPC: fixed a data race where `rpc.Sort` read the clients pool without holding the lock, and fixed a client added to the pool during a `Sort` round being silently dropped.
+
+  - `fireeth tools substreams logs connection`: explicitly passing `--logs=false` now skips the final `Logs` section altogether, printing neither the prompt nor the Cloud Logging console link. Omitting the flag keeps the previous behavior (prompt, falling back on the console link).
+
+- Bumped `substreams` to [v1.21.0](https://github.com/streamingfast/substreams/releases/tag/v1.21.0):
+
+  - Server: tier2 now aborts a segment when it **stops making progress** rather than when it exceeds a fixed time budget. The new stall timeout (10 minutes by default, `--substreams-tier2-segment-stall-timeout`) resets on every block processed, and the pre-existing segment execution timeout (`--substreams-tier2-segment-execution-timeout`) is kept only as an absolute backstop, its default raised from 60 minutes to 4 hours.
+
+    The old fixed budget was fatal to expensive-but-healthy workloads: a segment making thousands of `eth_call` per block could take slightly longer than 60 minutes while still advancing block by block, get killed, and — since a killed segment is never cached — have its retry redo the same work and hit the same wall. Such a request could never complete, no matter how many times it reconnected. A stalled segment is still killed promptly, and since a single block is already bounded by the block execution timeout (`--substreams-block-execution-timeout`, 3 minutes by default), the stall timeout cannot be tripped by one legitimately slow block.
+
+    The `request active for a long time` log gained a `since_last_progress` field, and a segment killed for stalling now reports `request stalled, no block progress` instead of `request active for too long`.
+
+  - Server: new `substreams_undo_signal_distance_blocks` prometheus histogram, observing how many blocks each `BlockUndoSignal` sent to clients reverts, labeled by `source` (`reorg` when a fork is seen while streaming, `cursor_resolution` when the cursor of an incoming request points to a block that was reorged out). Its `_count` gives the total number of undo signals sent; subtracting the `le="5"` bucket from it gives the number of large ones. Undo signals reverting more than 5 blocks are also logged as a warning with `trace_id`, `head`, `revert_up_to`, `distance` and, on the `cursor_resolution` path, the client `cursor`.
+
+  - Server: tier2 no longer logs `tls: first record does not look like a TLS handshake` errors from plain-HTTP health probes / load balancers hitting a TLS port (same suppress list as the existing EOF and connection-reset handshake noise).
+
+  - Server: a tier1 shutdown happening while a request was still in its parallel backprocessing phase was reported to the client as `Internal` instead of `Unavailable`, so clients did not see the reconnect signal during a tier1 rollout.
 
 - Substreams RPC calls (`eth_call` and `eth_getBalance`) now reuse their HTTP connections instead of opening a new one for every batch.
 
