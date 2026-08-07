@@ -13,7 +13,8 @@ import (
 
 // The sanitizer below is used both by 'fireeth tools compare-blocks' and by the reader node
 // running in test mode ('--reader-node-test-mode'), hence the chain-wide 'FIREETH_COMPARE_'
-// prefix of those environment variables.
+// prefix of those environment variables. The deprecated names carrying an 'OPSTACK_' part are
+// kept for compatibility only, none of the sanitizations is OP-Stack specific.
 var ignoreOrdinals = boolEnv("FIREETH_COMPARE_IGNORE_ORDINALS", "FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS")
 var ignoreSystemCallsOrder = boolEnv("FIREETH_COMPARE_IGNORE_SYSTEM_CALLS_ORDER", "FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_CALLS_ORDER")
 var ignoreGas = boolEnv("FIREETH_COMPARE_IGNORE_GAS", "FIREETH_TOOLS_COMPARE_IGNORE_GAS")
@@ -35,9 +36,9 @@ func boolEnv(names ...string) bool {
 	return false
 }
 
-// systemCaller is the well-known system address (0xffff...fffe) used as the caller of system
-// calls (EIP-4788 beacon roots, EIP-2935 block hashes, EIP-7002/7251 requests, OP-Stack system
-// transactions). It is not chain-specific.
+// systemCaller is the standard system address (0xffff...fffe) used as the caller of system
+// calls (EIP-4788 beacon roots, EIP-2935 block hashes, EIP-7002/7251 requests). Present on
+// every EVM chain running those EIPs, Ethereum mainnet included since Cancun.
 var systemCaller = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}
 
 const (
