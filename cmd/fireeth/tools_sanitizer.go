@@ -18,6 +18,7 @@ var ignoreNoopCodeChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CH
 var ignoreKeccak = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_KECCAK") == "true"
 var ignoreRevertedCallStorageChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES") == "true"
 var ignoreOPStackSystemGasLimit = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_GAS_LIMIT") == "true"
+var ignoreWithdrawals = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_WITHDRAWALS") == "true"
 
 // opStackSystemCaller is the well-known caller (0xffff...fffe) used for OP-Stack system transactions.
 var opStackSystemCaller = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}
@@ -70,6 +71,9 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	}
 	if ignoreRevertedCallStorageChanges {
 		removeRevertedCallStorageChangesFromEthereumBlock(ethBlock)
+	}
+	if ignoreWithdrawals {
+		removeWithdrawalsFromEthereumBlock(ethBlock)
 	}
 
 	if ignoreOPStackSystemGasLimit {
