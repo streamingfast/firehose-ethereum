@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package sf.ethereum.substreams.ethmethods.v1;
+
+// Transfers holds the ERC-20 and ERC-721 `Transfer` events decoded out of a block. It carries
+// no RPC result at all, so it streams successfully even when no RPC endpoint is configured on
+// the Firehose instance. Use it to tell "decoding is broken" apart from "the RPC extension is
+// not wired up".
+message Transfers {
+  uint64 block_number = 1;
+  repeated Erc20Transfer erc20_transfers = 2;
+  repeated Erc721Transfer erc721_transfers = 3;
+}
+
+message Erc20Transfer {
+  uint64 block_number = 1;
+  string tx_hash = 2;
+  uint32 log_index = 3;
+  string contract = 4;
+  string from = 5;
+  string to = 6;
+  // Decimal representation of the uint256 amount, a uint64 would silently truncate it.
+  string value = 7;
+}
+
+message Erc721Transfer {
+  uint64 block_number = 1;
+  string tx_hash = 2;
+  uint32 log_index = 3;
+  string contract = 4;
+  string from = 5;
+  string to = 6;
+  // Decimal representation of the uint256 token id, a uint64 would silently truncate it.
+  string token_id = 7;
+}
+
+// ReportStatus tells a block that performed requests apart from one that performed none, and in
+// the latter case why. A quiet chain, which a testnet usually is, legitimately produces blocks
+// holding nothing to build a request from: that is a property of the chain rather than a problem
+// with the RPC setup under test, and the two must not be confused.
+enum ReportStatus {
+  REPORT_STATUS_UNSPECIFIED = 0;
+  // Requests were performed, `invocations` and `stats` describe them.
+  REPORT_STATUS_PERFORMED = 1;
+  // The `call_ratio` or `balance_ratio` parameter excluded this block.
+  REPORT_STATUS_SKIPPED_BY_RATIO = 2;
+  // The block did not carry enough to build a single request. `hints` says what was missing and
+  // what to do about it.
+  REPORT_STATUS_INSUFFICIENT_BLOCK_DATA = 3;
+}
+
+// CallTargetSource says where the contract `balanceOf(address)` was called on came from, the
+// resolution degrading as a block carries less. Anything below BUSIEST_ERC20 means the call was
+// made against a contract that is quite possibly not a token, so an empty response is expected
+// and is not by itself the sign of a broken endpoint.
+enum CallTargetSource {
+  CALL_TARGET_SOURCE_UNSPECIFIED = 0;
+  // The `call_to` parameter, set directly or through the manifest `networks` section.
+  CALL_TARGET_SOURCE_PARAMETER = 1;
+  // The ERC-20 contract that emitted the most `Transfer` events in the block.
+  CALL_TARGET_SOURCE_BUSIEST_ERC20 = 2;
+  // An address the block sent a transaction to with a non empty payload, hence one holding code.
+  // Reached when the block carries no ERC-20 transfer at all.
+  CALL_TARGET_SOURCE_CALLED_CONTRACT = 3;
+}
+
+// EthCallReport is the outcome of the `rpc::eth_call` invocations performed for one block.
+message EthCallReport {
+  uint64 block_number = 1;
+  ReportStatus status = 2;
+  // Plain sentences describing anything worth knowing to read the rest, in particular why a
+  // block performed no request and what would make it perform one. Empty on a run where
+  // everything went as expected.
+  repeated string hints = 3;
+  // Contract `balanceOf(address)` was called on.
+  string target_contract = 4;
+  CallTargetSource target_source = 5;
+  repeated RpcInvocation invocations = 6;
+  RpcStats stats = 7;
+}
+
+// EthGetBalanceReport is the outcome of the `rpc::eth_get_balance` invocations performed for
+// one block.
+message EthGetBalanceReport {
+  uint64 block_number = 1;
+  ReportStatus status = 2;
+  // Plain sentences describing anything worth knowing to read the rest, in particular why a
+  // block performed no request and what would make it perform one. Empty on a run where
+  // everything went as expected.
+  repeated string hints = 3;
+  // Block parameter sent along each request, either the block's own number as hexadecimal or
+  // the `latest` tag.
+  string block_param = 4;
+  repeated RpcInvocation invocations = 5;
+  RpcStats stats = 6;
+}
+
+// EthMethodsReport bundles both reports so a single module run exercises everything.
+message EthMethodsReport {
+  uint64 block_number = 1;
+  EthCallReport eth_call = 2;
+  EthGetBalanceReport eth_get_balance = 3;
+}
+
+// InvocationKind tells a one-request invocation apart from a batched one. Both go through the
+// same host function, the batched one is what stresses the RPC batching path.
+enum InvocationKind {
+  INVOCATION_KIND_UNSPECIFIED = 0;
+  INVOCATION_KIND_SINGLE = 1;
+  INVOCATION_KIND_BATCH = 2;
+}
+
+message RpcInvocation {
+  InvocationKind kind = 1;
+  // Zero-based round this invocation belongs to, a ratio above 1 produces several rounds.
+  uint32 round = 2;
+  uint32 request_count = 3;
+  uint32 success_count = 4;
+  uint32 failure_count = 5;
+  repeated RpcResult results = 6;
+}
+
+message RpcResult {
+  // Address the request was made for, the `balanceOf` argument for eth_call and the queried
+  // account for eth_getBalance.
+  string address = 1;
+  bool failed = 2;
+  // Decimal representation of the returned uint256, empty when the request failed or when the
+  // payload could not be decoded.
+  string value = 3;
+  // Raw response as returned by the endpoint, hexadecimal with a `0x` prefix.
+  string raw = 4;
+}
+
+message RpcStats {
+  uint32 invocation_count = 1;
+  uint32 request_count = 2;
+  uint32 success_count = 3;
+  uint32 failure_count = 4;
+}
