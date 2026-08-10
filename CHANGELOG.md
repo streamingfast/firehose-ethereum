@@ -4,6 +4,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+- Block comparison: new `FIREETH_COMPARE_IGNORE_WITHDRAWALS=true` which removes every trace of beacon chain withdrawals from both sides before comparing: the `withdrawals` list, the header's `withdrawals_root` and the `REASON_WITHDRAWAL` balance changes, the ordinals of the remaining elements being shifted down accordingly.
+
+### Changed
+
+- The block comparison environment variables lose their `TOOLS_` prefix, `FIREETH_TOOLS_COMPARE_IGNORE_<X>` becoming `FIREETH_COMPARE_IGNORE_<X>`. They are not specific to `fireeth tools compare-blocks`: the reader node running in test mode (`--reader-node-test-mode`) sanitizes the blocks it diffs against production with the very same code, so they apply there too. The old names keep working:
+
+  | New name                                              | Deprecated name                                              |
+  | ----------------------------------------------------- | ------------------------------------------------------------ |
+  | `FIREETH_COMPARE_IGNORE_ORDINALS`                     | `FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS`                      |
+  | `FIREETH_COMPARE_IGNORE_GAS`                          | `FIREETH_TOOLS_COMPARE_IGNORE_GAS`                           |
+  | `FIREETH_COMPARE_IGNORE_KECCAK`                       | `FIREETH_TOOLS_COMPARE_IGNORE_KECCAK`                        |
+  | `FIREETH_COMPARE_IGNORE_NOOP_CODE_CHANGES`            | `FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES`             |
+  | `FIREETH_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES` | `FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES` |
+  | `FIREETH_COMPARE_IGNORE_SYSTEM_CALLS_ORDER`           | `FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_CALLS_ORDER`    |
+  | `FIREETH_COMPARE_IGNORE_SYSTEM_CALL_GAS_LIMIT`        | `FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_GAS_LIMIT`      |
+
+  The last two also lose their `OPSTACK_` part, because nothing about them is OP-Stack specific. The `0xffff...fffe` caller they key on is the standard system address used by EIP-4788 (beacon roots), EIP-2935 (block hashes) and EIP-7002/7251 (requests), so those system calls exist on Ethereum mainnet since Cancun.
+
+  The `30000000` vs `31566720` system call gas limit difference that `FIREETH_COMPARE_IGNORE_SYSTEM_CALL_GAS_LIMIT` normalizes is not a chain behavior either, it is a client difference visible on every chain: recent `revm` versions (hence reth) set `SYSTEM_CALL_GAS_LIMIT = 30_000_000 + SSTORE_SET_BYTES * CPSB_GLAMSTERDAM * SYSTEM_MAX_SSTORES_PER_CALL` = `31566720` (EIP-8037) for every system call, ungated by the fork it is meant for (Glamsterdam, not activated on any network yet), while geth keeps giving them `30_000_000`. The gas limit of a system call not being consensus visible, this only ever shows up when comparing traces.
+
 ## v2.20.0
 
 ### Added
