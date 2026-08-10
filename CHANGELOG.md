@@ -28,6 +28,14 @@ for instructions to keep up to date.
 
   The `30000000` vs `31566720` system call gas limit difference that `FIREETH_COMPARE_IGNORE_SYSTEM_CALL_GAS_LIMIT` normalizes is not a chain behavior either, it is a client difference visible on every chain: recent `revm` versions (hence reth) set `SYSTEM_CALL_GAS_LIMIT = 30_000_000 + SSTORE_SET_BYTES * CPSB_GLAMSTERDAM * SYSTEM_MAX_SSTORES_PER_CALL` = `31566720` (EIP-8037) for every system call, ungated by the fork it is meant for (Glamsterdam, not activated on any network yet), while geth keeps giving them `30_000_000`. The gas limit of a system call not being consensus visible, this only ever shows up when comparing traces.
 
+- Bumped `substreams` to [develop@a6afd34](https://github.com/streamingfast/substreams/commit/a6afd3480e24b7b0048146e68dc18c085365b9b1) (untagged, ahead of `v1.21.0`):
+
+  - Server: `substreams-tier1` now restarts itself when its block hub can no longer link live blocks, instead of serving a frozen head forever. When the live source reconnects after a gap, the hub back-fills the missing blocks from the one-block store; those files are deleted once merged, so a gap outliving that retention could never be linked. The hub then kept ingesting live blocks it could never emit, its ForkDB growing without bound while every request handed off at the frozen head and hung indefinitely — and since the head-block metrics keep tracking the live source, the instance still looked healthy. The relayer has guarded against this for a while, tier1 was left on the disabled default.
+
+  - Server: a tier1 request that is still running now logs a bounded summary of **why it is slow** every 5 minutes: where the blocks the client receives come from, how far each stage got and what its jobs are doing, what the external calls cost, the error that killed the last job, and how long the request spent blocked writing to the consumer. Every rate and delta covers a fixed trailing 5 minutes, so two consecutive lines are always comparable. A short hints list names the likely bottleneck when one is confidently detected — a full cache lead and a throttled scheduler are the steady state of a healthy request, not symptoms, so the consumer is only blamed for time actually spent blocked sending to it.
+
+    To keep those stats meaningful while a block is stuck, tier2 now reports failing and in-flight external calls (count, oldest wait, block held up) every 10 seconds instead of only once they return. An `eth_call` retrying against an unreachable endpoint is a single wasm extension call that can last minutes, which tier1 used to see as an idle job with no metrics until the whole segment gave up.
+
 ## v2.20.0
 
 ### Added
