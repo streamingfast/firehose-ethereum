@@ -80,6 +80,13 @@ func createPollRPCBlocksE(logger *zap.Logger) firecore.CommandExecutor {
 				continue
 			}
 
+			// A `null` result comes back without an error, so retry rather than
+			// dereferencing a nil block.
+			if rpcBlock == nil || rpcBlock.Hash == nil {
+				delay(fmt.Errorf("block %d not available on this endpoint", blockNum))
+				continue
+			}
+
 			receipts, err := blockfetcher.FetchReceipts(ctx, rpcBlock, client, 20, false)
 			if err != nil {
 				delay(fmt.Errorf("fetching receipts for block %d %q: %w", rpcBlock.Number, rpcBlock.Hash.Pretty(), err))

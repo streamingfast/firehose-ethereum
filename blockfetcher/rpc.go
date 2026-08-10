@@ -82,6 +82,17 @@ func (f *BlockFetcher) FetchPBEth(ctx context.Context, rpcClient *rpc.Client, bl
 		return nil, fmt.Errorf("fetching block %d: %w", blockNum, err)
 	}
 
+	// An endpoint that lags behind the head it reported through `eth_blockNumber`, or
+	// that pruned the block, answers with a JSON-RPC `null` result and no error, which
+	// decodes to a nil block. Reporting it lets the caller retry and rotate provider.
+	if rpcBlock == nil {
+		return nil, fmt.Errorf("block %d not found on this endpoint, it is either not available yet or was pruned", blockNum)
+	}
+
+	if rpcBlock.Hash == nil {
+		return nil, fmt.Errorf("block %d was returned without a hash", blockNum)
+	}
+
 	blockHash := eth.Bytes(rpcBlock.Hash.Bytes())
 	var receipts map[string]*rpc.TransactionReceipt
 	var logs map[string][]eth.Log
