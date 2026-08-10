@@ -13,6 +13,7 @@ import (
 	"github.com/streamingfast/eth-go/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 var (
@@ -187,4 +188,53 @@ func TestFetchReceipts_BatchSuccess(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, batchCalled)
 	require.Len(t, out, 2)
+}
+
+// nullBlockServer answers `eth_blockNumber` with a head above the requested
+// block, then serves a JSON-RPC `null` result for `eth_getBlockByNumber`. This
+// is what a lagging load-balanced endpoint (or one that pruned the block)
+// returns, and it comes back without any JSON-RPC error.
+func nullBlockServer(t *testing.T, blockResult string) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buffer := bytes.NewBuffer(nil)
+		_, err := buffer.ReadFrom(r.Body)
+		require.NoError(t, err)
+
+		var req map[string]interface{}
+		err = json.Unmarshal(buffer.Bytes(), &req)
+		require.NoError(t, err)
+
+		switch method := req["method"].(string); method {
+		case "eth_blockNumber":
+			w.Write([]byte(`{"jsonrpc":"2.0","id":"0x1","result":"0xff"}`))
+		case "eth_getBlockByNumber":
+			w.Write([]byte(blockResult))
+		default:
+			t.Fatalf("unexpected method: %s", method)
+		}
+	}))
+}
+
+func TestFetchPBEth_NullBlockIsAnError(t *testing.T) {
+	server := nullBlockServer(t, `{"jsonrpc":"2.0","id":"0x1","result":null}`)
+	defer server.Close()
+
+	fetcher := NewBlockFetcher(0, 0, 2, nil, zap.NewNop())
+
+	block, err := fetcher.FetchPBEth(context.Background(), rpc.NewClient(server.URL), 10)
+	assert.Nil(t, block)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "10")
+}
+
+func TestFetchPBEth_BlockWithoutHashIsAnError(t *testing.T) {
+	server := nullBlockServer(t, `{"jsonrpc":"2.0","id":"0x1","result":{"number":"0xa"}}`)
+	defer server.Close()
+
+	fetcher := NewBlockFetcher(0, 0, 2, nil, zap.NewNop())
+
+	block, err := fetcher.FetchPBEth(context.Background(), rpc.NewClient(server.URL), 10)
+	assert.Nil(t, block)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "10")
 }
