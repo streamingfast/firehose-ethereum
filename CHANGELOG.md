@@ -8,6 +8,8 @@ for instructions to keep up to date.
 
 ### Added
 
+- The Ethereum Hoodi testnet (`hoodi`, `eip155:560048`) now resolves StreamingFast Firehose and Substreams endpoints (`hoodi.eth.streamingfast.io:443`) in addition to the Pinax ones, through the `firehose-networks` `v0.2.3` bump. Visible in `fireeth tools networks list` and anywhere a network name is turned into an endpoint.
+
 - Block comparison: new `FIREETH_COMPARE_IGNORE_WITHDRAWALS=true` which removes every trace of beacon chain withdrawals from both sides before comparing: the `withdrawals` list, the header's `withdrawals_root` and the `REASON_WITHDRAWAL` balance changes, the ordinals of the remaining elements being shifted down accordingly.
 
 ### Changed
