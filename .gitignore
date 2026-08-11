@@ -5,6 +5,9 @@
 .env.release
 .release_notes.md
 *.spkg
+# The eth_methods diagnostic package is shipped as a committed artifact, tools and operators are
+# expected to use it rather than to build the module under substreams/modules/eth_methods.
+!/substreams/spkgs/*.spkg
 /sf-data
 /firehose-data*
 /sf.yaml

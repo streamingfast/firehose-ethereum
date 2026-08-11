@@ -8,6 +8,8 @@ for instructions to keep up to date.
 
 ### Added
 
+- New `substreams/spkgs/eth-methods-v0.1.0.spkg`, a diagnostic Substreams package exercising the `rpc::eth_call` and `rpc::eth_get_balance` WASM extensions against the endpoints an instance was started with. Each extension gets its own module, `map_eth_call` and `map_eth_get_balance`, so a setup configuring only one of `--substreams-rpc-endpoints` / `--substreams-rpc-get-balance-endpoints` can still be tested, `map_eth_methods` runs both. Every block performs at least one single-request invocation and one batched one per method, tunable through the `call_ratio`, `balance_ratio`, `call_batch_size` and `balance_batch_size` parameters. Call targets and queried accounts are resolved out of each block, so the package runs unchanged against any EVM chain; `--network` pins a per chain contract for `mainnet`, `base`, `arbitrum-one`, `optimism`, `matic`, `bsc`, `sepolia` and `hoodi`, and the `call_to` parameter pins an arbitrary one. On a chain quiet enough that a block carries no transfer, or no transaction at all, which regularly happens on a testnet, the target resolution degrades in steps and each report says through `status`, `target_source` and `hints` what it could and could not do, so a quiet chain never reads as a failing endpoint. The packed artifact is committed and is what tools and operators should use, sources live under `substreams/modules/eth_methods`.
+
 - Block comparison: new `FIREETH_COMPARE_IGNORE_WITHDRAWALS=true` which removes every trace of beacon chain withdrawals from both sides before comparing: the `withdrawals` list, the header's `withdrawals_root` and the `REASON_WITHDRAWAL` balance changes, the ordinals of the remaining elements being shifted down accordingly.
 
 ### Changed

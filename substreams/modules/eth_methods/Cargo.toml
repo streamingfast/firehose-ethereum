@@ -1,0 +1,24 @@
+[package]
+name = "eth_methods"
+version = "0.1.0"
+edition = "2021"
+description = "Diagnostic Substreams exercising the firehose-ethereum eth_call and eth_getBalance WASM extensions"
+publish = false
+
+[dependencies]
+substreams = "0.7"
+substreams-ethereum = "0.11"
+prost = "0.13"
+hex = "0.4"
+ethabi = "17"
+
+[build-dependencies]
+substreams-ethereum = "0.11"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+lto = true
+opt-level = "s"
+strip = "debuginfo"
