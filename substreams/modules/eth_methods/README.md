@@ -39,6 +39,30 @@ clear the module cache first.
 `map_transfers` is the one to run first when something is off: it decodes the same blocks without
 touching an endpoint, so a failure there is a block or decoding problem rather than an RPC one.
 
+### One binary per extension
+
+The `Needs` column above is enforced by the packaging rather than merely documented. A WASM module
+resolves its imports when it is **instantiated**, not when it calls them, so an instance that does
+not register `rpc::eth_get_balance` refuses to instantiate any binary mentioning it, and refuses it
+for every module that binary carries:
+
+```
+unknown import: `rpc::eth_get_balance` has not been defined
+```
+
+The package therefore ships three binaries, and `substreams.yaml` points each module at the one it
+belongs to:
+
+| Binary | Modules | Imports |
+| --- | --- | --- |
+| `no_rpc.wasm` | `map_transfers`, `map_eth_methods` | neither extension |
+| `eth_call.wasm` | `map_eth_call` | `rpc::eth_call` |
+| `eth_get_balance.wasm` | `map_eth_get_balance` | `rpc::eth_get_balance` |
+
+A missing endpoint flag then fails the module that needs it and nothing else. `map_eth_methods` is
+the exception, and not because of its own binary: it consumes the output of both RPC modules, so it
+fails whenever either of them does.
+
 ## What gets called
 
 Both methods derive their targets from the block being processed, which is what lets the package
@@ -142,6 +166,13 @@ flag is likely missing when every request failed, and the archive node requireme
 make          # substreams build, then repack the committed .spkg
 make test     # parameter parsing unit tests
 ```
+
+The handlers live in `src/bin`, one file per binary, and `src/lib.rs` holds only what they share.
+Cargo builds every `src/bin` target of a package on a plain `cargo build`, which is what
+`substreams build` runs, so the three wasm files come out of a single invocation and no extra
+build step is needed. Nothing in the library may reference either extension, directly or
+transitively: it is linked into all three binaries, and a reference would put the import back in
+every one of them.
 
 `substreams build` regenerates `src/pb` through the buf remote plugins, so it needs network access.
 Those bindings are committed precisely so that a plain `cargo build` does not. The ABI bindings
