@@ -15,8 +15,18 @@ ethabi = "17"
 [build-dependencies]
 substreams-ethereum = "0.11"
 
+# WASM imports are resolved when a module is instantiated, not when the import is called, so a
+# `fireeth` instance that registers neither `rpc::eth_call` nor `rpc::eth_get_balance` refuses to
+# instantiate any wasm referencing them, whatever the module being run. Both extensions are
+# registered independently, on `--substreams-rpc-endpoints` and
+# `--substreams-rpc-get-balance-endpoints` respectively, so a single wasm would make every module
+# of this package unusable as soon as one of the two flags is missing.
+#
+# Each binary under `src/bin` therefore holds the handlers needing one given extension, and this
+# library only the code they share. `substreams.yaml` then points each module at the binary it
+# belongs to, leaving a missing endpoint to fail that module alone.
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["rlib"]
 
 [profile.release]
 lto = true

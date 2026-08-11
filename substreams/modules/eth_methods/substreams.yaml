@@ -19,10 +19,20 @@ protobuf:
     - google
     - sf/substreams
 
+# One binary per RPC extension, plus a default one importing neither. A wasm module resolves its
+# imports when it is instantiated rather than when it calls them, so a single binary referencing
+# both extensions is refused wholesale by an instance registering only one of them, whatever the
+# module being run. Splitting them keeps a missing endpoint failing the modules that need it.
 binaries:
   default:
     type: wasm/rust-v1
-    file: ./target/wasm32-unknown-unknown/release/eth_methods.wasm
+    file: ./target/wasm32-unknown-unknown/release/no_rpc.wasm
+  eth_call:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/eth_call.wasm
+  eth_get_balance:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/eth_get_balance.wasm
 
 # Defaults are also encoded in the module itself, so an override only needs to carry the keys it
 # actually changes. Available keys:
@@ -108,6 +118,7 @@ modules:
 
   - name: map_eth_call
     kind: map
+    binary: eth_call
     initialBlock: 0
     inputs:
       - params: string
@@ -122,6 +133,7 @@ modules:
 
   - name: map_eth_get_balance
     kind: map
+    binary: eth_get_balance
     initialBlock: 0
     inputs:
       - params: string
