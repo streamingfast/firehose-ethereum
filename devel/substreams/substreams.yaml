@@ -12,3 +12,4 @@ start:
     substreams-tier1-subrequests-plaintext: true
     substreams-tier1-subrequests-endpoint: :9001
     substreams-tier2-grpc-listen-addr: :9001
+    substreams-rpc-endpoints: http://localhost:8080/

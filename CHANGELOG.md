@@ -4,11 +4,234 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.21.0
 
-- Bumped `substreams` to latest `develop`.
+### Added
+
+- Added Ethereum Hoodi testnet (`hoodi`, `eip155:560048`) StreamingFast Firehose and Substreams endpoints (`hoodi.eth.streamingfast.io:443`).
+- New `substreams/spkgs/eth-methods-v0.1.0.spkg`, a diagnostic Substreams package exercising the `rpc::eth_call` and `rpc::eth_get_balance` WASM extensions against the endpoints an instance was started with. Each extension gets its own module, `map_eth_call` and `map_eth_get_balance`, so a setup configuring only one of `--substreams-rpc-endpoints` / `--substreams-rpc-get-balance-endpoints` can still be tested, `map_eth_methods` runs both. Those modules also get one WASM binary each, `map_transfers` and `map_eth_methods` sharing a third importing neither extension: a module resolves its imports when it is instantiated rather than when it calls them, so a single binary mentioning both extensions is refused wholesale (`unknown import: 'rpc::eth_get_balance' has not been defined`) by an instance registering only one of them, whatever the module being run. Every block performs at least one single-request invocation and one batched one per method, tunable through the `call_ratio`, `balance_ratio`, `call_batch_size` and `balance_batch_size` parameters. Call targets and queried accounts are resolved out of each block, so the package runs unchanged against any EVM chain; `--network` pins a per chain contract for `mainnet`, `base`, `arbitrum-one`, `optimism`, `matic`, `bsc`, `sepolia` and `hoodi`, and the `call_to` parameter pins an arbitrary one. On a chain quiet enough that a block carries no transfer, or no transaction at all, which regularly happens on a testnet, the target resolution degrades in steps and each report says through `status`, `target_source` and `hints` what it could and could not do, so a quiet chain never reads as a failing endpoint. The packed artifact is committed and is what tools and operators should use, sources live under `substreams/modules/eth_methods`.
+
+- Block comparison: new `FIREETH_COMPARE_IGNORE_WITHDRAWALS=true` which removes every trace of beacon chain withdrawals from both sides before comparing: the `withdrawals` list, the header's `withdrawals_root` and the `REASON_WITHDRAWAL` balance changes, the ordinals of the remaining elements being shifted down accordingly.
+
+- Added flag `--validate-blocks` (`-b`) on `fireeth tools check merged-blocks`, ensures that individual block sequence is checked (reading the content of the merged blocks, instead of just checking by file name). Flag is implied by `--print-stats` and `--print-full`
+
+### Changed
+
+- The block comparison environment variables lose their `TOOLS_` prefix, `FIREETH_TOOLS_COMPARE_IGNORE_<X>` becoming `FIREETH_COMPARE_IGNORE_<X>`. They are not specific to `fireeth tools compare-blocks`: the reader node running in test mode (`--reader-node-test-mode`) sanitizes the blocks it diffs against production with the very same code, so they apply there too. The old names keep working:
+
+  | New name                                              | Deprecated name                                              |
+  | ----------------------------------------------------- | ------------------------------------------------------------ |
+  | `FIREETH_COMPARE_IGNORE_ORDINALS`                     | `FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS`                      |
+  | `FIREETH_COMPARE_IGNORE_GAS`                          | `FIREETH_TOOLS_COMPARE_IGNORE_GAS`                           |
+  | `FIREETH_COMPARE_IGNORE_KECCAK`                       | `FIREETH_TOOLS_COMPARE_IGNORE_KECCAK`                        |
+  | `FIREETH_COMPARE_IGNORE_NOOP_CODE_CHANGES`            | `FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES`             |
+  | `FIREETH_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES` | `FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES` |
+  | `FIREETH_COMPARE_IGNORE_SYSTEM_CALLS_ORDER`           | `FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_CALLS_ORDER`    |
+  | `FIREETH_COMPARE_IGNORE_SYSTEM_CALL_GAS_LIMIT`        | `FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_GAS_LIMIT`      |
+
+  The last two also lose their `OPSTACK_` part, because nothing about them is OP-Stack specific. The `0xffff...fffe` caller they key on is the standard system address used by EIP-4788 (beacon roots), EIP-2935 (block hashes) and EIP-7002/7251 (requests), so those system calls exist on Ethereum mainnet since Cancun.
+
+  The `30000000` vs `31566720` system call gas limit difference that `FIREETH_COMPARE_IGNORE_SYSTEM_CALL_GAS_LIMIT` normalizes is not a chain behavior either, it is a client difference visible on every chain: recent `revm` versions (hence reth) set `SYSTEM_CALL_GAS_LIMIT = 30_000_000 + SSTORE_SET_BYTES * CPSB_GLAMSTERDAM * SYSTEM_MAX_SSTORES_PER_CALL` = `31566720` (EIP-8037) for every system call, ungated by the fork it is meant for (Glamsterdam, not activated on any network yet), while geth keeps giving them `30_000_000`. The gas limit of a system call not being consensus visible, this only ever shows up when comparing traces.
+
+- The help output of every command except the root command and `start` no longer prints the global flags in full, they are replaced by a single line pointing at the new `--gh` flag:
+
+  ```
+  Global Flags:
+        --gh   Show global flags help, 10 global flags hidden
+  ```
+
+  Use `fireeth tools print one-block --gh` (or `--global-help`) to display them, either on its own or together with `-h`/`--help`. Long global flag descriptions were pushing a command's own flags out of sight, mostly under `fireeth tools ...`.
+
+- Flags inherited from an intermediate command are now printed in their own help section instead of being mixed into `Global Flags`, so `fireeth tools ...` commands show a `Tools Flags` section with `--output`, `--bytes-encoding`, `--proto-paths` and `--merged-blocks-bundle-size`.
+
+- Bumped `firehose-core` to [develop@2d13baa](https://github.com/streamingfast/firehose-core/commit/2d13baafe8f2) (untagged, released as `v1.18.0`) and `substreams` to [v1.21.1-0.20260820161654-1cffa6c10a8d](https://github.com/streamingfast/substreams/compare/v1.21.0...1cffa6c10a8d):
+
+  - **Operators** `--substreams-tier2-hosted-store-registry-address` is removed: `substreams-tier1` now resolves hosted foundational stores itself and sends the concrete endpoints to `substreams-tier2`, so tier2 never dials the control plane. Remove the flag from your `substreams-tier2` configuration before upgrading, otherwise the process refuses to start on an unknown flag. `--substreams-tier1-hosted-store-registry-address` and `--substreams-tier1-foundational-stores-config-path` are unchanged.
+
+  - Server: new `sf.substreams.rpc.v4.Estimator/Estimate` endpoint on `substreams-tier1`, served over gRPC and Connect at `/sf.substreams.rpc.v4.Estimator/Estimate`. It reports what a Substreams request would cost before running it, without ever sending the data: given a package, an output module, a block range and a sampling percentage (default 1%, capped at 10%), it streams back how many blocks the real request would have to process — stage multiplier included, already-cached segments excluded — and the estimated uncompressed egress for the range. The egress figure is measured rather than guessed: the sample is actually executed on `substreams-tier2` workers and only the *size* of the resulting output cache is read back, from the object store's metadata when it is there, so the data itself is never downloaded. A module graph with stores is only estimated over a range whose store snapshots the endpoint already holds; anything else is refused, naming the part of the range that could be estimated instead, since building the missing stores is the very cost being reported.
+
+    **Operators**: no new flag, the endpoint is registered by `substreams-tier1` itself. It does consume `substreams-tier2` worker capacity while a sample runs — a sample is a real, if small, production-mode request — so an instance serving estimates competes for the same tier2 fleet as its regular traffic.
+
+  - Server: `substreams-tier2` records the uncompressed size of each execution output file it writes as `datasize` object metadata, and the number of items it holds as `itemcount`, so what a segment represents can be known without downloading it. Skipped on object stores where setting metadata means rewriting the object (S3), which falls back to reading the file when the figures are needed.
+
+  - CLI: `substreams estimate` asks the endpoint for the estimate through that new RPC instead of sampling from the client, `--sample-percentage` (max 10) selecting how much of the range the endpoint runs. The previous client-side sampling stays available as `substreams estimate-local`, for endpoints not serving the new RPC.
+
+  - CLI: `substreams auth` opens a browser to pick an organization and an API key instead of requiring a pasted token; the paste flow remains under `--paste`.
+
+  - Server: `substreams-tier1` now restarts itself when its block hub can no longer link live blocks, instead of serving a frozen head forever. When the live source reconnects after a gap, the hub back-fills the missing blocks from the one-block store; those files are deleted once merged, so a gap outliving that retention could never be linked. The hub then kept ingesting live blocks it could never emit, its ForkDB growing without bound while every request handed off at the frozen head and hung indefinitely — and since the head-block metrics keep tracking the live source, the instance still looked healthy. The relayer has guarded against this for a while, tier1 was left on the disabled default.
+
+  - Server: a tier1 request that is still running now logs a bounded summary of **why it is slow** every 5 minutes: where the blocks the client receives come from, how far each stage got and what its jobs are doing, what the external calls cost, the error that killed the last job, and how long the request spent blocked writing to the consumer. Every rate and delta covers a fixed trailing 5 minutes, so two consecutive lines are always comparable. A short hints list names the likely bottleneck when one is confidently detected — a full cache lead and a throttled scheduler are the steady state of a healthy request, not symptoms, so the consumer is only blamed for time actually spent blocked sending to it.
+
+    To keep those stats meaningful while a block is stuck, tier2 now reports failing and in-flight external calls (count, oldest wait, block held up) every 10 seconds instead of only once they return. An `eth_call` retrying against an unreachable endpoint is a single wasm extension call that can last minutes, which tier1 used to see as an idle job with no metrics until the whole segment gave up.
+
+  - Server: foundational-store endpoint resolution moved to the public `dregistry` plugin chain (JSON map → control-plane `sf.registry.v1` → identifier passthrough) instead of an inline private client. Store dials now honor the registry's TLS flag instead of guessing from a `:443` suffix, each identifier lookup times out after 10 seconds so a hung control-plane RPC cannot stall request setup, and resolution success/failure is recorded on the request progress log and as Prometheus metrics.
+
+  - Server: the `incoming Substreams Blocks request` log of `substreams-tier1` now carries a `parallelism` object (requested, granted by the authentication layer, effective count and which of the two capped it, plan tier, stage layer executors) plus `parallel_segment_count` and `stage_count`. A client asking for 300 parallel workers and getting 15 previously left no trace of the negotiation in the logs.
+
+  - Server: the same worker accounting is now also reported once the request ends and while it runs. The `substreams request stats` log gained a `workers` object (`requested`, `granted`, `effective`, `peak`, `pool_exhausted_count`, `pool_rampup_deferred_count`): a high `pool_exhausted_count` with a `peak` well below `effective` means the shared tier2 worker pool ran dry, a case previously only visible at debug level. The periodic `substreams request progress` log gained its own `workers` object, with a hint naming the three ceilings that can cause it — the tier2 fleet being full, the organization's worker quota, or the server's per-session worker cap — since the pool reports a single error for all three.
+
+  - Server: `substreams-tier1` now tells clients how much of a stage is actually usable rather than merely produced. `ModulesProgress.stages` entries gained `ready_up_to_exclusive` (field 3), the chain block number up to which the stage is immediately usable, and `squash_wait_segment_count` (field 4), the number of segments whose partial exists but has not been squashed in yet. `completed_ranges` counts a segment as soon as its partial is produced, so a stage could render 100% covered with substantial work outstanding — and since squashing runs on tier1 it schedules no job and advances no `processed_blocks`, leaving the request looking frozen at 100% with a rate of zero. `SessionInit` gained `segment_block_count` (field 11), the width in blocks of one parallel segment, without which a client cannot turn `squash_wait_segment_count` into blocks.
+
+  - Server: `substreams-tier1` no longer hangs when a request carries a cursor the block hub declines (unknown hash). Instead of falling back to a file source that waits for merged-blocks to cover that block number, it immediately sends an undo-to-LIB.
+
+  - Server: new `context` WASM host module, giving modules a `context::clock(output_ptr)` intrinsic callable at any point during execution, writing the block clock as an encoded `sf.substreams.v1.Clock` (a `{ptr, len}` pair at `output_ptr`, the same convention the `state` getters use). Available on the `wasmtime` and `wazero` runtimes, not on the JavaScript/v8 one. Until now the clock was only reachable by declaring `source: sf.substreams.v1.Clock` as a module input. `context` joins `env`, `state` and `logger` as a namespace WASM extensions cannot register into.
+
+### Deprecated
+
+- `firecore.HideGlobalFlagsOnChildCmd` is now a no-op and prints a deprecation warning when called, remove the call from your chain. Global flags are all hidden behind `--gh` now, hiding a hand-picked subset of them is no longer useful.
+
+### Fixed
+
+- `fireeth tools poll-rpc-blocks` and the RPC block fetcher no longer panic when the endpoint answers with a JSON-RPC `null` block. An endpoint lagging behind the head it just reported through `eth_blockNumber`, or one that pruned the block, returns `null` with no error, which decodes to a nil block that was then dereferenced. Both paths now report it as an error so the caller retries and rotates provider.
+
+- Bumped `bstream`: a Firehose or Substreams request over a range containing an unreadable merged-blocks file no longer hangs. The goroutine reading a merged-blocks file shuts the stream down on failure without ever closing that file's blocks channel, and the consuming loop was a plain `range` over it, so depending on which of the two won the race the request could stall forever instead of returning the error. Found on a store holding a zero-byte merged-blocks file (no DBIN header at all, written by a merger predating the streaming bundle writer); such a file still fails, now deterministically, with `unable to create block reader: unable to read file header: EOF`.
+
+- `fireeth tools firehose-client --print-clock-only` no longer hangs once the stream is done. It printed every block, then waited forever on the response-ordering goroutine that only the block-decoding path ever starts. `--print-cursor-only` already returned early; the clock path now does too.
+
+- The merger no longer crashes at startup when the most recent merged-blocks bundles hold no block. On chains that skip block numbers a whole bundle range can contain nothing, and the merger writes a merged-blocks file with a header and no block so boundaries stay contiguous. Reading the last block back out of such a file returned no block and was then dereferenced. Startup now walks back to the last bundle that actually has a block.
+
+- The merger's `head_block_time_drift` metric no longer moves backwards. The merger reports its head block time from two places: on startup it publishes the last block of the last merged bundle as a reference point, and while running it reports the one-block files it bundles, read asynchronously. Those writes were unordered, so a stale block time could land after a fresher one and hold the drift high until the next block was bundled. The metric now ignores block times older than the one already reported.
+
+- A Firehose `Blocks` request whose cursor points above this instance's head now fails with `Unavailable` instead of sitting silent until the merged-blocks bundle covering that block number is written (about twenty minutes on a chain bundling 100 blocks). We may simply be lagging while another instance already serves that block, so the client should retry rather than discard its cursor. A cursor no source can resolve stays `InvalidArgument`.
+
+- The reader running in test mode (`--reader-node-test-mode`) now shuts down promptly: pending block comparisons against the production endpoint are cancelled when the process starts terminating, instead of draining the whole buffered blocks channel one remote fetch (and its retry backoff) at a time. Comparisons are still completed when the termination comes from reaching `--reader-node-stop-block-num`. The comparator's gRPC connection is also closed on the way out.
+
+- The `firehose` app now restarts when its block hub can no longer link incoming live blocks, instead of hanging every request at a frozen head indefinitely. A live-source gap whose one-block files were already merged away can never be linked, and `head_block_number`/`finalized_block_number` keep tracking the live source, so the process looked healthy throughout.
+
+- Restarting a supervised node process no longer deadlocks the whole superviser. `Start` waited for a previous process still stopping while holding the lock that also guards `IsRunning`, `LastExitCode` and `Stopped`, so a process that never reached a final state — one ignoring `SIGTERM`, or whose children keep its stdout/stderr open — froze every one of those calls forever. Waiting no longer holds that lock, and `Start` now gives up after 30s with an error instead of blocking indefinitely.
+
+### Security
+
+- Bumped `golang.org/x/mod` to `v0.40.0`, fixing CVE-2026-56864 and CVE-2026-56865 (both HIGH), reported against the binary image by vulnerability scanners.
+
+## v2.20.0
+
+### Added
+
+- New `--substreams-tier2-segment-stall-timeout` flag (default `10m`) on `substreams-tier2`: a segment is now killed when it stops processing blocks for that long, the deadline resetting on every block processed. See the `substreams` bump below for why this replaces the fixed execution budget as the primary guard.
+
+- `tools poller`: new repeatable `--provider=<url>[#<name>]` flag, declaring the RPC providers to poll blocks from. The flag order is the priority order: the first provider is the preferred one and the next ones are used as fallback when it errors out. The name, taken after the last `#` of the value, defaults to the URL's host and is what identifies the provider in logs and in `--headers`.
+
+  The `<rpc-endpoint>` positional argument is now optional, so both forms work and can be combined, a positional endpoint always being the highest priority provider, named `default`:
+
+  ```
+  fireeth tools poller optimism https://endpoint.example.com 1000
+
+  fireeth tools poller optimism 1000 \
+    --provider=https://primary.example.com/v1/key#primary \
+    --provider=https://fallback.example.com/key#fallback
+  ```
+
+  Duplicate provider names are refused at startup.
+
+- `tools poller`: new `--providers-failback-interval` flag (default `10m`) which periodically re-prefers the declared provider order. The rolling strategy used by the poller is sticky forever, so a single transient error on the preferred provider used to move polling to a fallback provider until the process was restarted, which for a paid fallback endpoint meant paying for it full-time after a momentary blip. Set it to `0` to keep the previous behavior.
+
+### Changed
+
+- **Operators** the default of `--substreams-tier2-segment-execution-timeout` moves from `1h` to `4h`. It is now only an absolute backstop, the new `--substreams-tier2-segment-stall-timeout` being the guard that actually kills wedged segments. If you pinned the flag to a value of your own, raise it or drop the override, otherwise expensive-but-healthy segments keep being killed.
+
+- `tools poller`: `--headers` entries can now be scoped to a single provider by suffixing them with `#<provider-name>`, as in `--headers="Authorization: Bearer xyz#fallback"`. Entries without a `#` keep applying to every provider, so existing invocations are unchanged. An entry scoped to an unknown provider name is refused at startup rather than being silently dropped.
+
+  The provider name is taken after the **last** `#` of the value, so a header value legitimately ending with `#<something>` is going to be mis-parsed. There is no escaping syntax.
+
+- `tools poller`: a malformed `--headers` entry (no `:` separator, or an empty key) is now refused at startup instead of being silently ignored, which used to make the endpoint reject requests for a missing credential that looked like it had been provided.
+
+- `tools poller`: `--headers` no longer splits its value on commas, it declares a single header and is repeated to send more than one. A header with a comma in its value (`-H "Accept-Encoding: gzip, deflate"`) used to be split into `Accept-Encoding: gzip` and a ` deflate` fragment that was silently dropped, which combined with the startup validation above would now have refused to start. Passing several headers in a single comma-separated `--headers` value no longer works, use one flag per header.
+
+- `tools poller`: block fetch errors now name the provider they came from (`provider "primary": ...`) and rolling to a fallback provider is logged as `rolling to next RPC provider` with the `from_provider` and `to_provider` names.
+
+- `tools poller`: the `launching firehose-ethereum poller` log line now reports the providers by name with their URL redacted (`rpc_providers: ["primary=https://primary.example.com/redacted"]`) instead of printing the full endpoint URL, which leaked the API key embedded in it in cleartext.
+
+- Bumped `firehose-core` to [v1.17.0](https://github.com/streamingfast/firehose-core/releases/tag/v1.17.0):
+
+  - RPC: `rpc.Clients` now tracks a provider name per client (`AddNamed`, `Names()`), failed attempts are attributed to their provider in the returned error (`provider "<name>": <error>`), and each roll to another provider is logged at `warn` with `from_provider`/`to_provider`. A given `from -> to` roll only warns again after 30s have elapsed, so a permanently down provider does not warn on every single call.
+
+  - RPC: new `rpc.Clients.Reset()` bringing the rolling strategy back to the pool's declared order, so the next call goes to the primary provider again. Without it, a `StickyRollingStrategy` that rolled to a fallback after a single transient error stayed on that fallback until the process restarted.
+
+  - RPC: fixed a data race where `rpc.Sort` read the clients pool without holding the lock, and fixed a client added to the pool during a `Sort` round being silently dropped.
+
+  - `fireeth tools substreams logs connection`: explicitly passing `--logs=false` now skips the final `Logs` section altogether, printing neither the prompt nor the Cloud Logging console link. Omitting the flag keeps the previous behavior (prompt, falling back on the console link).
+
+- Bumped `substreams` to [v1.21.0](https://github.com/streamingfast/substreams/releases/tag/v1.21.0):
+
+  - Server: tier2 now aborts a segment when it **stops making progress** rather than when it exceeds a fixed time budget. The new stall timeout (10 minutes by default, `--substreams-tier2-segment-stall-timeout`) resets on every block processed, and the pre-existing segment execution timeout (`--substreams-tier2-segment-execution-timeout`) is kept only as an absolute backstop, its default raised from 60 minutes to 4 hours.
+
+    The old fixed budget was fatal to expensive-but-healthy workloads: a segment making thousands of `eth_call` per block could take slightly longer than 60 minutes while still advancing block by block, get killed, and — since a killed segment is never cached — have its retry redo the same work and hit the same wall. Such a request could never complete, no matter how many times it reconnected. A stalled segment is still killed promptly, and since a single block is already bounded by the block execution timeout (`--substreams-block-execution-timeout`, 3 minutes by default), the stall timeout cannot be tripped by one legitimately slow block.
+
+    The `request active for a long time` log gained a `since_last_progress` field, and a segment killed for stalling now reports `request stalled, no block progress` instead of `request active for too long`.
+
+  - Server: new `substreams_undo_signal_distance_blocks` prometheus histogram, observing how many blocks each `BlockUndoSignal` sent to clients reverts, labeled by `source` (`reorg` when a fork is seen while streaming, `cursor_resolution` when the cursor of an incoming request points to a block that was reorged out). Its `_count` gives the total number of undo signals sent; subtracting the `le="5"` bucket from it gives the number of large ones. Undo signals reverting more than 5 blocks are also logged as a warning with `trace_id`, `head`, `revert_up_to`, `distance` and, on the `cursor_resolution` path, the client `cursor`.
+
+  - Server: tier2 no longer logs `tls: first record does not look like a TLS handshake` errors from plain-HTTP health probes / load balancers hitting a TLS port (same suppress list as the existing EOF and connection-reset handshake noise).
+
+  - Server: a tier1 shutdown happening while a request was still in its parallel backprocessing phase was reported to the client as `Internal` instead of `Unavailable`, so clients did not see the reconnect signal during a tier1 rollout.
+
+- Substreams RPC calls (`eth_call` and `eth_getBalance`) now reuse their HTTP connections instead of opening a new one for every batch.
+
+  Connections were explicitly never reused, so each batch paid a full DNS resolution, TCP handshake and TLS handshake before the endpoint did any work, which on a remote provider easily adds 100ms or more per batch. The connection pool is now also held by the extension itself rather than by the RPC engine, since Substreams builds a new engine for every tier2 job: a per engine pool could never be reused across jobs, and left its idle connections behind when the job ended.
+
+  Use `--substreams-rpc-max-idle-conns-per-host` (default `100`) and `--substreams-rpc-idle-conn-timeout` (default `90s`) to size the pool. Note that Go's own default of 2 idle connections per host is far too low for this workload, hence the higher default.
+
+  Set `--substreams-rpc-disable-keep-alives` to restore the previous behavior. This is only needed when a single endpoint hostname fronts a pool of nodes through round-robin DNS and spreading the load across them matters more than the handshake cost.
+
+## v2.19.1
+
+### Added
+
+- New `finalized_block_number{app}` metric, reported by `reader-node`, `reader-node-stdin`, `reader-node-firehose`, `relayer`, `firehose`, `merger` and `block-indexer`. Paired with the existing `head_block_number{app}`, it lets dashboards show how far behind finality each app's head is, as `head_block_number - finalized_block_number`. The `merger` and `block-indexer` only ever process final blocks, so they report the same value for both.
+
+- `tools substreams logs connection`: new final `Logs` section which asks whether the full logs should be printed (defaults to yes when you just hit enter) and, when declined or when running non-interactively, shows a Cloud Logging console link scoped to the request's own time window instead.
+
+- `tools substreams logs connection`: new `--logs` flag printing every log line of the request (tier1 and tier2 alike) in the final `Logs` section instead of the console link, rendered as `<time> <severity> <logger> <message>` with the remaining fields listed one `<key>: <value>` per line under it, numeric duration fields (`duration`, `parallel_duration`, `time_to_first_data`, ...) being shown as human durations. Use `--logs-limit` (default `500`, `0` disables) to control how many of the most recent lines are printed.
+
+### Changed
+
+- Bump `substreams` to [v1.20.3](https://github.com/streamingfast/substreams/releases/tag/v1.20.3).
+
+- Bumped `bstream` for `forkable.WithFinalizedBlockNumMetric`, the option backing the new `finalized_block_number` metric on the `relayer`.
+
+### Security
+
+- Bumped `google.golang.org/grpc` to `v1.82.1`, fixing GHSA-hrxh-6v49-42gf (HIGH, CVSS 8.8), an uncaught exception reachable from the network.
+
+## v2.19.0
+
+### Added
+
+- New `--common-merged-blocks-bundle-size` flag (default `100`, must be a positive multiple of 100) setting the number of blocks per merged-blocks file for the whole process: the merger writes bundles of that size and every reader (firehose, substreams-tier1, cursor resolution, single-block fetch) expects files of that size. substreams-tier1 forwards the value to tier2 on each subrequest, so a shared tier2 fleet can serve chains with different bundle sizes (upgrade tier2s first). The value must match the files actually present in the store; see `devel/bundle1000/` for a working 1000-blocks example.
+- New `fireeth tools resize-merged-blocks <source> <destination> <start> <stop> --source-bundle-size=100 --target-bundle-size=1000` command rewriting a merged-blocks store to a different bundle size (both up- and down-sizing, sizes must divide evenly, start/stop must be aligned on target boundaries).
+- Tools: new shared `--merged-blocks-bundle-size` flag (default `100`) on `tools` subcommands reading or writing merged blocks (`check merged-blocks`, `print merged-blocks`, `compare-blocks`, `merge-blocks`, `unmerge-blocks`, `upgrade-merged-blocks`, `download-from-firehose`, `fix-bloated-merged-blocks`, ...). The value is validated up-front (must be a positive multiple of 100) so an invalid size fails with a clear error instead of a later panic.
+- `fireeth tools fix-ordinals|fix-any-type|remove-gas-changes|fix-withdrawals|find-unknown-status`: now honor the shared `--merged-blocks-bundle-size` flag so these tools can operate on merged-blocks stores with non-100 bundle sizes.
+- merger: new `--merger-prune-one-block-files-after` flag (default `100`) controlling how many blocks below the last merged block one-block files are kept before deletion. Raise it so a relayer/firehose that briefly falls behind can still find the one-block files needed to bridge the gap and relink, instead of getting stuck in a reconnect loop or dying with `cannot link block after reconnection, restart required`. Clamped to a minimum of `100` (the bundle size) to preserve the safety margin against deleting not-yet-merged files.
+- New `--substreams-tier1-store-size-limit` flag (default `0` = 1GiB) overriding the store size limit (in bytes) for tier2 stores; the value is forwarded from tier1 to tier2 on each subrequest. Replaces the removed `SUBSTREAMS_STORE_SIZE_LIMIT` environment variable, which no longer needs to be set on tier2.
+- New `--substreams-stores-backend` flag (default `memory`) on `substreams-tier1` and `substreams-tier2`, selecting the FullKV store KV backend: `memory` (Go heap) or `mmap` (bbolt-backed, opt-in — reclaimable under memory pressure, see the `substreams` bump above).
+- New `--substreams-stores-scratch-space` flag (default `{sf-data-dir}/substreams/stores-scratch`) for the local scratch directory used by store KV backends (e.g. the `mmap` bbolt files). Must be on a local NVMe SSD when using `mmap`.
+
+### Changed
+
+- The firehose and substreams-tier1 hubs now keep `max(500|200, 2 x merged-blocks bundle size)` final blocks in memory so the joining source can hand off from a merged-blocks file boundary.
+- A merged-blocks reader now fails fast with a clear error when a file contains blocks beyond the configured bundle size (e.g. reading a 1000-blocks store with the default of 100).
+- Bumped `firehose-core` to [v1.16.0](https://github.com/streamingfast/firehose-core/releases/tag/v1.16.0).
+- Bumped `substreams` to [v1.20.1](https://github.com/streamingfast/substreams/releases/tag/v1.20.1).
+  - Server: new opt-in mmap (bbolt-backed) store backend, selectable via `--substreams-stores-backend=mmap` (default `memory`). It keeps FullKV store data in a memory-mapped file so cold pages are reclaimable by the kernel under memory pressure, instead of pinning everything on the non-reclaimable Go heap — this addresses production OOMs with large or highly concurrent stores. The in-memory backend remains the default and is byte-for-byte unchanged; mmap is validated to produce identical output. **The scratch-space directory holding the bbolt files (`--substreams-stores-scratch-space`) must live on a local NVMe SSD**: the store is continuously read and written through the mmap and the kernel pages it straight to that file, so a slow or network-backed disk (EBS-class, NFS) turns store operations into an I/O bottleneck and negates the benefit.
+  - Server: store quicksave/quickload now run up to 8 stores concurrently instead of one at a time, and quicksave streams the store lazily and unsorted (one KV entry at a time, no key sort/allocation) instead of buffering the whole serialized store, lowering peak memory and save time for large stores. On-disk format is unchanged; quickload is order-independent.
+  - Server: tier1 store loading at request start now loads up to 8 stores concurrently (size probe + download/decode) instead of one at a time.
+  - Server: cached deterministic errors now expire. Each error file carries a write timestamp in its name (`errors.<block>.<hash>.<unix>`), and on read tier1 discards any error older than `SUBSTREAMS_DETERMINISTIC_ERROR_MAX_AGE` (Go duration, default `1h`) and retries execution. Legacy error files without a timestamp are deleted on read.
+  - Server: canceled store loads now abort promptly instead of reading the entire (multi-GB) store file into the heap before returning, so a canceled/disconnected request stops hydrating immediately and no longer transiently pins gigabytes of store data.
+  - Server: a Blocks request whose start block resolves (from a cursor) to exactly the exclusive stop block now completes cleanly instead of returning `InvalidArgument: start block and stop block are the same`. This previously surfaced as a fatal, non-retryable error to clients that reconnected with a cursor sitting on the last block of the range after a transient disconnect. Raw (cursor-less) requests with `start == stop` still return the InvalidArgument as before.
+  - Server: client disconnects (`context canceled`) on a tier1 Blocks stream are no longer logged as `WARNING`/`ERROR` with `code Unknown`; they now resolve to `codes.Canceled` and are logged at Debug/Info as intended.
+  - Server: store quicksave now also triggers on client disconnect (context canceled), not only on graceful server shutdown, so a reconnecting client can resume without reprocessing. Only applies to production-mode requests.
+  - Server: quicksave block count now counts settled blocks (normal or last-partial) instead of skipping partials entirely, so quicksave arms correctly on flash-block chains; the minimum sent-block threshold before a quicksave triggers was raised from 25 to 50.
+  - Server: the `substreams request stats` log now includes the last block sent to the client (`last_sent_block_num`, `last_sent_block_id`, `last_sent_block_time`), and quicksave/quickload logs now report their duration (`save_duration` / `load_duration`).
   - Server: `tier1` calls to hosted foundational stores now forward the `x-organization-id` identity header (alongside the existing trusted headers), so a store's internal trust-based listener can authorize the request without an end-user JWT. This fixes `Unauthenticated: required authorization token not found` errors when reading from hosted foundational stores resolved via the control-plane registry.
   - Server: foundational store calls that fail with authentication errors, organization id mismatch, or prolonged unreachability now bubble up to the user as a non-deterministic (uncached) error instead of retrying until the global deadline. Transient unavailability is still retried (~30s) to absorb blips and rolling restarts.
+  - Server: on a linear resume from a cursor, tier1 now emits the client session (trace id) and starts keepalives *before* streaming the quicksave files into the stores, instead of after. Decoding a large store from a cold/remote quicksave can take a long time and previously ran with zero output, risking a gateway/client idle-timeout before the trace id ever arrived; the store files are opened (existence-checked) first, then streamed once the session is sent.
+
+### Fixed
+
+- `fireeth tools compare-blocks` with `FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES=true` no longer reports spurious `executed_code` differences. The noop-code-change sanitizer was force-setting `call.ExecutedCode = true` on any call carrying a noop code change (`OldHash == NewHash`, e.g. an EIP-7702 delegation revoke/re-delegate). Because the sanitizer runs per-block on each stream independently, this fired only on the side that actually emitted the noop code change, manufacturing an `executed_code` diff where the raw blocks agreed.
+- Bumped `dstore` to send S3 request checksums when the target bucket/endpoint requires them, fixing writes that failed against S3-compatible stores enforcing `x-amz-sdk-checksum-algorithm` on uploads.
+- `fireeth tools print merged-blocks <store>` no longer truncates its output when a merged-blocks file is missing (open range with no explicit stop, or a bounded range extending past the last available file): with the bumped `bstream` dependency it now prints every available block first, instead of discarding in-flight files on an async shutdown. On an open range it caps the stream at the last available merged-blocks file (found with an `O(log n)` existence probe rather than a full store listing) so it stops cleanly instead of erroring on the expected-missing next file. Also fixes an off-by-one that stopped one block early on a closed range, and a potential unsigned underflow when a closed range ends at block 0.
 
 ## v2.18.0
 

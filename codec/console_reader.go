@@ -875,6 +875,7 @@ func (ctx *parseCtx) readSkippedTrx(_ string) error {
 	// TODO: handle reason?
 
 	ctx.currentTrace = nil
+	ctx.evmCallStackIndexes = nil
 	return nil
 }
 
@@ -1025,6 +1026,10 @@ func (ctx *parseCtx) readFailedApplyTrx(line string) error {
 	ctx.transactionTraces = nil
 	ctx.currentTrace = nil
 	ctx.currentTraceLogCount = 0
+	ctx.currentRootCall = nil
+	ctx.inSystemCall = false
+	ctx.systemCalls = nil
+	ctx.evmCallStackIndexes = nil
 	ctx.finalizing = false
 
 	return nil
@@ -1061,6 +1066,7 @@ func (ctx *parseCtx) readCancelBlock(line string) error {
 	ctx.currentRootCall = nil
 	ctx.inSystemCall = false
 	ctx.systemCalls = nil
+	ctx.evmCallStackIndexes = nil
 	ctx.finalizing = false
 
 	return nil

@@ -11,20 +11,44 @@ import (
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
 
-var ignoreOrdinals = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS") == "true"
-var ignoreOPStackSystemCallsOrder = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_CALLS_ORDER") == "true"
-var ignoreGas = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_GAS") == "true"
-var ignoreNoopCodeChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES") == "true"
-var ignoreKeccak = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_KECCAK") == "true"
-var ignoreRevertedCallStorageChanges = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES") == "true"
-var ignoreOPStackSystemGasLimit = os.Getenv("FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_GAS_LIMIT") == "true"
+// The sanitizer below is used both by 'fireeth tools compare-blocks' and by the reader node
+// running in test mode ('--reader-node-test-mode'), hence the chain-wide 'FIREETH_COMPARE_'
+// prefix of those environment variables. The deprecated names carrying an 'OPSTACK_' part are
+// kept for compatibility only, none of the sanitizations is OP-Stack specific.
+var ignoreOrdinals = boolEnv("FIREETH_COMPARE_IGNORE_ORDINALS", "FIREETH_TOOLS_COMPARE_IGNORE_ORDINALS")
+var ignoreSystemCallsOrder = boolEnv("FIREETH_COMPARE_IGNORE_SYSTEM_CALLS_ORDER", "FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_CALLS_ORDER")
+var ignoreGas = boolEnv("FIREETH_COMPARE_IGNORE_GAS", "FIREETH_TOOLS_COMPARE_IGNORE_GAS")
+var ignoreNoopCodeChanges = boolEnv("FIREETH_COMPARE_IGNORE_NOOP_CODE_CHANGES", "FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES")
+var ignoreKeccak = boolEnv("FIREETH_COMPARE_IGNORE_KECCAK", "FIREETH_TOOLS_COMPARE_IGNORE_KECCAK")
+var ignoreRevertedCallStorageChanges = boolEnv("FIREETH_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES", "FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES")
+var ignoreSystemCallGasLimit = boolEnv("FIREETH_COMPARE_IGNORE_SYSTEM_CALL_GAS_LIMIT", "FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_GAS_LIMIT")
+var ignoreWithdrawals = boolEnv("FIREETH_COMPARE_IGNORE_WITHDRAWALS")
 
-// opStackSystemCaller is the well-known caller (0xffff...fffe) used for OP-Stack system transactions.
-var opStackSystemCaller = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}
+// boolEnv returns true if any of the given environment variables is set to "true", the
+// first name is the current one, the others are deprecated aliases kept for compatibility.
+func boolEnv(names ...string) bool {
+	for _, name := range names {
+		if os.Getenv(name) == "true" {
+			return true
+		}
+	}
+
+	return false
+}
+
+// systemCaller is the standard system address (0xffff...fffe) used as the caller of system
+// calls (EIP-4788 beacon roots, EIP-2935 block hashes, EIP-7002/7251 requests). Present on
+// every EVM chain running those EIPs, Ethereum mainnet included since Cancun.
+var systemCaller = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}
 
 const (
-	opStackSystemGasLimitOld = 30000000
-	opStackSystemGasLimitNew = 31566720
+	// systemCallGasLimitGeth is the gas limit geth gives to system calls.
+	systemCallGasLimitGeth = 30000000
+
+	// systemCallGasLimitRevm is the gas limit recent revm versions give to system calls, on every
+	// chain and every fork: 30_000_000 + SSTORE_SET_BYTES(64) * CPSB_GLAMSTERDAM(1530) *
+	// SYSTEM_MAX_SSTORES_PER_CALL(16), see revm-handler's SYSTEM_CALL_GAS_LIMIT (EIP-8037).
+	systemCallGasLimitRevm = 31566720
 )
 
 func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
@@ -44,8 +68,8 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 		ethBlock.Header.TotalDifficulty = nil
 	}
 	var hasLogBloom bool
-	for _, byte := range ethBlock.Header.LogsBloom {
-		if byte != '0' {
+	for _, b := range ethBlock.Header.LogsBloom {
+		if b != 0 {
 			hasLogBloom = true
 			break
 		}
@@ -71,19 +95,22 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	if ignoreRevertedCallStorageChanges {
 		removeRevertedCallStorageChangesFromEthereumBlock(ethBlock)
 	}
+	if ignoreWithdrawals {
+		removeWithdrawalsFromEthereumBlock(ethBlock)
+	}
 
-	if ignoreOPStackSystemGasLimit {
+	if ignoreSystemCallGasLimit {
 		for _, call := range ethBlock.SystemCalls {
-			normalizeOPStackSystemGasLimit(call)
+			normalizeSystemCallGasLimit(call)
 		}
 		for _, tx := range ethBlock.TransactionTraces {
 			for _, call := range tx.Calls {
-				normalizeOPStackSystemGasLimit(call)
+				normalizeSystemCallGasLimit(call)
 			}
 		}
 	}
 
-	if ignoreOPStackSystemCallsOrder {
+	if ignoreSystemCallsOrder {
 		// reorder system calls by using all the fields as sorting keys
 		sort.Slice(ethBlock.SystemCalls, func(i, j int) bool {
 			si, sj := ethBlock.SystemCalls[i], ethBlock.SystemCalls[j]
@@ -124,22 +151,14 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 			tx.BeginOrdinal = 0
 			tx.EndOrdinal = 0
 		}
-		var hasLogBloom bool
-		for _, byte := range tx.Receipt.LogsBloom {
-			if byte != '0' {
-				hasLogBloom = true
-				break
-			}
-		}
-		if !hasLogBloom {
-			tx.Receipt.LogsBloom = nil
-		}
 		if ignoreOrdinals {
 			for _, l := range tx.Receipt.Logs {
 				l.Ordinal = 0
 			}
 		}
 
+		// Receipt logs blooms are always removed for comparison, some producers
+		// don't fill them at all.
 		tx.Receipt.LogsBloom = nil
 		for _, call := range tx.Calls {
 			if ignoreOrdinals {
@@ -187,8 +206,8 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 	return out
 }
 
-func normalizeOPStackSystemGasLimit(call *pbeth.Call) {
-	if call.GasLimit == opStackSystemGasLimitOld && bytes.Equal(call.Caller, opStackSystemCaller) {
-		call.GasLimit = opStackSystemGasLimitNew
+func normalizeSystemCallGasLimit(call *pbeth.Call) {
+	if call.GasLimit == systemCallGasLimitGeth && bytes.Equal(call.Caller, systemCaller) {
+		call.GasLimit = systemCallGasLimitRevm
 	}
 }

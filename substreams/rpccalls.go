@@ -26,12 +26,55 @@ const EthCallFallbackDurationEnvVar = "ETH_CALL_FALLBACK_TO_LATEST_DURATION"
 
 // interfaces, living in `streamingfast/substreams:extensions.go`
 
-type RPCExtensioner struct {
-	params map[string]string
+// ConnectionOptions tunes the HTTP connection pool used to reach the RPC endpoints.
+type ConnectionOptions struct {
+	// MaxIdleConnsPerHost is how many idle connections are kept around per endpoint. The Go
+	// default of 2 is far too low here: past that, connections are closed after each request
+	// and every batch pays a fresh handshake again.
+	MaxIdleConnsPerHost int
+	// IdleConnTimeout is how long an unused connection is kept before being closed.
+	IdleConnTimeout time.Duration
+	// DisableKeepAlives restores the previous behavior of never reusing a connection. Needed
+	// only when a single endpoint hostname fronts a pool of nodes through round-robin DNS and
+	// spreading the load across them matters more than the handshake cost.
+	DisableKeepAlives bool
 }
 
-func NewRPCExtensioner(params map[string]string) *RPCExtensioner {
-	return &RPCExtensioner{params: params}
+func DefaultConnectionOptions() ConnectionOptions {
+	return ConnectionOptions{
+		MaxIdleConnsPerHost: 100,
+		IdleConnTimeout:     90 * time.Second,
+	}
+}
+
+// NewHTTPClient builds the HTTP client reaching the RPC endpoints.
+//
+// The returned client, and more importantly its underlying transport holding the connection
+// pool, is meant to be shared by every RPC engine of the process. Substreams builds a fresh
+// engine for each tier2 job it processes, so a per engine transport would keep the pool from
+// ever being reused across jobs, and would strand its idle connections when the job ends.
+func NewHTTPClient(opts ConnectionOptions) *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+
+	// The per host cap is the one that matters, all the load goes to a handful of endpoints.
+	transport.MaxIdleConns = 0
+	transport.MaxIdleConnsPerHost = opts.MaxIdleConnsPerHost
+	transport.IdleConnTimeout = opts.IdleConnTimeout
+	transport.DisableKeepAlives = opts.DisableKeepAlives
+
+	return &http.Client{Transport: transport}
+}
+
+type RPCExtensioner struct {
+	params     map[string]string
+	httpClient *http.Client
+}
+
+func NewRPCExtensioner(params map[string]string, opts ConnectionOptions) *RPCExtensioner {
+	return &RPCExtensioner{
+		params:     params,
+		httpClient: NewHTTPClient(opts),
+	}
 }
 
 func (e *RPCExtensioner) Params() map[string]string {
@@ -86,7 +129,7 @@ func (e *RPCExtensioner) WASMExtensions(in map[string]string) (map[string]map[st
 		}
 	}
 
-	eng, err := NewRPCEngine(callURLs, balURLs, gasLimit)
+	eng, err := NewRPCEngine(callURLs, balURLs, gasLimit, WithHTTPClient(e.httpClient))
 	if err != nil {
 		return nil, fmt.Errorf("creating new RPC engine: %w", err)
 	}
@@ -116,18 +159,38 @@ type RPCEngine struct {
 	currentBalanceClientIndex int
 }
 
-func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit uint64) (*RPCEngine, error) {
+// EngineOption customizes an [RPCEngine].
+type EngineOption func(*engineConfig)
+
+type engineConfig struct {
+	httpClient *http.Client
+}
+
+// WithHTTPClient makes the engine use the given HTTP client, and through it the connection
+// pool shared with the other engines of the process.
+func WithHTTPClient(httpClient *http.Client) EngineOption {
+	return func(config *engineConfig) {
+		config.httpClient = httpClient
+	}
+}
+
+func NewRPCEngine(callEndpoints []string, balanceEndpoints []string, gasLimit uint64, options ...EngineOption) (*RPCEngine, error) {
 	zlog.Debug("creating new Substreams RPC engine",
 		zap.Strings("call_endpoints", callEndpoints),
 		zap.Strings("get_balance_endpoints", balanceEndpoints),
 		zap.Uint64("gas_limit", gasLimit),
 	)
 
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			DisableKeepAlives: true, // don't reuse connections
-		},
+	config := &engineConfig{}
+	for _, option := range options {
+		option(config)
 	}
+
+	httpClient := config.httpClient
+	if httpClient == nil {
+		httpClient = NewHTTPClient(DefaultConnectionOptions())
+	}
+
 	opts := []rpc.Option{
 		rpc.WithHttpClient(httpClient),
 	}
@@ -248,14 +311,19 @@ func (e *RPCEngine) ethGetBalance(
 		addrHex := "0x" + hex.EncodeToString(r.Address)
 
 		blockParam := r.Block
-		if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
-			blockParam = "0x" + blockParam
+		switch blockParam {
+		case "latest", "pending", "earliest", "safe", "finalized":
+			// known block tags are passed through unchanged
+		default:
+			if blockParam != "" && !strings.HasPrefix(blockParam, "0x") {
+				blockParam = "0x" + blockParam
+			}
 		}
 
 		if fallbackDuration != 0 && blockAge > fallbackDuration {
 			blockParam = "latest"
 		} else if numberDuration != 0 && blockAge > numberDuration {
-			blockParam = strconv.FormatUint(clock.Number, 10)
+			blockParam = fmt.Sprintf("0x%x", clock.Number)
 		}
 
 		rpcReqs[i] = &rpc.RPCRequest{
@@ -367,12 +435,19 @@ func (e *RPCEngine) rpcDoWithRetry(
 				}
 			}
 			if retryWithLatest {
-				// Rebuild reqs with latest block
+				// Rebuild reqs with latest block, but only if we are not already
+				// querying "latest": otherwise a persistent -32602 would retry forever.
+				fallbackApplied := false
 				for _, req := range reqs {
-					req.Params[1] = "latest"
+					if req.Params[1] != "latest" {
+						req.Params[1] = "latest"
+						fallbackApplied = true
+					}
 				}
-				zlog.Warn("retrying eth_getBalance with latest block due to missing block (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
-				continue
+				if fallbackApplied {
+					zlog.Warn("retrying eth_getBalance with latest block due to missing block (-32602)", zap.String("trace_id", traceID), zap.String("original_block", blockHash))
+					continue
+				}
 			}
 		}
 

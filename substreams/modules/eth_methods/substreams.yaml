@@ -1,0 +1,159 @@
+specVersion: v0.1.0
+package:
+  name: eth_methods
+  version: v0.1.0
+  url: https://github.com/streamingfast/firehose-ethereum
+  description: Diagnostic package exercising the fireeth eth_call and eth_getBalance WASM extensions
+  # The long form documentation is picked up from README.md, `package.doc` is deprecated.
+
+network: mainnet
+
+protobuf:
+  files:
+    - sf/ethereum/substreams/ethmethods/v1/eth_methods.proto
+  importPaths:
+    - ./proto
+  # `substreams protogen` pulls the imports in too, and both those trees already reach the module
+  # through the `substreams` crate.
+  excludePaths:
+    - google
+    - sf/substreams
+
+# One binary per RPC extension, plus a default one importing neither. A wasm module resolves its
+# imports when it is instantiated rather than when it calls them, so a single binary referencing
+# both extensions is refused wholesale by an instance registering only one of them, whatever the
+# module being run. Splitting them keeps a missing endpoint failing the modules that need it.
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/no_rpc.wasm
+  eth_call:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/eth_call.wasm
+  eth_get_balance:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/eth_get_balance.wasm
+
+# Defaults are also encoded in the module itself, so an override only needs to carry the keys it
+# actually changes. Available keys:
+#
+#   call_ratio          (default 1)      eth_call rounds per block, one round being one
+#                                        single-request invocation plus one batched one. A value
+#                                        below 1 is the inverse of a period instead: 0.25 runs a
+#                                        single round every 4 blocks. 0 disables the method.
+#   balance_ratio       (default 1)      same, for eth_getBalance.
+#   call_batch_size     (default 10)     requests packed in the batched eth_call invocation,
+#                                        0 skips that invocation.
+#   balance_batch_size  (default 10)     same, for eth_getBalance.
+#   call_to             (default empty)  contract `balanceOf(address)` is called on. Left empty,
+#                                        each block picks the ERC-20 contract that emitted the
+#                                        most transfers in it.
+#   balance_block       (default number) `number` queries the block being processed, which needs
+#                                        an archive node when replaying history. `latest` reaches
+#                                        any node but answers for the chain head instead.
+params:
+  map_eth_call: ""
+  map_eth_get_balance: ""
+
+# Only `map_eth_call` needs a per network value, the accounts every other module works with are
+# read out of the block itself. Chains absent from this list are not unsupported: they simply
+# fall back to the busiest ERC-20 contract of each block.
+#
+# Every entry below points at that chain's canonical USDC contract, `balanceOf(address)` being
+# the call performed on it. USDC is picked for being among the busiest ERC-20 of each of those
+# chains, which keeps the queried accounts holding a non-zero balance: an endpoint answering an
+# all-zeroes payload is then visibly broken rather than plausibly correct.
+networks:
+  mainnet:
+    params:
+      # USDC, Circle, 6 decimals
+      map_eth_call: "call_to=0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+  base:
+    params:
+      # USDC, Circle, 6 decimals
+      map_eth_call: "call_to=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+  arbitrum-one:
+    params:
+      # USDC, Circle native issuance, 6 decimals. Not USDC.e, the bridged one.
+      map_eth_call: "call_to=0xaf88d065e77c8cc2239327c5edb3a432268e5831"
+  optimism:
+    params:
+      # USDC, Circle native issuance, 6 decimals. Not USDC.e, the bridged one.
+      map_eth_call: "call_to=0x0b2c639c533813f4aa9d7837caf62653d097ff85"
+  matic:
+    params:
+      # USDC, Circle native issuance, 6 decimals. Not USDC.e, the bridged one.
+      map_eth_call: "call_to=0x3c499c542cef5e3811e1192ce70d8cc03d5c3359"
+  bsc:
+    params:
+      # Binance-Peg USDC, 18 decimals unlike every other entry here.
+      map_eth_call: "call_to=0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"
+
+  # The two testnets below are listed so that `--network` accepts them: an unknown name is a hard
+  # error, `cannot apply network "sepolia": not found in manifest`, not a fallback.
+  sepolia:
+    params:
+      # USDC, Circle's testnet issuance, 6 decimals. Quiet compared to its mainnet counterpart, so
+      # expect blocks where it moved nothing: the report then says so rather than looking broken.
+      map_eth_call: "call_to=0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"
+  hoodi:
+    params:
+      # Deliberately left unpinned. Hoodi has no canonical stablecoin issuance to point at, and
+      # pinning a community token that later goes idle, or gets redeployed, is worse than resolving
+      # the target per block: the module then calls into whatever the block actually exercised.
+      map_eth_call: ""
+
+modules:
+  - name: map_transfers
+    kind: map
+    initialBlock: 0
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:sf.ethereum.substreams.ethmethods.v1.Transfers
+    doc: |
+      Decodes the ERC-20 and ERC-721 `Transfer` events of a block. Performs no RPC at all, so it
+      streams successfully even against an instance with no RPC endpoint configured: run it first
+      to tell a decoding problem apart from an RPC one.
+
+  - name: map_eth_call
+    kind: map
+    binary: eth_call
+    initialBlock: 0
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+      - map: map_transfers
+    output:
+      type: proto:sf.ethereum.substreams.ethmethods.v1.EthCallReport
+    doc: |
+      Calls `balanceOf(address)` through the `rpc::eth_call` extension, once per round with a
+      single request and once with a batch. Requires `--substreams-rpc-endpoints` on the serving
+      instance.
+
+  - name: map_eth_get_balance
+    kind: map
+    binary: eth_get_balance
+    initialBlock: 0
+    inputs:
+      - params: string
+      - source: sf.ethereum.type.v2.Block
+      - map: map_transfers
+    output:
+      type: proto:sf.ethereum.substreams.ethmethods.v1.EthGetBalanceReport
+    doc: |
+      Queries the balance of the accounts a block touches through the `rpc::eth_get_balance`
+      extension, once per round with a single request and once with a batch. Requires
+      `--substreams-rpc-get-balance-endpoints` on the serving instance.
+
+  - name: map_eth_methods
+    kind: map
+    initialBlock: 0
+    inputs:
+      - map: map_eth_call
+      - map: map_eth_get_balance
+    output:
+      type: proto:sf.ethereum.substreams.ethmethods.v1.EthMethodsReport
+    doc: |
+      Both reports side by side. Requires both extensions to be configured, use the individual
+      modules when only one of them is.
