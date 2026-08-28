@@ -69,10 +69,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 		maxConcurrency := sflags.MustGetInt(cmd, "max-concurrency")
 
 		if maxConcurrency == 0 {
-			maxConcurrency = runtime.GOMAXPROCS(0)
-			if maxConcurrency < 1 {
-				maxConcurrency = 1
-			}
+			maxConcurrency = max(runtime.GOMAXPROCS(0), 1)
 		}
 
 		if stop <= start {
