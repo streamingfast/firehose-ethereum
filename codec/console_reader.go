@@ -622,7 +622,7 @@ func decodeAccessList(b []byte) (out []*pbeth.AccessTuple, err error) {
 
 		for j := uint64(0); j < storageKeyCount; j++ {
 			if len(b) < 32 {
-				return nil, fmt.Errorf("access list at index %d: read straoge key: not enough bytes left, expected at least 32 bytes but there is only %d bytes", i, len(b))
+				return nil, fmt.Errorf("access list at index %d: read storage key: not enough bytes left, expected at least 32 bytes but there is only %d bytes", i, len(b))
 			}
 
 			out[i].StorageKeys[j] = b[0:32]
@@ -801,8 +801,8 @@ func (ctx *parseCtx) readEVMCallFailed(line string) error {
 	failureReason := chunks[2]
 
 	// FIXME: This would be overwritten by endCall below, check if
-	//        we need to make endCall aware of failure/revert and
-	//        act accordingly on gas consumed.
+	// we need to make endCall aware of failure/revert and
+	// act accordingly on gas consumed.
 	evmCall.GasConsumed = evmCall.GasLimit - gasLeft
 	evmCall.StatusFailed = true
 	evmCall.FailureReason = failureReason
@@ -1279,7 +1279,7 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 // [block_num:342342342] [partial_block_idx] [block_hash] [parent_num] [parent_hash] [lib:123123123] [timestamp:unix_nano] B64ENCODED_any {3.1}
 //
 //	if [partial_block_idx] is greater than 1000, it means that it is the final partial
-//	of a particular block and you must substract 1000 from it to get the actual index
+//	of a particular block and you must subtract 1000 from it to get the actual index
 func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block, error) {
 	start := time.Now()
 
