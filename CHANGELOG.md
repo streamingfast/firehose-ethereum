@@ -8,6 +8,10 @@ for instructions to keep up to date.
 
 ### Changed
 
+- Bumped `firehose-core` to [v1.18.1-0.20260902182612-1f4e56f44352](https://github.com/streamingfast/firehose-core/compare/475a571f0fe2...1f4e56f44352) and `substreams` to [v1.22.1-0.20260902182355-0c74c9fac34a](https://github.com/streamingfast/substreams/compare/5658911b40ce...0c74c9fac34a):
+
+  - Server: `substreams_tier1_effective_active_requests` could read below `substreams_active_requests`, the metric it is meant to replace as the horizontal autoscaler input. Requests still setting up were counted by one and not the other, so a tier1 pod with requests queued in setup looked emptier to the autoscaler than it was.
+
 - Bumped `firehose-core` to [v1.18.1-0.20260902155646-475a571f0fe2](https://github.com/streamingfast/firehose-core/compare/2d13baafe8f2...475a571f0fe2) and `substreams` to [v1.22.1-0.20260902153244-5658911b40ce](https://github.com/streamingfast/substreams/compare/1cffa6c10a8d...5658911b40ce):
 
   - Server: store snapshots (fullKV files) can now be pruned to save disk space: `substreams-tier1` no longer assumes that a fullKV at block `x` implies that every earlier fullKV still exists. At request start it walks backwards from the first segment needing work, in growing listing windows, until it finds the last block where every store module still has a snapshot, and rebuilds the stores from there. Only snapshots actually seen are reused, and a job is only scheduled once the previous segment of every lower stage is done, so a pruned file is never read. The new `fireeth tools substreams prune-states` command (below) is what does the pruning.

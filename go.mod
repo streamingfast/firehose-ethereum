@@ -22,12 +22,12 @@ require (
 	github.com/streamingfast/dstore v0.2.4-0.20260825160629-56e87480522c
 	github.com/streamingfast/eth-go v0.0.0-20260318130445-6d6ccaf27155
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.18.1-0.20260902155646-475a571f0fe2
+	github.com/streamingfast/firehose-core v1.18.1-0.20260902182612-1f4e56f44352
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260420191823-8b3fce4bf77a
 	github.com/streamingfast/logging v1.2.3-0.20260810132752-360563ac68a9
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.22.1-0.20260902153244-5658911b40ce
+	github.com/streamingfast/substreams v1.22.1-0.20260902182355-0c74c9fac34a
 	github.com/stretchr/testify v1.12.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.19.0
