@@ -8,6 +8,10 @@ for instructions to keep up to date.
 
 ### Changed
 
+- Bumped `substreams` to [v1.22.1-0.20260902211544-ae5b1131a6b5](https://github.com/streamingfast/substreams/compare/5658911b40ce...ae5b1131a6b5):
+
+  - Server: `substreams-tier1` now downloads the next cached execution output files while it streams the current one to a production-mode client. Before, each 1000-block segment was opened, decompressed and sent before the next one was even requested from the object store. Prefetching is bounded per request to 4 segments ahead and 64 MiB of decompressed data, with no size lookups against the store: the first segment is probed against the whole budget and, if it overflows, prefetching is turned off for that request; otherwise its size decides how many segments download concurrently. Not exposed as flags yet, the defaults apply.
+
 - Bumped `firehose-core` to [v1.18.1-0.20260902155646-475a571f0fe2](https://github.com/streamingfast/firehose-core/compare/2d13baafe8f2...475a571f0fe2) and `substreams` to [v1.22.1-0.20260902153244-5658911b40ce](https://github.com/streamingfast/substreams/compare/1cffa6c10a8d...5658911b40ce):
 
   - Server: store snapshots (fullKV files) can now be pruned to save disk space: `substreams-tier1` no longer assumes that a fullKV at block `x` implies that every earlier fullKV still exists. At request start it walks backwards from the first segment needing work, in growing listing windows, until it finds the last block where every store module still has a snapshot, and rebuilds the stores from there. Only snapshots actually seen are reused, and a job is only scheduled once the previous segment of every lower stage is done, so a pruned file is never read. The new `fireeth tools substreams prune-states` command (below) is what does the pruning.
