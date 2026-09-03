@@ -8,9 +8,15 @@ for instructions to keep up to date.
 
 ### Changed
 
-- Bumped `substreams` to [v1.22.1-0.20260902211544-ae5b1131a6b5](https://github.com/streamingfast/substreams/compare/5658911b40ce...ae5b1131a6b5):
+- Bumped `substreams` to [v1.22.1-0.20260903162505-4035f21109ec](https://github.com/streamingfast/substreams/compare/5658911b40ce...4035f21109ec):
 
-  - Server: `substreams-tier1` now downloads the next cached execution output files while it streams the current one to a production-mode client. Before, each 1000-block segment was opened, decompressed and sent before the next one was even requested from the object store. Prefetching is bounded per request to 4 segments ahead and 64 MiB of decompressed data, with no size lookups against the store: the first segment is probed against the whole budget and, if it overflows, prefetching is turned off for that request; otherwise its size decides how many segments download concurrently. Not exposed as flags yet, the defaults apply.
+  - Server: `substreams-tier1` scheduling no longer slows down as a large backprocessing range progresses. Picking the next tier2 job walked every segment between the squasher and the job frontier on every call, re-checking dependencies that could not have changed, so a run over N segments cost O(N²) in scheduling. The scheduler now keeps, per stage, the lowest segment that may still be pending and the highest segment completed so far, and only looks at the handful of segments those point at. On a 3-stage graph with 4 workers and a squasher three times slower than the jobs, scheduling 8000 segments went from 1.18s to 2.7ms, and now grows linearly with the range. Job order is unchanged.
+
+  - Server: `substreams-tier1` now downloads the next cached execution output files while it streams the current one to a production-mode client. Before, each 1000-block segment was opened, decompressed and sent before the next one was even requested from the object store, so every segment paid a full store round trip on the critical path. Prefetching is bounded per request, with no flag to set: at most 4 segments ahead, holding at most 64 MiB of decompressed data. No size is ever asked of the store, the decompressed size of the last downloaded segment being the estimate for the next ones, and a file bigger than the whole budget turns prefetching off for the rest of the request. Missing files are left to the existing retry loop.
+
+  - Server: `substreams-tier1` now sends each batch of cached execution output on its own goroutine, so decoding the next batch overlaps with compressing and writing the current one. At most one batch is being built while one is sent, and a segment is only reported done once every batch is out, so message order is unchanged. Decoding a batch also copies one less time, the item now aliasing the buffer it was read into.
+
+  - Server: `substreams-tier1` writes the `substreams.spkg` and `last_used` cache markers in the background instead of before the pipeline starts, so those object store round trips no longer delay the first block sent. They run detached from the request with a 30 second timeout: the request neither starts nor exits waiting for them, and a client that disconnects early still leaves its usage marker behind.
 
 - Bumped `firehose-core` to [v1.18.1-0.20260902155646-475a571f0fe2](https://github.com/streamingfast/firehose-core/compare/2d13baafe8f2...475a571f0fe2) and `substreams` to [v1.22.1-0.20260902153244-5658911b40ce](https://github.com/streamingfast/substreams/compare/1cffa6c10a8d...5658911b40ce):
 
