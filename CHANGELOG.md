@@ -8,6 +8,8 @@ for instructions to keep up to date.
 
 ### Changed
 
+- Bumped `golang.org/x/crypto` to `v0.56.0`, clearing CVE-2026-78662 and CVE-2026-56855 (both HIGH), which the Docker Scout scan of the published image fails on.
+
 - Bumped `substreams` to [v1.22.1-0.20260903162505-4035f21109ec](https://github.com/streamingfast/substreams/compare/5658911b40ce...4035f21109ec):
 
   - Server: `substreams-tier1` scheduling no longer slows down as a large backprocessing range progresses. Picking the next tier2 job walked every segment between the squasher and the job frontier on every call, re-checking dependencies that could not have changed, so a run over N segments cost O(N²) in scheduling. The scheduler now keeps, per stage, the lowest segment that may still be pending and the highest segment completed so far, and only looks at the handful of segments those point at. On a 3-stage graph with 4 workers and a squasher three times slower than the jobs, scheduling 8000 segments went from 1.18s to 2.7ms, and now grows linearly with the range. Job order is unchanged.
