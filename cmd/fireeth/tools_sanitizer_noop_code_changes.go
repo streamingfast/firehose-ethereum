@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"slices"
-	"sort"
 
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
@@ -64,7 +63,7 @@ func collectNoopCodeChangeOrdinals(block *pbeth.Block) []uint64 {
 		return nil
 	}
 
-	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	slices.Sort(out)
 	return slices.Compact(out)
 }
 
