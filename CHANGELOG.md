@@ -20,6 +20,14 @@ for instructions to keep up to date.
 
   - Server: `substreams-tier1` writes the `substreams.spkg` and `last_used` cache markers in the background instead of before the pipeline starts, so those object store round trips no longer delay the first block sent. They run detached from the request with a 30 second timeout: the request neither starts nor exits waiting for them, and a client that disconnects early still leaves its usage marker behind.
 
+- Bumped `substreams` to [v1.22.1-0.20260908190533-360e41fbc42f](https://github.com/streamingfast/substreams/compare/4035f21109ec...360e41fbc42f):
+
+  - CLI: a manifest can now import `sf/substreams/sink/sql/schema/v1/schema.proto` without vendoring a copy of it. The file is a system protobuf, but `protoparse` needs the source on disk to honour its extensions, so an import previously failed with `no such file`. It is now served from an embedded copy, the same way `sf/substreams/options.proto` already was.
+
+  - Server: fixed partial-blocks (flashblocks) streams on a tier1 that is shutting down. The stream now ends with `Unavailable` like a full-block stream does, so the client reconnects elsewhere. It used to stay open but silent, then send an undo signal at each block boundary naming a block the client had never received. An undo signal is also no longer sent for partial-block state whose outputs were never sent.
+
+  - Server: `substreams_tier1_effective_active_requests` could read below `substreams_active_requests`, the metric it is meant to replace as the horizontal autoscaler input. Requests still setting up were counted by one and not the other, so a tier1 instance with requests queued in setup looked emptier to the autoscaler than it was.
+
 - Bumped `firehose-core` to [v1.18.1-0.20260902155646-475a571f0fe2](https://github.com/streamingfast/firehose-core/compare/2d13baafe8f2...475a571f0fe2) and `substreams` to [v1.22.1-0.20260902153244-5658911b40ce](https://github.com/streamingfast/substreams/compare/1cffa6c10a8d...5658911b40ce):
 
   - Server: store snapshots (fullKV files) can now be pruned to save disk space: `substreams-tier1` no longer assumes that a fullKV at block `x` implies that every earlier fullKV still exists. At request start it walks backwards from the first segment needing work, in growing listing windows, until it finds the last block where every store module still has a snapshot, and rebuilds the stores from there. Only snapshots actually seen are reused, and a job is only scheduled once the previous segment of every lower stage is done, so a pruned file is never read. The new `fireeth tools substreams prune-states` command (below) is what does the pruning.
