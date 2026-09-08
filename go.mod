@@ -9,7 +9,7 @@ require (
 	github.com/emmansun/base64 v0.10.0
 	github.com/holiman/uint256 v1.3.2
 	github.com/josephburnett/jd v1.9.2
-	github.com/klauspost/compress v1.19.2
+	github.com/klauspost/compress v1.20.0
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.2.3
 	github.com/spf13/cobra v1.10.2
@@ -33,7 +33,7 @@ require (
 	github.com/tidwall/gjson v1.19.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.28.0
-	google.golang.org/grpc v1.83.1
+	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 )
 
