@@ -28,9 +28,13 @@ for instructions to keep up to date.
 
   - Server: `substreams_tier1_effective_active_requests` could read below `substreams_active_requests`, the metric it is meant to replace as the horizontal autoscaler input. Requests still setting up were counted by one and not the other, so a tier1 instance with requests queued in setup looked emptier to the autoscaler than it was.
 
-- Bumped `substreams` to [v1.22.1-0.20260910163759-61ab0e496914](https://github.com/streamingfast/substreams/compare/360e41fbc42f...61ab0e496914):
+- Bumped `substreams` to [v1.22.1-0.20260910181506-5b485a54f0ef](https://github.com/streamingfast/substreams/compare/360e41fbc42f...5b485a54f0ef):
 
   - Server: `substreams-tier1` now squashes store partials in runs. When a segment is ready to be merged, every following segment whose partial is already there is merged by the same command, up to 1000 segments or 30 s of work, instead of one segment per command. Each command waits for a round trip through the scheduler loop, which also borrows a worker for every job it schedules. On a busy backprocessing request that round trip took 3 to 5 s, so squashing was capped at about 15 segments per minute even when a merge took 0.3 s, and it fell tens of thousands of segments behind the tier2 jobs.
+
+  - Server: `substreams-tier1` no longer closes the squasher's cached stores while a squash is still running, which could corrupt a full store being merged or saved when the scheduler stopped early.
+
+  - Server: `substreams-tier1` squash runs now copy the previous full store over segments whose partials are all empty, instead of merging and saving each of them: an empty partial leaves the store unchanged. A run lists the sizes of its partials in one go, reads the first decompressed byte of the small ones only, so a large partial is never downloaded, then copies the last written full store to every consecutive empty segment, 32 at a time, server-side on object stores that support it. On a store most segments never touch, a run of 1000 segments goes from about 190 s to a few seconds.
 
 - Bumped `firehose-core` to [v1.18.1-0.20260902155646-475a571f0fe2](https://github.com/streamingfast/firehose-core/compare/2d13baafe8f2...475a571f0fe2) and `substreams` to [v1.22.1-0.20260902153244-5658911b40ce](https://github.com/streamingfast/substreams/compare/1cffa6c10a8d...5658911b40ce):
 
