@@ -27,13 +27,13 @@ require (
 	github.com/streamingfast/logging v1.2.3-0.20260810132752-360563ac68a9
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.22.1-0.20260910163759-61ab0e496914
+	github.com/streamingfast/substreams v1.22.1-0.20260910164959-d5115d95b8a6
 	github.com/stretchr/testify v1.12.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.19.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.28.0
-	google.golang.org/grpc v1.83.1
+	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 )
 
