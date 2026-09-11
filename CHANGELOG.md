@@ -30,6 +30,16 @@ for instructions to keep up to date.
 
   - Server: `substreams_tier1_effective_active_requests` could read below `substreams_active_requests`, the metric it is meant to replace as the horizontal autoscaler input. Requests still setting up were counted by one and not the other, so a tier1 instance with requests queued in setup looked emptier to the autoscaler than it was.
 
+- Bumped `substreams` to [v1.22.1-0.20260911133942-1b7d09c2de7b](https://github.com/streamingfast/substreams/compare/360e41fbc42f...1b7d09c2de7b):
+
+  - Server: `substreams-tier1` squashes store partials in runs of up to 1000 segments or 30 s of work per command instead of one segment per command, which capped squashing at about 15 segments per minute on busy backprocessing requests. Segments whose partials are all empty get a copy of the previous full store instead of a merge, server-side on object stores that support it.
+
+  - Server: `substreams-tier1` no longer closes the squasher's cached stores while a squash is still running. When the scheduler stopped early (a tier2 job failed, or the instance was shutting down), the in-flight merge could panic the process or write an empty full store to storage.
+
+  - Server: `substreams-tier1` asks the relayer for every block from its own LIB when it connects or reconnects, instead of the last 2 blocks, so a gap left by a disconnect is filled from the relayer's memory rather than from the one-block store.
+
+- Bumped `dstore` to [v0.2.4-0.20260911133316-3b0685e87595](https://github.com/streamingfast/dstore/compare/56e87480522c...3b0685e87595): S3 `CopyObject` is done server-side (multipart above 5 GiB) instead of downloading and uploading the object back, falling back to the old behaviour on backends answering `NotImplemented` or `MethodNotAllowed`.
+
 - Bumped `firehose-core` to [v1.18.1-0.20260902155646-475a571f0fe2](https://github.com/streamingfast/firehose-core/compare/2d13baafe8f2...475a571f0fe2) and `substreams` to [v1.22.1-0.20260902153244-5658911b40ce](https://github.com/streamingfast/substreams/compare/1cffa6c10a8d...5658911b40ce):
 
   - Server: store snapshots (fullKV files) can now be pruned to save disk space: `substreams-tier1` no longer assumes that a fullKV at block `x` implies that every earlier fullKV still exists. At request start it walks backwards from the first segment needing work, in growing listing windows, until it finds the last block where every store module still has a snapshot, and rebuilds the stores from there. Only snapshots actually seen are reused, and a job is only scheduled once the previous segment of every lower stage is done, so a pruned file is never read. The new `fireeth tools substreams prune-states` command (below) is what does the pruning.
