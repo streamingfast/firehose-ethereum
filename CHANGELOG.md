@@ -4,13 +4,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.22.0
+
+### Added
+
+- New `--substreams-tier1-cpu-eviction-*` flags letting `substreams-tier1` shed requests when its own cgroup reports the CPU saturated. `--substreams-tier1-cpu-eviction-mode` (default `off`, so nothing changes until you set it) selects what it does: `observe` logs the requests it would cancel without cancelling any, `dev-only` cancels development-mode requests, `full` cancels production ones as well. See the bump above for what a round of eviction does.
+
+  The rest are tunables, each defaulting to the value the eviction was designed around:
+
+  | Flag | Default | Meaning |
+  | --- | --- | --- |
+  | `--substreams-tier1-cpu-eviction-threshold` | `0.90` | CPU usage above which the instance counts as overloaded |
+  | `--substreams-tier1-cpu-eviction-sustain` | `15s` | how long that must hold before it acts |
+  | `--substreams-tier1-cpu-eviction-recover-threshold` | `0.75` | CPU usage under which it stops counting as overloaded |
+  | `--substreams-tier1-cpu-eviction-recover-sustain` | `30s` | how long that must hold before it advertises itself as ready again |
+  | `--substreams-tier1-cpu-eviction-target-ratio` | `0.75` | CPU usage a round of eviction cuts down to, which sizes the round |
+  | `--substreams-tier1-cpu-eviction-interval` | `5s` | how often it looks at the CPU |
+  | `--substreams-tier1-cpu-eviction-cooldown` | `15s` | minimum delay between two rounds |
+  | `--substreams-tier1-cpu-eviction-drain-delay` | `8s` | wait between going unready and the first cancellation, covering the load balancer's routing lag |
+  | `--substreams-tier1-cpu-eviction-min-age` | `90s` | requests younger than this are never cancelled, a request being at its most expensive while it loads its stores |
+  | `--substreams-tier1-cpu-eviction-min-burn-cores` | `0.05` | requests burning less than this are never cancelled, since cancelling them frees nothing and costs a reconnect |
+  | `--substreams-tier1-cpu-eviction-quota-cores-override` | `0` | CPU budget to measure usage against instead of the cgroup's `cpu.max` |
+  | `--substreams-tier1-cpu-eviction-nominal-capacity` | `0` | requests a full instance carries; scales the new `substreams_tier1_effective_active_requests` metric and nothing else. `0` takes `--substreams-tier1-active-requests-soft-limit` |
+
+  Thresholds and ratios are fractions of the CPU budget. That budget is the CPU limit the cgroup carries, so an instance running under cgroup v2 with no limit set — `cpu.max` reading `max` — has nothing to compare usage to and logs a warning at startup, leaving the eviction off; `--substreams-tier1-cpu-eviction-quota-cores-override` names the budget yourself in that case, and should stay at or under whatever limit the kernel does enforce, since above it the instance is throttled before the eviction ever fires. Reading the cgroup CPU files failing outright, cgroup v1 included, also logs a warning and leaves the eviction off. Every one of these warnings is only emitted when the mode is not `off`.
+
+- Added `fireeth tools annotate-merged-blocks <gs-store-url>`, which writes the `datasize`, `itemcount` and `timestamp` metadata entries above on merged-blocks files written before the merger did it. Files a previous run already annotated are skipped straight from the listing, so a rerun over a mostly-done store costs one listing and nothing else. `--parallelism` (32 by default) sets how many files are read at once; `--start-block`, `--stop-block`, `--overwrite` and `--dry-run` are supported. Google Cloud Storage only.
+
+- Added `fireeth tools stats-merged-blocks <gs-store-url>`, which reports a merged-blocks store's total compressed and uncompressed size, block count, compression ratio and bytes per block, broken down by month. Nothing is downloaded: every number comes from those three metadata entries, which come back with the listing, so the whole report costs one listing however large the range is. Google Cloud Storage only.
+
+- Added `fireeth tools last-oneblock <oneblocks-store>` which prints the highest block number found among the store's one-block files, as a bare number on stdout, exiting non-zero when the store cannot be listed, holds no one-block file, or a filename does not parse as one.
+
+- Added `fireeth tools substreams purge <state-url>` which deletes substreams module caches that have not been used recently, reading the `last_used*.zst` markers that `substreams-tier1` refreshes on every request it serves. Retention can be per billing plan (`--retention default=30d,pro=30d,scaling=14d,free=3d`), a module folder being kept as soon as one of its markers is within its own plan's retention. Direct tier1 layouts (`<state-url>/<hash>`, `<state-url>/<tag>/<hash>`) and shared network roots (`<state-url>/<network>/substreams-states/<tag>/<hash>`) are both recognized. Supports `--dry-run`, `--scan-only`, `--keep` glob patterns, `--read-marker-contents` for stores whose objects were copied (which resets last-write times), and `--daemon --interval 12h` for unattended purging. See the `firehose-core` changelog for the full details.
+
+- Added `fireeth tools substreams prune-states <store-url> --keep-every <blocks> --truncate-below-block <block>` to delete intermediate store snapshots (`<end>-<start>.kv` files) of modules still in use, keeping the first snapshot of each `--keep-every`-aligned window. Only snapshots whose end block is at or below `--truncate-below-block` are thinned, the most recent snapshot of each module is always kept, and `--minimum-age` additionally spares recently written ones. `substreams-tier1` rebuilds stores from the last remaining snapshot before the requested block (see the bump above), so pruning trades disk space for reprocessing time. Supports `--dry-run`.
+
+- Added `fireeth tools substreams prune-outputs <store-url> --network <network> --truncate-below-block <block> --minimum-age <age>` to delete execution output files (`<start>-<end>.output` under a module's `outputs/` folder) that are BOTH fully below `--truncate-below-block` AND last modified longer than `--minimum-age` ago, the modification time coming straight out of the listing. Module folders carrying an spkg (directly-queried output modules) are kept untouched unless `--output-module-minimum-age` is set. Supports `--dry-run` and `--force`.
 
 ### Changed
 
 - Bumped `bstream` to enable parallel one-blocks downloading upon bootstrap or reconnect (very useful on fast chains)
 
 - Bumped `golang.org/x/crypto` to `v0.56.0`, clearing CVE-2026-78662 and CVE-2026-56855 (both HIGH), which the Docker Scout scan of the published image fails on.
+
+- Bumped `google.golang.org/grpc` to v1.83.2, which fixes CVE-2026-84445.
 
 - Bumped `substreams` to [v1.22.1-0.20260903162505-4035f21109ec](https://github.com/streamingfast/substreams/compare/5658911b40ce...4035f21109ec):
 
@@ -40,7 +77,7 @@ for instructions to keep up to date.
 
 - Bumped `dstore` to [v0.2.4-0.20260911133316-3b0685e87595](https://github.com/streamingfast/dstore/compare/56e87480522c...3b0685e87595): S3 `CopyObject` is done server-side (multipart above 5 GiB) instead of downloading and uploading the object back, falling back to the old behaviour on backends answering `NotImplemented` or `MethodNotAllowed`.
 
-- Bumped `firehose-core` to [v1.18.1-0.20260911143051-e5582af02c74](https://github.com/streamingfast/firehose-core/compare/475a571f0fe2...e5582af02c74):
+- Bumped `firehose-core` to [v1.18.1-0.20260911145235-fa9c1e143386](https://github.com/streamingfast/firehose-core/compare/475a571f0fe2...fa9c1e143386) (untagged, released as `v1.19.0`):
 
   - Merger: no longer spins when a walk over one-block files keeps hitting the unlinkable-blocks limit. A merger stuck behind a gap in one-block files re-walked and logged `too many unlinkable blocks, continuing to next loop` about ten times per second; it now waits `--merger-time-between-store-lookups` like any other iteration, and the line is logged at `Warn`.
 
@@ -88,40 +125,9 @@ for instructions to keep up to date.
 
   - Dependencies: `google.golang.org/grpc` moves from v1.83.0 to v1.83.1, which clears GHSA-vp52-pcj8-j9qc, reported as HIGH: a peer could exhaust server heap by fragmenting HTTP/2 DATA frames.
 
-### Added
+### Removed
 
-- New `--substreams-tier1-cpu-eviction-*` flags letting `substreams-tier1` shed requests when its own cgroup reports the CPU saturated. `--substreams-tier1-cpu-eviction-mode` (default `off`, so nothing changes until you set it) selects what it does: `observe` logs the requests it would cancel without cancelling any, `dev-only` cancels development-mode requests, `full` cancels production ones as well. See the bump above for what a round of eviction does.
-
-  The rest are tunables, each defaulting to the value the eviction was designed around:
-
-  | Flag | Default | Meaning |
-  | --- | --- | --- |
-  | `--substreams-tier1-cpu-eviction-threshold` | `0.90` | CPU usage above which the instance counts as overloaded |
-  | `--substreams-tier1-cpu-eviction-sustain` | `15s` | how long that must hold before it acts |
-  | `--substreams-tier1-cpu-eviction-recover-threshold` | `0.75` | CPU usage under which it stops counting as overloaded |
-  | `--substreams-tier1-cpu-eviction-recover-sustain` | `30s` | how long that must hold before it advertises itself as ready again |
-  | `--substreams-tier1-cpu-eviction-target-ratio` | `0.75` | CPU usage a round of eviction cuts down to, which sizes the round |
-  | `--substreams-tier1-cpu-eviction-interval` | `5s` | how often it looks at the CPU |
-  | `--substreams-tier1-cpu-eviction-cooldown` | `15s` | minimum delay between two rounds |
-  | `--substreams-tier1-cpu-eviction-drain-delay` | `8s` | wait between going unready and the first cancellation, covering the load balancer's routing lag |
-  | `--substreams-tier1-cpu-eviction-min-age` | `90s` | requests younger than this are never cancelled, a request being at its most expensive while it loads its stores |
-  | `--substreams-tier1-cpu-eviction-min-burn-cores` | `0.05` | requests burning less than this are never cancelled, since cancelling them frees nothing and costs a reconnect |
-  | `--substreams-tier1-cpu-eviction-quota-cores-override` | `0` | CPU budget to measure usage against instead of the cgroup's `cpu.max` |
-  | `--substreams-tier1-cpu-eviction-nominal-capacity` | `0` | requests a full instance carries; scales the new `substreams_tier1_effective_active_requests` metric and nothing else. `0` takes `--substreams-tier1-active-requests-soft-limit` |
-
-  Thresholds and ratios are fractions of the CPU budget. That budget is the CPU limit the cgroup carries, so an instance running under cgroup v2 with no limit set — `cpu.max` reading `max` — has nothing to compare usage to and logs a warning at startup, leaving the eviction off; `--substreams-tier1-cpu-eviction-quota-cores-override` names the budget yourself in that case, and should stay at or under whatever limit the kernel does enforce, since above it the instance is throttled before the eviction ever fires. Reading the cgroup CPU files failing outright, cgroup v1 included, also logs a warning and leaves the eviction off. Every one of these warnings is only emitted when the mode is not `off`.
-
-- Added `fireeth tools annotate-merged-blocks <gs-store-url>`, which writes the `datasize`, `itemcount` and `timestamp` metadata entries above on merged-blocks files written before the merger did it. Files a previous run already annotated are skipped straight from the listing, so a rerun over a mostly-done store costs one listing and nothing else. `--parallelism` (32 by default) sets how many files are read at once; `--start-block`, `--stop-block`, `--overwrite` and `--dry-run` are supported. Google Cloud Storage only.
-
-- Added `fireeth tools stats-merged-blocks <gs-store-url>`, which reports a merged-blocks store's total compressed and uncompressed size, block count, compression ratio and bytes per block, broken down by month. Nothing is downloaded: every number comes from those three metadata entries, which come back with the listing, so the whole report costs one listing however large the range is. Google Cloud Storage only.
-
-- Added `fireeth tools last-oneblock <oneblocks-store>` which prints the highest block number found among the store's one-block files, as a bare number on stdout, exiting non-zero when the store cannot be listed, holds no one-block file, or a filename does not parse as one.
-
-- Added `fireeth tools substreams purge <state-url>` which deletes substreams module caches that have not been used recently, reading the `last_used*.zst` markers that `substreams-tier1` refreshes on every request it serves. Retention can be per billing plan (`--retention default=30d,pro=30d,scaling=14d,free=3d`), a module folder being kept as soon as one of its markers is within its own plan's retention. Direct tier1 layouts (`<state-url>/<hash>`, `<state-url>/<tag>/<hash>`) and shared network roots (`<state-url>/<network>/substreams-states/<tag>/<hash>`) are both recognized. Supports `--dry-run`, `--scan-only`, `--keep` glob patterns, `--read-marker-contents` for stores whose objects were copied (which resets last-write times), and `--daemon --interval 12h` for unattended purging. See the `firehose-core` changelog for the full details.
-
-- Added `fireeth tools substreams prune-states <store-url> --keep-every <blocks> --truncate-below-block <block>` to delete intermediate store snapshots (`<end>-<start>.kv` files) of modules still in use, keeping the first snapshot of each `--keep-every`-aligned window. Only snapshots whose end block is at or below `--truncate-below-block` are thinned, the most recent snapshot of each module is always kept, and `--minimum-age` additionally spares recently written ones. `substreams-tier1` rebuilds stores from the last remaining snapshot before the requested block (see the bump above), so pruning trades disk space for reprocessing time. Supports `--dry-run`.
-
-- Added `fireeth tools substreams prune-outputs <store-url> --network <network> --truncate-below-block <block> --minimum-age <age>` to delete execution output files (`<start>-<end>.output` under a module's `outputs/` folder) that are BOTH fully below `--truncate-below-block` AND last modified longer than `--minimum-age` ago, the modification time coming straight out of the listing. Module folders carrying an spkg (directly-queried output modules) are kept untouched unless `--output-module-minimum-age` is set. Supports `--dry-run` and `--force`.
+- Removed the `--reader-node-firehose-compression` flag. It has never had any effect: the connection to the upstream endpoint always uses zstd. Operators setting it must drop it, as an unknown flag stops the process from starting.
 
 ## v2.21.0
 
