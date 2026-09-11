@@ -40,6 +40,20 @@ for instructions to keep up to date.
 
 - Bumped `dstore` to [v0.2.4-0.20260911133316-3b0685e87595](https://github.com/streamingfast/dstore/compare/56e87480522c...3b0685e87595): S3 `CopyObject` is done server-side (multipart above 5 GiB) instead of downloading and uploading the object back, falling back to the old behaviour on backends answering `NotImplemented` or `MethodNotAllowed`.
 
+- Bumped `firehose-core` to [v1.18.1-0.20260911143051-e5582af02c74](https://github.com/streamingfast/firehose-core/compare/475a571f0fe2...e5582af02c74):
+
+  - Merger: no longer spins when a walk over one-block files keeps hitting the unlinkable-blocks limit. A merger stuck behind a gap in one-block files re-walked and logged `too many unlinkable blocks, continuing to next loop` about ten times per second; it now waits `--merger-time-between-store-lookups` like any other iteration, and the line is logged at `Warn`.
+
+  - Merger: the unlinkable-blocks limit (`bundleSize*4`) can be overridden with the `MERGER_MAX_UNLINKABLE_BLOCKS` env var, for deployments where the default is too tight (e.g. several one-block-file writers per chain).
+
+  - Block poller: `no clients have been working for over 1 minute, still retrying` is only logged when fetches have actually been failing for over a minute, and the per-block lines (`about to fetch block`, `processing block`, `saved cursor`, ...) are logged at `Debug` instead of `Info`.
+
+  - Firehose: the `Blocks` handler logs an `incoming firehose Blocks request` line when a request starts, and the `firehose process completed` line gains `duration`, `time_to_first_data` and `first_sent_block`. Both lines carry `trace_id` and are emitted for every outcome, early rejections and client disconnects included.
+
+  - `reader-node-firehose` no longer re-emits `STEP_UNDO` responses from its upstream endpoint as new blocks; it logs and skips them.
+
+  - Tools: `fireeth tools compare-blocks --fields` prints the protobuf field paths that differ for each mismatched block, and `fireeth tools stats-merged-blocks` gains `--json` and shows the first block of each month.
+
 - Bumped `firehose-core` to [v1.18.1-0.20260902155646-475a571f0fe2](https://github.com/streamingfast/firehose-core/compare/2d13baafe8f2...475a571f0fe2) and `substreams` to [v1.22.1-0.20260902153244-5658911b40ce](https://github.com/streamingfast/substreams/compare/1cffa6c10a8d...5658911b40ce):
 
   - Server: store snapshots (fullKV files) can now be pruned to save disk space: `substreams-tier1` no longer assumes that a fullKV at block `x` implies that every earlier fullKV still exists. At request start it walks backwards from the first segment needing work, in growing listing windows, until it finds the last block where every store module still has a snapshot, and rebuilds the stores from there. Only snapshots actually seen are reused, and a job is only scheduled once the previous segment of every lower stage is done, so a pruned file is never read. The new `fireeth tools substreams prune-states` command (below) is what does the pruning.
