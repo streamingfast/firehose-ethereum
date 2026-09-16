@@ -4,6 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+- New `--substreams-tier1-cpu-eviction-order` flag (default `dev,prod-cached,prod-catchup`) listing the request classes the CPU eviction may cancel, least important first. A class left out is never cancelled, so **live production requests are no longer cancelled** unless `prod-live` is added to the order. See the `substreams` bump below for the new `prod-cached` class.
+
+### Changed
+
+- Bumped `firehose-core` to [v1.19.1-0.20260916141447-78161b00cc2f](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...78161b00cc2f).
+
+- Bumped `substreams` to [v1.22.1-0.20260916134931-00f266e19542](https://github.com/streamingfast/substreams/compare/1b7d09c2de7b...00f266e19542):
+
+  - Server: the CPU eviction order is configurable. Classes are cancelled in the configured order, highest burn first within a class and oldest first on a tie. A new `prod-cached` class covers production requests that have not processed a block on tier1 yet, only streaming outputs cached by tier2. They run no wasm on tier1, so `--substreams-tier1-cpu-eviction-min-burn-cores` does not apply to them (`--substreams-tier1-cpu-eviction-min-age` still does), and since their CPU cost is unknown, a round of eviction stops right after cancelling one; the next round, after `--substreams-tier1-cpu-eviction-cooldown`, measures what it freed. The `substreams_tier1_evicted_requests_counter` metric gains the `prod-cached` class.
+
+  - Server: per-store lines are logged at `Debug` instead of `Info`: `using mmap KV store`, `using in-memory KV store`, `flushing store at boundary`, `merged partial into full store`, `deleting partial store`. `squashing time metrics` stays at `Info`.
+
 ## v2.22.0
 
 ### Added
