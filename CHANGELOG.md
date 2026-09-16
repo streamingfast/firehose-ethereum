@@ -12,7 +12,7 @@ for instructions to keep up to date.
 
 ### Changed
 
-- Bumped `firehose-core` to [v1.19.1-0.20260916135135-4ae98b6fc001](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...4ae98b6fc001).
+- Bumped `firehose-core` to [v1.19.1-0.20260916135914-aff5665cf6c5](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...aff5665cf6c5).
 
 - Bumped `substreams` to [v1.22.1-0.20260916134931-00f266e19542](https://github.com/streamingfast/substreams/compare/1b7d09c2de7b...00f266e19542):
 
