@@ -289,8 +289,9 @@ message BlockHeader {
   optional uint64 slot_number = 26;
 
   // MorphNextL1MsgIndex is the index in Morph's L1 message queue at which the next block must
-  // start processing L1 messages, in other words the queue index right after the last L1 message
-  // included in this block. It lets you verify that every queued L1 message was included, in order.
+  // start processing L1 messages. Since Morph's Jade upgrade, it is the queue index of the last L1
+  // message included in this block plus one, or the parent's value if the block includes none.
+  // Before Jade, the sequencer could skip queue indices, so the value can be higher than that.
   //
   // Morph specific, unset on all other chains.
   optional uint64 morph_next_l1_msg_index = 27;
@@ -557,7 +558,8 @@ message TransactionTrace {
   // This is specified by https://eips.ethereum.org/EIPS/eip-7702
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_SET_CODE` which is possible only
-  // if Prague fork is active on the chain.
+  // if Prague fork is active on the chain, or on Morph if `TransactionTrace.Type == TRX_TYPE_MORPH`
+  // and [MorphTxConfig.version] is 2.
   repeated SetCodeAuthorization set_code_authorizations = 36;
 
   // MorphTxConfig holds the Morph specific fields carried by a MorphTx transaction.
@@ -576,8 +578,10 @@ message TransactionTrace {
 //
 // Specified by https://docs.morph.network/docs/about-morph/morphtx
 message MorphTxConfig {
-  // Version of the MorphTx payload, 0 for the initial encoding and 1 for the encoding that added
-  // the 'reference' and 'memo' fields as well as support for paying the fees with the native token.
+  // Version of the MorphTx payload, 0 for the initial encoding, 1 for the encoding that added
+  // the 'reference' and 'memo' fields as well as support for paying the fees with the native token,
+  // and 2 for the encoding that adds an EIP-7702 authorization list, recorded in
+  // [TransactionTrace.set_code_authorizations].
   //
   // The on chain type is a 'uint8'.
   uint32 version = 1;
@@ -590,7 +594,8 @@ message MorphTxConfig {
   uint32 fee_token_id = 2;
 
   // FeeLimit is the maximum amount of 'fee_token_id' token the sender authorizes to be spent on
-  // gas for this transaction.
+  // the fees of this transaction, L2 gas plus the L1 data fee. A value of 0 means no explicit limit,
+  // the sender's whole token balance is available. It must be 0 when 'fee_token_id' is 0.
   BigInt fee_limit = 3;
 
   // Reference is an arbitrary 32 bytes value attached to the transaction and meant to be indexed
@@ -732,19 +737,26 @@ message TransactionReceipt {
 // MorphReceiptConfig represents the Morph specific fields recorded on the receipt of a transaction.
 message MorphReceiptConfig {
   // L1Fee is the fee, in the native token, paid to cover the cost of posting this transaction's
-  // data to the L1 chain. It is populated for every Morph transaction, regardless of its type.
+  // data to the L1 chain. It is populated for every Morph transaction except L1 messages, which
+  // are prepaid on L1. For a MorphTx paying with a fee token, it is included in the token debit.
   BigInt l1_fee = 1;
 
   // FeeRate is the oracle rate used to convert the gas cost expressed in the native token into
   // units of the transaction's fee token.
   //
-  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
+  // [MorphTxConfig.fee_token_id] is not 0.
   BigInt fee_rate = 2;
 
-  // TokenScale is the scaling factor of the transaction's fee token. Together with 'fee_rate', the
-  // token amount charged is computed as `ceil(native_amount * token_scale / fee_rate)`.
+  // TokenScale is the scaling factor of the transaction's fee token. Together with 'fee_rate', a
+  // native amount converts to `ceil(native_amount * token_scale / fee_rate)` token units. The fee is
+  // debited upfront for the gas limit plus the L1 fee, and the unused part is refunded through a
+  // separate conversion, which rounds down with a carried rounding credit once the upgrade that
+  // activates MorphTx version 2 is live. The net amount charged is therefore not a single
+  // conversion of the gas used.
   //
-  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
+  // [MorphTxConfig.fee_token_id] is not 0.
   BigInt token_scale = 3;
 }
 

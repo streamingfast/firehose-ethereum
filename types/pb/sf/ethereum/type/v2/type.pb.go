@@ -1072,8 +1072,9 @@ type BlockHeader struct {
 	// be added in Amsterdam hard fork.
 	SlotNumber *uint64 `protobuf:"varint,26,opt,name=slot_number,json=slotNumber,proto3,oneof" json:"slot_number,omitempty"`
 	// MorphNextL1MsgIndex is the index in Morph's L1 message queue at which the next block must
-	// start processing L1 messages, in other words the queue index right after the last L1 message
-	// included in this block. It lets you verify that every queued L1 message was included, in order.
+	// start processing L1 messages. Since Morph's Jade upgrade, it is the queue index of the last L1
+	// message included in this block plus one, or the parent's value if the block includes none.
+	// Before Jade, the sequencer could skip queue indices, so the value can be higher than that.
 	//
 	// Morph specific, unset on all other chains.
 	MorphNextL1MsgIndex *uint64 `protobuf:"varint,27,opt,name=morph_next_l1_msg_index,json=morphNextL1MsgIndex,proto3,oneof" json:"morph_next_l1_msg_index,omitempty"`
@@ -1590,7 +1591,8 @@ type TransactionTrace struct {
 	// This is specified by https://eips.ethereum.org/EIPS/eip-7702
 	//
 	// This will is populated only if `TransactionTrace.Type == TRX_TYPE_SET_CODE` which is possible only
-	// if Prague fork is active on the chain.
+	// if Prague fork is active on the chain, or on Morph if `TransactionTrace.Type == TRX_TYPE_MORPH`
+	// and [MorphTxConfig.version] is 2.
 	SetCodeAuthorizations []*SetCodeAuthorization `protobuf:"bytes,36,rep,name=set_code_authorizations,json=setCodeAuthorizations,proto3" json:"set_code_authorizations,omitempty"`
 	// MorphTxConfig holds the Morph specific fields carried by a MorphTx transaction.
 	//
@@ -1850,8 +1852,10 @@ func (x *TransactionTrace) GetMorphL1MessageConfig() *MorphL1MessageConfig {
 // Specified by https://docs.morph.network/docs/about-morph/morphtx
 type MorphTxConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Version of the MorphTx payload, 0 for the initial encoding and 1 for the encoding that added
-	// the 'reference' and 'memo' fields as well as support for paying the fees with the native token.
+	// Version of the MorphTx payload, 0 for the initial encoding, 1 for the encoding that added
+	// the 'reference' and 'memo' fields as well as support for paying the fees with the native token,
+	// and 2 for the encoding that adds an EIP-7702 authorization list, recorded in
+	// [TransactionTrace.set_code_authorizations].
 	//
 	// The on chain type is a 'uint8'.
 	Version uint32 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
@@ -1862,7 +1866,8 @@ type MorphTxConfig struct {
 	// The on chain type is a 'uint16'.
 	FeeTokenId uint32 `protobuf:"varint,2,opt,name=fee_token_id,json=feeTokenId,proto3" json:"fee_token_id,omitempty"`
 	// FeeLimit is the maximum amount of 'fee_token_id' token the sender authorizes to be spent on
-	// gas for this transaction.
+	// the fees of this transaction, L2 gas plus the L1 data fee. A value of 0 means no explicit limit,
+	// the sender's whole token balance is available. It must be 0 when 'fee_token_id' is 0.
 	FeeLimit *BigInt `protobuf:"bytes,3,opt,name=fee_limit,json=feeLimit,proto3" json:"fee_limit,omitempty"`
 	// Reference is an arbitrary 32 bytes value attached to the transaction and meant to be indexed
 	// by consumers.
@@ -2311,17 +2316,24 @@ func (x *TransactionReceipt) GetMorphReceiptConfig() *MorphReceiptConfig {
 type MorphReceiptConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// L1Fee is the fee, in the native token, paid to cover the cost of posting this transaction's
-	// data to the L1 chain. It is populated for every Morph transaction, regardless of its type.
+	// data to the L1 chain. It is populated for every Morph transaction except L1 messages, which
+	// are prepaid on L1. For a MorphTx paying with a fee token, it is included in the token debit.
 	L1Fee *BigInt `protobuf:"bytes,1,opt,name=l1_fee,json=l1Fee,proto3" json:"l1_fee,omitempty"`
 	// FeeRate is the oracle rate used to convert the gas cost expressed in the native token into
 	// units of the transaction's fee token.
 	//
-	// This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
+	// This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
+	// [MorphTxConfig.fee_token_id] is not 0.
 	FeeRate *BigInt `protobuf:"bytes,2,opt,name=fee_rate,json=feeRate,proto3" json:"fee_rate,omitempty"`
-	// TokenScale is the scaling factor of the transaction's fee token. Together with 'fee_rate', the
-	// token amount charged is computed as `ceil(native_amount * token_scale / fee_rate)`.
+	// TokenScale is the scaling factor of the transaction's fee token. Together with 'fee_rate', a
+	// native amount converts to `ceil(native_amount * token_scale / fee_rate)` token units. The fee is
+	// debited upfront for the gas limit plus the L1 fee, and the unused part is refunded through a
+	// separate conversion, which rounds down with a carried rounding credit once the upgrade that
+	// activates MorphTx version 2 is live. The net amount charged is therefore not a single
+	// conversion of the gas used.
 	//
-	// This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
+	// This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
+	// [MorphTxConfig.fee_token_id] is not 0.
 	TokenScale    *BigInt `protobuf:"bytes,3,opt,name=token_scale,json=tokenScale,proto3" json:"token_scale,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
