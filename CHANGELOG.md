@@ -24,6 +24,8 @@ for instructions to keep up to date.
 
 ### Changed
 
+- Documented in `Call.keccak_preimages` that only preimages of 256 bytes or less are recorded. The map is there so a consumer can walk a storage slot back to the expression that produced it, and Solidity's slot derivations are small: 32 bytes for a dynamic array or a long `bytes`/`string`, 64 bytes for a mapping with a value-type key, and 32 bytes plus the key for a `mapping(string => V)`. 256 bytes covers all of those, with room for a 224-byte dynamic key. A larger preimage is a contract hashing its own data, and is dropped rather than truncated, since a truncated preimage no longer hashes back to its key.
+
 - Bumped `firehose-core` to [v1.19.1-0.20260916141447-78161b00cc2f](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...78161b00cc2f).
 
 - Bumped `substreams` to [v1.22.1-0.20260916134931-00f266e19542](https://github.com/streamingfast/substreams/compare/1b7d09c2de7b...00f266e19542):
