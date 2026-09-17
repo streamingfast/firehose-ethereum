@@ -287,6 +287,13 @@ message BlockHeader {
   // SlotNumber was added by EIP-7843 and is ignored in legacy headers, it is scheduled to
   // be added in Amsterdam hard fork.
   optional uint64 slot_number = 26;
+
+  // MorphNextL1MsgIndex is the index in Morph's L1 message queue at which the next block must
+  // start processing L1 messages, in other words the queue index right after the last L1 message
+  // included in this block. It lets you verify that every queued L1 message was included, in order.
+  //
+  // Morph specific, unset on all other chains.
+  optional uint64 morph_next_l1_msg_index = 27;
 }
 
 message Uint64NestedArray {
@@ -413,6 +420,24 @@ message TransactionTrace {
 
     // Polygon(bor)-specific
     TRX_TYPE_POLYGON_STATE_SYNC = 200;
+
+    // Morph-specific transactions
+
+    // MorphTx (type byte 0x7f on chain), a transaction that can pay for its gas with a registered
+    // ERC-20 token instead of the native token and that can carry an indexable reference and a memo.
+    // Those extra fields are recorded in [TransactionTrace.morph_tx_config].
+    //
+    // Specified by https://docs.morph.network/docs/about-morph/morphtx
+    TRX_TYPE_MORPH = 300;
+
+    // Morph's L1 message transaction (type byte 0x7e on chain), a transaction queued on the L1
+    // chain and later included by the sequencer in an L2 block. It carries no signature, its
+    // 'from' is the L1 sender and its queue index is recorded in
+    // [TransactionTrace.morph_l1_message_config].
+    //
+    // It shares its type byte with Optimism's deposit transaction (TRX_TYPE_OPTIMISM_DEPOSIT) but
+    // has different semantics, hence the distinct value here.
+    TRX_TYPE_MORPH_L1_MESSAGE = 301;
   }
 
   // AccessList represents the storage access this transaction has agreed to do in which case those storage
@@ -534,6 +559,59 @@ message TransactionTrace {
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_SET_CODE` which is possible only
   // if Prague fork is active on the chain.
   repeated SetCodeAuthorization set_code_authorizations = 36;
+
+  // MorphTxConfig holds the Morph specific fields carried by a MorphTx transaction.
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
+  optional MorphTxConfig morph_tx_config = 37;
+
+  // MorphL1MessageConfig holds the Morph specific fields carried by an L1 message transaction.
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH_L1_MESSAGE`.
+  optional MorphL1MessageConfig morph_l1_message_config = 38;
+}
+
+// MorphTxConfig represents the extra fields of a Morph MorphTx transaction, a transaction type
+// that enables paying the gas fees with a registered ERC-20 token instead of the native token.
+//
+// Specified by https://docs.morph.network/docs/about-morph/morphtx
+message MorphTxConfig {
+  // Version of the MorphTx payload, 0 for the initial encoding and 1 for the encoding that added
+  // the 'reference' and 'memo' fields as well as support for paying the fees with the native token.
+  //
+  // The on chain type is a 'uint8'.
+  uint32 version = 1;
+
+  // FeeTokenID is the identifier, in Morph's L2 token registry, of the ERC-20 token used to pay
+  // for the gas of this transaction. A value of 0 means the native token is used to pay the fees,
+  // which is possible only since version 1.
+  //
+  // The on chain type is a 'uint16'.
+  uint32 fee_token_id = 2;
+
+  // FeeLimit is the maximum amount of 'fee_token_id' token the sender authorizes to be spent on
+  // gas for this transaction.
+  BigInt fee_limit = 3;
+
+  // Reference is an arbitrary 32 bytes value attached to the transaction and meant to be indexed
+  // by consumers.
+  //
+  // Available since version 1 only and optional, will be empty when unset.
+  bytes reference = 4;
+
+  // Memo is an arbitrary value of at most 64 bytes attached to the transaction.
+  //
+  // Available since version 1 only and optional, will be empty when unset.
+  bytes memo = 5;
+}
+
+// MorphL1MessageConfig represents the extra fields of a Morph L1 message transaction, a transaction
+// queued on the L1 chain and later included by the sequencer in an L2 block.
+message MorphL1MessageConfig {
+  // QueueIndex is the position of this message in Morph's L1 message queue. The chain requires
+  // L1 messages to be included in strictly increasing queue index order, refer to
+  // [BlockHeader.morph_next_l1_msg_index] to know at which index the next block resumes.
+  uint64 queue_index = 1;
 }
 
 // AccessTuple represents a list of storage keys for a given contract's address and is used
@@ -643,6 +721,31 @@ message TransactionReceipt {
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_BLOB` which is possible only
   // if Cancun fork is active on the chain.
   optional BigInt blob_gas_price = 6;
+
+  // MorphReceiptConfig holds the Morph specific values that were resolved while executing the
+  // transaction, mainly the L1 data fee and the oracle values used to charge the fee token.
+  //
+  // Morph specific, unset on all other chains.
+  optional MorphReceiptConfig morph_receipt_config = 7;
+}
+
+// MorphReceiptConfig represents the Morph specific fields recorded on the receipt of a transaction.
+message MorphReceiptConfig {
+  // L1Fee is the fee, in the native token, paid to cover the cost of posting this transaction's
+  // data to the L1 chain. It is populated for every Morph transaction, regardless of its type.
+  BigInt l1_fee = 1;
+
+  // FeeRate is the oracle rate used to convert the gas cost expressed in the native token into
+  // units of the transaction's fee token.
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
+  BigInt fee_rate = 2;
+
+  // TokenScale is the scaling factor of the transaction's fee token. Together with 'fee_rate', the
+  // token amount charged is computed as `ceil(native_amount * token_scale / fee_rate)`.
+  //
+  // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
+  BigInt token_scale = 3;
 }
 
 message Log {
