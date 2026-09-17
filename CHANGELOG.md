@@ -8,6 +8,18 @@ for instructions to keep up to date.
 
 ### Added
 
+- Added Morph specific fields to the Ethereum block model. All of them are unset on every other chain.
+
+  - New `TransactionTrace.Type` values `TRX_TYPE_MORPH` for MorphTx (`0x7f`) and `TRX_TYPE_MORPH_L1_MESSAGE` for L1 message transactions (`0x7e`). The L1 message gets its own value because it shares its type byte with Optimism's deposit transaction but has different semantics.
+
+  - New `TransactionTrace.morph_tx_config` holding the MorphTx fields `version`, `fee_token_id`, `fee_limit`, `reference` and `memo`.
+
+  - New `TransactionTrace.morph_l1_message_config` holding the L1 message `queue_index`.
+
+  - New `TransactionReceipt.morph_receipt_config` holding `l1_fee`, `fee_rate` and `token_scale`.
+
+  - New `BlockHeader.morph_next_l1_msg_index` recording the queue index at which the next block resumes processing L1 messages.
+
 - New `--substreams-tier1-cpu-eviction-order` flag (default `dev,prod-cached,prod-catchup`) listing the request classes the CPU eviction may cancel, least important first. A class left out is never cancelled, so **live production requests are no longer cancelled** unless `prod-live` is added to the order. See the `substreams` bump below for the new `prod-cached` class.
 
 ### Changed
