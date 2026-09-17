@@ -848,7 +848,23 @@ message Call {
   bool executed_code = 15;
   bool suicide = 16;
 
-  // hex representation of the hash -> preimage
+  // Keccak preimages produced by the KECCAK256 opcode during this call, as a map of the
+  // hex representation of the hash -> hex representation of the preimage. Neither side
+  // carries a `0x` prefix.
+  //
+  // The map exists so a consumer can walk a storage slot back to the expression that
+  // produced it, and only preimages of 256 bytes or less are recorded. Solidity's slot
+  // derivations are all small:
+  //
+  // - 32 bytes for a dynamic array, or for a `bytes`/`string` longer than 31 bytes
+  // - 64 bytes for a mapping with a value-type key, one hash per level of nesting
+  // - 32 bytes plus the key for a `mapping(string => V)` or `mapping(bytes => V)`
+  //
+  // 256 bytes covers all of those, with room for a 224-byte dynamic key. A preimage
+  // larger than that comes from a contract hashing its own data rather than deriving a
+  // slot, and is left out of the map entirely rather than truncated: a truncated
+  // preimage does not hash back to its key, which is worse for a consumer than no entry.
+  //
   // Note: not populated by the Monad tracer, the Monad execution layer does not emit keccak preimage events
   map<string, string> keccak_preimages = 20;
 

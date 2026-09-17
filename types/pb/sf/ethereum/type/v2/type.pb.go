@@ -2548,7 +2548,23 @@ type Call struct {
 	//     Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
 	ExecutedCode bool `protobuf:"varint,15,opt,name=executed_code,json=executedCode,proto3" json:"executed_code,omitempty"`
 	Suicide      bool `protobuf:"varint,16,opt,name=suicide,proto3" json:"suicide,omitempty"`
-	// hex representation of the hash -> preimage
+	// Keccak preimages produced by the KECCAK256 opcode during this call, as a map of the
+	// hex representation of the hash -> hex representation of the preimage. Neither side
+	// carries a `0x` prefix.
+	//
+	// The map exists so a consumer can walk a storage slot back to the expression that
+	// produced it, and only preimages of 256 bytes or less are recorded. Solidity's slot
+	// derivations are all small:
+	//
+	//   - 32 bytes for a dynamic array, or for a `bytes`/`string` longer than 31 bytes
+	//   - 64 bytes for a mapping with a value-type key, one hash per level of nesting
+	//   - 32 bytes plus the key for a `mapping(string => V)` or `mapping(bytes => V)`
+	//
+	// 256 bytes covers all of those, with room for a 224-byte dynamic key. A preimage
+	// larger than that comes from a contract hashing its own data rather than deriving a
+	// slot, and is left out of the map entirely rather than truncated: a truncated
+	// preimage does not hash back to its key, which is worse for a consumer than no entry.
+	//
 	// Note: not populated by the Monad tracer, the Monad execution layer does not emit keccak preimage events
 	KeccakPreimages map[string]string `protobuf:"bytes,20,rep,name=keccak_preimages,json=keccakPreimages,proto3" json:"keccak_preimages,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Known Issues
