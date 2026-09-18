@@ -20,6 +20,7 @@ var ignoreSystemCallsOrder = boolEnv("FIREETH_COMPARE_IGNORE_SYSTEM_CALLS_ORDER"
 var ignoreGas = boolEnv("FIREETH_COMPARE_IGNORE_GAS", "FIREETH_TOOLS_COMPARE_IGNORE_GAS")
 var ignoreNoopCodeChanges = boolEnv("FIREETH_COMPARE_IGNORE_NOOP_CODE_CHANGES", "FIREETH_TOOLS_COMPARE_IGNORE_NOOP_CODE_CHANGES")
 var ignoreKeccak = boolEnv("FIREETH_COMPARE_IGNORE_KECCAK", "FIREETH_TOOLS_COMPARE_IGNORE_KECCAK")
+var ignoreKeccakPreimagesAbove256 = boolEnv("FIREETH_COMPARE_IGNORE_KECCAK_PREIMAGES_ABOVE_256", "FIREETH_TOOLS_COMPARE_IGNORE_KECCAK_PREIMAGES_ABOVE_256")
 var ignoreRevertedCallStorageChanges = boolEnv("FIREETH_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES", "FIREETH_TOOLS_COMPARE_IGNORE_REVERTED_CALL_STORAGE_CHANGES")
 var ignoreSystemCallGasLimit = boolEnv("FIREETH_COMPARE_IGNORE_SYSTEM_CALL_GAS_LIMIT", "FIREETH_TOOLS_COMPARE_IGNORE_OPSTACK_SYSTEM_GAS_LIMIT")
 var ignoreWithdrawals = boolEnv("FIREETH_COMPARE_IGNORE_WITHDRAWALS")
@@ -186,6 +187,9 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 
 			if ignoreKeccak {
 				call.KeccakPreimages = nil
+			}
+			if ignoreKeccakPreimagesAbove256 {
+				removeLargeKeccakPreimagesFromCall(call)
 			}
 			if call.FailureReason != "" {
 				call.FailureReason = "<error replaced for comparison>"
