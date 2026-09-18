@@ -8,6 +8,8 @@ for instructions to keep up to date.
 
 ### Added
 
+- New `FIREETH_COMPARE_IGNORE_KECCAK_PREIMAGES_ABOVE_256` (alias `FIREETH_TOOLS_COMPARE_IGNORE_KECCAK_PREIMAGES_ABOVE_256`), which drops `Call.keccak_preimages` entries whose preimage exceeds 256 bytes from **both** blocks before comparing. It lets a node running a tracer that caps the map be compared against one that still emits the large entries, without hiding every other preimage the way `FIREETH_COMPARE_IGNORE_KECCAK` does. Applies to `fireeth tools compare-blocks` and to a reader node in `--reader-node-test-mode`.
+
 - Added Morph specific fields to the Ethereum block model. All of them are unset on every other chain.
 
   - New `TransactionTrace.Type` values `TRX_TYPE_MORPH` for MorphTx (`0x7f`) and `TRX_TYPE_MORPH_L1_MESSAGE` for L1 message transactions (`0x7e`). The L1 message gets its own value because it shares its type byte with Optimism's deposit transaction but has different semantics.
