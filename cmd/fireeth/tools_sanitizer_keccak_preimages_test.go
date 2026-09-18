@@ -59,3 +59,19 @@ func Test_removeLargeKeccakPreimagesFromEthereumBlock(t *testing.T) {
 func Test_removeLargeKeccakPreimagesFromEthereumBlock_nilBlock(t *testing.T) {
 	require.Equal(t, 0, removeLargeKeccakPreimagesFromEthereumBlock(nil))
 }
+
+func Test_removeLargeKeccakPreimagesFromCall(t *testing.T) {
+	require.Equal(t, 0, removeLargeKeccakPreimagesFromCall(nil))
+	require.Equal(t, 0, removeLargeKeccakPreimagesFromCall(&pbeth.Call{}))
+
+	atTheLimit := strings.Repeat("ab", maxComparableKeccakPreimageSize)
+	call := &pbeth.Call{
+		KeccakPreimages: map[string]string{
+			"keep": atTheLimit,
+			"drop": strings.Repeat("cd", maxComparableKeccakPreimageSize+1),
+		},
+	}
+
+	require.Equal(t, 1, removeLargeKeccakPreimagesFromCall(call))
+	require.Equal(t, map[string]string{"keep": atTheLimit}, call.KeccakPreimages)
+}

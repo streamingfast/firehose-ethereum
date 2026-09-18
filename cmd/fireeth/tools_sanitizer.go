@@ -43,12 +43,6 @@ func boolEnv(names ...string) bool {
 var systemCaller = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe}
 
 const (
-	// maxComparableKeccakPreimageSize is the preimage size, in bytes, above which a tracer that
-	// caps `Call.keccak_preimages` records no entry. Map values are hex-encoded, so the length
-	// check is against twice this. Dropping the larger entries on both sides lets a capped node
-	// be compared against one still emitting them.
-	maxComparableKeccakPreimageSize = 256
-
 	// systemCallGasLimitGeth is the gas limit geth gives to system calls.
 	systemCallGasLimitGeth = 30000000
 
@@ -195,11 +189,7 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 				call.KeccakPreimages = nil
 			}
 			if ignoreKeccakPreimagesAbove256 {
-				for hash, preimage := range call.KeccakPreimages {
-					if len(preimage) > 2*maxComparableKeccakPreimageSize {
-						delete(call.KeccakPreimages, hash)
-					}
-				}
+				removeLargeKeccakPreimagesFromCall(call)
 			}
 			if call.FailureReason != "" {
 				call.FailureReason = "<error replaced for comparison>"

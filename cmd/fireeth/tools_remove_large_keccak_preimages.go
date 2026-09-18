@@ -139,34 +139,3 @@ func createRemoveLargeKeccakPreimagesE(logger *zap.Logger) firecore.CommandExecu
 		return nil
 	}
 }
-
-// removeLargeKeccakPreimagesFromEthereumBlock drops every `keccak_preimages` entry whose preimage
-// exceeds maxComparableKeccakPreimageSize bytes, and returns how many it dropped. Map values are
-// hex-encoded, hence the comparison against twice that size.
-func removeLargeKeccakPreimagesFromEthereumBlock(block *pbeth.Block) int {
-	if block == nil {
-		return 0
-	}
-
-	removed := 0
-	removeFromCall := func(call *pbeth.Call) {
-		for hash, preimage := range call.KeccakPreimages {
-			if len(preimage) > 2*maxComparableKeccakPreimageSize {
-				delete(call.KeccakPreimages, hash)
-				removed++
-			}
-		}
-	}
-
-	for _, systemCall := range block.SystemCalls {
-		removeFromCall(systemCall)
-	}
-
-	for _, trace := range block.TransactionTraces {
-		for _, call := range trace.Calls {
-			removeFromCall(call)
-		}
-	}
-
-	return removed
-}
