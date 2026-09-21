@@ -28,17 +28,25 @@ for instructions to keep up to date.
 
 - `--relayer-source` accepts a `retry_interval=<duration>` query parameter (e.g. `my.source:12345?retry_interval=120s`) setting the minimum time between two connection attempts to that source. Use it for a rescuer or fallback endpoint that is expected to be down most of the time, so the relayer does not dial it (and log the failure) every 5s. `retry_interval` must be at least `5s`, and since sources are checked every 5s it is rounded up to the next 5s increment (e.g. `12s` behaves as `15s`). Without it, a source is retried every 5s.
 
+- gRPC clients receive responses up to 2 GiB instead of 1 GiB, and servers send responses up to 2 GiB (bumped `dgrpc`), so a block up to 2 GiB goes from the reader through the relayer to Firehose and Substreams. Request limits are unchanged. External clients need their own receive limit raised to get blocks that big.
+
 - New `--substreams-tier1-cpu-eviction-order` flag (default `dev,prod-cached,prod-catchup`) listing the request classes the CPU eviction may cancel, least important first. A class left out is never cancelled, so **live production requests are no longer cancelled** unless `prod-live` is added to the order. See the `substreams` bump below for the new `prod-cached` class.
 
 ### Changed
 
 - Documented in `Call.keccak_preimages` that only preimages of 256 bytes or less are recorded. The map is there so a consumer can walk a storage slot back to the expression that produced it, and Solidity's slot derivations are small: 32 bytes for a dynamic array or a long `bytes`/`string`, 64 bytes for a mapping with a value-type key, and 32 bytes plus the key for a `mapping(string => V)`. 256 bytes covers all of those, with room for a 224-byte dynamic key. A larger preimage is a contract hashing its own data, and is dropped rather than truncated, since a truncated preimage no longer hashes back to its key.
 
-- Bumped `firehose-core` to [v1.19.1-0.20260918144654-f8b1fb15c790](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...f8b1fb15c790).
+- `--reader-node-line-buffer-size` is now the normal size of the line buffer (default 100 MiB, at least 32 KiB). The buffer grows past it in pieces of that size for a longer line, up to `2861913428` bytes: the longest line whose block, with 1 MiB for the message around it, fits in a 2 GiB response. Each time 50 blocks in a row used less than half of it, it shrinks by half, keeping whole pieces and never going below the normal size. A grown buffer stays allocated until it shrinks back.
+
+- `--reader-node-line-buffer-size` outside of `32768` to `2861913428` bytes is now refused at startup instead of being used as is. A reader configured above that range does not start until the value is lowered.
+
+- Bumped `firehose-core` to [v1.19.1-0.20260921202950-7f05d52e13ac](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...7f05d52e13ac), which needs the `github.com/ShinyTrinkets/overseer` replace directive moved to `github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef`.
 
 - Bumped `bstream` to [v0.0.2-0.20260918143503-663ffa2a5017](https://github.com/streamingfast/bstream/compare/07a378ae0f74...663ffa2a5017) for the per-source retry interval backing `retry_interval` on `--relayer-source`.
 
-- Bumped `substreams` to [v1.22.1-0.20260916134931-00f266e19542](https://github.com/streamingfast/substreams/compare/1b7d09c2de7b...00f266e19542):
+- Bumped `substreams` to [v1.22.1-0.20260918202516-61fcf3e0651b](https://github.com/streamingfast/substreams/compare/1b7d09c2de7b...61fcf3e0651b):
+
+  - Server: production requests that fall far behind the chain are disconnected so they reconnect and back-process the gap in parallel. The main case is a long back-processing: when it finishes, the request would otherwise process everything the chain produced in the meantime linearly on tier1, which can take hours. A production request is disconnected when it is more than 2 segments behind the last final block (rounded down to a segment), checked when back-processing finishes and at every segment boundary while streaming final blocks. It gets the same `Unavailable` "endpoint is shutting down, please reconnect" error as a tier1 restart, so clients reconnecting from their cursor pick up where they left off. Set the `SUBSTREAMS_MAX_LINEAR_HANDOFF_LAG_SEGMENTS` environment variable on tier1 to change the number of segments.
 
   - Server: the CPU eviction order is configurable. Classes are cancelled in the configured order, highest burn first within a class and oldest first on a tie. A new `prod-cached` class covers production requests that have not processed a block on tier1 yet, only streaming outputs cached by tier2. They run no wasm on tier1, so `--substreams-tier1-cpu-eviction-min-burn-cores` does not apply to them (`--substreams-tier1-cpu-eviction-min-age` still does), and since their CPU cost is unknown, a round of eviction stops right after cancelling one; the next round, after `--substreams-tier1-cpu-eviction-cooldown`, measures what it freed. The `substreams_tier1_evicted_requests_counter` metric gains the `prod-cached` class.
 
