@@ -12,6 +12,8 @@ for instructions to keep up to date.
 
 - New `fireeth tools remove-large-keccak-preimages <src> <dest> <start> <stop>`, which rewrites merged-blocks files dropping every `Call.keccak_preimages` entry whose preimage exceeds 256 bytes. It brings a range written before the tracer cap in line with one written after it. Preimages carry no ordinal, so nothing else in the block moves and the block version is unchanged.
 
+- New `BlockHeader.block_access_list_hash` and `BlockHeader.block_access_list_rlp` fields for EIP-7928 block access lists, scheduled for the Amsterdam hard fork. Both are ignored in legacy headers; only the hash is committed to by the header itself. `block_access_list_rlp` is experimental, populated for measurement purposes only, and must not be depended on until StreamingFast declares it stable.
+
 - Added Morph specific fields to the Ethereum block model. All of them are unset on every other chain.
 
   - New `TransactionTrace.Type` values `TRX_TYPE_MORPH` for MorphTx (`0x7f`) and `TRX_TYPE_MORPH_L1_MESSAGE` for L1 message transactions (`0x7e`). The L1 message gets its own value because it shares its type byte with Optimism's deposit transaction but has different semantics.

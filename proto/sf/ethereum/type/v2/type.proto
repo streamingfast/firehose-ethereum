@@ -295,6 +295,19 @@ message BlockHeader {
   //
   // Morph specific, unset on all other chains.
   optional uint64 morph_next_l1_msg_index = 27;
+
+  // BlockAccessListHash was added by EIP-7928 and is ignored in legacy headers, it is scheduled
+  // to be added in Amsterdam hard fork. This is the field the block header itself commits to.
+  optional bytes block_access_list_hash = 28;
+
+  // BlockAccessList is the RLP-encoded EIP-7928 block access list for this block, added in the
+  // Amsterdam hard fork. Unlike `block_access_list_hash`, the header does not commit to this
+  // field directly.
+  //
+  // EXPERIMENTAL: this field is populated for measurement purposes only and must **not** be
+  // depended on. It is not yet officially supported for consumption and may be dropped or
+  // change shape without notice until StreamingFast declares it stable.
+  optional bytes block_access_list_rlp = 29;
 }
 
 message Uint64NestedArray {
