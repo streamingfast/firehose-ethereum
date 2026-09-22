@@ -46,7 +46,7 @@ for instructions to keep up to date.
 
 - `--reader-node-line-buffer-size` outside of `32768` to `2861913428` bytes is now refused at startup instead of being used as is. A reader configured above that range does not start until the value is lowered.
 
-- Bumped `firehose-core` to [v1.20.1-0.20260922204938-ed666d1cafdc](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...ed666d1cafdc), which needs the `github.com/ShinyTrinkets/overseer` replace directive moved to `github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef`.
+- Bumped `firehose-core` to [v1.20.1](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...v1.20.1), which needs the `github.com/ShinyTrinkets/overseer` replace directive moved to `github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef`.
 
 - Bumped `bstream` to [v0.0.2-0.20260921191230-ea57fcbd4fbb](https://github.com/streamingfast/bstream/compare/07a378ae0f74...ea57fcbd4fbb) for the per-source retry interval backing `retry_interval` on `--relayer-source`.
 
