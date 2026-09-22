@@ -36,6 +36,8 @@ for instructions to keep up to date.
 
 - New `--substreams-tier1-squasher-plugin` flag so `fireeth start` can point `substreams-tier1` at a remote store-merge (squasher) process. Empty or `local://` keeps in-process squashing. Production uses `grpcs://host?secret=<token>`: TLS, port defaults to 443, `secret` is sent as the `authorization` header. Plaintext local/dev uses `grpc://host:port`. Extra TLS/plaintext toggles stay on the DSN query string (`insecure=true`, `plaintext=false`).
 
+- Reader: the base64 payload of a `FIRE BLOCK` line (Firehose protocol 3.x) is decoded while the line is read, instead of after the whole line was copied into a string, using the `firehose-core` line splitter. Reading a block needs about 1.5 times its line size in memory instead of about 3 times. With `--reader-node-debug-firehose-logs`, a `FIRE BLOCK` line is logged as `FIRE BLOCK <header> <payload: N bytes decoded>` instead of its full base64 text.
+
 ### Changed
 
 - Documented in `Call.keccak_preimages` that only preimages of 256 bytes or less are recorded. The map is there so a consumer can walk a storage slot back to the expression that produced it, and Solidity's slot derivations are small: 32 bytes for a dynamic array or a long `bytes`/`string`, 64 bytes for a mapping with a value-type key, and 32 bytes plus the key for a `mapping(string => V)`. 256 bytes covers all of those, with room for a 224-byte dynamic key. A larger preimage is a contract hashing its own data, and is dropped rather than truncated, since a truncated preimage no longer hashes back to its key.
