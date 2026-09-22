@@ -36,7 +36,7 @@ for instructions to keep up to date.
 
 - New `--substreams-tier1-squasher-plugin` flag so `fireeth start` can point `substreams-tier1` at a remote store-merge (squasher) process. Empty or `local://` keeps in-process squashing. Production uses `grpcs://host?secret=<token>`: TLS, port defaults to 443, `secret` is sent as the `authorization` header. Plaintext local/dev uses `grpc://host:port`. Extra TLS/plaintext toggles stay on the DSN query string (`insecure=true`, `plaintext=false`).
 
-- Reader: the base64 payload of a `FIRE BLOCK` line (Firehose protocol 3.x) is decoded while the line is read, instead of after the whole line was copied into a string, using the `firehose-core` line splitter. Reading a block needs about 1.5 times its line size in memory instead of about 3 times. With `--reader-node-debug-firehose-logs`, a `FIRE BLOCK` line is logged as `FIRE BLOCK <header> <payload: N bytes decoded>` instead of its full base64 text.
+- Reader: the base64 payload of a `FIRE BLOCK` line (Firehose protocol 3.x) is decoded while the line is read, instead of after the whole line was copied into a string, using the `firehose-core` line splitter, which decodes with `github.com/emmansun/base64` like `fireeth` did before. Reading a block needs about 1.5 times its line size in memory instead of about 3 times. With `--reader-node-debug-firehose-logs`, a `FIRE BLOCK` line is logged as `FIRE BLOCK <header> <payload: N bytes decoded>` instead of its full base64 text.
 
 ### Changed
 
@@ -46,7 +46,7 @@ for instructions to keep up to date.
 
 - `--reader-node-line-buffer-size` outside of `32768` to `2861913428` bytes is now refused at startup instead of being used as is. A reader configured above that range does not start until the value is lowered.
 
-- Bumped `firehose-core` to [v1.19.1-0.20260922200117-2a50dfcbb319](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...2a50dfcbb319), which needs the `github.com/ShinyTrinkets/overseer` replace directive moved to `github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef`.
+- Bumped `firehose-core` to [v1.20.1-0.20260922204938-ed666d1cafdc](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...ed666d1cafdc), which needs the `github.com/ShinyTrinkets/overseer` replace directive moved to `github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef`.
 
 - Bumped `bstream` to [v0.0.2-0.20260921191230-ea57fcbd4fbb](https://github.com/streamingfast/bstream/compare/07a378ae0f74...ea57fcbd4fbb) for the per-source retry interval backing `retry_interval` on `--relayer-source`.
 
