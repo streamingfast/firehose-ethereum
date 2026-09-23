@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.23.0
 
 ### Added
 
@@ -32,6 +32,12 @@ for instructions to keep up to date.
 
 - New `--substreams-tier1-cpu-eviction-order` flag (default `dev,prod-cached,prod-catchup`) listing the request classes the CPU eviction may cancel, least important first. A class left out is never cancelled, so **live production requests are no longer cancelled** unless `prod-live` is added to the order. See the `substreams` bump below for the new `prod-cached` class.
 
+- New `--substreams-tier1-max-request-duration` flag (default `0`, no limit). When set, a Substreams request that has run for that long is ended gracefully: its stores are quick-saved (with `--substreams-tier1-quicksave-store`) and the client is told to reconnect. Set it a bit under the stream duration limit of the load balancer serving requests.
+
+- New `--substreams-tier1-squasher-plugin` flag so `fireeth start` can point `substreams-tier1` at a remote store-merge (squasher) process. Empty or `local://` keeps in-process squashing. Production uses `grpcs://host?secret=<token>`: TLS, port defaults to 443, `secret` is sent as the `authorization` header. Plaintext local/dev uses `grpc://host:port`. Extra TLS/plaintext toggles stay on the DSN query string (`insecure=true`, `plaintext=false`).
+
+- Reader: the base64 payload of a `FIRE BLOCK` line (Firehose protocol 3.x) is decoded while the line is read, instead of after the whole line was copied into a string, using the `firehose-core` line splitter, which decodes with `github.com/emmansun/base64` like `fireeth` did before. Reading a block needs about 1.5 times its line size in memory instead of about 3 times. With `--reader-node-debug-firehose-logs`, a `FIRE BLOCK` line is logged as `FIRE BLOCK <header> <payload: N bytes decoded>` instead of its full base64 text.
+
 ### Changed
 
 - Documented in `Call.keccak_preimages` that only preimages of 256 bytes or less are recorded. The map is there so a consumer can walk a storage slot back to the expression that produced it, and Solidity's slot derivations are small: 32 bytes for a dynamic array or a long `bytes`/`string`, 64 bytes for a mapping with a value-type key, and 32 bytes plus the key for a `mapping(string => V)`. 256 bytes covers all of those, with room for a 224-byte dynamic key. A larger preimage is a contract hashing its own data, and is dropped rather than truncated, since a truncated preimage no longer hashes back to its key.
@@ -40,17 +46,25 @@ for instructions to keep up to date.
 
 - `--reader-node-line-buffer-size` outside of `32768` to `2861913428` bytes is now refused at startup instead of being used as is. A reader configured above that range does not start until the value is lowered.
 
-- Bumped `firehose-core` to [v1.19.1-0.20260921202950-7f05d52e13ac](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...7f05d52e13ac), which needs the `github.com/ShinyTrinkets/overseer` replace directive moved to `github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef`.
+- Bumped `firehose-core` to [v1.20.1](https://github.com/streamingfast/firehose-core/compare/fa9c1e143386...v1.20.1), which needs the `github.com/ShinyTrinkets/overseer` replace directive moved to `github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef`.
 
-- Bumped `bstream` to [v0.0.2-0.20260918143503-663ffa2a5017](https://github.com/streamingfast/bstream/compare/07a378ae0f74...663ffa2a5017) for the per-source retry interval backing `retry_interval` on `--relayer-source`.
+- Bumped `bstream` to [v0.0.2-0.20260921191230-ea57fcbd4fbb](https://github.com/streamingfast/bstream/compare/07a378ae0f74...ea57fcbd4fbb) for the per-source retry interval backing `retry_interval` on `--relayer-source`.
 
-- Bumped `substreams` to [v1.22.1-0.20260918202516-61fcf3e0651b](https://github.com/streamingfast/substreams/compare/1b7d09c2de7b...61fcf3e0651b):
+- Bumped `substreams` to [v1.23.0](https://github.com/streamingfast/substreams/compare/1b7d09c2de7b...v1.23.0):
 
   - Server: production requests that fall far behind the chain are disconnected so they reconnect and back-process the gap in parallel. The main case is a long back-processing: when it finishes, the request would otherwise process everything the chain produced in the meantime linearly on tier1, which can take hours. A production request is disconnected when it is more than 2 segments behind the last final block (rounded down to a segment), checked when back-processing finishes and at every segment boundary while streaming final blocks. It gets the same `Unavailable` "endpoint is shutting down, please reconnect" error as a tier1 restart, so clients reconnecting from their cursor pick up where they left off. Set the `SUBSTREAMS_MAX_LINEAR_HANDOFF_LAG_SEGMENTS` environment variable on tier1 to change the number of segments.
 
   - Server: the CPU eviction order is configurable. Classes are cancelled in the configured order, highest burn first within a class and oldest first on a tie. A new `prod-cached` class covers production requests that have not processed a block on tier1 yet, only streaming outputs cached by tier2. They run no wasm on tier1, so `--substreams-tier1-cpu-eviction-min-burn-cores` does not apply to them (`--substreams-tier1-cpu-eviction-min-age` still does), and since their CPU cost is unknown, a round of eviction stops right after cancelling one; the next round, after `--substreams-tier1-cpu-eviction-cooldown`, measures what it freed. The `substreams_tier1_evicted_requests_counter` metric gains the `prod-cached` class.
 
   - Server: per-store lines are logged at `Debug` instead of `Info`: `using mmap KV store`, `using in-memory KV store`, `flushing store at boundary`, `merged partial into full store`, `deleting partial store`. `squashing time metrics` stays at `Info`.
+
+  - Server: the tier1 block hub logs `processing block` at `Debug`, except for one line every 10 seconds kept at `Info` to show progress. `linking live block using one blocks` moves up to `Info`, so a one-block store lookup after an unlinkable live block shows in production logs.
+
+  - Server: tier1 can merge stores on a remote squasher selected by `--substreams-tier1-squasher-plugin`. Empty or `local://` stays in-process. Each remote run is one RPC per store module; if the remote is unreachable that run is squashed locally and later runs stay local until one succeeds. A live remote that returns an application error still fails the request.
+
+### Security
+
+- Bumped `google.golang.org/grpc` to `v1.85.0-dev.0.20260825072537-93e31b48545e`, the commit that fixes CVE-2026-84445. `v1.84.0` is still in the affected range; this pin comes in with `substreams` `v1.23.0`.
 
 ## v2.22.0
 

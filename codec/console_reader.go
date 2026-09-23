@@ -31,6 +31,7 @@ import (
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/dmetrics"
 	firecore "github.com/streamingfast/firehose-core"
+	"github.com/streamingfast/firehose-core/node-manager/consoleline"
 	"github.com/streamingfast/firehose-core/node-manager/mindreader"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"github.com/streamingfast/logging"
@@ -42,8 +43,9 @@ import (
 // ConsoleReader is what reads the `geth` output directly. It builds
 // up some LogEntry objects. See `LogReader` to read those entries .
 type ConsoleReader struct {
-	lines chan string
-	close func()
+	lines        chan string
+	consoleLines <-chan consoleline.Line
+	close        func()
 
 	ctx   *parseCtx
 	done  chan interface{}
@@ -68,6 +70,27 @@ func NewConsoleReader(lines chan string, blockEncoder firecore.BlockEncoder, log
 	}
 
 	return l, nil
+}
+
+var _ mindreader.BlockLineConsoleReader = (*ConsoleReader)(nil)
+
+// ReadLines makes the reader read its lines from the given channel instead of the one
+// it was created with, "FIRE BLOCK" lines on it can have their payload already decoded.
+// It implements [mindreader.BlockLineConsoleReader].
+func (c *ConsoleReader) ReadLines(lines <-chan consoleline.Line) {
+	c.consoleLines = lines
+}
+
+// nextLine returns the next line read, as text or as a decoded "FIRE BLOCK" line, ok is
+// false once the lines channel is closed.
+func (c *ConsoleReader) nextLine() (line string, block *consoleline.Block, ok bool) {
+	if c.consoleLines != nil {
+		consoleLine, ok := <-c.consoleLines
+		return consoleLine.Text, consoleLine.Block, ok
+	}
+
+	line, ok = <-c.lines
+	return line, nil, ok
 }
 
 // todo: WTF?
@@ -232,7 +255,21 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 
 	c.logger.Debug("next", zap.Int("read_type", readType))
 
-	for line := range c.lines {
+	for {
+		line, block, ok := c.nextLine()
+		if !ok {
+			break
+		}
+
+		if block != nil {
+			if err := ctx.checkBlockLineAllowed(); err != nil {
+				return nil, fmt.Errorf("%s (line header %q)", err, block.Header)
+			}
+
+			ctx.stats.inc("BLOCK")
+			return ctx.readDecodedBlockForProtocolVersion3(block)
+		}
+
 		switch {
 		case strings.HasPrefix(line, "DMLOG "):
 			line = line[6:]
@@ -256,15 +293,11 @@ func (c *ConsoleReader) next(readType int) (out interface{}, err error) {
 		// It's a micro-optimization but's worth it.
 		switch {
 		case strings.HasPrefix(line, "BLOCK"):
-			if ctx.fhMajorVersion == 0 {
-				return nil, fmt.Errorf("got 'FIRE BLOCK ...' line before receiving 'FIRE INIT ...' line, cannot proceed (received full line %q)", line)
+			if err := ctx.checkBlockLineAllowed(); err != nil {
+				return nil, fmt.Errorf("%s (received full line %q)", err, line)
 			}
 
 			ctx.stats.inc("BLOCK")
-			if ctx.fhMajorVersion != 3 {
-				return nil, fmt.Errorf("got 'FIRE BLOCK ...' line while Firehose protocol major version reported by 'FIRE INIT ...' was actually %d, this is invalid as 'FIRE BLOCK ...' can be emitted only if Firehose protocol major version is 3", ctx.fhMajorVersion)
-			}
-
 			return ctx.readBlockForProtocolVersion3(line)
 
 		case strings.HasPrefix(line, "GAS_CHANGE"):
@@ -1283,17 +1316,74 @@ func (ctx *parseCtx) readCodeChange(line string) error {
 func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block, error) {
 	start := time.Now()
 
-	chunkCount := 8
-	if ctx.readPartialBlockIndex {
-		chunkCount = 9
-	}
-	chunks, err := SplitInBoundedChunks(line, chunkCount)
+	chunks, err := SplitInBoundedChunks(line, ctx.blockHeaderFieldCount()+2)
 	if err != nil {
 		return nil, fmt.Errorf("splitting block log line: %w", err)
 	}
 
-	i := 0
+	encodedPayload := chunks[len(chunks)-1]
+	return ctx.buildBlockForProtocolVersion3(start, chunks[:len(chunks)-1], func() ([]byte, error) {
+		payload, err := base64.StdEncoding.DecodeString(encodedPayload)
+		if err != nil {
+			return nil, fmt.Errorf("decoding base64 block payload: %w", err)
+		}
 
+		return payload, nil
+	})
+}
+
+// readDecodedBlockForProtocolVersion3 is readBlockForProtocolVersion3 for a "FIRE BLOCK" line
+// whose payload was decoded while it was read.
+func (ctx *parseCtx) readDecodedBlockForProtocolVersion3(line *consoleline.Block) (out *pbbstream.Block, err error) {
+	start := time.Now()
+
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("BLOCK: %s (line header %q)", err, line.Header)
+		}
+	}()
+
+	// The header has no "BLOCK" chunk in front of its fields, the empty one stands for it
+	fields, err := SplitInBoundedChunks(" "+line.Header, ctx.blockHeaderFieldCount()+1)
+	if err != nil {
+		return nil, fmt.Errorf("splitting block log line: %w", err)
+	}
+
+	return ctx.buildBlockForProtocolVersion3(start, fields, func() ([]byte, error) {
+		if line.Err != nil {
+			return nil, fmt.Errorf("decoding base64 block payload: %w", line.Err)
+		}
+
+		return line.Payload, nil
+	})
+}
+
+// checkBlockLineAllowed returns an error when a "FIRE BLOCK" line is not valid for the
+// protocol version announced by the "FIRE INIT" line.
+func (ctx *parseCtx) checkBlockLineAllowed() error {
+	if ctx.fhMajorVersion == 0 {
+		return fmt.Errorf("got 'FIRE BLOCK ...' line before receiving 'FIRE INIT ...' line, cannot proceed")
+	}
+
+	if ctx.fhMajorVersion != 3 {
+		return fmt.Errorf("got 'FIRE BLOCK ...' line while Firehose protocol major version reported by 'FIRE INIT ...' was actually %d, this is invalid as 'FIRE BLOCK ...' can be emitted only if Firehose protocol major version is 3", ctx.fhMajorVersion)
+	}
+
+	return nil
+}
+
+// blockHeaderFieldCount is the number of fields before the payload in a "FIRE BLOCK" line.
+func (ctx *parseCtx) blockHeaderFieldCount() int {
+	if ctx.readPartialBlockIndex {
+		return 7
+	}
+	return 6
+}
+
+// buildBlockForProtocolVersion3 builds the block out of the header fields of a "FIRE BLOCK"
+// line, payload is called once the fields are validated.
+func (ctx *parseCtx) buildBlockForProtocolVersion3(start time.Time, chunks []string, payload func() ([]byte, error)) (*pbbstream.Block, error) {
+	i := 0
 	blockNum, err := strconv.ParseUint(chunks[i], 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parsing block num %q: %w", chunks[i], err)
@@ -1339,14 +1429,14 @@ func (ctx *parseCtx) readBlockForProtocolVersion3(line string) (*pbbstream.Block
 	i++
 
 	timestamp := time.Unix(0, int64(timestampUnixNano))
-	payload, err := base64.StdEncoding.DecodeString(chunks[i])
+	payloadBytes, err := payload()
 	if err != nil {
-		return nil, fmt.Errorf("decoding base64 block payload: %w", err)
+		return nil, err
 	}
 
 	blockPayload := &anypb.Any{
 		TypeUrl: "type.googleapis.com/sf.ethereum.type.v2.Block",
-		Value:   payload,
+		Value:   payloadBytes,
 	}
 
 	block := &pbbstream.Block{
