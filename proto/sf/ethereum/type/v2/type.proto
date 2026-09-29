@@ -837,8 +837,26 @@ message Call {
   BigInt value = 7;
   uint64 gas_limit = 8;
   uint64 gas_consumed = 9;
+
+  // ReturnData is the raw return data of the call.
+  //
+  // It is left empty once the return data of the calls that ended before it in the same
+  // transaction adds up to more than 25 MiB. When a block would otherwise exceed 1 GiB, this
+  // budget is halved until the block fits. `return_data_truncated` is set to true whenever
+  // return data was left out. The root call is never truncated.
   bytes return_data = 13;
 
+  // ReturnDataTruncated is true when the call returned data but `return_data` was left
+  // empty to stay within the transaction's return data budget, see `return_data`.
+  bool return_data_truncated = 36;
+
+  // Input is the raw input data of the call.
+  //
+  // It is cut to its first 4 bytes (the method selector) once the input of the calls that
+  // started before it in the same transaction adds up to more than 50 MiB. When a block would
+  // otherwise exceed 1 GiB, this budget is halved until the block fits. `input_truncated` is
+  // set to true whenever input was cut. The root call is never truncated.
+  //
   // Known Issues
   // - Version 3:
   //    When call is `CREATE` or `CREATE2`, this field is not populated. A couple of suggestions:
@@ -847,6 +865,10 @@ message Call {
   //
   //    Fixed in `Version 4`, see https://docs.substreams.dev/reference-material/chains-and-endpoints/ethereum-data-model for information about block versions.
   bytes input = 14;
+
+  // InputTruncated is true when `input` was cut to its first 4 bytes to stay within the
+  // transaction's input budget, see `input`. An input of 4 bytes or less is never flagged.
+  bool input_truncated = 35;
 
   // Indicates whether the call executed code.
   //
@@ -977,24 +999,8 @@ message Call {
   repeated AccountCreation account_creations = 33 [deprecated = true];
 
   // The identifier 34 is taken by 'address_delegates_to' field above.
-
-  // True when `input` holds only the first 4 bytes (the method selector) of the call's input
-  // rather than all of it. The tracer keeps at most 50 MiB of input across the internal calls of
-  // one transaction, counted in call order: once the calls so far exceed that, the input of every
-  // later call is cut to 4 bytes. It uses a lower budget, halved until the block fits, when a
-  // block would otherwise exceed 1 GiB. The root call is never truncated, its input is also in
-  // `TransactionTrace.input`. Execution is not affected, only what the trace records.
-  //
-  // Set only when bytes were left out, so an input of 4 bytes or less is never flagged.
-  bool input_truncated = 35;
-
-  // True when `return_data` was left empty even though the call returned data. The tracer keeps
-  // at most 25 MiB of return data across the internal calls of one transaction, counted in the
-  // order calls end: once the calls so far exceed that, the return data of every later call is
-  // left out. It uses a lower budget, halved until the block fits, when a block would otherwise
-  // exceed 1 GiB. The root call is never truncated, its return data is also in
-  // `TransactionTrace.return_data`.
-  bool return_data_truncated = 36;
+  // The identifier 35 is taken by 'input_truncated' field above.
+  // The identifier 36 is taken by 'return_data_truncated' field above.
 
   reserved 50; // repeated ERC20BalanceChange erc20_balance_changes = 50 [deprecated = true];
   reserved 51; // repeated ERC20TransferEvent erc20_transfer_events = 51 [deprecated = true];
