@@ -198,6 +198,24 @@ func (m *BlockHeader) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.BlockAccessListRlp != nil {
+		i -= len(m.BlockAccessListRlp)
+		copy(dAtA[i:], m.BlockAccessListRlp)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.BlockAccessListRlp)))
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xea
+	}
+	if m.BlockAccessListHash != nil {
+		i -= len(m.BlockAccessListHash)
+		copy(dAtA[i:], m.BlockAccessListHash)
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.BlockAccessListHash)))
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xe2
+	}
 	if m.MorphNextL1MsgIndex != nil {
 		i = protohelpers.EncodeVarint(dAtA, i, uint64(*m.MorphNextL1MsgIndex))
 		i--
@@ -1334,6 +1352,30 @@ func (m *Call) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.unknownFields != nil {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
+	}
+	if m.ReturnDataTruncated {
+		i--
+		if m.ReturnDataTruncated {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xa0
+	}
+	if m.InputTruncated {
+		i--
+		if m.InputTruncated {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0x98
 	}
 	if m.AddressDelegatesTo != nil {
 		i -= len(m.AddressDelegatesTo)
@@ -2533,6 +2575,14 @@ func (m *BlockHeader) SizeVT() (n int) {
 	if m.MorphNextL1MsgIndex != nil {
 		n += 2 + protohelpers.SizeOfVarint(uint64(*m.MorphNextL1MsgIndex))
 	}
+	if m.BlockAccessListHash != nil {
+		l = len(m.BlockAccessListHash)
+		n += 2 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	if m.BlockAccessListRlp != nil {
+		l = len(m.BlockAccessListRlp)
+		n += 2 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
 	n += len(m.unknownFields)
 	return n
 }
@@ -3028,6 +3078,12 @@ func (m *Call) SizeVT() (n int) {
 	if m.AddressDelegatesTo != nil {
 		l = len(m.AddressDelegatesTo)
 		n += 2 + l + protohelpers.SizeOfVarint(uint64(l))
+	}
+	if m.InputTruncated {
+		n += 3
+	}
+	if m.ReturnDataTruncated {
+		n += 3
 	}
 	n += len(m.unknownFields)
 	return n
@@ -4532,6 +4588,74 @@ func (m *BlockHeader) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			m.MorphNextL1MsgIndex = &v
+		case 28:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BlockAccessListHash", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protohelpers.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BlockAccessListHash = append(m.BlockAccessListHash[:0], dAtA[iNdEx:postIndex]...)
+			if m.BlockAccessListHash == nil {
+				m.BlockAccessListHash = []byte{}
+			}
+			iNdEx = postIndex
+		case 29:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BlockAccessListRlp", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protohelpers.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return protohelpers.ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BlockAccessListRlp = append(m.BlockAccessListRlp[:0], dAtA[iNdEx:postIndex]...)
+			if m.BlockAccessListRlp == nil {
+				m.BlockAccessListRlp = []byte{}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
@@ -7976,6 +8100,46 @@ func (m *Call) UnmarshalVT(dAtA []byte) error {
 				m.AddressDelegatesTo = []byte{}
 			}
 			iNdEx = postIndex
+		case 35:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field InputTruncated", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protohelpers.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.InputTruncated = bool(v != 0)
+		case 36:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReturnDataTruncated", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protohelpers.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.ReturnDataTruncated = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])

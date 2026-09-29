@@ -6,6 +6,10 @@ for instructions to keep up to date.
 
 ## Unreleased
 
+### Added
+
+- `Call.input_truncated` and `Call.return_data_truncated` in `sf.ethereum.type.v2`. They flag the calls whose input was cut to its 4-byte selector, or whose return data was left out, by a tracer that limits how much call input and return data a transaction or block records. A trace without such limits never sets them.
+
 ### Fixed
 
 - Firehose and substreams-tier1 now return the sessions they still hold to the session server before exiting, whatever `--common-system-shutdown-signal-delay` is set to. Sessions of requests cut by the shutdown used to be released in the background while the process exited, so they stayed counted against the organization until they expired on the session server, and a client reconnecting right away could be refused with `Concurrent stream limit exceeded`. This applies to session plugins implementing `Close(ctx) error`, which the `tgm://` plugin does.
