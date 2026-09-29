@@ -318,6 +318,7 @@ func stripFirehoseUncles(in []*pbeth.BlockHeader) {
 
 func stripFirehoseHeader(in *pbeth.BlockHeader) {
 	in.TxDependency = nil
+	in.BlockAccessListRlp = nil // experimental, not available on RPC
 
 	if in.BaseFeePerGas == nil {
 		in.BaseFeePerGas = &pbeth.BigInt{}
