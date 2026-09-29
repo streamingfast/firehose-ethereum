@@ -840,8 +840,8 @@ message Call {
 
   // ReturnData is the raw return data of the call.
   //
-  // It is left empty once the return data of the calls that ended before it in the same
-  // transaction adds up to more than 25 MiB. When a block would otherwise exceed 1 GiB, this
+  // If the return data of the calls that ended before it in the same transaction adds up to more than
+  // 25 MiB, this call's return data is left empty. When a block would otherwise exceed 1 GiB, this
   // budget is halved until the block fits. `return_data_truncated` is set to true whenever
   // return data was left out. The root call is never truncated.
   bytes return_data = 13;
@@ -852,8 +852,8 @@ message Call {
 
   // Input is the raw input data of the call.
   //
-  // It is cut to its first 4 bytes (the method selector) once the input of the calls that
-  // started before it in the same transaction adds up to more than 50 MiB. When a block would
+  // If the input of the calls that started before it in the same transaction adds up to more than
+  // 50 MiB, this call's input is cut to its first 4 bytes (the method selector). When a block would
   // otherwise exceed 1 GiB, this budget is halved until the block fits. `input_truncated` is
   // set to true whenever input was cut. The root call is never truncated.
   //
