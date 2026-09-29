@@ -861,22 +861,20 @@ message Call {
   bool executed_code = 15;
   bool suicide = 16;
 
-  // Keccak preimages produced by the KECCAK256 opcode during this call, as a map of the
-  // hex representation of the hash -> hex representation of the preimage. Neither side
-  // carries a `0x` prefix.
+  // KeccakPreimages maps the hash of each KECCAK256 computed in this call (hex, no 0x) to
+  // the bytes that were hashed (hex, no 0x). Only preimages that explain a storage slot
+  // written by the same transaction (or system call) are kept:
   //
-  // The map exists so a consumer can walk a storage slot back to the expression that
-  // produced it, and only preimages of 256 bytes or less are recorded. Solidity's slot
-  // derivations are all small:
+  // - the hash is a storage change key, or a storage change key is the hash plus less
+  //   than 2^64 (struct fields and array elements live at `keccak(p) + i`);
+  // - or the hash, or the hash plus such an offset, appears in another kept preimage as
+  //   a 32-byte-aligned word or as its last 32 bytes (nested mappings, a mapping inside
+  //   a struct or array element, `string`/`bytes` keys), following at most 16 levels.
   //
-  // - 32 bytes for a dynamic array, or for a `bytes`/`string` longer than 31 bytes
-  // - 64 bytes for a mapping with a value-type key, one hash per level of nesting
-  // - 32 bytes plus the key for a `mapping(string => V)` or `mapping(bytes => V)`
-  //
-  // 256 bytes covers all of those, with room for a 224-byte dynamic key. A preimage
-  // larger than that comes from a contract hashing its own data rather than deriving a
-  // slot, and is left out of the map entirely rather than truncated: a truncated
-  // preimage does not hash back to its key, which is worse for a consumer than no entry.
+  // Preimages longer than 256 bytes, and hashes that never lead to a written storage slot
+  // (hashes used only to read storage, signatures, CREATE2 addresses, Merkle proofs), are
+  // not included. An entry stays on the call that computed the hash, which may differ
+  // from the call that wrote the storage slot.
   //
   // Note: not populated by the Monad tracer, the Monad execution layer does not emit keccak preimage events
   map<string, string> keccak_preimages = 20;
