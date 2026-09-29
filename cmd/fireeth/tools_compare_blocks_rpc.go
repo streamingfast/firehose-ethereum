@@ -384,6 +384,12 @@ func stripFirehoseTransactionTraces(in []*pbeth.TransactionTrace, hashesWithoutT
 		stripFirehoseTrxReceipt(trace.Receipt)
 		trace.Calls = nil // not available on RPC
 
+		for _, auth := range trace.SetCodeAuthorizations {
+			auth.Discarded = false // not available on RPC, Firehose-computed validity flag that depends on execution-time account state
+			auth.R = bytes.TrimLeft(auth.R, string([]byte{0}))
+			auth.S = bytes.TrimLeft(auth.S, string([]byte{0}))
+		}
+
 		if trace.Value == nil {
 			trace.Value = &pbeth.BigInt{}
 		}
@@ -392,6 +398,12 @@ func stripFirehoseTransactionTraces(in []*pbeth.TransactionTrace, hashesWithoutT
 }
 
 func stripFirehoseTrxReceipt(in *pbeth.TransactionReceipt) {
+	if in == nil {
+		// A missing receipt is a real difference (RPC always synthesizes one), let the
+		// proto/JSON comparison downstream report it instead of panicking here.
+		return
+	}
+
 	for _, log := range in.Logs {
 		log.Ordinal = 0
 		log.Index = 0 // index inside transaction is a pbeth construct, it doesn't exist in RPC interface and we can't reconstruct exactly the same from RPC because the pbeth ones are increased even when a call is reverted.
