@@ -18,6 +18,10 @@ for instructions to keep up to date.
 
 - `fireeth tools compare-blocks-rpc`/`compare-oneblock-rpc` no longer report false differences for `header.slot_number` (EIP-7843) and the EIP-4844 blob fields (`blob_gas`, `blob_gas_fee_cap`, `blob_hashes`, receipt `blob_gas_used`/`blob_gas_price`) on Amsterdam-fork blocks. The RPC side of the comparison silently dropped these fields when rebuilding a block from `eth_getBlockByNumber`/`eth_getTransactionReceipt`, because `eth-go`'s RPC types had no fields to decode them into; bumped `eth-go` to pick up the fix and mapped the new fields in `block.RpcToEthBlock`.
 
+- `fireeth tools compare-blocks-rpc`/`compare-oneblock-rpc` no longer report false differences on `set_code_authorizations` (EIP-7702) for transactions carrying a `SetCode` (type 4) authorization list. `eth-go`'s RPC `Transaction` type had no field to decode `authorizationList`; bumped `eth-go` to add it and mapped the tuples in `block.RpcToEthBlock`, recovering `authority` from the tuple's signature the same way the Firehose tracer does. `discarded` stays Firehose-only (it depends on execution-time account state the RPC doesn't expose) and is excluded from the comparison, same as `Calls`/`ReturnData`.
+
+- `fireeth tools compare-blocks-rpc` no longer panics with a nil pointer dereference when a Firehose transaction trace has no receipt (observed on reth for an Amsterdam transaction that runs out of gas before its root frame). A missing receipt is now reported as a diff instead of crashing the tool.
+
 - `BlockHeader.block_access_list_hash` and `block_access_list_rlp` (added to the proto in v2.23.0) were never actually present in the generated Go code, since `types/pb` wasn't regenerated after the proto change. This made every `compare-blocks-rpc`/`compare-oneblock-rpc` comparison on a block carrying either field fail with an empty, uninformative diff. Bumped `firehose-ethereum/types` to pick up the regenerated code and compare `block_access_list_hash` against RPC's `eth_getBlockByNumber`; `block_access_list_rlp` stays Firehose-only and is excluded from the comparison, same as `Calls`/`ReturnData`.
 
 ### Changed

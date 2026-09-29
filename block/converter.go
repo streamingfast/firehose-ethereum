@@ -128,6 +128,29 @@ func toAccessList(in rpc.AccessList) []*pbeth.AccessTuple {
 	return out
 }
 
+// toSetCodeAuthorizations converts the raw EIP-7702 authorization tuples returned by the RPC.
+// The RPC only exposes the signed tuple, 'discarded' (whether the chain applied it) is a
+// Firehose-only, execution-dependent flag and is left unset here. 'authority' is recovered
+// from the signature via rpc.SetCodeAuthorization.Authority, nil when unrecoverable (e.g. an
+// invalid, all-zero signature).
+func toSetCodeAuthorizations(in rpc.AuthorizationList) []*pbeth.SetCodeAuthorization {
+	out := make([]*pbeth.SetCodeAuthorization, len(in))
+	for i, v := range in {
+		out[i] = &pbeth.SetCodeAuthorization{
+			ChainId: pbeth.NewBigInt(int64(v.ChainID)).Bytes,
+			Address: v.Address.Bytes(),
+			Nonce:   uint64(v.Nonce),
+			V:       uint32(v.YParity),
+			R:       BigIntFromEthUint256(v.R).Bytes,
+			S:       BigIntFromEthUint256(v.S).Bytes,
+		}
+		if authority, err := v.Authority(); err == nil {
+			out[i].Authority = authority.Bytes()
+		}
+	}
+	return out
+}
+
 type counter struct {
 	val uint64
 }
@@ -169,6 +192,9 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 	}
 	if transaction.BlobVersionedHashes != nil {
 		out.BlobHashes = HashesToBytes(transaction.BlobVersionedHashes)
+	}
+	if transaction.AuthorizationList != nil {
+		out.SetCodeAuthorizations = toSetCodeAuthorizations(transaction.AuthorizationList)
 	}
 
 	var fhReceipt *pbeth.TransactionReceipt
