@@ -43,6 +43,18 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 	if in.WithdrawalsHash != nil {
 		withdrawalHash = in.WithdrawalsHash.Bytes()
 	}
+
+	var slotNumber *uint64
+	if in.SlotNumber != nil {
+		asUint := uint64(*in.SlotNumber)
+		slotNumber = &asUint
+	}
+
+	var blockAccessListHash []byte
+	if in.BlockAccessListHash != nil {
+		blockAccessListHash = (*in.BlockAccessListHash).Bytes()
+	}
+
 	totalDiff := BigIntFromEthUint256(in.TotalDifficulty)
 	if totalDiff.String() == "" {
 		totalDiff = nil
@@ -58,30 +70,32 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 		BalanceChanges:    nil, // not available
 		CodeChanges:       nil, // not available
 		Header: &pbeth.BlockHeader{
-			ParentHash:       in.ParentHash.Bytes(),
-			Coinbase:         in.Miner,
-			UncleHash:        in.UnclesSHA3,
-			StateRoot:        in.StateRoot.Bytes(),
-			TransactionsRoot: in.TransactionsRoot.Bytes(),
-			ReceiptRoot:      in.ReceiptsRoot.Bytes(),
-			LogsBloom:        in.LogsBloom.Bytes(),
-			Difficulty:       BigIntFromEthUint256(in.Difficulty),
-			TotalDifficulty:  totalDiff,
-			Number:           uint64(in.Number),
-			GasLimit:         uint64(in.GasLimit),
-			GasUsed:          uint64(in.GasUsed),
-			Timestamp:        timestamppb.New(time.Time(in.Timestamp)),
-			ExtraData:        in.ExtraData.Bytes(),
-			Nonce:            uint64(in.Nonce),
-			Hash:             in.Hash.Bytes(),
-			MixHash:          in.MixHash.Bytes(),
-			BaseFeePerGas:    BigIntFromEthUint256(in.BaseFeePerGas),
-			WithdrawalsRoot:  withdrawalHash,
-			BlobGasUsed:      blobGasUsed,
-			ExcessBlobGas:    excessBlobGas,
-			ParentBeaconRoot: parentBeaconRoot,
-			RequestsHash:     requestsHash,
-			TxDependency:     nil, // not available
+			ParentHash:          in.ParentHash.Bytes(),
+			Coinbase:            in.Miner,
+			UncleHash:           in.UnclesSHA3,
+			StateRoot:           in.StateRoot.Bytes(),
+			TransactionsRoot:    in.TransactionsRoot.Bytes(),
+			ReceiptRoot:         in.ReceiptsRoot.Bytes(),
+			LogsBloom:           in.LogsBloom.Bytes(),
+			Difficulty:          BigIntFromEthUint256(in.Difficulty),
+			TotalDifficulty:     totalDiff,
+			Number:              uint64(in.Number),
+			GasLimit:            uint64(in.GasLimit),
+			GasUsed:             uint64(in.GasUsed),
+			Timestamp:           timestamppb.New(time.Time(in.Timestamp)),
+			ExtraData:           in.ExtraData.Bytes(),
+			Nonce:               uint64(in.Nonce),
+			Hash:                in.Hash.Bytes(),
+			MixHash:             in.MixHash.Bytes(),
+			BaseFeePerGas:       BigIntFromEthUint256(in.BaseFeePerGas),
+			WithdrawalsRoot:     withdrawalHash,
+			BlobGasUsed:         blobGasUsed,
+			ExcessBlobGas:       excessBlobGas,
+			ParentBeaconRoot:    parentBeaconRoot,
+			RequestsHash:        requestsHash,
+			SlotNumber:          slotNumber,
+			BlockAccessListHash: blockAccessListHash,
+			TxDependency:        nil, // not available
 		},
 	}
 	return out, hashesWithoutTo
@@ -150,6 +164,13 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 		// Calls:                   // not available on RPC
 	}
 
+	if transaction.MaxFeePerBlobGas != nil {
+		out.BlobGasFeeCap = BigIntFromEthUint256(transaction.MaxFeePerBlobGas)
+	}
+	if transaction.BlobVersionedHashes != nil {
+		out.BlobHashes = HashesToBytes(transaction.BlobVersionedHashes)
+	}
+
 	var fhReceipt *pbeth.TransactionReceipt
 	fhReceipt = toFirehoseReceipts(receipt, ordinal, logs) // each log will increment the ordinal by 1
 	out.Receipt = fhReceipt
@@ -157,6 +178,10 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 	if receipt != nil {
 		if receipt.Status != nil {
 			out.Status = toFirehoseReceiptStatus(uint64(*receipt.Status))
+		}
+		if receipt.BlobGasUsed != nil {
+			blobGas := uint64(*receipt.BlobGasUsed)
+			out.BlobGas = &blobGas
 		}
 		out.Type = pbeth.TransactionTrace_Type(receipt.Type)
 		// Polygon 127 is state sync
@@ -222,12 +247,22 @@ func toFirehoseReceipts(receipt *rpc.TransactionReceipt, ordinal *counter, logs 
 		logBloom = receipt.LogsBloom.Bytes()
 	}
 
-	return &pbeth.TransactionReceipt{
+	out := &pbeth.TransactionReceipt{
 		StateRoot:         receipt.Root,
 		CumulativeGasUsed: uint64(receipt.CumulativeGasUsed),
 		LogsBloom:         logBloom,
 		Logs:              toFirehoseLogs(receipt.Logs, ordinal),
 	}
+
+	if receipt.BlobGasUsed != nil {
+		blobGasUsed := uint64(*receipt.BlobGasUsed)
+		out.BlobGasUsed = &blobGasUsed
+	}
+	if receipt.BlobGasPrice != nil {
+		out.BlobGasPrice = BigIntFromEthUint256(receipt.BlobGasPrice)
+	}
+
+	return out
 }
 
 func ethLogtoFirehoseLogs(logs []eth.Log, ordinal *counter) []*pbeth.Log {

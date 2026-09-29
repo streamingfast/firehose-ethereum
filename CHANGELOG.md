@@ -16,6 +16,10 @@ for instructions to keep up to date.
 
 - Substreams: Fix tier1 requests rejected before their body is read (authentication, compression enforcement) sometimes failing at a load balancer with HTTP 502 or `INTERNAL` instead of returning their error.
 
+- `fireeth tools compare-blocks-rpc`/`compare-oneblock-rpc` no longer report false differences for `header.slot_number` (EIP-7843) and the EIP-4844 blob fields (`blob_gas`, `blob_gas_fee_cap`, `blob_hashes`, receipt `blob_gas_used`/`blob_gas_price`) on Amsterdam-fork blocks. The RPC side of the comparison silently dropped these fields when rebuilding a block from `eth_getBlockByNumber`/`eth_getTransactionReceipt`, because `eth-go`'s RPC types had no fields to decode them into; bumped `eth-go` to pick up the fix and mapped the new fields in `block.RpcToEthBlock`.
+
+- `BlockHeader.block_access_list_hash` and `block_access_list_rlp` (added to the proto in v2.23.0) were never actually present in the generated Go code, since `types/pb` wasn't regenerated after the proto change. This made every `compare-blocks-rpc`/`compare-oneblock-rpc` comparison on a block carrying either field fail with an empty, uninformative diff. Bumped `firehose-ethereum/types` to pick up the regenerated code and compare `block_access_list_hash` against RPC's `eth_getBlockByNumber`; `block_access_list_rlp` stays Firehose-only and is excluded from the comparison, same as `Calls`/`ReturnData`.
+
 ### Changed
 
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
