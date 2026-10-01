@@ -32,6 +32,12 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 			    offset, or through up to 16 levels of nested hashing);
 			  - the single empty topic of a log without topics emitted by a reverted call.
 
+			Fixed on every block:
+
+			  - 'Log.index' counts every log of the transaction in the order they were emitted,
+			    logs of reverted calls included. A receipt log gets the index of its copy in the
+			    calls. Version 3 and below counted the receipt logs only.
+
 			Fixed on blocks of version 2:
 
 			  - the caller of a DELEGATE call is set to the address of its closest ancestor that is
@@ -42,12 +48,13 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 			  - a root call recorded with a 'begin_ordinal' of 0 gets the ordinal the tracer left
 			    unused when the call started, or a new one right after the transaction's
 			    'begin_ordinal' when there is none;
-			  - any other call recorded with a 'begin_ordinal' of 0 gets a new ordinal right before
-			    the first thing it recorded;
+			  - any other call recorded with a 'begin_ordinal' of 0 gets the closest unused ordinal
+			    below the first thing it recorded, or a new one right before it when there is none;
 			  - the genesis root call recorded with an 'end_ordinal' of 0 gets a new ordinal right
 			    before the transaction's 'end_ordinal';
-			  - the ordinals of the transactions are moved above those of the system calls when they
-			    overlap (blocks before Prague only);
+			  - the ordinals of the transactions are moved above those of the system calls when a
+			    transaction and a system call use the same ordinal (blocks before Prague only).
+			    System calls that ran inside a transaction (Arbitrum) keep their place;
 			  - 'TransactionTrace.return_data' is copied from the root call when empty;
 			  - the input of a root CREATE call is set to the transaction's input when empty;
 			  - a keccak preimage recorded as "." (empty input) becomes an empty string.
@@ -65,10 +72,17 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 			Blocks already at version 5 go through the same steps. Only those written by a tracer
 			that did not filter keccak preimages or limit call data change.
 
-			Not fixed, the block alone does not hold what is needed:
+			Not fixed, the block alone does not hold what is needed. On these fields the output
+			differs from the blocks a version 5 tracer produces for the same chain:
 
 			  - the input of internal CREATE calls is empty (version 3 and below);
-			  - 'Call.executed_code' can be wrong (version 3 and below);
+			  - 'Call.executed_code' can be wrong (version 3 and below): it is set on calls to
+			    precompiles and on the root call of Arbitrum internal transactions, and missing
+			    on calls without input to an address that has code;
+			  - 'Call.address_delegates_to' is empty on calls to an account that delegates its code
+			    (EIP-7702), and 'Call.executed_code' is not set on them (version 3 and below);
+			  - on Prague blocks of version 3 and below, transactions and system calls keep sharing
+			    ordinals, so the ordinals differ from those of a version 5 tracer;
 			  - the balance changes of a self-destruct are in the old order and miss the burn
 			    (version 3 and below);
 			  - 'Block.withdrawals' is empty, use 'fix-withdrawals' for that.

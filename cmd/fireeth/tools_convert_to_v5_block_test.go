@@ -347,13 +347,76 @@ func Test_convertEthereumBlockToV5_version3KnownIssues(t *testing.T) {
 					{
 						Index: 2, ParentIndex: 1, Depth: 1, CallType: pbeth.CallType_CALL, BeginOrdinal: 6, EndOrdinal: 7,
 						StateReverted: true,
-						Logs:          []*pbeth.Log{{}, {Topics: [][]byte{word(1)}}},
+						Logs:          []*pbeth.Log{{}, {Index: 1, Topics: [][]byte{word(1)}}},
 					},
 				},
 			},
 		},
 		BalanceChanges: []*pbeth.BalanceChange{{Ordinal: 10, OldValue: bigInt(1), NewValue: bigInt(2)}},
 	}, block)
+}
+
+func Test_convertEthereumBlockToV5_systemCallInsideTransaction(t *testing.T) {
+	// Ordinals 2 and 3 were consumed by the two calls when they started and left unused
+	block := &pbeth.Block{
+		Ver:    3,
+		Header: &pbeth.BlockHeader{},
+		SystemCalls: []*pbeth.Call{
+			{Index: 2, ParentIndex: 1, Depth: 1, BeginOrdinal: 6, EndOrdinal: 7},
+			{Index: 1, BeginOrdinal: 4, EndOrdinal: 9, GasChanges: []*pbeth.GasChange{{Ordinal: 5}}, StorageChanges: []*pbeth.StorageChange{{Ordinal: 8, OldValue: word(1), NewValue: word(2)}}},
+		},
+		TransactionTraces: []*pbeth.TransactionTrace{
+			{
+				BeginOrdinal: 1,
+				EndOrdinal:   13,
+				Calls: []*pbeth.Call{
+					{Index: 1, EndOrdinal: 12},
+					{Index: 2, ParentIndex: 1, Depth: 1, EndOrdinal: 11, StorageChanges: []*pbeth.StorageChange{{Ordinal: 10, OldValue: word(1), NewValue: word(2)}}},
+				},
+			},
+		},
+	}
+
+	convertEthereumBlockToV5(block)
+
+	assertProtoEqual(t, &pbeth.Block{
+		Ver:    5,
+		Header: &pbeth.BlockHeader{},
+		SystemCalls: []*pbeth.Call{
+			{Index: 2, ParentIndex: 1, Depth: 1, BeginOrdinal: 5, EndOrdinal: 6},
+			{Index: 1, BeginOrdinal: 4, EndOrdinal: 8, StorageChanges: []*pbeth.StorageChange{{Ordinal: 7, OldValue: word(1), NewValue: word(2)}}},
+		},
+		TransactionTraces: []*pbeth.TransactionTrace{
+			{
+				BeginOrdinal: 1,
+				EndOrdinal:   12,
+				Calls: []*pbeth.Call{
+					{Index: 1, BeginOrdinal: 2, EndOrdinal: 11},
+					{Index: 2, ParentIndex: 1, Depth: 1, BeginOrdinal: 3, EndOrdinal: 10, StorageChanges: []*pbeth.StorageChange{{Ordinal: 9, OldValue: word(1), NewValue: word(2)}}},
+				},
+			},
+		},
+	}, block)
+}
+
+func Test_setLogIndexes(t *testing.T) {
+	trace := &pbeth.TransactionTrace{
+		Receipt: &pbeth.TransactionReceipt{Logs: []*pbeth.Log{{Ordinal: 3}, {Ordinal: 9}}},
+		Calls: []*pbeth.Call{
+			{Index: 1, Logs: []*pbeth.Log{{Ordinal: 3}, {Ordinal: 9, Index: 1}}},
+			{Index: 2, ParentIndex: 1, StateReverted: true, Logs: []*pbeth.Log{{Ordinal: 5}, {Ordinal: 6}}},
+		},
+	}
+
+	setLogIndexes(trace)
+
+	assertProtoEqual(t, &pbeth.TransactionTrace{
+		Receipt: &pbeth.TransactionReceipt{Logs: []*pbeth.Log{{Ordinal: 3}, {Ordinal: 9, Index: 3}}},
+		Calls: []*pbeth.Call{
+			{Index: 1, Logs: []*pbeth.Log{{Ordinal: 3}, {Ordinal: 9, Index: 3}}},
+			{Index: 2, ParentIndex: 1, StateReverted: true, Logs: []*pbeth.Log{{Ordinal: 5, Index: 1}, {Ordinal: 6, Index: 2}}},
+		},
+	}, trace)
 }
 
 func Test_moveTransactionOrdinalsAfterSystemCalls_skipsPragueBlocks(t *testing.T) {

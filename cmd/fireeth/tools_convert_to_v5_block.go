@@ -37,6 +37,7 @@ func convertEthereumBlockToV5(block *pbeth.Block) {
 
 	for _, trace := range block.TransactionTraces {
 		removeEmptyTopicOfRevertedLogs(trace)
+		setLogIndexes(trace)
 		if fixVersion3KnownIssues {
 			populateFromRootCall(trace)
 		}
@@ -70,12 +71,15 @@ func convertEthereumBlockToV5(block *pbeth.Block) {
 }
 
 // moveTransactionOrdinalsAfterSystemCalls moves the ordinals of the transactions above those of
-// the system calls on blocks where they overlap.
+// the system calls on blocks where a transaction and a system call use the same ordinal.
 //
 // On a block with system calls, the tracers of version 3 and below restarted the ordinals at the
 // first transaction, then added the last system call `end_ordinal` to the block level changes
 // made after the last transaction only. Adding it to the transactions too gives ordinals that
 // are unique in the block.
+//
+// A block whose system calls run inside a transaction (Arbitrum) has ordinals that are already
+// unique, with those of the system calls between those of the transaction. It must stay as is.
 //
 // Blocks from Prague onward are left as they are: some of their system calls run after the
 // transactions, so how far the transactions must move is unknown.
@@ -85,17 +89,23 @@ func moveTransactionOrdinalsAfterSystemCalls(block *pbeth.Block) {
 	}
 
 	lastSystemCallOrdinal := uint64(0)
+	systemCallOrdinals := map[uint64]struct{}{}
 	for _, call := range block.SystemCalls {
 		forEachCallOrdinal(call, func(ordinal *uint64) {
 			lastSystemCallOrdinal = max(lastSystemCallOrdinal, *ordinal)
+			systemCallOrdinals[*ordinal] = struct{}{}
 		})
 	}
 
-	firstTransactionOrdinal := block.TransactionTraces[0].BeginOrdinal
+	sharedOrdinal := false
 	for _, trace := range block.TransactionTraces {
-		firstTransactionOrdinal = min(firstTransactionOrdinal, trace.BeginOrdinal)
+		forEachTraceOrdinal(trace, func(ordinal *uint64) {
+			if _, found := systemCallOrdinals[*ordinal]; found && *ordinal != 0 {
+				sharedOrdinal = true
+			}
+		})
 	}
-	if firstTransactionOrdinal > lastSystemCallOrdinal {
+	if !sharedOrdinal {
 		return
 	}
 
@@ -119,6 +129,31 @@ func removeEmptyTopicOfRevertedLogs(trace *pbeth.TransactionTrace) {
 			if len(log.Topics) == 1 && len(log.Topics[0]) == 0 {
 				log.Topics = nil
 			}
+		}
+	}
+}
+
+// setLogIndexes numbers the logs of the transaction 0, 1, 2, ... in the order they were emitted,
+// logs of reverted calls included, and gives each receipt log the index of its copy in the calls.
+//
+// The tracers of version 3 and below counted the logs of the receipt only, and recorded an index
+// of 0 on every log of a reverted call.
+func setLogIndexes(trace *pbeth.TransactionTrace) {
+	var logs []*pbeth.Log
+	for _, call := range trace.Calls {
+		logs = append(logs, call.Logs...)
+	}
+	slices.SortStableFunc(logs, func(a, b *pbeth.Log) int { return cmp.Compare(a.Ordinal, b.Ordinal) })
+
+	indexes := map[uint64]uint32{}
+	for i, log := range logs {
+		log.Index = uint32(i)
+		indexes[log.Ordinal] = log.Index
+	}
+
+	for _, log := range trace.GetReceipt().GetLogs() {
+		if index, found := indexes[log.Ordinal]; found && log.Ordinal != 0 {
+			log.Index = index
 		}
 	}
 }
@@ -271,11 +306,22 @@ func setMissingCallOrdinals(block *pbeth.Block, trace *pbeth.TransactionTrace) {
 			continue
 		}
 
-		// A call started right before the first thing it recorded
-		if first := firstOrdinalWithinCall(trace, call); first != 0 {
-			insertOrdinalAt(block, first)
-			call.BeginOrdinal = first
+		first := firstOrdinalWithinCall(trace, call)
+		if first == 0 {
+			continue
 		}
+
+		// The tracer consumed an ordinal when the call started and left it unused. It is the
+		// closest one below the first thing the call recorded. What sits between the two was
+		// recorded by a system call that ran inside the call.
+		if unused := lastUnusedOrdinalBetween(block, trace, callBeginOrdinal(trace, call.ParentIndex), first); unused != 0 {
+			call.BeginOrdinal = unused
+			continue
+		}
+
+		// Without such an ordinal, the call started right before the first thing it recorded
+		insertOrdinalAt(block, first)
+		call.BeginOrdinal = first
 	}
 
 	if len(trace.Calls) > 0 && trace.Calls[0].EndOrdinal == 0 && trace.EndOrdinal != 0 {
@@ -290,15 +336,12 @@ func setMissingCallOrdinals(block *pbeth.Block, trace *pbeth.TransactionTrace) {
 // The tracers that record a root call `begin_ordinal` of 0 still consumed an ordinal when the
 // call started, after the balance and nonce changes made before the call (gas purchase, sender
 // nonce bump), which are attached to the root call. That ordinal is the first one above the
-// transaction's `begin_ordinal` that nothing in the transaction uses.
+// transaction's `begin_ordinal` that neither the transaction nor a system call uses.
 //
 // When there is no such ordinal, a new one is inserted right after the transaction's
 // `begin_ordinal`.
 func rootCallBeginOrdinal(block *pbeth.Block, trace *pbeth.TransactionTrace, root *pbeth.Call) uint64 {
-	used := map[uint64]struct{}{}
-	forEachTraceOrdinal(trace, func(ordinal *uint64) {
-		used[*ordinal] = struct{}{}
-	})
+	used := usedOrdinals(block, trace)
 
 	unused := trace.BeginOrdinal + 1
 	for {
@@ -323,6 +366,51 @@ func rootCallBeginOrdinal(block *pbeth.Block, trace *pbeth.TransactionTrace, roo
 
 	insertOrdinalAt(block, trace.BeginOrdinal+1)
 	return trace.BeginOrdinal + 1
+}
+
+// usedOrdinals returns the ordinals used by the transaction and by the system calls of the
+// block, which can run inside a transaction (Arbitrum).
+func usedOrdinals(block *pbeth.Block, trace *pbeth.TransactionTrace) map[uint64]struct{} {
+	used := map[uint64]struct{}{}
+	visit := func(ordinal *uint64) {
+		used[*ordinal] = struct{}{}
+	}
+
+	forEachTraceOrdinal(trace, visit)
+	for _, call := range block.SystemCalls {
+		forEachCallOrdinal(call, visit)
+	}
+
+	return used
+}
+
+// lastUnusedOrdinalBetween returns the highest unused ordinal above `after` and below `before`,
+// 0 when there is none. An `after` of 0 stands for the transaction's `begin_ordinal`.
+func lastUnusedOrdinalBetween(block *pbeth.Block, trace *pbeth.TransactionTrace, after, before uint64) uint64 {
+	if after == 0 {
+		after = trace.BeginOrdinal
+	}
+
+	used := usedOrdinals(block, trace)
+	for ordinal := before - 1; ordinal > after; ordinal-- {
+		if _, found := used[ordinal]; !found {
+			return ordinal
+		}
+	}
+
+	return 0
+}
+
+// callBeginOrdinal returns the `begin_ordinal` of the call of the transaction at `index`, 0 when
+// it has none yet.
+func callBeginOrdinal(trace *pbeth.TransactionTrace, index uint32) uint64 {
+	for _, call := range trace.Calls {
+		if call.Index == index {
+			return call.BeginOrdinal
+		}
+	}
+
+	return 0
 }
 
 // firstOrdinalWithinCall returns the lowest ordinal recorded by the call or by the calls it

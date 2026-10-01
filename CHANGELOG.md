@@ -16,12 +16,13 @@ for instructions to keep up to date.
   - keeps in `Call.keccak_preimages` only the preimages of at most 256 bytes that explain a storage slot written by the same transaction or system call, like the tracers do;
   - gives an ordinal to the calls recorded with a `begin_ordinal` of 0 (the root call of every transaction in version 3 and below), and to the genesis root call recorded with an `end_ordinal` of 0;
   - sets the caller of the `DELEGATE` calls of version 2 blocks to the address of the closest ancestor that is not a `DELEGATE` call;
-  - on blocks of version 3 and below, moves the ordinals of the transactions above those of the system calls when they overlap (blocks before Prague only), copies the root call's return data to `TransactionTrace.return_data`, and sets the input of a root `CREATE` call to the transaction's input;
+  - on blocks of version 3 and below, moves the ordinals of the transactions above those of the system calls when both use the same ordinal (blocks before Prague only), copies the root call's return data to `TransactionTrace.return_data`, and sets the input of a root `CREATE` call to the transaction's input;
   - removes the single empty topic of a log without topics emitted by a reverted call;
+  - sets `Log.index` to the position of the log among all the logs of its transaction, logs of reverted calls included;
   - renumbers the ordinals of the block as 1, 2, 3, ... in their existing order;
   - applies the call input and return data limits of the tracers, setting `Call.input_truncated` and `Call.return_data_truncated`.
 
-  The known issues of version 3 that the block alone cannot fix are left as they are, see the command's help for the list.
+  The known issues of version 3 that the block alone cannot fix are left as they are, so the output differs from tracer-produced version 5 blocks on those fields. See the command's help for the list.
 
 ### Fixed
 
