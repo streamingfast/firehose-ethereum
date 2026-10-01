@@ -419,6 +419,29 @@ func Test_setLogIndexes(t *testing.T) {
 	}, trace)
 }
 
+func Test_isMissingWithdrawals(t *testing.T) {
+	withdrawals := []*pbeth.Withdrawal{{Index: 1}}
+	deposit := []*pbeth.TransactionTrace{{Type: pbeth.TransactionTrace_TRX_TYPE_OPTIMISM_DEPOSIT}}
+
+	tests := []struct {
+		name     string
+		block    *pbeth.Block
+		expected bool
+	}{
+		{"header without root", &pbeth.Block{Header: &pbeth.BlockHeader{}}, false},
+		{"root of an empty list", &pbeth.Block{Header: &pbeth.BlockHeader{WithdrawalsRoot: emptyWithdrawalsRoot}}, false},
+		{"root without withdrawals", &pbeth.Block{Header: &pbeth.BlockHeader{WithdrawalsRoot: word(1)}}, true},
+		{"root with withdrawals", &pbeth.Block{Header: &pbeth.BlockHeader{WithdrawalsRoot: word(1)}, Withdrawals: withdrawals}, false},
+		{"OP Stack block", &pbeth.Block{Header: &pbeth.BlockHeader{WithdrawalsRoot: word(1)}, TransactionTraces: deposit}, false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.expected, isMissingWithdrawals(test.block))
+		})
+	}
+}
+
 func Test_moveTransactionOrdinalsAfterSystemCalls_skipsPragueBlocks(t *testing.T) {
 	block := &pbeth.Block{
 		Header:            &pbeth.BlockHeader{RequestsHash: word(1)},

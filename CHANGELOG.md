@@ -22,6 +22,8 @@ for instructions to keep up to date.
   - renumbers the ordinals of the block as 1, 2, 3, ... in their existing order;
   - applies the call input and return data limits of the tracers, setting `Call.input_truncated` and `Call.return_data_truncated`.
 
+  With `--rpc-endpoint`, it also fetches `Block.withdrawals` on the blocks whose header `withdrawals_root` announces withdrawals that the block does not hold. Chains and block ranges without withdrawals make no RPC call.
+
   The known issues of version 3 that the block alone cannot fix are left as they are, so the output differs from tracer-produced version 5 blocks on those fields. See the command's help for the list.
 
 ### Fixed

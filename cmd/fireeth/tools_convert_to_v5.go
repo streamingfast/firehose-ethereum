@@ -1,14 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"io"
+	"runtime"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
 	"github.com/streamingfast/cli"
+	"github.com/streamingfast/cli/sflags"
 	"github.com/streamingfast/dstore"
+	"github.com/streamingfast/eth-go"
+	"github.com/streamingfast/eth-go/rpc"
 	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
@@ -85,12 +91,72 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 			    ordinals, so the ordinals differ from those of a version 5 tracer;
 			  - the balance changes of a self-destruct are in the old order and miss the burn
 			    (version 3 and below);
-			  - 'Block.withdrawals' is empty, use 'fix-withdrawals' for that.
+			  - 'Block.withdrawals' stays empty when '--rpc-endpoint' is not set.
+
+			Withdrawals:
+
+			When '--rpc-endpoint' is set, 'Block.withdrawals' is fetched from it
+			(eth_getBlockByNumber) on the blocks without withdrawals whose header
+			'withdrawals_root' is set and is not the root of an empty list. Chains and block
+			ranges without withdrawals make no RPC call. OP Stack blocks, recognized by their
+			first transaction being a deposit, are never fetched: they have no withdrawals, and
+			from Isthmus onward their 'withdrawals_root' holds another value.
+
+			The lookups of a file run while its blocks are read and converted. Without
+			'--rpc-endpoint', the command reports how many blocks were left without their
+			withdrawals.
 		`),
 		Args: cobra.ExactArgs(4),
 		RunE: createConvertToV5E(logger),
 	}
+
+	cmd.Flags().String("rpc-endpoint", "", "RPC endpoint the missing withdrawals are fetched from, they are left out when empty")
+	cmd.Flags().StringSlice("rpc-endpoint-headers", nil, "Headers to send with each RPC request (ex: '--rpc-endpoint-headers \"key1: value1\" --rpc-endpoint-headers \"key2: value2\"')")
+	cmd.Flags().Int("rpc-endpoint-max-concurrency", 0, "Maximum number of concurrent RPC requests (0 = auto-detect: GOMAXPROCS)")
 	return cmd
+}
+
+// emptyWithdrawalsRoot is the header `withdrawals_root` of a block without withdrawals.
+var emptyWithdrawalsRoot = eth.MustNewHash("0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
+
+// isMissingWithdrawals tells if the header of the block announces withdrawals that
+// `Block.withdrawals` does not hold.
+func isMissingWithdrawals(block *pbeth.Block) bool {
+	// OP Stack blocks never list withdrawals, from Isthmus onward their `withdrawals_root` is the
+	// storage root of the L2 to L1 message passer contract
+	if len(block.TransactionTraces) > 0 && block.TransactionTraces[0].Type == pbeth.TransactionTrace_TRX_TYPE_OPTIMISM_DEPOSIT {
+		return false
+	}
+
+	root := block.GetHeader().GetWithdrawalsRoot()
+	return len(block.Withdrawals) == 0 && len(root) != 0 && !bytes.Equal(root, emptyWithdrawalsRoot)
+}
+
+// withdrawalsFetch is the RPC lookup of the withdrawals of one block. `withdrawals` and `err`
+// are set once `done` is closed.
+type withdrawalsFetch struct {
+	done        chan struct{}
+	withdrawals []*pbeth.Withdrawal
+	err         error
+}
+
+// startWithdrawalsFetch starts the lookup of the withdrawals of the block and returns right
+// away. Everything it needs from the block is read before it returns, the block can be modified
+// while the lookup runs. `semaphore` limits how many lookups run at once.
+func startWithdrawalsFetch(ctx context.Context, rpcClient *rpc.Client, semaphore chan struct{}, block *pbeth.Block) *withdrawalsFetch {
+	fetch := &withdrawalsFetch{done: make(chan struct{})}
+	number, hash := block.Number, eth.Hash(block.Hash)
+	balanceChangeWithdrawalCount := countBalanceChangeWithdrawal(block)
+
+	go func() {
+		defer close(fetch.done)
+		semaphore <- struct{}{}
+		defer func() { <-semaphore }()
+
+		fetch.withdrawals, fetch.err = fetchWithdrawalsFromRPC(ctx, rpcClient, number, hash, balanceChangeWithdrawalCount)
+	}()
+
+	return fetch
 }
 
 func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
@@ -117,6 +183,18 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 		if stop <= start {
 			return fmt.Errorf("stop block must be greater than start block")
 		}
+
+		var rpcClient *rpc.Client
+		if rpcEndpoint := sflags.MustGetString(cmd, "rpc-endpoint"); rpcEndpoint != "" {
+			rpcClient = newRPCClientWithHeaders(rpcEndpoint, sflags.MustGetStringSlice(cmd, "rpc-endpoint-headers"))
+		}
+
+		rpcMaxConcurrency := sflags.MustGetInt(cmd, "rpc-endpoint-max-concurrency")
+		if rpcMaxConcurrency <= 0 {
+			rpcMaxConcurrency = max(runtime.GOMAXPROCS(0), 1)
+		}
+		rpcSemaphore := make(chan struct{}, rpcMaxConcurrency)
+		blocksLeftWithoutWithdrawals := 0
 
 		lastFileProcessed := ""
 		startWalkFrom := fmt.Sprintf("%010d", start-(start%bundleSize))
@@ -147,6 +225,49 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 			}
 
 			var blocks []*pbbstream.Block
+			encode := func(index int, ethBlock *pbeth.Block, libNum uint64) error {
+				blocks[index], err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: libNum})
+				if err != nil {
+					return fmt.Errorf("re-packing the block: %w", err)
+				}
+				return nil
+			}
+
+			// A block waiting for its withdrawals is kept decoded until its lookup ends, the
+			// others are encoded right away
+			type pendingBlock struct {
+				index    int
+				ethBlock *pbeth.Block
+				libNum   uint64
+				fetch    *withdrawalsFetch
+			}
+			var pending []*pendingBlock
+			encodePending := func(wait bool) error {
+				remaining := pending[:0]
+				for _, p := range pending {
+					if !wait {
+						select {
+						case <-p.fetch.done:
+						default:
+							remaining = append(remaining, p)
+							continue
+						}
+					}
+
+					<-p.fetch.done
+					if p.fetch.err != nil {
+						return fmt.Errorf("adding withdrawals to block %d: %w", p.ethBlock.Number, p.fetch.err)
+					}
+					p.ethBlock.Withdrawals = p.fetch.withdrawals
+					if err := encode(p.index, p.ethBlock, p.libNum); err != nil {
+						return err
+					}
+				}
+				clear(pending[len(remaining):])
+				pending = remaining
+				return nil
+			}
+
 			for {
 				block, err := br.Read()
 				if err == io.EOF {
@@ -162,14 +283,37 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 					return fmt.Errorf("unmarshaling eth block: %w", err)
 				}
 
+				// The lookup runs while this block and the next ones are read and converted
+				var fetch *withdrawalsFetch
+				if isMissingWithdrawals(ethBlock) {
+					if rpcClient != nil {
+						fetch = startWithdrawalsFetch(ctx, rpcClient, rpcSemaphore, ethBlock)
+					} else {
+						blocksLeftWithoutWithdrawals++
+					}
+				}
+
 				convertEthereumBlockToV5(ethBlock)
 
-				block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
-				if err != nil {
-					return fmt.Errorf("re-packing the block: %w", err)
+				index := len(blocks)
+				blocks = append(blocks, nil)
+				if fetch == nil {
+					if err := encode(index, ethBlock, block.LibNum); err != nil {
+						return err
+					}
+				} else {
+					pending = append(pending, &pendingBlock{index: index, ethBlock: ethBlock, libNum: block.LibNum, fetch: fetch})
 				}
-				blocks = append(blocks, block)
+
+				if err := encodePending(false); err != nil {
+					return err
+				}
 			}
+
+			if err := encodePending(true); err != nil {
+				return err
+			}
+
 			if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
 				return fmt.Errorf("writing merged block %d: %w", startBlock, err)
 			}
@@ -179,6 +323,9 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 			return nil
 		})
 		fmt.Printf("Last file processed: %s.dbin.zst\n", lastFileProcessed)
+		if blocksLeftWithoutWithdrawals > 0 {
+			fmt.Printf("WARNING: %d blocks have withdrawals that were left out, set --rpc-endpoint to fetch them\n", blocksLeftWithoutWithdrawals)
+		}
 
 		if err == io.EOF {
 			return nil
