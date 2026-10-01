@@ -63,11 +63,14 @@ func normalizeInPlace(block *pbeth.Block, features *normalizationFeatures, first
 	}
 
 	if features.UpgradeBlockV2ToV3 {
-		upgradeBlockV2ToV3(block)
+		UpgradeBlockV2ToV3(block)
 	}
 }
 
-func upgradeBlockV2ToV3(block *pbeth.Block) {
+// UpgradeBlockV2ToV3 sets the caller of every DELEGATE call of a version 2 block to the address
+// of its closest ancestor that is not itself a DELEGATE call, and marks the block as version 3.
+// Blocks of any other version are left untouched.
+func UpgradeBlockV2ToV3(block *pbeth.Block) {
 	if block.Ver == 2 {
 		for _, trx := range block.TransactionTraces {
 			headParents := make(map[uint32]uint32)
