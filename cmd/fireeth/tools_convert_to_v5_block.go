@@ -562,8 +562,14 @@ func keepStorageSlotKeccakPreimages(calls []*pbeth.Call) {
 	preimages := map[[32]byte][]byte{}
 	for _, call := range calls {
 		for hash, preimage := range call.KeccakPreimages {
+			// Preimages are hex-encoded, hence the comparison against twice the size
+			if len(preimage) > 2*maxComparableKeccakPreimageSize {
+				delete(call.KeccakPreimages, hash)
+				continue
+			}
+
 			decodedHash, decodedPreimage, ok := decodeKeccakPreimage(hash, preimage)
-			if !ok || len(decodedPreimage) > maxComparableKeccakPreimageSize {
+			if !ok {
 				delete(call.KeccakPreimages, hash)
 				continue
 			}
