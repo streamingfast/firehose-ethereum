@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/streamingfast/dmetering"
 	"github.com/streamingfast/eth-go"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
@@ -1095,4 +1096,49 @@ func TestRPCExtensionerSharesConnectionsAcrossEngines(t *testing.T) {
 	}
 
 	assert.Equal(t, 1, connectionCount(), "engines built from the same extensioner must share the connection pool")
+}
+
+func TestRPCEngine_metersEveryCallOfABatch(t *testing.T) {
+	attempts := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		attempts++
+		if attempts == 1 {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		result := `"result":"0x0000000000000000000000000000000000000000000000000000000000000012"`
+		w.Write([]byte(`[{"jsonrpc":"2.0","id":"0x1",` + result + `},{"jsonrpc":"2.0","id":"0x2",` + result + `}]`))
+	}))
+	defer server.Close()
+
+	engine, err := NewRPCEngine([]string{server.URL}, []string{server.URL}, 50_000_000)
+	require.NoError(t, err)
+
+	address := eth.MustNewAddress("0xea674fdde714fd979de3edf0f56aa9716b898ec8")
+	data := eth.MustNewMethodDef("decimals()").MethodID()
+
+	ctx := dmetering.WithBytesMeter(context.Background())
+	meter := dmetering.GetBytesMeter(ctx)
+
+	calls, err := proto.Marshal(&pbethss.RpcCalls{Calls: []*pbethss.RpcCall{
+		{ToAddr: address, Data: data},
+		{ToAddr: address, Data: data},
+	}})
+	require.NoError(t, err)
+
+	_, _, err = engine.ethCall(ctx, 1, "traceID", clockBlock1, calls)
+	require.NoError(t, err)
+	require.Equal(t, 2, attempts)
+	assert.Equal(t, 2, meter.GetCount("external_calls_eth_call"))
+
+	balances, err := proto.Marshal(&pbethss.RpcGetBalanceRequests{Requests: []*pbethss.RpcGetBalanceRequest{
+		{Address: address, Block: clockBlock1.Id},
+		{Address: address, Block: clockBlock1.Id},
+	}})
+	require.NoError(t, err)
+
+	_, _, err = engine.ethGetBalance(ctx, 1, "traceID", clockBlock1, balances)
+	require.NoError(t, err)
+	assert.Equal(t, 2, meter.GetCount("external_calls_eth_getBalance"))
 }

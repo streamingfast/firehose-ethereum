@@ -9,15 +9,16 @@ require (
 	github.com/emmansun/base64 v0.10.0
 	github.com/holiman/uint256 v1.3.2
 	github.com/josephburnett/jd v1.9.2
-	github.com/klauspost/compress v1.20.0
+	github.com/klauspost/compress v1.20.1
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.2.3
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/streamingfast/bstream v0.0.2-0.20260923182239-7232c70ed67b
+	github.com/streamingfast/bstream v0.0.2-0.20260930141647-3dd2b9bd72d7
 	github.com/streamingfast/cli v0.0.4-0.20250815192146-d8a233ec3d0b
 	github.com/streamingfast/derr v0.0.0-20250814163534-bd7407bd89d7
+	github.com/streamingfast/dmetering v0.0.0-20260901152443-1ff4cd0d617d
 	github.com/streamingfast/dmetrics v0.0.0-20260819172634-28069dc8018a
 	github.com/streamingfast/dstore v0.2.4-0.20260911133316-3b0685e87595
 	github.com/streamingfast/eth-go v0.0.0-20260929201909-24d21927f9af
@@ -27,13 +28,13 @@ require (
 	github.com/streamingfast/logging v1.2.3-0.20260810132752-360563ac68a9
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.23.1-0.20260925175558-9993cd94b53f
+	github.com/streamingfast/substreams v1.24.1-0.20261002185915-c14100343793
 	github.com/stretchr/testify v1.12.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.19.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.28.0
-	google.golang.org/grpc v1.85.0-dev.0.20260825072537-93e31b48545e
+	google.golang.org/grpc v1.86.0-dev
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -116,7 +117,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/dustin/go-humanize v1.1.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
-	github.com/envoyproxy/go-control-plane/envoy v1.39.0 // indirect
+	github.com/envoyproxy/go-control-plane/envoy v1.39.1-0.20260819172001-e6e3fd93e4be // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
@@ -200,14 +201,13 @@ require (
 	github.com/spiffe/go-spiffe/v2 v2.8.1 // indirect
 	github.com/streamingfast/dauth v0.0.0-20260318230957-4ab1e1d2ebc3 // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
-	github.com/streamingfast/dgrpc v0.0.0-20260917154456-85358c50e8f1 // indirect
+	github.com/streamingfast/dgrpc v0.0.0-20260929191947-99e20897ecc7 // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
 	github.com/streamingfast/diffx v0.0.0-20260428032925-db795b0d8333 // indirect
-	github.com/streamingfast/dmetering v0.0.0-20260901152443-1ff4cd0d617d // indirect
 	github.com/streamingfast/dregistry v0.0.0-20260818204944-2fed3956d4e1 // indirect
 	github.com/streamingfast/dsession v0.0.0-20260414190543-79b9846e7c58 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9 // indirect
-	github.com/streamingfast/dummy-blockchain v1.7.7 // indirect
+	github.com/streamingfast/dummy-blockchain v1.7.8 // indirect
 	github.com/streamingfast/firehose-networks v0.3.0 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/streamingfast/payment-gateway v0.0.0-20260928153037-ec91d4feb67c // indirect
@@ -218,7 +218,7 @@ require (
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf // indirect
 	github.com/tetratelabs/wazero v1.12.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/pretty v1.2.2 // indirect
 	github.com/valyala/fastjson v1.6.4 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
