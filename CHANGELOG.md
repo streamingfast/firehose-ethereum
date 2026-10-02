@@ -42,6 +42,10 @@ for instructions to keep up to date.
 
 - `BlockHeader.block_access_list_hash` and `block_access_list_rlp` (added to the proto in v2.23.0) were never actually present in the generated Go code, since `types/pb` wasn't regenerated after the proto change. This made every `compare-blocks-rpc`/`compare-oneblock-rpc` comparison on a block carrying either field fail with an empty, uninformative diff. Bumped `firehose-ethereum/types` to pick up the regenerated code and compare `block_access_list_hash` against RPC's `eth_getBlockByNumber`; `block_access_list_rlp` stays Firehose-only and is excluded from the comparison, same as `Calls`/`ReturnData`.
 
+- Substreams: Fix a tier1 panic (`INTERNAL: runtime error: invalid memory address or nil pointer dereference`) on a production-mode request starting past the chain's final block, when that final block falls within the first segment of the request's stores.
+
+- Firehose, substreams-tier1 and the relayer no longer exit with `received 5 consecutive unlinkable blocks` or `cannot link block after reconnection` when they start while the merger is deleting the one-block files of a bundle it just merged.
+
 ### Changed
 
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
@@ -51,6 +55,16 @@ for instructions to keep up to date.
 - Subscribers to live blocks (relayer, firehose and substreams subscriptions to live) are no longer disconnected as soon as 100 blocks are waiting for them. On fast chains, a live source pausing for a few seconds and then sending its backlog at once filled those 100 slots before a subscriber could send the first block, disconnecting every subscriber at the same time. A subscriber is now disconnected when it has not caught up for `--common-live-subscriber-catch-up-timeout` (default `30s`), which catches one that is stuck or slower than the chain, or when `--common-live-subscriber-max-buffered-blocks` (default `10000`) blocks are waiting for it.
 
 - The relayer, firehose and substreams-tier1 no longer look up one-block files, nor log `block not linkable after one-block lookup`, when a live source sends a block they already have below LIB. With several `--relayer-source`, this happened every few seconds.
+
+- Substreams: tier2 logs `refusing Substreams ProcessRange request` and the gRPC `finished streaming call with code ResourceExhausted` line at `Debug` instead of `Info`. The `substreams_tier2_rejected_request_counter` metric still counts the refusals by reason.
+
+### Performance improvements
+
+- Substreams: tier1 handles Ethereum partial blocks about 20x faster, with almost no allocations. It reads the transaction traces straight from the encoded block and drops the ones already sent by copying bytes, instead of decoding and re-encoding the whole block for every partial.
+
+- Merged blocks are read without copying their payload, which halves the memory allocated per merged-blocks file read (25.8 MiB instead of 50.8 MiB for 100 blocks of 256 KiB).
+
+- RPC pollers (`blockpoller`) print each `FIRE BLOCK` line 11-15x faster and no longer allocate several times the block size to do it: the line is built once in a reused buffer, with SIMD base64 encoding.
 
 ### Deprecated
 
