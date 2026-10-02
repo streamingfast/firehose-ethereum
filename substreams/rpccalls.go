@@ -13,6 +13,7 @@ import (
 
 	"github.com/streamingfast/eth-go/rpc"
 	pbethss "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/substreams/v1"
+	"github.com/streamingfast/substreams/metering"
 	pbsubstreams "github.com/streamingfast/substreams/pb/sf/substreams/v1"
 	"github.com/streamingfast/substreams/reqctx"
 	"github.com/streamingfast/substreams/wasm"
@@ -267,6 +268,8 @@ func (e *RPCEngine) ethCall(ctx context.Context, retryCount int, traceID string,
 		return nil, true, err
 	}
 
+	metering.AddExternalCalls(ctx, "eth_call", len(calls.Calls))
+
 	res, deterministic, err := e.rpcCalls(ctx, traceID, retryCount, clock.Id, clock.Number, clock.Timestamp, calls)
 	if err != nil {
 		return nil, deterministic, err
@@ -301,6 +304,8 @@ func (e *RPCEngine) ethGetBalance(
 	if len(reqMsg.Requests) == 0 {
 		return []byte{}, true, nil
 	}
+
+	metering.AddExternalCalls(ctx, "eth_getBalance", len(reqMsg.Requests))
 
 	fallbackDuration := reqctx.EthCallFallbackToLatestDuration(ctx)
 	numberDuration := reqctx.EthCallUseBlockNumberDuration(ctx)

@@ -26,6 +26,8 @@ for instructions to keep up to date.
 
   The known issues of version 3 that the block alone cannot fix are left as they are, so the output differs from tracer-produced version 5 blocks on those fields. See the command's help for the list.
 
+- Substreams `eth_call` and `eth_getBalance` calls are now sent in the metering events as `external_calls_eth_call` and `external_calls_eth_getBalance`. A batch counts for as many calls as it contains, and retries are not counted.
+
 ### Fixed
 
 - Firehose and substreams-tier1 now return the sessions they still hold to the session server before exiting, whatever `--common-system-shutdown-signal-delay` is set to. Sessions of requests cut by the shutdown used to be released in the background while the process exited, so they stayed counted against the organization until they expired on the session server, and a client reconnecting right away could be refused with `Concurrent stream limit exceeded`. This applies to session plugins implementing `Close(ctx) error`, which the `tgm://` plugin does.
