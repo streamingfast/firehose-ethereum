@@ -9,7 +9,7 @@ require (
 	github.com/emmansun/base64 v0.10.0
 	github.com/holiman/uint256 v1.3.2
 	github.com/josephburnett/jd v1.9.2
-	github.com/klauspost/compress v1.20.0
+	github.com/klauspost/compress v1.20.1
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.2.3
 	github.com/spf13/cobra v1.10.2
@@ -33,7 +33,7 @@ require (
 	github.com/tidwall/gjson v1.19.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.28.0
-	google.golang.org/grpc v1.85.0-dev.0.20260825072537-93e31b48545e
+	google.golang.org/grpc v1.86.0-dev
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -116,7 +116,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/dustin/go-humanize v1.1.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
-	github.com/envoyproxy/go-control-plane/envoy v1.39.0 // indirect
+	github.com/envoyproxy/go-control-plane/envoy v1.39.1-0.20260819172001-e6e3fd93e4be // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
