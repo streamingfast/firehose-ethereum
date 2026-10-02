@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -49,16 +50,7 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 		}
 
 		rpcEndpoint := args[2]
-		var opts []rpc.Option
-		for _, headerStr := range sflags.MustGetStringSlice(cmd, "headers") {
-			parts := strings.SplitN(headerStr, ":", 2)
-			if len(parts) == 2 {
-				key := strings.TrimSpace(parts[0])
-				value := strings.TrimSpace(parts[1])
-				opts = append(opts, rpc.WithHttpHeader(key, value))
-			}
-		}
-		rpcClient := rpc.NewClient(rpcEndpoint, opts...)
+		rpcClient := newRPCClientWithHeaders(rpcEndpoint, sflags.MustGetStringSlice(cmd, "headers"))
 
 		start := mustParseUint64(args[3])
 		stop := mustParseUint64(args[4])
@@ -153,29 +145,12 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 						return
 					}
 
-					// Fetch withdrawals from RPC and populate the block
-					rpcBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.BlockNumber(ethBlock.Number))
+					withdrawals, err := fetchWithdrawalsFromRPC(ctx, rpcClient, ethBlock.Number, ethBlock.Hash, countBalanceChangeWithdrawal(ethBlock))
 					if err != nil {
-						errorCh <- fmt.Errorf("fetching rpc block %d: %w", ethBlock.Number, err)
+						errorCh <- err
 						return
 					}
-
-					if rpcBlock.Hash.String() != eth.Hash(ethBlock.Hash).String() {
-						errorCh <- fmt.Errorf("rpc block hash mismatch for block %d: expected %s, got %s", ethBlock.Number, ethBlock.Hash, rpcBlock.Hash.String())
-						return
-					}
-
-					if rpcBlock.Withdrawals != nil {
-						ethBlock.Withdrawals = convertRPCWithdrawalsToPB(rpcBlock.Withdrawals)
-					} else {
-						ethBlock.Withdrawals = nil
-					}
-
-					balanceChangeWithdrawalCount := countBalanceChangeWithdrawal(ethBlock)
-					if balanceChangeWithdrawalCount > 0 && len(ethBlock.Withdrawals) != balanceChangeWithdrawalCount {
-						errorCh <- fmt.Errorf("sanity check, mismatch between RPC withdrawals and balance changes for block %d", ethBlock.Number)
-						return
-					}
+					ethBlock.Withdrawals = withdrawals
 
 					processedBlock, err := blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
 					if err != nil {
@@ -220,6 +195,40 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 
 		return nil
 	}
+}
+
+// fetchWithdrawalsFromRPC returns the withdrawals of the block `number` fetched from RPC. It
+// fails when the RPC block has another hash, or when `balanceChangeWithdrawalCount`, the number
+// of withdrawal balance changes of the block, is above 0 and is not the number of withdrawals.
+func fetchWithdrawalsFromRPC(ctx context.Context, rpcClient *rpc.Client, number uint64, hash eth.Hash, balanceChangeWithdrawalCount int) ([]*pbeth.Withdrawal, error) {
+	rpcBlock, err := rpcClient.GetBlockByNumber(ctx, rpc.BlockNumber(number))
+	if err != nil {
+		return nil, fmt.Errorf("fetching rpc block %d: %w", number, err)
+	}
+
+	if rpcBlock.Hash.String() != hash.String() {
+		return nil, fmt.Errorf("rpc block hash mismatch for block %d: expected %s, got %s", number, hash, rpcBlock.Hash.String())
+	}
+
+	withdrawals := convertRPCWithdrawalsToPB(rpcBlock.Withdrawals)
+	if balanceChangeWithdrawalCount > 0 && len(withdrawals) != balanceChangeWithdrawalCount {
+		return nil, fmt.Errorf("sanity check, mismatch between RPC withdrawals and balance changes for block %d", number)
+	}
+
+	return withdrawals, nil
+}
+
+func newRPCClientWithHeaders(endpoint string, headers []string) *rpc.Client {
+	var opts []rpc.Option
+	for _, headerStr := range headers {
+		parts := strings.SplitN(headerStr, ":", 2)
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			opts = append(opts, rpc.WithHttpHeader(key, value))
+		}
+	}
+	return rpc.NewClient(endpoint, opts...)
 }
 
 // convertRPCWithdrawalsToPB converts RPC block withdrawals to protobuf withdrawals

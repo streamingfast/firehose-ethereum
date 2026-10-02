@@ -10,6 +10,22 @@ for instructions to keep up to date.
 
 - `Call.input_truncated` and `Call.return_data_truncated` in `sf.ethereum.type.v2`. They flag the calls whose input was cut to its 4-byte selector, or whose return data was left out, by a tracer that limits how much call input and return data a transaction or block records. A trace without such limits never sets them.
 
+- New `fireeth tools convert-to-v5 <src> <dest> <start> <stop>`, which rewrites merged-blocks files of version 2, 3 or 4 as version 5 blocks. For each block it:
+  - removes every gas change and account creation;
+  - removes the balance, nonce, code and storage changes whose old and new values are equal;
+  - keeps in `Call.keccak_preimages` only the preimages of at most 256 bytes that explain a storage slot written by the same transaction or system call, like the tracers do;
+  - gives an ordinal to the calls recorded with a `begin_ordinal` of 0 (the root call of every transaction in version 3 and below), and to the genesis root call recorded with an `end_ordinal` of 0;
+  - sets the caller of the `DELEGATE` calls of version 2 blocks to the address of the closest ancestor that is not a `DELEGATE` call;
+  - on blocks of version 3 and below, moves the ordinals of the transactions above those of the system calls when both use the same ordinal (blocks before Prague only), copies the root call's return data to `TransactionTrace.return_data`, and sets the input of a root `CREATE` call to the transaction's input;
+  - removes the single empty topic of a log without topics emitted by a reverted call;
+  - sets `Log.index` to the position of the log among all the logs of its transaction, logs of reverted calls included;
+  - renumbers the ordinals of the block as 1, 2, 3, ... in their existing order;
+  - applies the call input and return data limits of the tracers, setting `Call.input_truncated` and `Call.return_data_truncated`.
+
+  With `--rpc-endpoint`, it also fetches `Block.withdrawals` on the blocks whose header `withdrawals_root` announces withdrawals that the block does not hold. Chains and block ranges without withdrawals make no RPC call.
+
+  The known issues of version 3 that the block alone cannot fix are left as they are, so the output differs from tracer-produced version 5 blocks on those fields. See the command's help for the list.
+
 ### Fixed
 
 - Firehose and substreams-tier1 now return the sessions they still hold to the session server before exiting, whatever `--common-system-shutdown-signal-delay` is set to. Sessions of requests cut by the shutdown used to be released in the background while the process exited, so they stayed counted against the organization until they expired on the session server, and a client reconnecting right away could be refused with `Concurrent stream limit exceeded`. This applies to session plugins implementing `Close(ctx) error`, which the `tgm://` plugin does.

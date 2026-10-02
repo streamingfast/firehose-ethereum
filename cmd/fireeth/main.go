@@ -145,6 +145,7 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				parent.AddCommand(newFixWithdrawalsCmd(zlog))
 				parent.AddCommand(newRemoveGasChangesCmd(zlog))
 				parent.AddCommand(newRemoveLargeKeccakPreimagesCmd(zlog))
+				parent.AddCommand(newConvertToV5Cmd(zlog))
 				parent.AddCommand(newPollRPCBlocksCmd(zlog))
 				parent.AddCommand(newPollerCmd(zlog, tracer))
 				parent.AddCommand(newOptimismPollerCmd(zlog, tracer))
