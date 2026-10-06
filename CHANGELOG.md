@@ -46,6 +46,8 @@ for instructions to keep up to date.
 
 - `BlockHeader.block_access_list_hash` and `block_access_list_rlp` (added to the proto in v2.23.0) were never actually present in the generated Go code, since `types/pb` wasn't regenerated after the proto change. This made every `compare-blocks-rpc`/`compare-oneblock-rpc` comparison on a block carrying either field fail with an empty, uninformative diff. Bumped `firehose-ethereum/types` to pick up the regenerated code and compare `block_access_list_hash` against RPC's `eth_getBlockByNumber`; `block_access_list_rlp` stays Firehose-only and is excluded from the comparison, same as `Calls`/`ReturnData`.
 
+- `fireeth tools compare-blocks-rpc`/`compare-block-store-rpc` no longer report a `withdrawals` diff on every block carrying EIP-4895 validator withdrawals. `block.RpcToEthBlock` only filled `Header.withdrawals_root` and never populated `Block.withdrawals` from the RPC block, while the Firehose side always has them, so the comparison flagged a difference on every such block.
+
 ### Changed
 
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
