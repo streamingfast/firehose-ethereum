@@ -170,7 +170,35 @@ func writeMergedBlocks(lowBlockNum uint64, store dstore.Store, blocks []*pbbstre
 		}
 	}()
 
-	return store.WriteObject(context.Background(), file, pr)
+	ctx := context.Background()
+	counter := &countingReader{Reader: pr}
+	if err := store.WriteObject(ctx, file, counter); err != nil {
+		return err
+	}
+
+	// Same rule as the merger: the annotation is written only where a listing can read it back,
+	// and a failure to write it leaves the file correct, so it does not fail the command.
+	if firecore.MergedBlocksMetadataSupported(store) {
+		metadata := firecore.MergedBlocksMetadata(counter.count, int64(len(blocks)), blocks[0].Timestamp.AsTime())
+		if err := store.SetMetadata(ctx, file, metadata); err != nil {
+			fmt.Printf("WARNING: cannot annotate merged file %s.dbin.zst, run 'firecore tools annotate-merged-blocks' on it: %s\n", file, err)
+		}
+	}
+
+	return nil
+}
+
+// countingReader counts the bytes read through it, which for the merged blocks stream is the
+// file's size before the store compresses it.
+type countingReader struct {
+	io.Reader
+	count int64
+}
+
+func (r *countingReader) Read(p []byte) (int, error) {
+	n, err := r.Reader.Read(p)
+	r.count += int64(n)
+	return n, err
 }
 
 func filename(num uint64) string {
