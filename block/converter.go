@@ -69,6 +69,7 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 		TransactionTraces: trx,
 		BalanceChanges:    nil, // not available
 		CodeChanges:       nil, // not available
+		Withdrawals: ToFirehoseWithdrawals(in.Withdrawals),
 		Header: &pbeth.BlockHeader{
 			ParentHash:          in.ParentHash.Bytes(),
 			Coinbase:            in.Miner,
@@ -99,6 +100,25 @@ func RpcToEthBlock(in *rpc.Block, receipts map[string]*rpc.TransactionReceipt, l
 		},
 	}
 	return out, hashesWithoutTo
+}
+
+// ToFirehoseWithdrawals converts the RPC block withdrawals (EIP-4895) to their protobuf
+// equivalent. Returns nil when in is nil, matching the Firehose block field for blocks
+// without withdrawals (pre-Shanghai).
+func ToFirehoseWithdrawals(in []rpc.Withdrawal) []*pbeth.Withdrawal {
+	if in == nil {
+		return nil
+	}
+	out := make([]*pbeth.Withdrawal, len(in))
+	for i := range in {
+		out[i] = &pbeth.Withdrawal{
+			Index:          uint64(in[i].Index),
+			ValidatorIndex: uint64(in[i].Validator),
+			Address:        in[i].Address.Bytes(),
+			Amount:         uint64(in[i].Amount),
+		}
+	}
+	return out
 }
 
 func toFirehoseUncles(in []eth.Hash) []*pbeth.BlockHeader {
