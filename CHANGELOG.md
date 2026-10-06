@@ -8,7 +8,7 @@ for instructions to keep up to date.
 
 ### Added
 
-- `DSTORE_ZSTD_CONFIG` environment variable sets the zstd compression level and window used to write merged blocks and every other zstd-compressed store, as `<level>` or `<level>/<window MiB>`, for example `best`, `better/32` or `best/64`. Levels are `fastest`, `default`, `better` and `best`. Unset, the library defaults are kept. Files written with any setting are read back without configuration. An invalid value makes opening a zstd store fail.
+- Store URLs accept the `compression` and `compression_config` query parameters (dstore). `compression_config` sets the zstd level and window used to write that store only, as `<level>` or `<level>/<window MiB>`, for example `--common-merged-blocks-store-url=gs://bucket/merged-blocks?compression_config=best/32`. Levels are `fastest`, `default`, `better` and `best`; files written with any setting are read back without configuration. `compression=zstd|gzip|none` overrides the compression of the store and changes the file extension to match (`.dbin.gz`, `.dbin`), so every reader of that store must use the same `compression`. An invalid value makes opening the store fail.
 
 - `Call.input_truncated` and `Call.return_data_truncated` in `sf.ethereum.type.v2`. They flag the calls whose input was cut to its 4-byte selector, or whose return data was left out, by a tracer that limits how much call input and return data a transaction or block records. A trace without such limits never sets them.
 
