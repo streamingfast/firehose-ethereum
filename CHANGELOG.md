@@ -8,6 +8,8 @@ for instructions to keep up to date.
 
 ### Added
 
+- Store URLs, such as `--common-merged-blocks-store-url`, accept `compression_config` to tune how files are written, matching the store's compression: a zstd level with an optional window in MiB (`best`, `better/32`), or a gzip level from `1` to `9`. For example `gs://bucket/merged-blocks?compression_config=best/32`. Files written with any setting are read back without configuration. An invalid value makes opening the store fail.
+
 - `Call.input_truncated` and `Call.return_data_truncated` in `sf.ethereum.type.v2`. They flag the calls whose input was cut to its 4-byte selector, or whose return data was left out, by a tracer that limits how much call input and return data a transaction or block records. A trace without such limits never sets them.
 
 - New `fireeth tools convert-to-v5 <src> <dest> <start> <stop>`, which rewrites merged-blocks files of version 2, 3 or 4 as version 5 blocks. For each block it:
