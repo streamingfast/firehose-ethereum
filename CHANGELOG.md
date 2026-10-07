@@ -26,6 +26,8 @@ for instructions to keep up to date.
 
   The known issues of version 3 that the block alone cannot fix are left as they are, so the output differs from tracer-produced version 5 blocks on those fields. See the command's help for the list.
 
+  On Google Cloud Storage, each merged-blocks file it writes carries the same annotation the merger writes (data size, block count and first block time), read by `firecore tools stats-merged-blocks`. The other `fireeth tools` commands that rewrite merged-blocks files write it too.
+
 - Substreams `eth_call` and `eth_getBalance` calls are now sent in the metering events as `external_calls_eth_call` and `external_calls_eth_getBalance`. A batch counts for as many calls as it contains, and retries are not counted.
 
 ### Fixed
