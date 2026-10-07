@@ -71,6 +71,29 @@ func TestConvertTrx(t *testing.T) {
 // unset, since it is a Firehose-only, execution-dependent flag the RPC doesn't expose.
 // The exact recovery math (RLP payload, magic byte, signature recovery byte offset) is eth-go's
 // responsibility and is tested there against the same fixture data.
+// TestToFirehoseWithdrawals checks the EIP-4895 conversion, including that a block without
+// withdrawals (nil slice, e.g. pre-Shanghai) stays nil rather than becoming an empty slice,
+// so it compares equal to a Firehose block that never had withdrawals (see compare-blocks-rpc).
+func TestToFirehoseWithdrawals(t *testing.T) {
+	assert.Nil(t, ToFirehoseWithdrawals(nil))
+
+	out := ToFirehoseWithdrawals([]rpc.Withdrawal{})
+	assert.NotNil(t, out)
+	assert.Len(t, out, 0)
+
+	address, err := eth.NewAddress("0x8d58f7e2e58471b46d20a66a61f4cde3c78ab6c0")
+	require.NoError(t, err)
+
+	out = ToFirehoseWithdrawals([]rpc.Withdrawal{
+		{Index: 0, Validator: 96, Address: eth.Address(address), Amount: 429863},
+	})
+	require.Len(t, out, 1)
+	assert.Equal(t, uint64(0), out[0].Index)
+	assert.Equal(t, uint64(96), out[0].ValidatorIndex)
+	assert.Equal(t, uint64(429863), out[0].Amount)
+	assert.Equal(t, []byte(address), out[0].Address)
+}
+
 func TestToSetCodeAuthorizations(t *testing.T) {
 	tests := []struct {
 		name          string

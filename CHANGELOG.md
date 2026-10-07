@@ -28,6 +28,8 @@ for instructions to keep up to date.
 
   The known issues of version 3 that the block alone cannot fix are left as they are, so the output differs from tracer-produced version 5 blocks on those fields. See the command's help for the list.
 
+  On Google Cloud Storage, each merged-blocks file it writes carries the same annotation the merger writes (data size, block count and first block time), read by `firecore tools stats-merged-blocks`. The other `fireeth tools` commands that rewrite merged-blocks files write it too.
+
 - Substreams `eth_call` and `eth_getBalance` calls are now sent in the metering events as `external_calls_eth_call` and `external_calls_eth_getBalance`. A batch counts for as many calls as it contains, and retries are not counted.
 
 ### Fixed
@@ -47,6 +49,8 @@ for instructions to keep up to date.
 - `fireeth tools compare-blocks-rpc` no longer panics with a nil pointer dereference when a Firehose transaction trace has no receipt (observed on reth for an Amsterdam transaction that runs out of gas before its root frame). A missing receipt is now reported as a diff instead of crashing the tool.
 
 - `BlockHeader.block_access_list_hash` and `block_access_list_rlp` (added to the proto in v2.23.0) were never actually present in the generated Go code, since `types/pb` wasn't regenerated after the proto change. This made every `compare-blocks-rpc`/`compare-oneblock-rpc` comparison on a block carrying either field fail with an empty, uninformative diff. Bumped `firehose-ethereum/types` to pick up the regenerated code and compare `block_access_list_hash` against RPC's `eth_getBlockByNumber`; `block_access_list_rlp` stays Firehose-only and is excluded from the comparison, same as `Calls`/`ReturnData`.
+
+- `fireeth tools compare-blocks-rpc`/`compare-block-store-rpc` no longer report a `withdrawals` diff on every block carrying EIP-4895 validator withdrawals. `block.RpcToEthBlock` only filled `Header.withdrawals_root` and never populated `Block.withdrawals` from the RPC block, while the Firehose side always has them, so the comparison flagged a difference on every such block.
 
 ### Changed
 

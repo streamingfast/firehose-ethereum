@@ -18,6 +18,7 @@ import (
 	"github.com/streamingfast/dstore"
 	"github.com/streamingfast/eth-go/rpc"
 	firecore "github.com/streamingfast/firehose-core"
+	"github.com/streamingfast/firehose-ethereum/block"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 	"go.uber.org/zap"
 )
@@ -210,7 +211,7 @@ func fetchWithdrawalsFromRPC(ctx context.Context, rpcClient *rpc.Client, number 
 		return nil, fmt.Errorf("rpc block hash mismatch for block %d: expected %s, got %s", number, hash, rpcBlock.Hash.String())
 	}
 
-	withdrawals := convertRPCWithdrawalsToPB(rpcBlock.Withdrawals)
+	withdrawals := block.ToFirehoseWithdrawals(rpcBlock.Withdrawals)
 	if balanceChangeWithdrawalCount > 0 && len(withdrawals) != balanceChangeWithdrawalCount {
 		return nil, fmt.Errorf("sanity check, mismatch between RPC withdrawals and balance changes for block %d", number)
 	}
@@ -229,23 +230,6 @@ func newRPCClientWithHeaders(endpoint string, headers []string) *rpc.Client {
 		}
 	}
 	return rpc.NewClient(endpoint, opts...)
-}
-
-// convertRPCWithdrawalsToPB converts RPC block withdrawals to protobuf withdrawals
-func convertRPCWithdrawalsToPB(ws []rpc.Withdrawal) []*pbeth.Withdrawal {
-	if ws == nil {
-		return nil
-	}
-	out := make([]*pbeth.Withdrawal, len(ws))
-	for i := range ws {
-		out[i] = &pbeth.Withdrawal{
-			Index:          uint64(ws[i].Index),
-			ValidatorIndex: uint64(ws[i].Validator),
-			Address:        ws[i].Address.Bytes(),
-			Amount:         uint64(ws[i].Amount),
-		}
-	}
-	return out
 }
 
 func countBalanceChangeWithdrawal(block *pbeth.Block) int {
