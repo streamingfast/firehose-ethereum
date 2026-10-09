@@ -31,7 +31,7 @@ require (
 	github.com/streamingfast/substreams v1.24.1-0.20261008183729-95587ffa7532
 	github.com/stretchr/testify v1.12.1
 	github.com/test-go/testify v1.1.4
-	github.com/tidwall/gjson v1.19.0
+	github.com/tidwall/gjson v1.20.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.28.0
 	google.golang.org/grpc v1.86.0-dev
