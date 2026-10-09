@@ -105,6 +105,17 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 			The lookups of a file run while its blocks are read and converted. Without
 			'--rpc-endpoint', the command reports how many blocks were left without their
 			withdrawals.
+
+			Bundle size:
+
+			The source files hold '--merged-blocks-bundle-size' blocks each. With
+			'--target-bundle-size', the destination files hold that many blocks instead, like
+			'resize-merged-blocks' writes them. One size must be a multiple of the other.
+
+			The files written are those from the one holding <start-block> to the one holding
+			<stop-block>, in the target size. A file is written once all of its blocks were read,
+			so a last file whose blocks go past the end of the source store is not written. The
+			source files must follow each other without a missing file.
 		`),
 		Args: cobra.ExactArgs(4),
 		RunE: createConvertToV5E(logger),
@@ -113,6 +124,7 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 	cmd.Flags().String("rpc-endpoint", "", "RPC endpoint the missing withdrawals are fetched from, they are left out when empty")
 	cmd.Flags().StringSlice("rpc-endpoint-headers", nil, "Headers to send with each RPC request (ex: '--rpc-endpoint-headers \"key1: value1\" --rpc-endpoint-headers \"key2: value2\"')")
 	cmd.Flags().Int("rpc-endpoint-max-concurrency", 0, "Maximum number of concurrent RPC requests (0 = auto-detect: GOMAXPROCS)")
+	cmd.Flags().Uint64("target-bundle-size", 0, "Number of blocks per merged-blocks file written to the destination store (0 = same as --merged-blocks-bundle-size)")
 	return cmd
 }
 
@@ -175,13 +187,33 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 
 		start := mustParseUint64(args[2])
 		stop := mustParseUint64(args[3])
-		bundleSize, err := firecore.GetMergedBlocksBundleSizeFlag(cmd)
+		sourceBundleSize, err := firecore.GetMergedBlocksBundleSizeFlag(cmd)
 		if err != nil {
 			return err
 		}
 
+		targetBundleSize := sflags.MustGetUint64(cmd, "target-bundle-size")
+		if targetBundleSize == 0 {
+			targetBundleSize = sourceBundleSize
+		}
+		if err := firecore.ValidateMergedBlocksBundleSize(targetBundleSize); err != nil {
+			return fmt.Errorf("invalid --target-bundle-size: %w", err)
+		}
+		if targetBundleSize%sourceBundleSize != 0 && sourceBundleSize%targetBundleSize != 0 {
+			return fmt.Errorf("bundle sizes must divide evenly (source %d, target %d)", sourceBundleSize, targetBundleSize)
+		}
+
 		if stop <= start {
 			return fmt.Errorf("stop block must be greater than start block")
+		}
+
+		bundler := &mergedBlocksBundler{
+			bundleSize:   targetBundleSize,
+			lowBlockNum:  firecore.LowBoundaryFor(start, targetBundleSize),
+			stopBlockNum: firecore.LowBoundaryFor(stop, targetBundleSize) + targetBundleSize,
+			write: func(lowBlockNum uint64, blocks []*pbbstream.Block) error {
+				return writeMergedBlocks(lowBlockNum, destStore, blocks)
+			},
 		}
 
 		var rpcClient *rpc.Client
@@ -197,20 +229,28 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 		blocksLeftWithoutWithdrawals := 0
 
 		lastFileProcessed := ""
-		startWalkFrom := fmt.Sprintf("%010d", start-(start%bundleSize))
+		startWalkFrom := filename(firecore.LowBoundaryFor(bundler.lowBlockNum, sourceBundleSize))
 		err = srcStore.WalkFrom(ctx, "", startWalkFrom, func(filename string) error {
 			logger.Debug("checking merged block file", zap.String("filename", filename))
 
 			startBlock := mustParseUint64(filename)
 
-			if startBlock > stop {
+			if startBlock >= bundler.stopBlockNum {
 				logger.Debug("stopping at merged block file above stop block", zap.String("filename", filename), zap.Uint64("stop", stop))
 				return io.EOF
 			}
 
-			if startBlock+bundleSize < start {
+			if startBlock+sourceBundleSize <= bundler.lowBlockNum {
 				logger.Debug("skipping merged block file below start block", zap.String("filename", filename))
 				return nil
+			}
+
+			if lastFileProcessed == "" {
+				// The source store can begin after <start-block>, the files below its first one
+				// have no block to write
+				bundler.lowBlockNum = max(bundler.lowBlockNum, firecore.LowBoundaryFor(startBlock, targetBundleSize))
+			} else if expected := mustParseUint64(lastFileProcessed) + sourceBundleSize; startBlock != expected {
+				return fmt.Errorf("merged-blocks file %s is missing from the source store, found %s after %s", fmt.Sprintf("%010d", expected), filename, lastFileProcessed)
 			}
 
 			rc, err := srcStore.OpenObject(ctx, filename)
@@ -314,15 +354,24 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 				return err
 			}
 
-			if err := writeMergedBlocks(startBlock, destStore, blocks); err != nil {
-				return fmt.Errorf("writing merged block %d: %w", startBlock, err)
+			if err := bundler.add(blocks); err != nil {
+				return err
+			}
+			if err := bundler.writeBundlesEndingBefore(startBlock + sourceBundleSize); err != nil {
+				return err
 			}
 
 			lastFileProcessed = filename
 
+			if bundler.done() {
+				return io.EOF
+			}
 			return nil
 		})
 		fmt.Printf("Last file processed: %s.dbin.zst\n", lastFileProcessed)
+		if len(bundler.blocks) > 0 {
+			fmt.Printf("WARNING: merged-blocks file %s.dbin.zst was not written, the source store ends before its last block\n", filename(bundler.lowBlockNum))
+		}
 		if blocksLeftWithoutWithdrawals > 0 {
 			fmt.Printf("WARNING: %d blocks have withdrawals that were left out, set --rpc-endpoint to fetch them\n", blocksLeftWithoutWithdrawals)
 		}
