@@ -89,6 +89,18 @@ func Test_mergedBlocksBundler(t *testing.T) {
 			expected:   []bundle{{0, 0, 49, 50}, {100, 49, 49, 1}, {200, 250, 299, 50}},
 			expectDone: true,
 		},
+		{
+			name:        "file without its own blocks inside a bigger bundle",
+			bundleSize:  1000,
+			lowBlockNum: 0,
+			stop:        1000,
+			sourceSize:  100,
+			sourceFiles: append(append(sourceFiles(0, 200, 100),
+				sourceFile{200, []*pbbstream.Block{{Number: 199}}}),
+				sourceFiles(300, 1000, 100)...),
+			expected:   []bundle{{0, 0, 999, 900}},
+			expectDone: true,
+		},
 	}
 
 	for _, tt := range tests {

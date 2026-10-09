@@ -25,6 +25,11 @@ type mergedBlocksBundler struct {
 // add receives the next blocks. Those outside of the bundles to write are dropped.
 func (b *mergedBlocksBundler) add(blocks []*pbbstream.Block) error {
 	for _, blk := range blocks {
+		// A file without blocks of its own holds the last block of the previous file again
+		if b.lastBlock != nil && blk.Number <= b.lastBlock.Number {
+			continue
+		}
+
 		if blk.Number < b.lowBlockNum {
 			b.lastBlock = blk
 			continue
