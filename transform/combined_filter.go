@@ -28,7 +28,7 @@ const IdxPrefixCall = "C" // call prefix for combined index
 const CombinedIndexerShortName = "combined"
 
 type Indexer interface {
-	Add(keys []string, blockNum uint64)
+	Add(keys []string, blockNum uint64) error
 }
 
 var CombinedFilterMessageName = proto.MessageName(&pbtransform.CombinedFilter{})
@@ -140,7 +140,9 @@ func (i *EthCombinedIndexer) ProcessBlock(blk *pbeth.Block) error {
 		keyArray = append(keyArray, key)
 	}
 
-	i.BlockIndexer.Add(keyArray, blk.Number)
+	if err := i.BlockIndexer.Add(keyArray, blk.Number); err != nil {
+		return fmt.Errorf("adding keys to index for block %d: %w", blk.Number, err)
+	}
 	return nil
 }
 

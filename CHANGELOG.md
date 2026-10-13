@@ -54,6 +54,8 @@ for instructions to keep up to date.
 
 - `fireeth tools compare-blocks-rpc`/`compare-block-store-rpc` no longer report a `withdrawals` diff on every block carrying EIP-4895 validator withdrawals. `block.RpcToEthBlock` only filled `Header.withdrawals_root` and never populated `Block.withdrawals` from the RPC block, while the Firehose side always has them, so the comparison flagged a difference on every such block.
 
+- `index-builder` no longer silently skips a block's index write on a transient index store error, nor restarts indexing from the configured start block afterwards. Bumped `bstream` and `firehose-core` so `BlockIndexer.Add` returns the write error instead of only logging it, and `EthCombinedIndexer.ProcessBlock` now propagates it. ([firehose-core#288](https://github.com/streamingfast/firehose-core/issues/288))
+
 ### Changed
 
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
