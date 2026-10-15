@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"runtime"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/streamingfast/bstream"
@@ -113,9 +114,12 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 			'resize-merged-blocks' writes them. One size must be a multiple of the other.
 
 			The files written are those from the one holding <start-block> to the one holding
-			<stop-block>, in the target size. A file is written once all of its blocks were read,
-			so a last file whose blocks go past the end of the source store is not written. The
-			source files must follow each other without a missing file.
+			<stop-block>, in the target size. A file is written once all of its blocks were read.
+			The source files must follow each other without a missing file.
+
+			When the source store ends before <stop-block>, the command checks for the next source
+			file every 5 seconds until it reaches <stop-block>. When the source store holds no file
+			at or after <start-block>, the command writes nothing and exits.
 		`),
 		Args: cobra.ExactArgs(4),
 		RunE: createConvertToV5E(logger),
@@ -127,6 +131,10 @@ func newConvertToV5Cmd(logger *zap.Logger) *cobra.Command {
 	cmd.Flags().Uint64("target-bundle-size", 0, "Number of blocks per merged-blocks file written to the destination store (0 = same as --merged-blocks-bundle-size)")
 	return cmd
 }
+
+// sourceFileRetryDelay is how long convert-to-v5 waits before checking again for the next source
+// file when the source store ends before the stop block.
+const sourceFileRetryDelay = 5 * time.Second
 
 // emptyWithdrawalsRoot is the header `withdrawals_root` of a block without withdrawals.
 var emptyWithdrawalsRoot = eth.MustNewHash("0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
@@ -229,8 +237,7 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 		blocksLeftWithoutWithdrawals := 0
 
 		lastFileProcessed := ""
-		startWalkFrom := filename(firecore.LowBoundaryFor(bundler.lowBlockNum, sourceBundleSize))
-		err = srcStore.WalkFrom(ctx, "", startWalkFrom, func(filename string) error {
+		processFile := func(filename string) error {
 			logger.Debug("checking merged block file", zap.String("filename", filename))
 
 			startBlock := mustParseUint64(filename)
@@ -367,7 +374,27 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 				return io.EOF
 			}
 			return nil
-		})
+		}
+
+		walkFrom := filename(firecore.LowBoundaryFor(bundler.lowBlockNum, sourceBundleSize))
+		for {
+			err = srcStore.WalkFrom(ctx, "", walkFrom, processFile)
+			if err != nil || lastFileProcessed == "" {
+				break
+			}
+
+			// The source store ends before <stop-block>, wait for its next file to be written
+			walkFrom = filename(mustParseUint64(lastFileProcessed) + sourceBundleSize)
+			logger.Info("waiting for next merged block file", zap.String("filename", walkFrom), zap.Duration("retry_delay", sourceFileRetryDelay))
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
+			case <-time.After(sourceFileRetryDelay):
+			}
+			if err != nil {
+				break
+			}
+		}
 		fmt.Printf("Last file processed: %s.dbin.zst\n", lastFileProcessed)
 		if len(bundler.blocks) > 0 {
 			fmt.Printf("WARNING: merged-blocks file %s.dbin.zst was not written, the source store ends before its last block\n", filename(bundler.lowBlockNum))

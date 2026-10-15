@@ -28,6 +28,8 @@ for instructions to keep up to date.
 
   With `--rpc-endpoint`, it also fetches `Block.withdrawals` on the blocks whose header `withdrawals_root` announces withdrawals that the block does not hold. Chains and block ranges without withdrawals make no RPC call.
 
+  When the source store ends before `<stop>`, it checks for the next source file every 5 seconds until it reaches `<stop>`, so it can run ahead of the chain and catch up as new files are merged.
+
   The known issues of version 3 that the block alone cannot fix are left as they are, so the output differs from tracer-produced version 5 blocks on those fields. See the command's help for the list.
 
   On Google Cloud Storage, each merged-blocks file it writes carries the same annotation the merger writes (data size, block count and first block time), read by `firecore tools stats-merged-blocks`. The other `fireeth tools` commands that rewrite merged-blocks files write it too.
