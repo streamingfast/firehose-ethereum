@@ -32,6 +32,8 @@ for instructions to keep up to date.
 
   On Google Cloud Storage, each merged-blocks file it writes carries the same annotation the merger writes (data size, block count and first block time), read by `firecore tools stats-merged-blocks`. The other `fireeth tools` commands that rewrite merged-blocks files write it too.
 
+- Substreams: `--substreams-tier1-allow-pruned-chain` lets tier1 serve modules (mappers and stores) whose initial block is below `--common-first-streamable-block`, after that block was raised (the chain was pruned). They run from the first streamable block on, and their stores resume from the snapshots taken before the pruning. A request is refused when a store has no snapshot at the first streamable block to resume from, or when a store has no initial block: every store must set one, at or above the first streamable block. Tier2 must run this version before the flag is set on tier1.
+
 - Substreams `eth_call` and `eth_getBalance` calls are now sent in the metering events as `external_calls_eth_call` and `external_calls_eth_getBalance`. A batch counts for as many calls as it contains, and retries are not counted.
 
 ### Fixed
@@ -56,6 +58,16 @@ for instructions to keep up to date.
 
 - `index-builder` no longer silently skips a block's index write on a transient index store error, nor restarts indexing from the configured start block afterwards. Bumped `bstream` and `firehose-core` so `BlockIndexer.Add` returns the write error instead of only logging it, and `EthCombinedIndexer.ProcessBlock` now propagates it. ([firehose-core#288](https://github.com/streamingfast/firehose-core/issues/288))
 
+- Substreams: Fix requests failing with `snapshot "…" does not exist` after `--common-first-streamable-block` was raised, for stores without an initial block. Their snapshots named after the previous first streamable block are now ignored and the store is rebuilt.
+
+- Substreams: Fix dev-mode requests reading blocks below the first streamable block when that block is not a multiple of the segment size.
+
+- Substreams: Fix requests with a cursor being refused with `invalid start block …, must be >= …` when their start block is below the first streamable block. The block the cursor resolves to is what is checked now.
+
+- Substreams: Fix the live back filler (started after a quickload) stopping for the rest of the request when it rewound below the first streamable block, or to a snapshot named after another initial block.
+
+- `index-builder` now serves its health check, over gRPC and HTTP `/healthz`, on `--index-builder-grpc-listen-addr`, which it never listened on.
+
 ### Changed
 
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
@@ -74,7 +86,7 @@ for instructions to keep up to date.
 
 - `fireeth tools poller` prints each `FIRE BLOCK` line 11-15x faster and no longer allocates several times the block size to do it: the line is built once in a reused buffer, with SIMD base64 encoding.
 
-- Bump `firehose-core` to [6dc6849](https://github.com/streamingfast/firehose-core/compare/6706c0483339...6dc6849915cb), `bstream` to [2d126b0](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...2d126b0b0009) and `substreams` to [24d98f5](https://github.com/streamingfast/substreams/compare/c14100343793...24d98f5409d4).
+- Bump `firehose-core` to [513060d](https://github.com/streamingfast/firehose-core/compare/6706c0483339...513060df3b9d), `bstream` to [2d126b0](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...2d126b0b0009) and `substreams` to [00bc09f](https://github.com/streamingfast/substreams/compare/c14100343793...00bc09fd4f2f).
 
 ### Deprecated
 
