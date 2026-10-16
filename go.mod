@@ -6,10 +6,10 @@ require (
 	github.com/RoaringBitmap/roaring v1.9.4
 	github.com/abourget/llerrgroup v0.2.0
 	github.com/bobg/go-generics/v2 v2.2.2
-	github.com/emmansun/base64 v0.10.0
+	github.com/emmansun/base64 v0.11.0
 	github.com/holiman/uint256 v1.3.2
 	github.com/josephburnett/jd v1.9.2
-	github.com/klauspost/compress v1.20.1
+	github.com/klauspost/compress v1.20.3
 	github.com/mitchellh/go-testing-interface v1.14.1
 	github.com/mostynb/go-grpc-compression v1.2.3
 	github.com/spf13/cobra v1.10.2
@@ -31,7 +31,7 @@ require (
 	github.com/streamingfast/substreams v1.25.1-0.20261016154027-d18ca66fe152
 	github.com/stretchr/testify v1.12.1
 	github.com/test-go/testify v1.1.4
-	github.com/tidwall/gjson v1.19.0
+	github.com/tidwall/gjson v1.20.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.28.0
 	google.golang.org/grpc v1.86.0-dev
