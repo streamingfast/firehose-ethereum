@@ -46,6 +46,8 @@ for instructions to keep up to date.
 
 ### Fixed
 
+- Substreams: Fix tier1 leaking a connection for every `eth_call` or `eth_getBalance` batch that the RPC endpoint answers with an HTTP error status, such as `429` when it is rate limited. The response body was never closed, so each one kept a socket and two goroutines until tier1 ran out of file descriptors and stopped accepting connections. Bumps `eth-go` to include streamingfast/eth-go#18.
+
 - Firehose and substreams-tier1 now return the sessions they still hold to the session server before exiting, whatever `--common-system-shutdown-signal-delay` is set to. Sessions of requests cut by the shutdown used to be released in the background while the process exited, so they stayed counted against the organization until they expired on the session server, and a client reconnecting right away could be refused with `Concurrent stream limit exceeded`. This applies to session plugins implementing `Close(ctx) error`, which the `tgm://` plugin does.
 
 - Substreams: Fix tier1 requests rejected before their body is read (authentication, compression enforcement) sometimes failing at a load balancer with HTTP 502 or `INTERNAL` instead of returning their error.
