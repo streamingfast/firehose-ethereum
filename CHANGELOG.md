@@ -76,6 +76,8 @@ for instructions to keep up to date.
 
 ### Changed
 
+- Substreams: production-mode requests disconnected for being more than 2 segments behind the last final block now get `back-processing ended too far behind the last final block of the chain, please reconnect to process the gap in parallel` or `stream fell too far behind the last final block of the chain, please reconnect to process the gap in parallel` instead of `endpoint is shutting down, please reconnect`. Both are still `Unavailable`.
+
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
 
 - Bump `firehose-networks` to `v0.3.0`.
@@ -92,7 +94,7 @@ for instructions to keep up to date.
 
 - `fireeth tools poller` prints each `FIRE BLOCK` line 11-15x faster and no longer allocates several times the block size to do it: the line is built once in a reused buffer, with SIMD base64 encoding.
 
-- Bump `firehose-core` to [a7a0628](https://github.com/streamingfast/firehose-core/compare/6706c0483339...a7a0628e39d5), `bstream` to [71724f9](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...71724f9213e7) and `substreams` to [da89504](https://github.com/streamingfast/substreams/compare/c14100343793...da8950480229).
+- Bump `firehose-core` to [a7a0628](https://github.com/streamingfast/firehose-core/compare/6706c0483339...a7a0628e39d5), `bstream` to [71724f9](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...71724f9213e7) and `substreams` to [d18ca66](https://github.com/streamingfast/substreams/compare/c14100343793...d18ca66fe152).
 
 ### Deprecated
 
