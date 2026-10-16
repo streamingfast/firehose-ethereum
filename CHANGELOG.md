@@ -122,7 +122,7 @@ for instructions to keep up to date.
 
 - `fireeth tools poller` prints each `FIRE BLOCK` line 11-15x faster and no longer allocates several times the block size to do it: the line is built once in a reused buffer, with SIMD base64 encoding.
 
-- Bump `firehose-core` to [a7a0628](https://github.com/streamingfast/firehose-core/compare/6706c0483339...a7a0628e39d5), `bstream` to [71724f9](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...71724f9213e7) and `substreams` to [d18ca66](https://github.com/streamingfast/substreams/compare/c14100343793...d18ca66fe152).
+- Bump `firehose-core` to [v1.21.0](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.0), `bstream` to [71724f9](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...71724f9213e7) and `substreams` to [d18ca66](https://github.com/streamingfast/substreams/compare/c14100343793...d18ca66fe152).
 
 ### Removed
 
