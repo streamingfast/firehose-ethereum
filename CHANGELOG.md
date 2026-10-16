@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.24.0
 
 ### Added
 
@@ -70,6 +70,10 @@ for instructions to keep up to date.
 
 - `index-builder` now serves its health check, over gRPC and HTTP `/healthz`, on `--index-builder-grpc-listen-addr`, which it never listened on.
 
+- Startup no longer lowers the open-files limit (`RLIMIT_NOFILE`) to 24,576 when it can't raise it to 1,000,000 and the current limit is already higher, as in containers without `CAP_SYS_RESOURCE` (k0s: 999,999, containerd 2.x: 524,288). It now keeps the current limit.
+
+- Substreams: Fix wasm calls that fail because the host ran out of file descriptors or memory (for example `Too many open files` while creating an instance) being reported as deterministic errors, which returned `InvalidArgument` and were cached for 1h. They now return `Internal`, and the shared cache runs the call again instead of handing the same error to every stream on that block.
+
 ### Changed
 
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
@@ -88,11 +92,15 @@ for instructions to keep up to date.
 
 - `fireeth tools poller` prints each `FIRE BLOCK` line 11-15x faster and no longer allocates several times the block size to do it: the line is built once in a reused buffer, with SIMD base64 encoding.
 
-- Bump `firehose-core` to [513060d](https://github.com/streamingfast/firehose-core/compare/6706c0483339...513060df3b9d), `bstream` to [2d126b0](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...2d126b0b0009) and `substreams` to [00bc09f](https://github.com/streamingfast/substreams/compare/c14100343793...00bc09fd4f2f).
+- Bump `firehose-core` to [a7a0628](https://github.com/streamingfast/firehose-core/compare/6706c0483339...a7a0628e39d5), `bstream` to [71724f9](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...71724f9213e7) and `substreams` to [da89504](https://github.com/streamingfast/substreams/compare/c14100343793...da8950480229).
 
 ### Deprecated
 
 - The `SOURCE_CHAN_SIZE` environment variable, replaced by `--common-live-subscriber-max-buffered-blocks`. It is still used when the flag is not set, with a warning at startup.
+
+### Security
+
+- Bump OpenTelemetry to `v1.47.0` to fix known vulnerabilities.
 
 ## v2.23.0
 
