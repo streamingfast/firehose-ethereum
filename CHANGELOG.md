@@ -10,6 +10,8 @@ for instructions to keep up to date.
 
 - Store URLs, such as `--common-merged-blocks-store-url`, accept `compression_config` to tune how files are written, matching the store's compression: a zstd level with an optional window in MiB (`best`, `better/32`), or a gzip level from `1` to `9`. For example `gs://bucket/merged-blocks?compression_config=best/32`. Files written with any setting are read back without configuration. An invalid value makes opening the store fail.
 
+- On zstd stores, `compression_config` also takes decoder settings, comma separated after the level or alone: `lowmem=false` gives each decoder a history buffer of twice the window, and `pool=<name>` reuses decoders across reads and across every store using that name, in place of the `default` pool. `pool=none` gives each file a decoder of its own. For example `--common-merged-blocks-store-url=gs://bucket/merged-blocks?compression_config=best/32,lowmem=false,pool=blocks` and `--substreams-state-store-url=gs://bucket/states?compression_config=better/16,pool=cache`. Substreams tier2 gets them through the URLs tier1 sends. Reading 100 MiB `best/32` merged blocks files 10 at a time, adding `lowmem=false` to the `default` pool used 70% less CPU and 57% more peak heap. `lowmem=false` only helps files larger than their window plus about 1 MiB.
+
 - `Call.input_truncated` and `Call.return_data_truncated` in `sf.ethereum.type.v2`. They flag the calls whose input was cut to its 4-byte selector, or whose return data was left out, by a tracer that limits how much call input and return data a transaction or block records. A trace without such limits never sets them.
 
 - New `fireeth tools convert-to-v5 <src> <dest> <start> <stop>`, which rewrites merged-blocks files of version 2, 3 or 4 as version 5 blocks. For each block it:
@@ -37,6 +39,10 @@ for instructions to keep up to date.
 - Substreams: `--substreams-tier1-allow-pruned-chain` lets tier1 serve modules (mappers and stores) whose initial block is below `--common-first-streamable-block`, after that block was raised (the chain was pruned). They run from the first streamable block on, and their stores resume from the snapshots taken before the pruning. A request is refused when a store has no snapshot at the first streamable block to resume from, or when a store has no initial block: every store must set one, at or above the first streamable block. Tier2 must run this version before the flag is set on tier1.
 
 - Substreams `eth_call` and `eth_getBalance` calls are now sent in the metering events as `external_calls_eth_call` and `external_calls_eth_getBalance`. A batch counts for as many calls as it contains, and retries are not counted.
+
+- `fireeth tools resize-merged-blocks --fix-misplaced-blocks` rewrites a store where merged-blocks files hold blocks outside of their range, as the empty files of a gap in block numbers can (ex: near-testnet around block 53461716). Each block is written to the file of its own number, with its parent number set to the last block written. A block at or below the last block written is skipped, and one that does not have it as parent stops the process with an error. Without the flag, such a store fails with `contains block ..., beyond the configured bundle size`.
+
+- `fireeth tools substreams prune-states`, `prune-outputs` and `purge`: `--delete-rate` (default `500`) caps deletions per second, `0` removes the cap.
 
 ### Fixed
 
@@ -74,6 +80,16 @@ for instructions to keep up to date.
 
 - Substreams: Fix wasm calls that fail because the host ran out of file descriptors or memory (for example `Too many open files` while creating an instance) being reported as deterministic errors, which returned `InvalidArgument` and were cached for 1h. They now return `Internal`, and the shared cache runs the call again instead of handing the same error to every stream on that block.
 
+- The tools writing merged-blocks files (`resize-merged-blocks`, `download-from-firehose` and others) now fail instead of writing a block to a file whose range does not hold it. The previous bundle's last block carried into the files of a gap is still written.
+
+- Merger no longer moves canonical one-block files to the forked-blocks store when readers write the same block with a different LIB, as happens on Polygon PoS / Amoy. Only blocks with another ID at the same height are moved.
+
+- The reader now always clamps a decoded block's `lib_num` down to its own block number when the node/plugin reports `lib_num` greater than the block number (invalid; `lib_num` equal to the block number is still valid), logs an error and increments `reader_node_invalid_libnum_clamped_count`, instead of letting the bad value reach the relayer where it moved LIB past head and silently stalled it forever.
+
+- zstd stores (merged blocks, one-block files, substreams states) now close the object's HTTP stream or file when a reader is closed before the end of the file. Streams stopping mid-bundle, at their stop block or when the client goes away, used to leave it open.
+
+- `fireeth tools substreams prune-states`, `prune-outputs` and `purge` no longer fail deletions on GCS with `429 rateLimitExceeded` ("request distribution is too uneven across the key-ranges" or "request-rate on the bucket has ramped up too fast"). They now delete in random order instead of listing order, which sent every concurrent deletion to the same part of the bucket, are capped by the new `--delete-rate` flag, and retry a failed deletion 5 times over several seconds instead of twice over 50ms.
+
 ### Changed
 
 - Substreams: production-mode requests disconnected for being more than 2 segments behind the last final block now get `back-processing ended too far behind the last final block of the chain, please reconnect to process the gap in parallel` or `stream fell too far behind the last final block of the chain, please reconnect to process the gap in parallel` instead of `endpoint is shutting down, please reconnect`. Both are still `Unavailable`.
@@ -92,15 +108,33 @@ for instructions to keep up to date.
 
 - Merged blocks are read without copying their payload, which halves the memory allocated per merged-blocks file read (25.8 MiB instead of 50.8 MiB for 100 blocks of 256 KiB).
 
+- Go 1.27 or newer is now required to build.
+
+- `fireeth tools resize-merged-blocks` now accepts equal `--source-bundle-size` and `--target-bundle-size` to rewrite merged-blocks files with different settings (ex: compression), after a confirmation prompt (`--force` skips it). It also clears the deprecated `payload_kind` and `payload_buffer` fields from every block written; the block data stays in `payload`.
+
+- `firehose` and `substreams-tier1` launched in the same process now share one forkable hub instead of each holding its own copy of the live blocks; on Solana that saves about 0.5 GiB per process. Firehose still streams complete blocks only.
+
+- The firehose hub keeps as many final blocks as the substreams-tier1 hub: two merged-blocks files worth, at least 200, instead of at least 500. Clients resuming between 200 and 500 blocks below the last irreversible block now read those blocks from merged-blocks files.
+
+- zstd stores (merged blocks, one-block files, substreams states) now read with decoders kept in a process-wide `default` pool when `compression_config` names no pool, and those decoders work on the reading goroutine instead of 4 background ones. Reading 100 MiB `best/32` merged blocks files 10 at a time, that used 6% less CPU and 53% less peak heap; on 2 MiB files, 42% less CPU. `compression_config=pool=none` brings back a decoder per file.
+
+- Firehose, substreams-tier1 and the relayer now detect a relayer or reader that disappears without closing the connection (for example a host reboot) in about 40s instead of 5 minutes. They send gRPC keepalive pings after `30s` without data and drop the connection after `10s` without an answer.
+
 - `fireeth tools poller` prints each `FIRE BLOCK` line 11-15x faster and no longer allocates several times the block size to do it: the line is built once in a reused buffer, with SIMD base64 encoding.
 
 - Bump `firehose-core` to [a7a0628](https://github.com/streamingfast/firehose-core/compare/6706c0483339...a7a0628e39d5), `bstream` to [71724f9](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...71724f9213e7) and `substreams` to [d18ca66](https://github.com/streamingfast/substreams/compare/c14100343793...d18ca66fe152).
+
+### Removed
+
+- Removed the `--firehose-discard-partial-blocks` flag. Firehose clients only receive complete blocks, and the hub firehose builds when it runs without substreams-tier1 never receives partial blocks from the relayer, so the flag no longer did anything. Operators setting it must drop it, as an unknown flag stops the process from starting.
 
 ### Deprecated
 
 - The `SOURCE_CHAN_SIZE` environment variable, replaced by `--common-live-subscriber-max-buffered-blocks`. It is still used when the flag is not set, with a warning at startup.
 
 ### Security
+
+- Bump `golang.org/x/net` to `v0.61.0` to fix CVE-2026-78663 (critical), CVE-2026-78669, CVE-2026-78660 and CVE-2026-78659 (high).
 
 - Bump OpenTelemetry to `v1.47.0` to fix known vulnerabilities.
 
