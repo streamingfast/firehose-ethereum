@@ -4,6 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## v2.24.1
+
+### Changed
+
+- With continuous authentication (`?continuous=true` on the `grpc` auth plugin), each continuous `Authenticate` response now refreshes the stream's trusted headers. A stream whose first authentication returned no headers (for example an authenticator that failed open) is metered with its identity from the next continuous call on, instead of without it for its whole lifetime.
+
+- Substreams: Tier2 skips loading dependency stores and compiling WASM modules for a segment once its cached block index proves every module excludes all of the segment's blocks. It still writes the same (empty) output files as before.
+
+- Bump `firehose-core` to [v1.21.1](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.1), `dauth` to [75940c1](https://github.com/streamingfast/dauth/compare/4ab1e1d2ebc3...75940c11f03e) and `substreams` to [5ed941a](https://github.com/streamingfast/substreams/compare/d18ca66fe152...5ed941ac91dc).
+
 ## v2.24.0
 
 ### Added
