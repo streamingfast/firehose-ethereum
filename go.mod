@@ -23,12 +23,12 @@ require (
 	github.com/streamingfast/dstore v0.2.4-0.20261009150522-6c74c85f2222
 	github.com/streamingfast/eth-go v0.0.0-20260929201909-24d21927f9af
 	github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd
-	github.com/streamingfast/firehose-core v1.21.0
+	github.com/streamingfast/firehose-core v1.21.1
 	github.com/streamingfast/firehose-ethereum/types v0.0.0-20260929182440-ca89a61c1a6c
 	github.com/streamingfast/logging v1.2.3-0.20260810132752-360563ac68a9
 	github.com/streamingfast/pbgo v0.0.6-0.20260206150405-2b95acf70437
 	github.com/streamingfast/shutter v1.5.0
-	github.com/streamingfast/substreams v1.25.1-0.20261016154027-d18ca66fe152
+	github.com/streamingfast/substreams v1.25.1-0.20261019180455-5ed941ac91dc
 	github.com/stretchr/testify v1.12.1
 	github.com/test-go/testify v1.1.4
 	github.com/tidwall/gjson v1.19.0
@@ -203,7 +203,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.8.1 // indirect
-	github.com/streamingfast/dauth v0.0.0-20260318230957-4ab1e1d2ebc3 // indirect
+	github.com/streamingfast/dauth v0.0.0-20261009160221-75940c11f03e // indirect
 	github.com/streamingfast/dbin v0.9.1-0.20231117225723-59790c798e2c // indirect
 	github.com/streamingfast/dgrpc v0.0.0-20260929191947-99e20897ecc7 // indirect
 	github.com/streamingfast/dhammer v0.0.0-20230125192823-c34bbd561bd4 // indirect
