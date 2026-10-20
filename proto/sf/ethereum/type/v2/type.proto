@@ -611,10 +611,10 @@ message TransactionTrace {
 //
 // The common transaction fields hold the values that keep their meaning: `from` is the resolved
 // sender, `nonce` is the sequence number within [AccountAbstractionTrxInput.nonce_key], `v`, `r`
-// and `s` hold the sender's signature when the sender signs with its secp256k1 key (the only
-// authentication without Keystore accounts, EIP-8130), `gas_price` is the effective gas price and
-// `gas_used` includes the payer's authentication gas. `to`, `value` and `input` are empty: the
-// calls are carried in the phases.
+// and `s` hold the sender's signature when the sender signs with its secp256k1 key (otherwise see
+// [AccountAbstractionTrxInput.sender_auth]), `gas_price` is the effective gas price and `gas_used`
+// includes the payer's authentication gas. `to`, `value` and `input` are empty: the calls are
+// carried in the phases.
 //
 // Calls are laid out as follows:
 //
@@ -667,6 +667,11 @@ message AccountAbstractionTrxInput {
   // CallPhases are the calls of the transaction as signed, grouped in phases, in order. Every
   // signed call is listed, including the ones that never executed.
   repeated AccountAbstractionCallPhase call_phases = 7;
+
+  // SenderAuth is the sender's authentication as signed, `authenticator (20) || data`, when the
+  // sender does not sign with its secp256k1 key: a Keystore actor (EIP-8130) using the P-256,
+  // WebAuthn or delegate authenticator. Empty when `v`, `r` and `s` hold the sender's signature.
+  bytes sender_auth = 8;
 }
 
 // AccountAbstractionCallPhase represents one entry of [AccountAbstractionTrxInput.call_phases].
@@ -694,13 +699,100 @@ message AccountAbstractionCallInput {
 }
 
 // AccountAbstractionAccountChange represents one entry of
-// [AccountAbstractionTrxInput.account_changes].
+// [AccountAbstractionTrxInput.account_changes]. Each field number is the on chain entry type
+// byte.
 message AccountAbstractionAccountChange {
   oneof change {
     // DelegationTarget sets or clears the EIP-7702 style delegation of the sender (entry type
     // 0x01). The sender's code becomes `0xef0100 || delegation_target`, or is cleared when it is
     // empty.
     bytes delegation_target = 1;
+
+    // Create creates the sender's account in the Keystore (entry type 0x02, EIP-8130). It is the
+    // first entry when present.
+    AccountAbstractionAccountCreate create = 2;
+
+    // ConfigChange applies a signed batch of Keystore changes to the sender's account (entry type
+    // 0x03, EIP-8130).
+    AccountAbstractionConfigChange config_change = 3;
+  }
+}
+
+// AccountAbstractionAccountCreate represents a Keystore create entry: the sender is the account
+// derived from `user_salt`, `code` and `initial_actors`. The code is placed at the sender
+// without running and the initial actors are registered, both recorded on the root call.
+message AccountAbstractionAccountCreate {
+  // UserSalt is the salt chosen by the user for the address derivation. The on chain type is a
+  // 'bytes32'.
+  bytes user_salt = 1;
+
+  // Code is the runtime bytecode placed at the account address.
+  bytes code = 2;
+
+  // InitialActors are the actors authorized on the new account, in ascending `actor_id` order.
+  repeated AccountAbstractionInitialActor initial_actors = 3;
+}
+
+// AccountAbstractionInitialActor represents one actor registered by an
+// [AccountAbstractionAccountCreate].
+message AccountAbstractionInitialActor {
+  // ActorId identifies the actor's key, as derived by its authenticator. The on chain type is a
+  // 'bytes32'.
+  bytes actor_id = 1;
+
+  // Authenticator is the authenticator contract of the actor (`0x...01` for secp256k1).
+  bytes authenticator = 2;
+
+  // Scope is the actor's scope bit field, 0 for an unrestricted admin. The on chain type is a
+  // 'uint16'.
+  uint32 scope = 3;
+
+  // PolicyData is empty, or the 20 bytes manager address followed by the 32 bytes policy
+  // commitment.
+  bytes policy_data = 4;
+}
+
+// AccountAbstractionConfigChange represents a Keystore config change entry, one signed batch of
+// changes applied to the sender's account atomically. The resulting Keystore writes and logs are
+// recorded on the root call.
+message AccountAbstractionConfigChange {
+  // Channel is the replay domain the batch is bound to.
+  Channel channel = 1;
+
+  // Sequence is the channel sequence the batch consumes: `local_epoch (high 32 bits) ||
+  // local_sequence (low 32 bits)` on the local channel, a plain counter on the multichain one.
+  uint64 sequence = 2;
+
+  // Changes are the changes of the batch, in order.
+  repeated AccountAbstractionKeystoreChange changes = 3;
+
+  // Auth is the admin signature over the batch digest, `authenticator (20) || data`.
+  bytes auth = 4;
+
+  enum Channel {
+    // Local binds the batch to the chain it is applied on.
+    CHANNEL_LOCAL = 0;
+    // Multichain binds the batch to chain id 0, valid on any chain.
+    CHANNEL_MULTICHAIN = 1;
+  }
+}
+
+// AccountAbstractionKeystoreChange represents one change of an [AccountAbstractionConfigChange].
+message AccountAbstractionKeystoreChange {
+  Type type = 1;
+
+  // Payload is the ABI encoded argument of the change: `(bytes32 actorId, ActorConfig config,
+  // bytes policyData)` to authorize an actor, `(bytes32 actorId)` to revoke one, `(uint16
+  // unlockDelay)` to lock the account, and empty otherwise.
+  bytes payload = 2;
+
+  // Type values are the on chain change type bytes.
+  enum Type {
+    TYPE_AUTHORIZE_ACTOR = 0;
+    TYPE_REVOKE_ACTOR = 1;
+    TYPE_INCREMENT_LOCAL_EPOCH = 2;
+    TYPE_LOCK = 3;
+    TYPE_UNLOCK = 4;
   }
 }
 
