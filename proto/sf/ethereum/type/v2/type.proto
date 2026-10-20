@@ -629,8 +629,8 @@ message TransactionTrace {
 // call reverts, its whole phase is reverted, including the calls of the phase that succeeded
 // before it, and the following phases are skipped. Phases that committed before it keep their
 // state. [AccountAbstractionTrxOutput.committed_phases] counts the phases that committed, and
-// [AccountAbstractionTrxInput.phases] links each signed call to the child of the root call that
-// executed it.
+// [AccountAbstractionTrxInput.call_phases] links each signed call to the child of the root call
+// that executed it.
 //
 // Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
 // in https://github.com/ethereum/EIPs/pull/12385.
@@ -664,19 +664,19 @@ message AccountAbstractionTrxInput {
   // order. Their state changes are recorded on the root call.
   repeated AccountAbstractionAccountChange account_changes = 6;
 
-  // Phases are the calls of the transaction as signed, grouped in phases, in order. Every signed
-  // call is listed, including the ones that never executed.
-  repeated AccountAbstractionPhase phases = 7;
+  // CallPhases are the calls of the transaction as signed, grouped in phases, in order. Every
+  // signed call is listed, including the ones that never executed.
+  repeated AccountAbstractionCallPhase call_phases = 7;
 }
 
-// AccountAbstractionPhase represents one entry of [AccountAbstractionTrxInput.phases].
-message AccountAbstractionPhase {
+// AccountAbstractionCallPhase represents one entry of [AccountAbstractionTrxInput.call_phases].
+message AccountAbstractionCallPhase {
   // Calls are the calls of this phase as signed, in order.
-  repeated AccountAbstractionPhaseCall calls = 1;
+  repeated AccountAbstractionCallInput calls = 1;
 }
 
-// AccountAbstractionPhaseCall represents one signed call of an [AccountAbstractionPhase].
-message AccountAbstractionPhaseCall {
+// AccountAbstractionCallInput represents one signed call of an [AccountAbstractionCallPhase].
+message AccountAbstractionCallInput {
   // To is the account called.
   bytes to = 1;
 
@@ -875,8 +875,8 @@ message TransactionReceipt {
 // abstraction transaction (`TRX_TYPE_ACCOUNT_ABSTRACTION`).
 message AccountAbstractionTrxOutput {
   // CommittedPhases is the number of phases that committed. When it is lower than the number of
-  // phases in [AccountAbstractionTrxInput.phases], phase `committed_phases` (zero-based) reverted
-  // and the phases after it were skipped.
+  // phases in [AccountAbstractionTrxInput.call_phases], phase `committed_phases` (zero-based)
+  // reverted and the phases after it were skipped.
   uint64 committed_phases = 1;
 }
 

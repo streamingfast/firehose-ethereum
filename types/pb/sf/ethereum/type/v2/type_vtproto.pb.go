@@ -900,9 +900,9 @@ func (m *AccountAbstractionTrxInput) MarshalToSizedBufferVT(dAtA []byte) (int, e
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if len(m.Phases) > 0 {
-		for iNdEx := len(m.Phases) - 1; iNdEx >= 0; iNdEx-- {
-			size, err := m.Phases[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
+	if len(m.CallPhases) > 0 {
+		for iNdEx := len(m.CallPhases) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.CallPhases[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -961,7 +961,7 @@ func (m *AccountAbstractionTrxInput) MarshalToSizedBufferVT(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *AccountAbstractionPhase) MarshalVT() (dAtA []byte, err error) {
+func (m *AccountAbstractionCallPhase) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -974,12 +974,12 @@ func (m *AccountAbstractionPhase) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *AccountAbstractionPhase) MarshalToVT(dAtA []byte) (int, error) {
+func (m *AccountAbstractionCallPhase) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *AccountAbstractionPhase) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *AccountAbstractionCallPhase) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -1006,7 +1006,7 @@ func (m *AccountAbstractionPhase) MarshalToSizedBufferVT(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
-func (m *AccountAbstractionPhaseCall) MarshalVT() (dAtA []byte, err error) {
+func (m *AccountAbstractionCallInput) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -1019,12 +1019,12 @@ func (m *AccountAbstractionPhaseCall) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *AccountAbstractionPhaseCall) MarshalToVT(dAtA []byte) (int, error) {
+func (m *AccountAbstractionCallInput) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *AccountAbstractionPhaseCall) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *AccountAbstractionCallInput) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -3111,8 +3111,8 @@ func (m *AccountAbstractionTrxInput) SizeVT() (n int) {
 			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 		}
 	}
-	if len(m.Phases) > 0 {
-		for _, e := range m.Phases {
+	if len(m.CallPhases) > 0 {
+		for _, e := range m.CallPhases {
 			l = e.SizeVT()
 			n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 		}
@@ -3121,7 +3121,7 @@ func (m *AccountAbstractionTrxInput) SizeVT() (n int) {
 	return n
 }
 
-func (m *AccountAbstractionPhase) SizeVT() (n int) {
+func (m *AccountAbstractionCallPhase) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3137,7 +3137,7 @@ func (m *AccountAbstractionPhase) SizeVT() (n int) {
 	return n
 }
 
-func (m *AccountAbstractionPhaseCall) SizeVT() (n int) {
+func (m *AccountAbstractionCallInput) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -6608,7 +6608,7 @@ func (m *AccountAbstractionTrxInput) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 7:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Phases", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field CallPhases", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6635,8 +6635,8 @@ func (m *AccountAbstractionTrxInput) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Phases = append(m.Phases, &AccountAbstractionPhase{})
-			if err := m.Phases[len(m.Phases)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			m.CallPhases = append(m.CallPhases, &AccountAbstractionCallPhase{})
+			if err := m.CallPhases[len(m.CallPhases)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -6662,7 +6662,7 @@ func (m *AccountAbstractionTrxInput) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *AccountAbstractionPhase) UnmarshalVT(dAtA []byte) error {
+func (m *AccountAbstractionCallPhase) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6685,10 +6685,10 @@ func (m *AccountAbstractionPhase) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AccountAbstractionPhase: wiretype end group for non-group")
+			return fmt.Errorf("proto: AccountAbstractionCallPhase: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AccountAbstractionPhase: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AccountAbstractionCallPhase: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6720,7 +6720,7 @@ func (m *AccountAbstractionPhase) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Calls = append(m.Calls, &AccountAbstractionPhaseCall{})
+			m.Calls = append(m.Calls, &AccountAbstractionCallInput{})
 			if err := m.Calls[len(m.Calls)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -6747,7 +6747,7 @@ func (m *AccountAbstractionPhase) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *AccountAbstractionPhaseCall) UnmarshalVT(dAtA []byte) error {
+func (m *AccountAbstractionCallInput) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6770,10 +6770,10 @@ func (m *AccountAbstractionPhaseCall) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AccountAbstractionPhaseCall: wiretype end group for non-group")
+			return fmt.Errorf("proto: AccountAbstractionCallInput: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AccountAbstractionPhaseCall: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AccountAbstractionCallInput: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
