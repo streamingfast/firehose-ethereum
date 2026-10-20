@@ -590,8 +590,8 @@ func (m *TransactionTrace) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if m.MorphL1MessageConfig != nil {
-		size, err := m.MorphL1MessageConfig.MarshalToSizedBufferVT(dAtA[:i])
+	if m.MorphL1MessageTrxInput != nil {
+		size, err := m.MorphL1MessageTrxInput.MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -602,8 +602,8 @@ func (m *TransactionTrace) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0xb2
 	}
-	if m.MorphTxConfig != nil {
-		size, err := m.MorphTxConfig.MarshalToSizedBufferVT(dAtA[:i])
+	if m.MorphTrxInput != nil {
+		size, err := m.MorphTrxInput.MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -858,7 +858,7 @@ func (m *TransactionTrace) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MorphTxConfig) MarshalVT() (dAtA []byte, err error) {
+func (m *MorphTrxInput) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -871,12 +871,12 @@ func (m *MorphTxConfig) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MorphTxConfig) MarshalToVT(dAtA []byte) (int, error) {
+func (m *MorphTrxInput) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *MorphTxConfig) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *MorphTrxInput) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -925,7 +925,7 @@ func (m *MorphTxConfig) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MorphL1MessageConfig) MarshalVT() (dAtA []byte, err error) {
+func (m *MorphL1MessageTrxInput) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -938,12 +938,12 @@ func (m *MorphL1MessageConfig) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MorphL1MessageConfig) MarshalToVT(dAtA []byte) (int, error) {
+func (m *MorphL1MessageTrxInput) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *MorphL1MessageConfig) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *MorphL1MessageTrxInput) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -1130,8 +1130,8 @@ func (m *TransactionReceipt) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if m.MorphReceiptConfig != nil {
-		size, err := m.MorphReceiptConfig.MarshalToSizedBufferVT(dAtA[:i])
+	if m.MorphTrxOutput != nil {
+		size, err := m.MorphTrxOutput.MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1189,7 +1189,7 @@ func (m *TransactionReceipt) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MorphReceiptConfig) MarshalVT() (dAtA []byte, err error) {
+func (m *MorphTrxOutput) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -1202,12 +1202,12 @@ func (m *MorphReceiptConfig) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MorphReceiptConfig) MarshalToVT(dAtA []byte) (int, error) {
+func (m *MorphTrxOutput) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *MorphReceiptConfig) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *MorphTrxOutput) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -2751,19 +2751,19 @@ func (m *TransactionTrace) SizeVT() (n int) {
 			n += 2 + l + protohelpers.SizeOfVarint(uint64(l))
 		}
 	}
-	if m.MorphTxConfig != nil {
-		l = m.MorphTxConfig.SizeVT()
+	if m.MorphTrxInput != nil {
+		l = m.MorphTrxInput.SizeVT()
 		n += 2 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
-	if m.MorphL1MessageConfig != nil {
-		l = m.MorphL1MessageConfig.SizeVT()
+	if m.MorphL1MessageTrxInput != nil {
+		l = m.MorphL1MessageTrxInput.SizeVT()
 		n += 2 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
 	n += len(m.unknownFields)
 	return n
 }
 
-func (m *MorphTxConfig) SizeVT() (n int) {
+func (m *MorphTrxInput) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2791,7 +2791,7 @@ func (m *MorphTxConfig) SizeVT() (n int) {
 	return n
 }
 
-func (m *MorphL1MessageConfig) SizeVT() (n int) {
+func (m *MorphL1MessageTrxInput) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2893,15 +2893,15 @@ func (m *TransactionReceipt) SizeVT() (n int) {
 		l = m.BlobGasPrice.SizeVT()
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
-	if m.MorphReceiptConfig != nil {
-		l = m.MorphReceiptConfig.SizeVT()
+	if m.MorphTrxOutput != nil {
+		l = m.MorphTrxOutput.SizeVT()
 		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
 	}
 	n += len(m.unknownFields)
 	return n
 }
 
-func (m *MorphReceiptConfig) SizeVT() (n int) {
+func (m *MorphTrxOutput) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -5834,7 +5834,7 @@ func (m *TransactionTrace) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 37:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MorphTxConfig", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MorphTrxInput", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -5861,16 +5861,16 @@ func (m *TransactionTrace) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.MorphTxConfig == nil {
-				m.MorphTxConfig = &MorphTxConfig{}
+			if m.MorphTrxInput == nil {
+				m.MorphTrxInput = &MorphTrxInput{}
 			}
-			if err := m.MorphTxConfig.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.MorphTrxInput.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 38:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MorphL1MessageConfig", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MorphL1MessageTrxInput", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -5897,10 +5897,10 @@ func (m *TransactionTrace) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.MorphL1MessageConfig == nil {
-				m.MorphL1MessageConfig = &MorphL1MessageConfig{}
+			if m.MorphL1MessageTrxInput == nil {
+				m.MorphL1MessageTrxInput = &MorphL1MessageTrxInput{}
 			}
-			if err := m.MorphL1MessageConfig.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.MorphL1MessageTrxInput.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -5926,7 +5926,7 @@ func (m *TransactionTrace) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MorphTxConfig) UnmarshalVT(dAtA []byte) error {
+func (m *MorphTrxInput) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5949,10 +5949,10 @@ func (m *MorphTxConfig) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MorphTxConfig: wiretype end group for non-group")
+			return fmt.Errorf("proto: MorphTrxInput: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MorphTxConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MorphTrxInput: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6119,7 +6119,7 @@ func (m *MorphTxConfig) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MorphL1MessageConfig) UnmarshalVT(dAtA []byte) error {
+func (m *MorphL1MessageTrxInput) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6142,10 +6142,10 @@ func (m *MorphL1MessageConfig) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MorphL1MessageConfig: wiretype end group for non-group")
+			return fmt.Errorf("proto: MorphL1MessageTrxInput: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MorphL1MessageConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MorphL1MessageTrxInput: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -6793,7 +6793,7 @@ func (m *TransactionReceipt) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 7:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MorphReceiptConfig", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MorphTrxOutput", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6820,10 +6820,10 @@ func (m *TransactionReceipt) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.MorphReceiptConfig == nil {
-				m.MorphReceiptConfig = &MorphReceiptConfig{}
+			if m.MorphTrxOutput == nil {
+				m.MorphTrxOutput = &MorphTrxOutput{}
 			}
-			if err := m.MorphReceiptConfig.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.MorphTrxOutput.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -6849,7 +6849,7 @@ func (m *TransactionReceipt) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MorphReceiptConfig) UnmarshalVT(dAtA []byte) error {
+func (m *MorphTrxOutput) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6872,10 +6872,10 @@ func (m *MorphReceiptConfig) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MorphReceiptConfig: wiretype end group for non-group")
+			return fmt.Errorf("proto: MorphTrxOutput: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MorphReceiptConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MorphTrxOutput: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

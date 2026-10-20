@@ -439,7 +439,7 @@ message TransactionTrace {
 
     // MorphTx (type byte 0x7f on chain), a transaction that can pay for its gas with a registered
     // ERC-20 token instead of the native token and that can carry an indexable reference and a memo.
-    // Those extra fields are recorded in [TransactionTrace.morph_tx_config].
+    // Those extra fields are recorded in [TransactionTrace.morph_trx_input].
     //
     // Specified by https://docs.morph.network/docs/about-morph/morphtx
     TRX_TYPE_MORPH = 300;
@@ -447,7 +447,7 @@ message TransactionTrace {
     // Morph's L1 message transaction (type byte 0x7e on chain), a transaction queued on the L1
     // chain and later included by the sequencer in an L2 block. It carries no signature, its
     // 'from' is the L1 sender and its queue index is recorded in
-    // [TransactionTrace.morph_l1_message_config].
+    // [TransactionTrace.morph_l1_message_trx_input].
     //
     // It shares its type byte with Optimism's deposit transaction (TRX_TYPE_OPTIMISM_DEPOSIT) but
     // has different semantics, hence the distinct value here.
@@ -572,25 +572,25 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_SET_CODE` which is possible only
   // if Prague fork is active on the chain, or on Morph if `TransactionTrace.Type == TRX_TYPE_MORPH`
-  // and [MorphTxConfig.version] is 2.
+  // and [MorphTrxInput.version] is 2.
   repeated SetCodeAuthorization set_code_authorizations = 36;
 
-  // MorphTxConfig holds the Morph specific fields carried by a MorphTx transaction.
+  // MorphTrxInput holds the Morph specific fields carried by a MorphTx transaction.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
-  optional MorphTxConfig morph_tx_config = 37;
+  optional MorphTrxInput morph_trx_input = 37;
 
-  // MorphL1MessageConfig holds the Morph specific fields carried by an L1 message transaction.
+  // MorphL1MessageTrxInput holds the Morph specific fields carried by an L1 message transaction.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH_L1_MESSAGE`.
-  optional MorphL1MessageConfig morph_l1_message_config = 38;
+  optional MorphL1MessageTrxInput morph_l1_message_trx_input = 38;
 }
 
-// MorphTxConfig represents the extra fields of a Morph MorphTx transaction, a transaction type
+// MorphTrxInput represents the extra fields of a Morph MorphTx transaction, a transaction type
 // that enables paying the gas fees with a registered ERC-20 token instead of the native token.
 //
 // Specified by https://docs.morph.network/docs/about-morph/morphtx
-message MorphTxConfig {
+message MorphTrxInput {
   // Version of the MorphTx payload, 0 for the initial encoding, 1 for the encoding that added
   // the 'reference' and 'memo' fields as well as support for paying the fees with the native token,
   // and 2 for the encoding that adds an EIP-7702 authorization list, recorded in
@@ -623,9 +623,9 @@ message MorphTxConfig {
   bytes memo = 5;
 }
 
-// MorphL1MessageConfig represents the extra fields of a Morph L1 message transaction, a transaction
+// MorphL1MessageTrxInput represents the extra fields of a Morph L1 message transaction, a transaction
 // queued on the L1 chain and later included by the sequencer in an L2 block.
-message MorphL1MessageConfig {
+message MorphL1MessageTrxInput {
   // QueueIndex is the position of this message in Morph's L1 message queue. The chain requires
   // L1 messages to be included in strictly increasing queue index order, refer to
   // [BlockHeader.morph_next_l1_msg_index] to know at which index the next block resumes.
@@ -740,15 +740,15 @@ message TransactionReceipt {
   // if Cancun fork is active on the chain.
   optional BigInt blob_gas_price = 6;
 
-  // MorphReceiptConfig holds the Morph specific values that were resolved while executing the
+  // MorphTrxOutput holds the Morph specific values that were resolved while executing the
   // transaction, mainly the L1 data fee and the oracle values used to charge the fee token.
   //
   // Morph specific, unset on all other chains.
-  optional MorphReceiptConfig morph_receipt_config = 7;
+  optional MorphTrxOutput morph_trx_output = 7;
 }
 
-// MorphReceiptConfig represents the Morph specific fields recorded on the receipt of a transaction.
-message MorphReceiptConfig {
+// MorphTrxOutput represents the Morph specific fields recorded on the receipt of a transaction.
+message MorphTrxOutput {
   // L1Fee is the fee, in the native token, paid to cover the cost of posting this transaction's
   // data to the L1 chain. It is populated for every Morph transaction except L1 messages, which
   // are prepaid on L1. For a MorphTx paying with a fee token, it is included in the token debit.
@@ -758,7 +758,7 @@ message MorphReceiptConfig {
   // units of the transaction's fee token.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
-  // [MorphTxConfig.fee_token_id] is not 0.
+  // [MorphTrxInput.fee_token_id] is not 0.
   BigInt fee_rate = 2;
 
   // TokenScale is the scaling factor of the transaction's fee token. Together with 'fee_rate', a
@@ -769,7 +769,7 @@ message MorphReceiptConfig {
   // conversion of the gas used.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
-  // [MorphTxConfig.fee_token_id] is not 0.
+  // [MorphTrxInput.fee_token_id] is not 0.
   BigInt token_scale = 3;
 }
 
