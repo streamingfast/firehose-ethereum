@@ -429,6 +429,14 @@ message TransactionTrace {
     TRX_TYPE_ARBITRUM_INTERNAL = 106;
     TRX_TYPE_ARBITRUM_LEGACY = 120;
 
+    // Account abstraction transaction (type byte 0x79 on chain), carrying batched calls grouped
+    // in phases, gas sponsorship by a payer, two-dimensional nonces and in-band EIP-7702 style
+    // delegation. Those extra fields are recorded in [TransactionTrace.aa_trx_input].
+    //
+    // Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
+    // in https://github.com/ethereum/EIPs/pull/12385. Activated on Base by the Everest upgrade.
+    TRX_TYPE_AA = 121;
+
     // OPTIMISM-specific transactions
     TRX_TYPE_OPTIMISM_DEPOSIT = 126;
 
@@ -528,6 +536,11 @@ message TransactionTrace {
   // balance changes you process those where `reason` is either `REASON_GAS_BUY`, `REASON_GAS_REFUND` or
   // `REASON_REWARD_TRANSACTION_FEE` and for nonce change, still on the root call, you pick the nonce change which the
   // smallest ordinal (if more than one).
+  //
+  // An account abstraction transaction (`TRX_TYPE_AA`) is the exception: it is `FAILED` when one of its phases
+  // reverted, but the phases that committed before it keep their state and logs, and its root call is never
+  // reverted. Whatever its status, you iterate over the `calls` array and record the state changes for each call for
+  // which `state_reverted == false`. See [AaTrxInput] for how its calls are laid out.
   TransactionTraceStatus status = 30;
 
   TransactionReceipt receipt = 31;
@@ -584,6 +597,113 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH_L1_MESSAGE`.
   optional MorphL1MessageTrxInput morph_l1_message_trx_input = 38;
+
+  // AaTrxInput holds the fields carried by an account abstraction transaction that have no
+  // equivalent among the common transaction fields.
+  //
+  // This is populated only if `TransactionTrace.Type == TRX_TYPE_AA`.
+  optional AaTrxInput aa_trx_input = 39;
+}
+
+// AaTrxInput represents the extra fields of an account abstraction transaction
+// (`TRX_TYPE_AA`).
+//
+// The common transaction fields hold the values that keep their meaning: `from` is the resolved
+// sender, `nonce` is the sequence number within [AaTrxInput.nonce_key], `v`, `r` and `s` hold the
+// sender's signature when the sender signs with its secp256k1 key (the only authentication
+// without Keystore accounts, EIP-8130), `gas_price` is the effective gas price and `gas_used`
+// includes the payer's authentication gas. `to`, `value` and `input` are empty: the calls are carried in the
+// call phases.
+//
+// Calls are laid out as follows:
+//
+// - The root call (`calls[0]`) is a call from the sender to itself whose input is the encoded
+//   transaction. It runs no code and carries the state changes made outside the calls: the payer's
+//   gas purchase and refund, the fee payouts, the nonce increment and the account changes. It is
+//   never reverted.
+// - Each signed call that executed is a child of the root call (`parent_index` is the root call's
+//   index), in execution order. Calls made by those calls are nested below them as usual.
+//
+// Phases run in order, and the calls of a phase take effect all together or not at all. When a
+// call reverts, its whole phase is reverted, including the calls of the phase that succeeded
+// before it, and the following phases are skipped. Phases that committed before it keep their
+// state. [AaTrxOutput.committed_phases] counts the phases that committed, and
+// [AaTrxInput.phases] links each signed call to the child of the root call that executed it.
+//
+// Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
+// in https://github.com/ethereum/EIPs/pull/12385.
+message AaTrxInput {
+  // NonceKey selects the nonce channel of the transaction: 0 for the account nonce shared with the
+  // other transaction types, 2^256-1 for the nonce-free mode, and any other value for a parallel
+  // channel held by the nonce manager. The sequence number within the channel is in
+  // [TransactionTrace.nonce].
+  //
+  // The on chain type is a 'uint256'.
+  BigInt nonce_key = 1;
+
+  // Payer is the resolved address paying the gas fees: the sender when self-paying, the payer
+  // named by the transaction, or the payer recovered from its signature when the transaction
+  // leaves the payer open.
+  bytes payer = 2;
+
+  // ValidAfter is the time, as signed, before which the transaction is not valid. Values below
+  // 10^11 are seconds and the others are milliseconds. 0 means no lower bound.
+  uint64 valid_after = 3;
+
+  // ValidBefore is the time, as signed, after which the transaction is not valid. Values below
+  // 10^11 are seconds and the others are milliseconds. 0 means no expiry.
+  uint64 valid_before = 4;
+
+  // Metadata is arbitrary attribution or annotation data covered by the signatures. It does not
+  // affect execution.
+  bytes metadata = 5;
+
+  // AccountChanges are the changes applied to the sender's account before the calls run, in
+  // order. Their state changes are recorded on the root call.
+  repeated AccountChange account_changes = 6;
+
+  // Phases are the calls of the transaction as signed, grouped in phases, in order. Every signed
+  // call is listed, including the ones that never executed.
+  repeated Phase phases = 7;
+
+  // Phase represents one entry of [AaTrxInput.phases].
+  message Phase {
+    // Calls are the calls of this phase as signed, in order.
+    repeated PhaseCall calls = 1;
+  }
+
+  // PhaseCall represents one signed call of a phase.
+  message PhaseCall {
+    // To is the account called.
+    bytes to = 1;
+
+    // Value is the amount of native token sent by the sender to `to` with the call.
+    BigInt value = 2;
+
+    // Data is the input of the call.
+    bytes data = 3;
+
+    // CallIndex is the [Call.index] of the child of the root call that executed this signed call.
+    // It is 0 when the call never executed: the calls after the one that reverted in the same
+    // phase, the calls of the phases skipped after it, and a call the protocol refused to
+    // dispatch.
+    uint32 call_index = 4;
+  }
+
+  // AccountChange represents one entry of [AaTrxInput.account_changes].
+  message AccountChange {
+    oneof change {
+      // Delegation sets or clears the EIP-7702 style delegation of the sender (entry type 0x01).
+      Delegation delegation = 1;
+    }
+  }
+
+  // Delegation represents an account change delegating the sender's code to another account.
+  message Delegation {
+    // Target is the account the sender delegates to. The sender's code becomes
+    // `0xef0100 || target`. Empty when the transaction clears the delegation.
+    bytes target = 1;
+  }
 }
 
 // MorphTrxInput represents the extra fields of a Morph MorphTx transaction, a transaction type
@@ -745,6 +865,20 @@ message TransactionReceipt {
   //
   // Morph specific, unset on all other chains.
   optional MorphTrxOutput morph_trx_output = 7;
+
+  // AaTrxOutput holds the values recorded on the receipt of an account abstraction transaction.
+  //
+  // This is populated only if `TransactionTrace.Type == TRX_TYPE_AA`.
+  optional AaTrxOutput aa_trx_output = 8;
+}
+
+// AaTrxOutput represents the extra fields recorded on the receipt of an account abstraction
+// transaction (`TRX_TYPE_AA`).
+message AaTrxOutput {
+  // CommittedPhases is the number of phases that committed. When it is lower than the number of
+  // phases in [AaTrxInput.phases], phase `committed_phases` (zero-based) reverted and the phases
+  // after it were skipped.
+  uint64 committed_phases = 1;
 }
 
 // MorphTrxOutput represents the Morph specific fields recorded on the receipt of a transaction.
