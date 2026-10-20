@@ -8,7 +8,7 @@ for instructions to keep up to date.
 
 ### Added
 
-- `TRX_TYPE_AA = 121` in `sf.ethereum.type.v2`, for the account abstraction transaction (type byte `0x79`) of the AA Transaction Type proposal split out of EIP-8130, which Base activates with its Everest upgrade. Its fields are in the new `TransactionTrace.aa_trx_input`: the nonce key, the payer, the validity window, the metadata, the account changes, and the signed calls grouped in phases, each linked to the call that executed it. `committed_phases`, in the new `TransactionReceipt.aa_trx_output`, counts the phases that committed. A transaction of this type can be `FAILED` and still keep the state of the phases that committed before the one that reverted, see the `TransactionTrace.status` documentation.
+- `TRX_TYPE_ACCOUNT_ABSTRACTION = 121` in `sf.ethereum.type.v2`, for the account abstraction transaction (type byte `0x79`) of the AA Transaction Type proposal split out of EIP-8130, which Base activates with its Everest upgrade. Its fields are in the new `TransactionTrace.account_abstraction_trx_input`: the nonce key, the payer, the validity window, the metadata, the account changes, and the signed calls grouped in phases, each linked to the call that executed it. `committed_phases`, in the new `TransactionReceipt.account_abstraction_trx_output`, counts the phases that committed. A transaction of this type can be `FAILED` and still keep the state of the phases that committed before the one that reverted, see the `TransactionTrace.status` documentation.
 
 ### Changed
 

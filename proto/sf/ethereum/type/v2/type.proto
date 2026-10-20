@@ -420,6 +420,15 @@ message TransactionTrace {
     // Activated in Prague (EIP-7702)
     TRX_TYPE_SET_CODE = 4;
 
+    // Account abstraction transaction (type byte 0x79 on chain), carrying batched calls grouped
+    // in phases, gas sponsorship by a payer, two-dimensional nonces and in-band EIP-7702 style
+    // delegation. Those extra fields are recorded in
+    // [TransactionTrace.account_abstraction_trx_input].
+    //
+    // Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
+    // in https://github.com/ethereum/EIPs/pull/12385. Activated on Base by the Everest upgrade.
+    TRX_TYPE_ACCOUNT_ABSTRACTION = 121;
+
     // Arbitrum-specific transactions
     TRX_TYPE_ARBITRUM_DEPOSIT = 100;
     TRX_TYPE_ARBITRUM_UNSIGNED = 101;
@@ -428,14 +437,6 @@ message TransactionTrace {
     TRX_TYPE_ARBITRUM_SUBMIT_RETRYABLE = 105;
     TRX_TYPE_ARBITRUM_INTERNAL = 106;
     TRX_TYPE_ARBITRUM_LEGACY = 120;
-
-    // Account abstraction transaction (type byte 0x79 on chain), carrying batched calls grouped
-    // in phases, gas sponsorship by a payer, two-dimensional nonces and in-band EIP-7702 style
-    // delegation. Those extra fields are recorded in [TransactionTrace.aa_trx_input].
-    //
-    // Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
-    // in https://github.com/ethereum/EIPs/pull/12385. Activated on Base by the Everest upgrade.
-    TRX_TYPE_AA = 121;
 
     // OPTIMISM-specific transactions
     TRX_TYPE_OPTIMISM_DEPOSIT = 126;
@@ -537,10 +538,10 @@ message TransactionTrace {
   // `REASON_REWARD_TRANSACTION_FEE` and for nonce change, still on the root call, you pick the nonce change which the
   // smallest ordinal (if more than one).
   //
-  // An account abstraction transaction (`TRX_TYPE_AA`) is the exception: it is `FAILED` when one of its phases
-  // reverted, but the phases that committed before it keep their state and logs, and its root call is never
-  // reverted. Whatever its status, you iterate over the `calls` array and record the state changes for each call for
-  // which `state_reverted == false`. See [AaTrxInput] for how its calls are laid out.
+  // An account abstraction transaction (`TRX_TYPE_ACCOUNT_ABSTRACTION`) is the exception: it is `FAILED` when one
+  // of its phases reverted, but the phases that committed before it keep their state and logs, and its root call is
+  // never reverted. Whatever its status, you iterate over the `calls` array and record the state changes for each
+  // call for which `state_reverted == false`. See [AccountAbstractionTrxInput] for how its calls are laid out.
   TransactionTraceStatus status = 30;
 
   TransactionReceipt receipt = 31;
@@ -598,22 +599,22 @@ message TransactionTrace {
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH_L1_MESSAGE`.
   optional MorphL1MessageTrxInput morph_l1_message_trx_input = 38;
 
-  // AaTrxInput holds the fields carried by an account abstraction transaction that have no
-  // equivalent among the common transaction fields.
+  // AccountAbstractionTrxInput holds the fields carried by an account abstraction transaction that
+  // have no equivalent among the common transaction fields.
   //
-  // This is populated only if `TransactionTrace.Type == TRX_TYPE_AA`.
-  optional AaTrxInput aa_trx_input = 39;
+  // This is populated only if `TransactionTrace.Type == TRX_TYPE_ACCOUNT_ABSTRACTION`.
+  optional AccountAbstractionTrxInput account_abstraction_trx_input = 39;
 }
 
-// AaTrxInput represents the extra fields of an account abstraction transaction
-// (`TRX_TYPE_AA`).
+// AccountAbstractionTrxInput represents the extra fields of an account abstraction transaction
+// (`TRX_TYPE_ACCOUNT_ABSTRACTION`).
 //
 // The common transaction fields hold the values that keep their meaning: `from` is the resolved
-// sender, `nonce` is the sequence number within [AaTrxInput.nonce_key], `v`, `r` and `s` hold the
-// sender's signature when the sender signs with its secp256k1 key (the only authentication
-// without Keystore accounts, EIP-8130), `gas_price` is the effective gas price and `gas_used`
-// includes the payer's authentication gas. `to`, `value` and `input` are empty: the calls are carried in the
-// call phases.
+// sender, `nonce` is the sequence number within [AccountAbstractionTrxInput.nonce_key], `v`, `r`
+// and `s` hold the sender's signature when the sender signs with its secp256k1 key (the only
+// authentication without Keystore accounts, EIP-8130), `gas_price` is the effective gas price and
+// `gas_used` includes the payer's authentication gas. `to`, `value` and `input` are empty: the
+// calls are carried in the phases.
 //
 // Calls are laid out as follows:
 //
@@ -627,12 +628,13 @@ message TransactionTrace {
 // Phases run in order, and the calls of a phase take effect all together or not at all. When a
 // call reverts, its whole phase is reverted, including the calls of the phase that succeeded
 // before it, and the following phases are skipped. Phases that committed before it keep their
-// state. [AaTrxOutput.committed_phases] counts the phases that committed, and
-// [AaTrxInput.phases] links each signed call to the child of the root call that executed it.
+// state. [AccountAbstractionTrxOutput.committed_phases] counts the phases that committed, and
+// [AccountAbstractionTrxInput.phases] links each signed call to the child of the root call that
+// executed it.
 //
 // Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
 // in https://github.com/ethereum/EIPs/pull/12385.
-message AaTrxInput {
+message AccountAbstractionTrxInput {
   // NonceKey selects the nonce channel of the transaction: 0 for the account nonce shared with the
   // other transaction types, 2^256-1 for the nonce-free mode, and any other value for a parallel
   // channel held by the nonce manager. The sequence number within the channel is in
@@ -660,49 +662,45 @@ message AaTrxInput {
 
   // AccountChanges are the changes applied to the sender's account before the calls run, in
   // order. Their state changes are recorded on the root call.
-  repeated AccountChange account_changes = 6;
+  repeated AccountAbstractionAccountChange account_changes = 6;
 
   // Phases are the calls of the transaction as signed, grouped in phases, in order. Every signed
   // call is listed, including the ones that never executed.
-  repeated Phase phases = 7;
+  repeated AccountAbstractionPhase phases = 7;
+}
 
-  // Phase represents one entry of [AaTrxInput.phases].
-  message Phase {
-    // Calls are the calls of this phase as signed, in order.
-    repeated PhaseCall calls = 1;
-  }
+// AccountAbstractionPhase represents one entry of [AccountAbstractionTrxInput.phases].
+message AccountAbstractionPhase {
+  // Calls are the calls of this phase as signed, in order.
+  repeated AccountAbstractionPhaseCall calls = 1;
+}
 
-  // PhaseCall represents one signed call of a phase.
-  message PhaseCall {
-    // To is the account called.
-    bytes to = 1;
+// AccountAbstractionPhaseCall represents one signed call of an [AccountAbstractionPhase].
+message AccountAbstractionPhaseCall {
+  // To is the account called.
+  bytes to = 1;
 
-    // Value is the amount of native token sent by the sender to `to` with the call.
-    BigInt value = 2;
+  // Value is the amount of native token sent by the sender to `to` with the call.
+  BigInt value = 2;
 
-    // Data is the input of the call.
-    bytes data = 3;
+  // Data is the input of the call.
+  bytes data = 3;
 
-    // CallIndex is the [Call.index] of the child of the root call that executed this signed call.
-    // It is 0 when the call never executed: the calls after the one that reverted in the same
-    // phase, the calls of the phases skipped after it, and a call the protocol refused to
-    // dispatch.
-    uint32 call_index = 4;
-  }
+  // CallIndex is the [Call.index] of the child of the root call that executed this signed call.
+  // Call indexes start at 1, so 0 never names a call: it means the call never executed. That is
+  // the case of the calls after the one that reverted in the same phase, the calls of the phases
+  // skipped after it, and a call the protocol refused to dispatch.
+  uint32 call_index = 4;
+}
 
-  // AccountChange represents one entry of [AaTrxInput.account_changes].
-  message AccountChange {
-    oneof change {
-      // Delegation sets or clears the EIP-7702 style delegation of the sender (entry type 0x01).
-      Delegation delegation = 1;
-    }
-  }
-
-  // Delegation represents an account change delegating the sender's code to another account.
-  message Delegation {
-    // Target is the account the sender delegates to. The sender's code becomes
-    // `0xef0100 || target`. Empty when the transaction clears the delegation.
-    bytes target = 1;
+// AccountAbstractionAccountChange represents one entry of
+// [AccountAbstractionTrxInput.account_changes].
+message AccountAbstractionAccountChange {
+  oneof change {
+    // DelegationTarget sets or clears the EIP-7702 style delegation of the sender (entry type
+    // 0x01). The sender's code becomes `0xef0100 || delegation_target`, or is cleared when it is
+    // empty.
+    bytes delegation_target = 1;
   }
 }
 
@@ -866,18 +864,19 @@ message TransactionReceipt {
   // Morph specific, unset on all other chains.
   optional MorphTrxOutput morph_trx_output = 7;
 
-  // AaTrxOutput holds the values recorded on the receipt of an account abstraction transaction.
+  // AccountAbstractionTrxOutput holds the values recorded on the receipt of an account abstraction
+  // transaction.
   //
-  // This is populated only if `TransactionTrace.Type == TRX_TYPE_AA`.
-  optional AaTrxOutput aa_trx_output = 8;
+  // This is populated only if `TransactionTrace.Type == TRX_TYPE_ACCOUNT_ABSTRACTION`.
+  optional AccountAbstractionTrxOutput account_abstraction_trx_output = 8;
 }
 
-// AaTrxOutput represents the extra fields recorded on the receipt of an account abstraction
-// transaction (`TRX_TYPE_AA`).
-message AaTrxOutput {
+// AccountAbstractionTrxOutput represents the extra fields recorded on the receipt of an account
+// abstraction transaction (`TRX_TYPE_ACCOUNT_ABSTRACTION`).
+message AccountAbstractionTrxOutput {
   // CommittedPhases is the number of phases that committed. When it is lower than the number of
-  // phases in [AaTrxInput.phases], phase `committed_phases` (zero-based) reverted and the phases
-  // after it were skipped.
+  // phases in [AccountAbstractionTrxInput.phases], phase `committed_phases` (zero-based) reverted
+  // and the phases after it were skipped.
   uint64 committed_phases = 1;
 }
 
