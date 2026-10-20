@@ -420,6 +420,15 @@ message TransactionTrace {
     // Activated in Prague (EIP-7702)
     TRX_TYPE_SET_CODE = 4;
 
+    // Account abstraction transaction (type byte 0x79 on chain), carrying batched calls grouped
+    // in phases, gas sponsorship by a payer, two-dimensional nonces and in-band EIP-7702 style
+    // delegation. Those extra fields are recorded in
+    // [TransactionTrace.account_abstraction_trx_input].
+    //
+    // Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
+    // in https://github.com/ethereum/EIPs/pull/12385. Activated on Base by the Everest upgrade.
+    TRX_TYPE_ACCOUNT_ABSTRACTION = 121;
+
     // Arbitrum-specific transactions
     TRX_TYPE_ARBITRUM_DEPOSIT = 100;
     TRX_TYPE_ARBITRUM_UNSIGNED = 101;
@@ -439,7 +448,7 @@ message TransactionTrace {
 
     // MorphTx (type byte 0x7f on chain), a transaction that can pay for its gas with a registered
     // ERC-20 token instead of the native token and that can carry an indexable reference and a memo.
-    // Those extra fields are recorded in [TransactionTrace.morph_tx_config].
+    // Those extra fields are recorded in [TransactionTrace.morph_trx_input].
     //
     // Specified by https://docs.morph.network/docs/about-morph/morphtx
     TRX_TYPE_MORPH = 300;
@@ -447,7 +456,7 @@ message TransactionTrace {
     // Morph's L1 message transaction (type byte 0x7e on chain), a transaction queued on the L1
     // chain and later included by the sequencer in an L2 block. It carries no signature, its
     // 'from' is the L1 sender and its queue index is recorded in
-    // [TransactionTrace.morph_l1_message_config].
+    // [TransactionTrace.morph_l1_message_trx_input].
     //
     // It shares its type byte with Optimism's deposit transaction (TRX_TYPE_OPTIMISM_DEPOSIT) but
     // has different semantics, hence the distinct value here.
@@ -528,6 +537,11 @@ message TransactionTrace {
   // balance changes you process those where `reason` is either `REASON_GAS_BUY`, `REASON_GAS_REFUND` or
   // `REASON_REWARD_TRANSACTION_FEE` and for nonce change, still on the root call, you pick the nonce change which the
   // smallest ordinal (if more than one).
+  //
+  // An account abstraction transaction (`TRX_TYPE_ACCOUNT_ABSTRACTION`) is the exception: it is `FAILED` when one
+  // of its phases reverted, but the phases that committed before it keep their state and logs, and its root call is
+  // never reverted. Whatever its status, you iterate over the `calls` array and record the state changes for each
+  // call for which `state_reverted == false`. See [AccountAbstractionTrxInput] for how its calls are laid out.
   TransactionTraceStatus status = 30;
 
   TransactionReceipt receipt = 31;
@@ -572,25 +586,129 @@ message TransactionTrace {
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_SET_CODE` which is possible only
   // if Prague fork is active on the chain, or on Morph if `TransactionTrace.Type == TRX_TYPE_MORPH`
-  // and [MorphTxConfig.version] is 2.
+  // and [MorphTrxInput.version] is 2.
   repeated SetCodeAuthorization set_code_authorizations = 36;
 
-  // MorphTxConfig holds the Morph specific fields carried by a MorphTx transaction.
+  // MorphTrxInput holds the Morph specific fields carried by a MorphTx transaction.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH`.
-  optional MorphTxConfig morph_tx_config = 37;
+  optional MorphTrxInput morph_trx_input = 37;
 
-  // MorphL1MessageConfig holds the Morph specific fields carried by an L1 message transaction.
+  // MorphL1MessageTrxInput holds the Morph specific fields carried by an L1 message transaction.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH_L1_MESSAGE`.
-  optional MorphL1MessageConfig morph_l1_message_config = 38;
+  optional MorphL1MessageTrxInput morph_l1_message_trx_input = 38;
+
+  // AccountAbstractionTrxInput holds the fields carried by an account abstraction transaction that
+  // have no equivalent among the common transaction fields.
+  //
+  // This is populated only if `TransactionTrace.Type == TRX_TYPE_ACCOUNT_ABSTRACTION`.
+  optional AccountAbstractionTrxInput account_abstraction_trx_input = 39;
 }
 
-// MorphTxConfig represents the extra fields of a Morph MorphTx transaction, a transaction type
+// AccountAbstractionTrxInput represents the extra fields of an account abstraction transaction
+// (`TRX_TYPE_ACCOUNT_ABSTRACTION`).
+//
+// The common transaction fields hold the values that keep their meaning: `from` is the resolved
+// sender, `nonce` is the sequence number within [AccountAbstractionTrxInput.nonce_key], `v`, `r`
+// and `s` hold the sender's signature when the sender signs with its secp256k1 key (the only
+// authentication without Keystore accounts, EIP-8130), `gas_price` is the effective gas price and
+// `gas_used` includes the payer's authentication gas. `to`, `value` and `input` are empty: the
+// calls are carried in the phases.
+//
+// Calls are laid out as follows:
+//
+// - The root call (`calls[0]`) is a call from the sender to itself whose input is the encoded
+//   transaction. It runs no code and carries the state changes made outside the calls: the payer's
+//   gas purchase and refund, the fee payouts, the nonce increment and the account changes. It is
+//   never reverted.
+// - Each signed call that executed is a child of the root call (`parent_index` is the root call's
+//   index), in execution order. Calls made by those calls are nested below them as usual.
+//
+// Phases run in order, and the calls of a phase take effect all together or not at all. When a
+// call reverts, its whole phase is reverted, including the calls of the phase that succeeded
+// before it, and the following phases are skipped. Phases that committed before it keep their
+// state. [AccountAbstractionTrxOutput.committed_phases] counts the phases that committed, and
+// [AccountAbstractionTrxInput.call_phases] links each signed call to the child of the root call
+// that executed it.
+//
+// Specified by the AA Transaction Type proposal (split out of EIP-8130), drafted as EIP-8430
+// in https://github.com/ethereum/EIPs/pull/12385.
+message AccountAbstractionTrxInput {
+  // NonceKey selects the nonce channel of the transaction: 0 for the account nonce shared with the
+  // other transaction types, 2^256-1 for the nonce-free mode, and any other value for a parallel
+  // channel held by the nonce manager. The sequence number within the channel is in
+  // [TransactionTrace.nonce].
+  //
+  // The on chain type is a 'uint256'.
+  BigInt nonce_key = 1;
+
+  // Payer is the resolved address paying the gas fees: the sender when self-paying, the payer
+  // named by the transaction, or the payer recovered from its signature when the transaction
+  // leaves the payer open.
+  bytes payer = 2;
+
+  // ValidAfter is the time, as signed, before which the transaction is not valid. Values below
+  // 10^11 are seconds and the others are milliseconds. 0 means no lower bound.
+  uint64 valid_after = 3;
+
+  // ValidBefore is the time, as signed, after which the transaction is not valid. Values below
+  // 10^11 are seconds and the others are milliseconds. 0 means no expiry.
+  uint64 valid_before = 4;
+
+  // Metadata is arbitrary attribution or annotation data covered by the signatures. It does not
+  // affect execution.
+  bytes metadata = 5;
+
+  // AccountChanges are the changes applied to the sender's account before the calls run, in
+  // order. Their state changes are recorded on the root call.
+  repeated AccountAbstractionAccountChange account_changes = 6;
+
+  // CallPhases are the calls of the transaction as signed, grouped in phases, in order. Every
+  // signed call is listed, including the ones that never executed.
+  repeated AccountAbstractionCallPhase call_phases = 7;
+}
+
+// AccountAbstractionCallPhase represents one entry of [AccountAbstractionTrxInput.call_phases].
+message AccountAbstractionCallPhase {
+  // Calls are the calls of this phase as signed, in order.
+  repeated AccountAbstractionCallInput calls = 1;
+}
+
+// AccountAbstractionCallInput represents one signed call of an [AccountAbstractionCallPhase].
+message AccountAbstractionCallInput {
+  // To is the account called.
+  bytes to = 1;
+
+  // Value is the amount of native token sent by the sender to `to` with the call.
+  BigInt value = 2;
+
+  // Data is the input of the call.
+  bytes data = 3;
+
+  // CallIndex is the [Call.index] of the child of the root call that executed this signed call.
+  // Call indexes start at 1, so 0 never names a call: it means the call never executed. That is
+  // the case of the calls after the one that reverted in the same phase, the calls of the phases
+  // skipped after it, and a call the protocol refused to dispatch.
+  uint32 call_index = 4;
+}
+
+// AccountAbstractionAccountChange represents one entry of
+// [AccountAbstractionTrxInput.account_changes].
+message AccountAbstractionAccountChange {
+  oneof change {
+    // DelegationTarget sets or clears the EIP-7702 style delegation of the sender (entry type
+    // 0x01). The sender's code becomes `0xef0100 || delegation_target`, or is cleared when it is
+    // empty.
+    bytes delegation_target = 1;
+  }
+}
+
+// MorphTrxInput represents the extra fields of a Morph MorphTx transaction, a transaction type
 // that enables paying the gas fees with a registered ERC-20 token instead of the native token.
 //
 // Specified by https://docs.morph.network/docs/about-morph/morphtx
-message MorphTxConfig {
+message MorphTrxInput {
   // Version of the MorphTx payload, 0 for the initial encoding, 1 for the encoding that added
   // the 'reference' and 'memo' fields as well as support for paying the fees with the native token,
   // and 2 for the encoding that adds an EIP-7702 authorization list, recorded in
@@ -623,9 +741,9 @@ message MorphTxConfig {
   bytes memo = 5;
 }
 
-// MorphL1MessageConfig represents the extra fields of a Morph L1 message transaction, a transaction
+// MorphL1MessageTrxInput represents the extra fields of a Morph L1 message transaction, a transaction
 // queued on the L1 chain and later included by the sequencer in an L2 block.
-message MorphL1MessageConfig {
+message MorphL1MessageTrxInput {
   // QueueIndex is the position of this message in Morph's L1 message queue. The chain requires
   // L1 messages to be included in strictly increasing queue index order, refer to
   // [BlockHeader.morph_next_l1_msg_index] to know at which index the next block resumes.
@@ -740,15 +858,30 @@ message TransactionReceipt {
   // if Cancun fork is active on the chain.
   optional BigInt blob_gas_price = 6;
 
-  // MorphReceiptConfig holds the Morph specific values that were resolved while executing the
+  // MorphTrxOutput holds the Morph specific values that were resolved while executing the
   // transaction, mainly the L1 data fee and the oracle values used to charge the fee token.
   //
   // Morph specific, unset on all other chains.
-  optional MorphReceiptConfig morph_receipt_config = 7;
+  optional MorphTrxOutput morph_trx_output = 7;
+
+  // AccountAbstractionTrxOutput holds the values recorded on the receipt of an account abstraction
+  // transaction.
+  //
+  // This is populated only if `TransactionTrace.Type == TRX_TYPE_ACCOUNT_ABSTRACTION`.
+  optional AccountAbstractionTrxOutput account_abstraction_trx_output = 8;
 }
 
-// MorphReceiptConfig represents the Morph specific fields recorded on the receipt of a transaction.
-message MorphReceiptConfig {
+// AccountAbstractionTrxOutput represents the extra fields recorded on the receipt of an account
+// abstraction transaction (`TRX_TYPE_ACCOUNT_ABSTRACTION`).
+message AccountAbstractionTrxOutput {
+  // CommittedPhases is the number of phases that committed. When it is lower than the number of
+  // phases in [AccountAbstractionTrxInput.call_phases], phase `committed_phases` (zero-based)
+  // reverted and the phases after it were skipped.
+  uint64 committed_phases = 1;
+}
+
+// MorphTrxOutput represents the Morph specific fields recorded on the receipt of a transaction.
+message MorphTrxOutput {
   // L1Fee is the fee, in the native token, paid to cover the cost of posting this transaction's
   // data to the L1 chain. It is populated for every Morph transaction except L1 messages, which
   // are prepaid on L1. For a MorphTx paying with a fee token, it is included in the token debit.
@@ -758,7 +891,7 @@ message MorphReceiptConfig {
   // units of the transaction's fee token.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
-  // [MorphTxConfig.fee_token_id] is not 0.
+  // [MorphTrxInput.fee_token_id] is not 0.
   BigInt fee_rate = 2;
 
   // TokenScale is the scaling factor of the transaction's fee token. Together with 'fee_rate', a
@@ -769,7 +902,7 @@ message MorphReceiptConfig {
   // conversion of the gas used.
   //
   // This will is populated only if `TransactionTrace.Type == TRX_TYPE_MORPH` and
-  // [MorphTxConfig.fee_token_id] is not 0.
+  // [MorphTrxInput.fee_token_id] is not 0.
   BigInt token_scale = 3;
 }
 

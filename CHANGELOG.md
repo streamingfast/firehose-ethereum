@@ -4,6 +4,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+- `TRX_TYPE_ACCOUNT_ABSTRACTION = 121` in `sf.ethereum.type.v2`, for the account abstraction transaction (type byte `0x79`) of the AA Transaction Type proposal split out of EIP-8130, which Base activates with its Everest upgrade. Its fields are in the new `TransactionTrace.account_abstraction_trx_input`: the nonce key, the payer, the validity window, the metadata, the account changes, and the signed calls grouped in phases, each linked to the call that executed it. `committed_phases`, in the new `TransactionReceipt.account_abstraction_trx_output`, counts the phases that committed. A transaction of this type can be `FAILED` and still keep the state of the phases that committed before the one that reverted, see the `TransactionTrace.status` documentation.
+
+### Changed
+
+- In `sf.ethereum.type.v2`, `TransactionTrace.morph_tx_config` (`MorphTxConfig`) is renamed `morph_trx_input` (`MorphTrxInput`), `TransactionTrace.morph_l1_message_config` (`MorphL1MessageConfig`) is renamed `morph_l1_message_trx_input` (`MorphL1MessageTrxInput`), and `TransactionReceipt.morph_receipt_config` (`MorphReceiptConfig`) is renamed `morph_trx_output` (`MorphTrxOutput`). The field numbers are unchanged, so blocks already written decode the same, but code using the generated bindings or the JSON field names must use the new names.
+
 ## v2.24.1
 
 ### Changed
