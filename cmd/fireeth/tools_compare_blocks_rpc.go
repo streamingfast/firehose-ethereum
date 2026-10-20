@@ -24,8 +24,6 @@ import (
 
 	"github.com/streamingfast/firehose-ethereum/blockfetcher"
 
-	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-
 	jd "github.com/josephburnett/jd/lib"
 	"github.com/mostynb/go-grpc-compression/zstd"
 	"github.com/spf13/cobra"
@@ -459,16 +457,4 @@ func CompareFirehoseToRPC(fhBlock *pbeth.Block, rpcBlock *rpc.Block, receipts ma
 		return false, differences
 	}
 	return true, nil
-}
-
-func decodeAnyPB(in *anypb.Any) (*pbbstream.Block, error) {
-	block := &pbeth.Block{}
-	if err := anypb.UnmarshalTo(in, block, proto.UnmarshalOptions{}); err != nil {
-		return nil, fmt.Errorf("unmarshal anypb: %w", err)
-	}
-
-	// We are downloading only final blocks from the Firehose connection which means the LIB for them
-	// can be set to themself (although we use `- 1` to ensure problem would occur if code don't like
-	// `LIBNum == self.BlockNum`).
-	return blockEncoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: block.Number - 1})
 }

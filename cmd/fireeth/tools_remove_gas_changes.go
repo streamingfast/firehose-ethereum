@@ -100,9 +100,9 @@ func createRemoveGasChangesE(logger *zap.Logger) firecore.CommandExecutor {
 					ethBlock.Ver = 5
 				}
 
-				block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
+				block, err = repackBlock(block, ethBlock)
 				if err != nil {
-					return fmt.Errorf("re-packing the block: %w", err)
+					return err
 				}
 				blocks[blocksRead] = block
 				blocksRead++
