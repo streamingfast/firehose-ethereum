@@ -7,7 +7,6 @@ import (
 	"sort"
 
 	pbbstream "github.com/streamingfast/bstream/pb/sf/bstream/v1"
-	firecore "github.com/streamingfast/firehose-core"
 	pbeth "github.com/streamingfast/firehose-ethereum/types/pb/sf/ethereum/type/v2"
 )
 
@@ -199,10 +198,7 @@ func SanitizeEthereumBlockForCompare(block *pbbstream.Block) *pbbstream.Block {
 
 	ethBlock.Ver = 5 // we don't want errors on version differences
 
-	out, err := firecore.EncodeBlock(firecore.BlockEnveloppe{
-		Block:  ethBlock,
-		LIBNum: block.LibNum,
-	})
+	out, err := repackBlock(block, ethBlock)
 	if err != nil {
 		panic(fmt.Errorf("unable to encode block: %w", err))
 	}
