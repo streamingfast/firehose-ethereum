@@ -14,6 +14,10 @@ for instructions to keep up to date.
 
 - In `sf.ethereum.type.v2`, `TransactionTrace.morph_tx_config` (`MorphTxConfig`) is renamed `morph_trx_input` (`MorphTrxInput`), `TransactionTrace.morph_l1_message_config` (`MorphL1MessageConfig`) is renamed `morph_l1_message_trx_input` (`MorphL1MessageTrxInput`), and `TransactionReceipt.morph_receipt_config` (`MorphReceiptConfig`) is renamed `morph_trx_output` (`MorphTrxOutput`). The field numbers are unchanged, so blocks already written decode the same, but code using the generated bindings or the JSON field names must use the new names.
 
+### Fixed
+
+- Bump `eth-go` to [736af9a](https://github.com/streamingfast/eth-go/compare/24d21927f9af...736af9a002ec), which closes the response body when the RPC endpoint answers with an HTTP error status ([eth-go#18](https://github.com/streamingfast/eth-go/pull/18)). Before, every error response (for example a `429` from a rate-limited endpoint) leaked its connection and two goroutines, so Substreams `eth_call` and `eth_getBalance` requests to a failing endpoint grew the open file count until the process hit its limit.
+
 ## v2.24.1
 
 ### Changed
