@@ -211,7 +211,7 @@ require (
 	github.com/streamingfast/dregistry v0.0.0-20260818204944-2fed3956d4e1 // indirect
 	github.com/streamingfast/dsession v0.0.0-20260414190543-79b9846e7c58 // indirect
 	github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9 // indirect
-	github.com/streamingfast/dummy-blockchain v1.7.8 // indirect
+	github.com/streamingfast/dummy-blockchain v1.7.10 // indirect
 	github.com/streamingfast/firehose-networks v0.3.1 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
 	github.com/streamingfast/payment-gateway v0.0.0-20260928153037-ec91d4feb67c // indirect
