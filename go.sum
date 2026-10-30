@@ -2326,8 +2326,8 @@ github.com/streamingfast/dstore v0.2.4-0.20261009150522-6c74c85f2222 h1:ljCNEMwK
 github.com/streamingfast/dstore v0.2.4-0.20261009150522-6c74c85f2222/go.mod h1:DangUsbON/YBKPbxfUaoSFi9zupzHKP70q2bu9DhR68=
 github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9 h1:RaMv0J2e30vQpJiKdWOGB1HObWtJ4/w4vEUkUhTYE+c=
 github.com/streamingfast/dtracing v0.0.0-20260303163312-862cb0fb60c9/go.mod h1:huOJyjMYS6K8upTuxDxaNd+emD65RrXoVBvh8f1/7Ns=
-github.com/streamingfast/dummy-blockchain v1.7.8 h1:NDJzic6mslvmqJ05zL5W/bnJsvtY/syiM/q6fdK9iN8=
-github.com/streamingfast/dummy-blockchain v1.7.8/go.mod h1:CGVBAboLgok8OWn0kzwnp+hkI9Q8nWpJu/g1UKxXe5A=
+github.com/streamingfast/dummy-blockchain v1.7.10 h1:UDYKbd5LyhGezuflw3CxEsz+X07hbNEJDqkRaRDf29c=
+github.com/streamingfast/dummy-blockchain v1.7.10/go.mod h1:LM3ZPF/HwuUJGdW3sIL68wOOkJk/JsE5eDBO9EGETc4=
 github.com/streamingfast/eth-go v0.0.0-20261002145937-736af9a002ec h1:zPeX8Mzujctd/vTbUq24XJzNdqj950h1IcQ2cVIFslk=
 github.com/streamingfast/eth-go v0.0.0-20261002145937-736af9a002ec/go.mod h1:iaGNhvYNm/UeLa6QYGgkhPRaub+paEfIUk+jzvE3dCA=
 github.com/streamingfast/firehose v0.1.1-0.20240118135215-dcf04d40bfcd h1:t5n8dDcgUi7t36Qwxm19K4H2vyOLJfY6MHxTbOvK1z8=
