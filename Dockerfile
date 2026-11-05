@@ -17,6 +17,9 @@ ARG TARGETPLATFORM
 # gettext-base is needed for envsubst
 RUN apt-get update && apt-get -y install ca-certificates htop iotop sysstat strace lsof curl jq tzdata file gettext-base
 
+# Ubuntu ships no fix yet for the apt CVE-2026-109518, nothing runs apt on this image so drop it
+RUN dpkg --purge --force-remove-protected --force-remove-essential apt libapt-pkg6.0t64 && rm -f /var/lib/dpkg/status-old
+
 WORKDIR /app
 
 COPY --from=build /app/fireeth /app/fireeth
