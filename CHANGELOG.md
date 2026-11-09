@@ -22,6 +22,8 @@ for instructions to keep up to date.
 
 ### Fixed
 
+- `github.com/klauspost/compress` is updated from `v1.20.1` to `v1.20.2` to fix CVE-2026-116591 (High, `zstd` `DecodeAll` crash on crafted input, [GHSA-fpmh-frq8-7rj8](https://github.com/klauspost/compress/security/advisories/GHSA-fpmh-frq8-7rj8)).
+
 - `github.com/go-jose/go-jose/v4` is updated from `v4.1.4` to `v4.1.6` to fix CVE-2026-116587 (High, inefficient algorithmic complexity).
 
 - Bump `eth-go` to [736af9a](https://github.com/streamingfast/eth-go/compare/24d21927f9af...736af9a002ec), which closes the response body when the RPC endpoint answers with an HTTP error status ([eth-go#18](https://github.com/streamingfast/eth-go/pull/18)). Before, every error response (for example a `429` from a rate-limited endpoint) leaked its connection and two goroutines, so Substreams `eth_call` and `eth_getBalance` requests to a failing endpoint grew the open file count until the process hit its limit.
