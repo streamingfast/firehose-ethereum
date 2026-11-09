@@ -14,6 +14,7 @@ import (
 	firecore "github.com/streamingfast/firehose-core"
 	fhCmd "github.com/streamingfast/firehose-core/cmd"
 	"github.com/streamingfast/firehose-core/firehose/info"
+	"github.com/streamingfast/firehose-core/node-manager/mindreader"
 	"github.com/streamingfast/firehose-ethereum/codec"
 	ethss "github.com/streamingfast/firehose-ethereum/substreams"
 	"github.com/streamingfast/firehose-ethereum/transform"
@@ -65,7 +66,9 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 			transform.MultiLogFilterMessageName:    transform.NewMultiLogFilterTransformFactory,
 		},
 
-		ConsoleReaderFactory: codec.NewConsoleReader,
+		ConsoleReaderFactory: func(lines chan string, blockEncoder firecore.BlockEncoder, logger *zap.Logger, tracer logging.Tracer) (mindreader.ConsolerReader, error) {
+			return codec.NewConsoleReader(lines, blockEncoder, logger, tracer, codec.WithLIBMaxDistance(viper.GetUint64("reader-node-lib-max-distance")))
+		},
 
 		RegisterExtraStartFlags: func(flags *pflag.FlagSet) {
 			// The "\n" is there on purpose to improve readability of the added elements
@@ -75,6 +78,12 @@ func Chain() *firecore.Chain[*pbeth.Block] {
 				which execute any bash script and offers more flexibility.
 			`)+"\n")
 
+			flags.Uint64("reader-node-lib-max-distance", 0, cli.Dedent(`
+				When not 0, raise each block's LIB so it trails the block by at most this many blocks. For devnets
+				only: a node whose chain does not report finality falls back to a LIB 200 blocks behind, so Firehose
+				serves nothing before block 300 and waits 200 more blocks for each block to become final. Never set it
+				on a public network, it marks blocks final that the chain has not finalized.
+			`))
 			flags.StringArray("substreams-rpc-endpoints", nil, "Remote endpoints to contact to satisfy Substreams 'eth_call's")
 			flags.StringArray("substreams-rpc-get-balance-endpoints", nil, "Endpoints to contact to satisfy Substreams 'eth_get_balance's")
 			flags.Uint64("substreams-rpc-gas-limit", 50_000_000, "Gas limit to set when calling RPC (set it to 0 for arbitrum chains, otherwise you should keep 50M)")

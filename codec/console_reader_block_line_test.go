@@ -67,6 +67,29 @@ func TestConsoleReader_DecodedBlockLineInvalidPayload(t *testing.T) {
 	assert.Contains(t, err.Error(), `line header "10 aa 9 bb 9 1000"`)
 }
 
+func TestConsoleReader_LIBMaxDistance(t *testing.T) {
+	withLIB := func(num, lib uint64) string {
+		fields := strings.Fields(testFireBlockLine(t, num, false))
+		fields[6] = fmt.Sprint(lib)
+		return strings.Join(fields, " ")
+	}
+
+	lines := make(chan string, 10)
+	lines <- "FIRE INIT 3.0 geth 1.14.0-fh3.0"
+	lines <- withLIB(250, 50)
+	lines <- withLIB(251, 245)
+	lines <- withLIB(8, 0)
+	close(lines)
+
+	blocks, err := readAllBlocks(lines, nil, WithLIBMaxDistance(10))
+	require.NoError(t, err)
+	require.Len(t, blocks, 3)
+
+	assert.Equal(t, uint64(240), blocks[0].LibNum, "a LIB 200 behind is raised to 10 behind")
+	assert.Equal(t, uint64(245), blocks[1].LibNum, "a LIB within the distance is kept")
+	assert.Equal(t, uint64(0), blocks[2].LibNum, "a block closer to genesis than the distance keeps its LIB")
+}
+
 func testFireBlockLine(t *testing.T, num uint64, partial bool) string {
 	t.Helper()
 
@@ -114,8 +137,8 @@ func readBlocksFromDecodedLines(output string) (blocks []*pbbstream.Block, decod
 	return blocks, decodedCount, err
 }
 
-func readAllBlocks(lines chan string, consoleLines <-chan consoleline.Line) ([]*pbbstream.Block, error) {
-	consoleReader, err := NewConsoleReader(lines, firecore.NewBlockEncoder(), zap.NewNop(), nil)
+func readAllBlocks(lines chan string, consoleLines <-chan consoleline.Line, opts ...ConsoleReaderOption) ([]*pbbstream.Block, error) {
+	consoleReader, err := NewConsoleReader(lines, firecore.NewBlockEncoder(), zap.NewNop(), nil, opts...)
 	if err != nil {
 		return nil, err
 	}

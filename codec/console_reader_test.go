@@ -32,6 +32,26 @@ func TestValueParsing(t *testing.T) {
 	require.Equal(t, expectedValue, value)
 }
 
+func Test_limitLIBDistance(t *testing.T) {
+	tests := []struct {
+		name                       string
+		blockNum, libNum, distance uint64
+		expected                   uint64
+	}{
+		{"disabled", 500, 300, 0, 300},
+		{"lib too far behind", 500, 300, 10, 490},
+		{"lib already close", 500, 495, 10, 495},
+		{"block below distance", 5, 0, 10, 0},
+		{"block at distance", 10, 0, 10, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, limitLIBDistance(tt.blockNum, tt.libNum, tt.distance))
+		})
+	}
+}
+
 func Test_computeProofOfWorkLIBNum(t *testing.T) {
 	type args struct {
 		blockNum                uint64

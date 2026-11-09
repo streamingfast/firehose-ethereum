@@ -54,7 +54,18 @@ type ConsoleReader struct {
 	logger *zap.Logger
 }
 
-func NewConsoleReader(lines chan string, blockEncoder firecore.BlockEncoder, logger *zap.Logger, tracer logging.Tracer) (mindreader.ConsolerReader, error) {
+// ConsoleReaderOption configures a ConsoleReader.
+type ConsoleReaderOption func(*parseCtx)
+
+// WithLIBMaxDistance raises each block's LIB so it trails the block by at most
+// distance blocks. 0 keeps the LIB the node reports.
+func WithLIBMaxDistance(distance uint64) ConsoleReaderOption {
+	return func(ctx *parseCtx) {
+		ctx.libMaxDistance = distance
+	}
+}
+
+func NewConsoleReader(lines chan string, blockEncoder firecore.BlockEncoder, logger *zap.Logger, tracer logging.Tracer, opts ...ConsoleReaderOption) (mindreader.ConsolerReader, error) {
 	globalStats := newConsoleReaderStats()
 	globalStats.StartPeriodicLogToZap(context.Background(), logger, 30*time.Second)
 
@@ -67,6 +78,9 @@ func NewConsoleReader(lines chan string, blockEncoder firecore.BlockEncoder, log
 		stats: globalStats,
 
 		logger: logger,
+	}
+	for _, opt := range opts {
+		opt(l.ctx)
 	}
 
 	return l, nil
@@ -216,9 +230,11 @@ type parseCtx struct {
 	systemCalls         []*pbeth.Call
 	evmCallStackIndexes []int32
 
-	encoder     firecore.BlockEncoder
-	stats       *parsingStats
-	globalStats *consoleReaderStats
+	encoder firecore.BlockEncoder
+	// libMaxDistance, when not 0, is how far at most a block's LIB trails it.
+	libMaxDistance uint64
+	stats          *parsingStats
+	globalStats    *consoleReaderStats
 
 	logger *zap.Logger
 }
@@ -1420,6 +1436,7 @@ func (ctx *parseCtx) buildBlockForProtocolVersion3(start time.Time, chunks []str
 	if err != nil {
 		return nil, fmt.Errorf("parsing lib num %q: %w", chunks[i], err)
 	}
+	libNum = limitLIBDistance(blockNum, libNum, ctx.libMaxDistance)
 	i++
 
 	timestampUnixNano, err := strconv.ParseUint(chunks[i], 10, 64)
@@ -1534,6 +1551,8 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 		libNum = computeProofOfWorkLIBNum(block.Number, bstream.GetProtocolFirstStreamableBlock)
 	}
 
+	libNum = limitLIBDistance(blockNum, libNum, ctx.libMaxDistance)
+
 	bstreamBlock, err := ctx.encoder.Encode(firecore.BlockEnveloppe{Block: block, LIBNum: libNum})
 	if err != nil {
 		return nil, err
@@ -1543,6 +1562,16 @@ func (ctx *parseCtx) readEndBlock(line string) (*pbbstream.Block, error) {
 	BlockTotalParseTime.AddInt64(int64(time.Since(ctx.stats.startAt)))
 
 	return bstreamBlock, nil
+}
+
+// limitLIBDistance raises libNum so it trails blockNum by at most maxDistance
+// blocks. A maxDistance of 0 leaves libNum as is.
+func limitLIBDistance(blockNum, libNum, maxDistance uint64) uint64 {
+	if maxDistance == 0 || blockNum < maxDistance {
+		return libNum
+	}
+
+	return max(libNum, blockNum-maxDistance)
 }
 
 func computeProofOfWorkLIBNum(blockNum uint64, firstStreamableBlockNum uint64) uint64 {
