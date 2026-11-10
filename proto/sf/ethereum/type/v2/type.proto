@@ -432,6 +432,14 @@ message TransactionTrace {
     // OPTIMISM-specific transactions
     TRX_TYPE_OPTIMISM_DEPOSIT = 126;
 
+    // Optimism's post-exec transaction (type byte 0x7d on chain), a system transaction the block
+    // builder appends to the block. It is not signed and its sender is the zero address, its input
+    // is the RLP-encoded post-exec payload, and it runs no EVM code: it has no calls and its gas
+    // used is 0.
+    //
+    // Activated on OP Stack chains by the Lagoon upgrade.
+    TRX_TYPE_OPTIMISM_POST_EXEC = 125;
+
     // Polygon(bor)-specific
     TRX_TYPE_POLYGON_STATE_SYNC = 200;
 
