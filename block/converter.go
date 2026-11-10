@@ -225,10 +225,7 @@ func convertTrx(transaction *rpc.Transaction, toBytes []byte, ordinal *counter, 
 		if receipt.Status != nil {
 			out.Status = toFirehoseReceiptStatus(uint64(*receipt.Status))
 		}
-		if receipt.BlobGasUsed != nil {
-			blobGas := uint64(*receipt.BlobGasUsed)
-			out.BlobGas = &blobGas
-		}
+		out.BlobGas = receiptBlobGasUsed(receipt)
 		out.Type = pbeth.TransactionTrace_Type(receipt.Type)
 		// Polygon 127 is state sync
 		if out.Type == 127 {
@@ -300,15 +297,23 @@ func toFirehoseReceipts(receipt *rpc.TransactionReceipt, ordinal *counter, logs 
 		Logs:              toFirehoseLogs(receipt.Logs, ordinal),
 	}
 
-	if receipt.BlobGasUsed != nil {
-		blobGasUsed := uint64(*receipt.BlobGasUsed)
-		out.BlobGasUsed = &blobGasUsed
-	}
+	out.BlobGasUsed = receiptBlobGasUsed(receipt)
 	if receipt.BlobGasPrice != nil {
 		out.BlobGasPrice = BigIntFromEthUint256(receipt.BlobGasPrice)
 	}
 
 	return out
+}
+
+// receiptBlobGasUsed returns the receipt's 'blobGasUsed' for blob transactions (type 3) and
+// nil for every other type. OP-stack receipts since Jovian report the transaction's
+// data-availability footprint as 'blobGasUsed' on all transactions, which is not blob gas.
+func receiptBlobGasUsed(receipt *rpc.TransactionReceipt) *uint64 {
+	if receipt.BlobGasUsed == nil || pbeth.TransactionTrace_Type(receipt.Type) != pbeth.TransactionTrace_TRX_TYPE_BLOB {
+		return nil
+	}
+	blobGasUsed := uint64(*receipt.BlobGasUsed)
+	return &blobGasUsed
 }
 
 func ethLogtoFirehoseLogs(logs []eth.Log, ordinal *counter) []*pbeth.Log {

@@ -20,6 +20,8 @@ for instructions to keep up to date.
 
 ### Fixed
 
+- Blocks built from JSON-RPC (`tools compare-blocks-rpc` and the RPC poller) now set `TransactionTrace.blob_gas` and `TransactionReceipt.blob_gas_used` only for blob transactions (type 3). On OP-stack chains since Jovian, receipts report the transaction's data-availability footprint as `blobGasUsed` on every transaction, which was copied as blob gas.
+
 - `github.com/klauspost/compress` is updated from `v1.20.1` to `v1.20.2` to fix CVE-2026-116591 (High, `zstd` `DecodeAll` crash on crafted input, [GHSA-fpmh-frq8-7rj8](https://github.com/klauspost/compress/security/advisories/GHSA-fpmh-frq8-7rj8)).
 
 - `github.com/go-jose/go-jose/v4` is updated from `v4.1.4` to `v4.1.6` to fix CVE-2026-116587 (High, inefficient algorithmic complexity).
