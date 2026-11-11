@@ -1,0 +1,38 @@
+name: Draft release
+
+on:
+  pull_request:
+    branches:
+      - "develop"
+    paths:
+      - "CHANGELOG.md"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: draft-release-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  draft-release:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Detect release PR
+        id: detect
+        uses: streamingfast/actions/sfreleaser/detect@v1
+
+      - name: Prepare release
+        if: steps.detect.outputs.is_release_pr
+        uses: streamingfast/actions/sfreleaser/prepare@v1
+        with:
+          version: ${{ steps.detect.outputs.version }}
+          homebrew-tap-token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
