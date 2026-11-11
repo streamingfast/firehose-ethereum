@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
-## Unreleased
+## v2.25.0
 
 ### Added
 
@@ -16,9 +16,13 @@ for instructions to keep up to date.
 
 ### Changed
 
-- Bump `firehose-core` to [ee1853c](https://github.com/streamingfast/firehose-core/pull/323), with the matching `substreams` and `dauth`. The Firehose incoming request logs, as well as the `incoming Substreams Blocks request` and Estimate logs, now carry `auth_method`, `auth_jwt_lifetime_bucket`, `auth_jwt_iat` and `auth_jwt_exp` ([firehose-core#319](https://github.com/streamingfast/firehose-core/pull/319), [substreams#1039](https://github.com/streamingfast/substreams/pull/1039)), to follow the phase out of long-lived JWTs.
+- Bump `firehose-core` to [v1.21.2](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.2) and `substreams` to [v1.27.0](https://github.com/streamingfast/substreams/releases/tag/v1.27.0), with the matching `dauth`. The Firehose incoming request logs, as well as the `incoming Substreams Blocks request` and Estimate logs, now carry `auth_method`, `auth_jwt_lifetime_bucket`, `auth_jwt_iat` and `auth_jwt_exp` ([firehose-core#319](https://github.com/streamingfast/firehose-core/pull/319), [substreams#1039](https://github.com/streamingfast/substreams/pull/1039)), to follow the phase out of long-lived JWTs.
 
 - In `sf.ethereum.type.v2`, `TransactionTrace.morph_tx_config` (`MorphTxConfig`) is renamed `morph_trx_input` (`MorphTrxInput`), `TransactionTrace.morph_l1_message_config` (`MorphL1MessageConfig`) is renamed `morph_l1_message_trx_input` (`MorphL1MessageTrxInput`), and `TransactionReceipt.morph_receipt_config` (`MorphReceiptConfig`) is renamed `morph_trx_output` (`MorphTrxOutput`). The field numbers are unchanged, so blocks already written decode the same, but code using the generated bindings or the JSON field names must use the new names.
+
+- Bump `dstore`: an S3 upload now fails when its reader fails partway instead of storing a truncated object, S3 copies run server-side, and zstd stores accept `compression_config` (level, window, decoder `lowmem` and pool) in the store URL.
+
+- Bump `dsession` to fix two worker counter leaks.
 
 ### Fixed
 
