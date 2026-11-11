@@ -1,4 +1,5 @@
-FROM golang:1.27-bookworm AS build
+# Go 1.27.4 rejects the libwasmtime.a bundled with wasmtime-go (disallowed LTO section ".llvmbc").
+FROM golang:1.27.3-bookworm AS build
 WORKDIR /app
 
 COPY go.mod go.sum ./

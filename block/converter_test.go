@@ -132,3 +132,41 @@ func TestToSetCodeAuthorizations(t *testing.T) {
 		})
 	}
 }
+
+// TestConvertTrxBlobGas checks that blob gas is only taken from blob transaction (type 3)
+// receipts. OP-stack receipts since Jovian carry 'blobGasUsed' on every transaction.
+func TestConvertTrxBlobGas(t *testing.T) {
+	tests := []struct {
+		name            string
+		receiptJSON     string
+		wantBlobGasUsed *uint64
+	}{
+		{
+			name:            "op-stack dynamic fee transaction with blobGasUsed",
+			receiptJSON:     `{"type":"0x2","status":"0x1","gasUsed":"0x5208","cumulativeGasUsed":"0x5208","blobGasUsed":"0x1a0","logs":[]}`,
+			wantBlobGasUsed: nil,
+		},
+		{
+			name:            "blob transaction",
+			receiptJSON:     `{"type":"0x3","status":"0x1","gasUsed":"0x5208","cumulativeGasUsed":"0x5208","blobGasUsed":"0x20000","blobGasPrice":"0x1","logs":[]}`,
+			wantBlobGasUsed: new(uint64(0x20000)),
+		},
+		{
+			name:            "blob transaction without blobGasUsed",
+			receiptJSON:     `{"type":"0x3","status":"0x1","gasUsed":"0x5208","cumulativeGasUsed":"0x5208","logs":[]}`,
+			wantBlobGasUsed: nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			receipt := &rpc.TransactionReceipt{}
+			require.NoError(t, json.Unmarshal([]byte(test.receiptJSON), receipt))
+
+			out := convertTrx(&rpc.Transaction{}, nil, &counter{}, receipt, nil)
+
+			assert.Equal(t, test.wantBlobGasUsed, out.BlobGas)
+			assert.Equal(t, test.wantBlobGasUsed, out.Receipt.BlobGasUsed)
+		})
+	}
+}

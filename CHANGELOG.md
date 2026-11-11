@@ -12,6 +12,8 @@ for instructions to keep up to date.
 
 - `TRX_TYPE_ACCOUNT_ABSTRACTION = 121` in `sf.ethereum.type.v2`, for the account abstraction transaction (type byte `0x79`) of the AA Transaction Type proposal split out of EIP-8130, which Base activates with its Everest upgrade. Its fields are in the new `TransactionTrace.account_abstraction_trx_input`: the nonce key, the payer, the validity window, the metadata, the account changes (an EIP-7702 style delegation, or the creation and configuration of a Keystore account, EIP-8130), the signed calls grouped in phases, each linked to the call that executed it, and the sender's authentication when the sender does not sign with its secp256k1 key. `committed_phases`, in the new `TransactionReceipt.account_abstraction_trx_output`, counts the phases that committed. A transaction of this type can be `FAILED` and still keep the state of the phases that committed before the one that reverted, see the `TransactionTrace.status` documentation.
 
+- `TRX_TYPE_OPTIMISM_POST_EXEC = 125` in `sf.ethereum.type.v2`, for Optimism's post-exec transaction (type byte `0x7d`), which OP Stack chains activate with the Lagoon upgrade. It is a system transaction appended by the block builder: its sender is the zero address, its input is the RLP-encoded post-exec payload, it runs no EVM code (no calls) and its gas used is 0.
+
 ### Changed
 
 - Bump `firehose-core` to [ee1853c](https://github.com/streamingfast/firehose-core/pull/323), with the matching `substreams` and `dauth`. The Firehose incoming request logs, as well as the `incoming Substreams Blocks request` and Estimate logs, now carry `auth_method`, `auth_jwt_lifetime_bucket`, `auth_jwt_iat` and `auth_jwt_exp` ([firehose-core#319](https://github.com/streamingfast/firehose-core/pull/319), [substreams#1039](https://github.com/streamingfast/substreams/pull/1039)), to follow the phase out of long-lived JWTs.
@@ -19,6 +21,8 @@ for instructions to keep up to date.
 - In `sf.ethereum.type.v2`, `TransactionTrace.morph_tx_config` (`MorphTxConfig`) is renamed `morph_trx_input` (`MorphTrxInput`), `TransactionTrace.morph_l1_message_config` (`MorphL1MessageConfig`) is renamed `morph_l1_message_trx_input` (`MorphL1MessageTrxInput`), and `TransactionReceipt.morph_receipt_config` (`MorphReceiptConfig`) is renamed `morph_trx_output` (`MorphTrxOutput`). The field numbers are unchanged, so blocks already written decode the same, but code using the generated bindings or the JSON field names must use the new names.
 
 ### Fixed
+
+- Blocks built from JSON-RPC (`tools compare-blocks-rpc` and the RPC poller) now set `TransactionTrace.blob_gas` and `TransactionReceipt.blob_gas_used` only for blob transactions (type 3). On OP-stack chains since Jovian, receipts report the transaction's data-availability footprint as `blobGasUsed` on every transaction, which was copied as blob gas.
 
 - `github.com/klauspost/compress` is updated from `v1.20.1` to `v1.20.2` to fix CVE-2026-116591 (High, `zstd` `DecodeAll` crash on crafted input, [GHSA-fpmh-frq8-7rj8](https://github.com/klauspost/compress/security/advisories/GHSA-fpmh-frq8-7rj8)).
 
