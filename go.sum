@@ -2349,8 +2349,8 @@ github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 h1:xlWSfi1BoP
 github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308/go.mod h1:K1p8Bj/wG34KJvYzPUqtzpndffmpkrVY11u2hkyxCWQ=
 github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef h1:yumLI3jRzwvQRzhEMtE4fe4Kzdx+2EcnIevmnbAwS6o=
 github.com/streamingfast/overseer v0.2.1-0.20260917150444-9ebead8ffdef/go.mod h1:cq8CvbZ3ioFmGrHokSAJalS0lC+pVXLKhITScItUGXY=
-github.com/streamingfast/payment-gateway v0.0.0-20260928153037-ec91d4feb67c h1:rkYN77TZL4W5GE9Te0/y7Kzczktdr0zaQ3E5GAe1LwY=
-github.com/streamingfast/payment-gateway v0.0.0-20260928153037-ec91d4feb67c/go.mod h1:wJ8VW1+qNARWezf9Xu52RrEssZ868iZ081tEJYZI7WU=
+github.com/streamingfast/payment-gateway v0.0.0-20261112203506-7890dd0c5410 h1:k/EooaMjw8SNSCJjDyOpnV1aMhy55c79wNoHvqWkmPk=
+github.com/streamingfast/payment-gateway v0.0.0-20261112203506-7890dd0c5410/go.mod h1:AuXNXqEMH4PVGjAl7TbHY0q1SbPSNscDX4XQmZT3b/Y=
 github.com/streamingfast/pbgo v0.0.6-0.20260716142331-5a68101bc5a6 h1:rKQwTagKoxBxctjEUJ7g2kQ7I2tDUW8bCfKAe3Lg+ss=
 github.com/streamingfast/pbgo v0.0.6-0.20260716142331-5a68101bc5a6/go.mod h1:MHb9nR5zyNyvA1Zi2wud+hWpoILpll7vpLUijvh3YV0=
 github.com/streamingfast/protoreflect v0.0.0-20231205191344-4b629d20ce8d h1:33VIARqUqBUKXJcuQoOS1rVSms54tgxhhNCmrLptpLg=
