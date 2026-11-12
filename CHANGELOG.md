@@ -16,6 +16,8 @@ for instructions to keep up to date.
 
 ### Changed
 
+- Bump `payment-gateway` to `7890dd0c5410`. The `tgm://` auth plugin now sets the `x-auth-*` auth-method headers, so `auth_method`, `auth_jwt_lifetime_bucket`, `auth_jwt_iat` and `auth_jwt_exp` are populated in the incoming Firehose and Substreams request logs, instead of always being empty.
+
 - Bump `firehose-core` to [v1.21.2](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.2) and `substreams` to [v1.27.0](https://github.com/streamingfast/substreams/releases/tag/v1.27.0), with the matching `dauth`. The Firehose incoming request logs, as well as the `incoming Substreams Blocks request` and Estimate logs, now carry `auth_method`, `auth_jwt_lifetime_bucket`, `auth_jwt_iat` and `auth_jwt_exp` ([firehose-core#319](https://github.com/streamingfast/firehose-core/pull/319), [substreams#1039](https://github.com/streamingfast/substreams/pull/1039)), to follow the phase out of long-lived JWTs.
 
 - In `sf.ethereum.type.v2`, `TransactionTrace.morph_tx_config` (`MorphTxConfig`) is renamed `morph_trx_input` (`MorphTrxInput`), `TransactionTrace.morph_l1_message_config` (`MorphL1MessageConfig`) is renamed `morph_l1_message_trx_input` (`MorphL1MessageTrxInput`), and `TransactionReceipt.morph_receipt_config` (`MorphReceiptConfig`) is renamed `morph_trx_output` (`MorphTrxOutput`). The field numbers are unchanged, so blocks already written decode the same, but code using the generated bindings or the JSON field names must use the new names.

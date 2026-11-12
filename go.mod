@@ -214,7 +214,7 @@ require (
 	github.com/streamingfast/dummy-blockchain v1.7.10 // indirect
 	github.com/streamingfast/firehose-networks v0.3.1 // indirect
 	github.com/streamingfast/opaque v0.0.0-20210811180740-0c01d37ea308 // indirect
-	github.com/streamingfast/payment-gateway v0.0.0-20260928153037-ec91d4feb67c // indirect
+	github.com/streamingfast/payment-gateway v0.0.0-20261112203506-7890dd0c5410 // indirect
 	github.com/streamingfast/sf-tracing v0.0.0-20260716142341-6172a527bdd6 // indirect
 	github.com/streamingfast/snapshotter v0.0.0-20230316190750-5bcadfde44d0 // indirect
 	github.com/streamingfast/worker-pool-protocol v0.0.0-20251029142144-b539534f3eb1 // indirect
