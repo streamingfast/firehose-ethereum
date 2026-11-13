@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Changed
+
+- Bump `firehose-core` to `c161cde` (`develop`, after [v1.21.2](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.2)) and `substreams` to `1661a96`. The merger health check reports not serving while the merger is stuck on a hole, substreams-tier1 retries jobs on a tier2 that went silent (`--substreams-tier1-subrequests-disappear-timeout`, default `90s`), and firehose and substreams-tier1 keep streaming when the merger falls behind. See the firehose-core `CHANGELOG.md` `Unreleased` section for the full list.
+
 ## v2.25.0
 
 ### Added
