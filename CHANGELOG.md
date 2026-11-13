@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). See [MAINTAINERS.md](./MAINTAINERS.md)
 for instructions to keep up to date.
 
+## Unreleased
+
+### Added
+
+- Poller: the block fetchers of `fireeth tools poller` (`optimism`, `arb-one`, `generic-evm`, `firehose-tracer-api`) now report the chain head block number to the block poller. With a firehose-core that includes streamingfast/firehose-core#351, the poller warns `start block is above the chain head block, the poller waits until the chain reaches it` on startup instead of waiting silently.
+
 ## v2.25.0
 
 ### Added
