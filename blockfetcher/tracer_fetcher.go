@@ -20,6 +20,10 @@ func (f *TracerBlockFetcher) IsBlockAvailable(requested uint64) bool {
 	return f.fetcher.IsBlockAvailable(requested)
 }
 
+func (f *TracerBlockFetcher) FetchHeadBlockNumber(ctx context.Context, client *rpc.Client) (uint64, error) {
+	return f.fetcher.FetchHeadBlockNumber(ctx, client)
+}
+
 func (f *TracerBlockFetcher) Fetch(ctx context.Context, client *rpc.Client, blkNum uint64) (b *pbbstream.Block, skipped bool, err error) {
 	respStr, err := client.DoRequest(ctx, "debug_traceFirehoseBlockByNumber", []interface{}{fmt.Sprintf("0x%x", blkNum), nil})
 	if err != nil {

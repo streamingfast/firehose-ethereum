@@ -19,6 +19,10 @@ func (f *OptimismBlockFetcher) IsBlockAvailable(requested uint64) bool {
 	return f.fetcher.IsBlockAvailable(requested)
 }
 
+func (f *OptimismBlockFetcher) FetchHeadBlockNumber(ctx context.Context, rpcClient *rpc.Client) (uint64, error) {
+	return f.fetcher.FetchHeadBlockNumber(ctx, rpcClient)
+}
+
 func (f *OptimismBlockFetcher) Fetch(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (b *pbbstream.Block, skipped bool, err error) {
 	blk, err := f.fetcher.Fetch(ctx, rpcClient, blockNum)
 	return blk, false, err
