@@ -45,7 +45,7 @@ func NewBlockFetcher(intervalBetweenFetch, latestBlockRetryInterval time.Duratio
 }
 
 // SkipReceipts sets whether to skip fetching receipts for transactions. When true, the Logs will be fetched directly instead, using a single RPC call.
-// Some transaction fields will be missing by using this technique, like gasUsed, cumulativeGasUsed, status, log Index...
+// Receipt metadata such as gasUsed, cumulativeGasUsed, and status will be unavailable, but log indices are still populated from the logs response.
 func (f *BlockFetcher) SkipReceipts(skip bool) {
 	f.skipReceipts = skip
 }
