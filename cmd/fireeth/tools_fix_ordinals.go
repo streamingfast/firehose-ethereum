@@ -109,9 +109,9 @@ func createFixOrdinalsE(logger *zap.Logger) firecore.CommandExecutor {
 					ordinal++
 				}
 
-				block, err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
+				block, err = repackBlock(block, ethBlock)
 				if err != nil {
-					return fmt.Errorf("re-packing the block: %w", err)
+					return err
 				}
 				blocks[i] = block
 				i++

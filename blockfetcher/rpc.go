@@ -54,6 +54,11 @@ func (f *BlockFetcher) IsBlockAvailable(blockNum uint64) bool {
 	return blockNum <= f.latest
 }
 
+// FetchHeadBlockNumber lets the poller warn when it starts above the chain head
+func (f *BlockFetcher) FetchHeadBlockNumber(ctx context.Context, rpcClient *rpc.Client) (uint64, error) {
+	return rpcClient.LatestBlockNum(ctx)
+}
+
 func (f *BlockFetcher) FetchPBEth(ctx context.Context, rpcClient *rpc.Client, blockNum uint64) (block *pbeth.Block, err error) {
 
 	f.logger.Debug("fetching block", zap.Uint64("block_num", blockNum))

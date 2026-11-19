@@ -153,9 +153,9 @@ func createFixWithdrawalsE(logger *zap.Logger) firecore.CommandExecutor {
 					}
 					ethBlock.Withdrawals = withdrawals
 
-					processedBlock, err := blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: block.LibNum})
+					processedBlock, err := repackBlock(block, ethBlock)
 					if err != nil {
-						errorCh <- fmt.Errorf("re-packing the block: %w", err)
+						errorCh <- err
 						return
 					}
 

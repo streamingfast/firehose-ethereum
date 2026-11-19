@@ -8,7 +8,61 @@ for instructions to keep up to date.
 
 ### Added
 
+- Poller: the block fetchers of `fireeth tools poller` (`optimism`, `arb-one`, `generic-evm`, `firehose-tracer-api`) now report the chain head block number to the block poller. With a firehose-core that includes streamingfast/firehose-core#351, the poller warns `start block is above the chain head block, the poller waits until the chain reaches it` on startup instead of waiting silently.
+
+### Changed
+
+- Bump `firehose-core` to `c161cde` (`develop`, after [v1.21.2](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.2)) and `substreams` to `1661a96`. The merger health check reports not serving while the merger is stuck on a hole, substreams-tier1 retries jobs on a tier2 that went silent (`--substreams-tier1-subrequests-disappear-timeout`, default `90s`), and firehose and substreams-tier1 keep streaming when the merger falls behind. See the firehose-core `CHANGELOG.md` `Unreleased` section for the full list.
+
+## v2.25.0
+
+### Added
+
+- Substreams: `--substreams-tier1-status-page-template` takes the path to a Go html/template file that tier1 serves to anything doing `GET /` on its endpoint, with the chain name, readiness, liveness and head block (`{{ .ChainName }}`, `{{ .Ready }}`, `{{ .Live }}`, `{{ .HeadBlockNum }}`, `{{ .HeadBlockID }}`, `{{ .HeadBlockTime }}`). A client asking for `application/json` gets the same data as JSON. The file is reloaded when it changes. The page is served whatever the `Accept` header says and is not subject to `--substreams-tier1-enforce-compression`, like `/healthz`.
+
+- `TRX_TYPE_ACCOUNT_ABSTRACTION = 121` in `sf.ethereum.type.v2`, for the account abstraction transaction (type byte `0x79`) of the AA Transaction Type proposal split out of EIP-8130, which Base activates with its Everest upgrade. Its fields are in the new `TransactionTrace.account_abstraction_trx_input`: the nonce key, the payer, the validity window, the metadata, the account changes (an EIP-7702 style delegation, or the creation and configuration of a Keystore account, EIP-8130), the signed calls grouped in phases, each linked to the call that executed it, and the sender's authentication when the sender does not sign with its secp256k1 key. `committed_phases`, in the new `TransactionReceipt.account_abstraction_trx_output`, counts the phases that committed. A transaction of this type can be `FAILED` and still keep the state of the phases that committed before the one that reverted, see the `TransactionTrace.status` documentation.
+
+- `TRX_TYPE_OPTIMISM_POST_EXEC = 125` in `sf.ethereum.type.v2`, for Optimism's post-exec transaction (type byte `0x7d`), which OP Stack chains activate with the Lagoon upgrade. It is a system transaction appended by the block builder: its sender is the zero address, its input is the RLP-encoded post-exec payload, it runs no EVM code (no calls) and its gas used is 0.
+
+### Changed
+
+- Bump `payment-gateway` to `7890dd0c5410`. The `tgm://` auth plugin now sets the `x-auth-*` auth-method headers, so `auth_method`, `auth_jwt_lifetime_bucket`, `auth_jwt_iat` and `auth_jwt_exp` are populated in the incoming Firehose and Substreams request logs, instead of always being empty.
+
+- Bump `firehose-core` to [v1.21.2](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.2) and `substreams` to [v1.27.0](https://github.com/streamingfast/substreams/releases/tag/v1.27.0), with the matching `dauth`. The Firehose incoming request logs, as well as the `incoming Substreams Blocks request` and Estimate logs, now carry `auth_method`, `auth_jwt_lifetime_bucket`, `auth_jwt_iat` and `auth_jwt_exp` ([firehose-core#319](https://github.com/streamingfast/firehose-core/pull/319), [substreams#1039](https://github.com/streamingfast/substreams/pull/1039)), to follow the phase out of long-lived JWTs.
+
+- In `sf.ethereum.type.v2`, `TransactionTrace.morph_tx_config` (`MorphTxConfig`) is renamed `morph_trx_input` (`MorphTrxInput`), `TransactionTrace.morph_l1_message_config` (`MorphL1MessageConfig`) is renamed `morph_l1_message_trx_input` (`MorphL1MessageTrxInput`), and `TransactionReceipt.morph_receipt_config` (`MorphReceiptConfig`) is renamed `morph_trx_output` (`MorphTrxOutput`). The field numbers are unchanged, so blocks already written decode the same, but code using the generated bindings or the JSON field names must use the new names.
+
+- Bump `dstore`: an S3 upload now fails when its reader fails partway instead of storing a truncated object, S3 copies run server-side, and zstd stores accept `compression_config` (level, window, decoder `lowmem` and pool) in the store URL.
+
+- Bump `dsession` to fix two worker counter leaks.
+
+### Fixed
+
+- Blocks built from JSON-RPC (`tools compare-blocks-rpc` and the RPC poller) now set `TransactionTrace.blob_gas` and `TransactionReceipt.blob_gas_used` only for blob transactions (type 3). On OP-stack chains since Jovian, receipts report the transaction's data-availability footprint as `blobGasUsed` on every transaction, which was copied as blob gas.
+
+- `github.com/klauspost/compress` is updated from `v1.20.1` to `v1.20.2` to fix CVE-2026-116591 (High, `zstd` `DecodeAll` crash on crafted input, [GHSA-fpmh-frq8-7rj8](https://github.com/klauspost/compress/security/advisories/GHSA-fpmh-frq8-7rj8)).
+
+- `github.com/go-jose/go-jose/v4` is updated from `v4.1.4` to `v4.1.6` to fix CVE-2026-116587 (High, inefficient algorithmic complexity).
+
+- Bump `eth-go` to [736af9a](https://github.com/streamingfast/eth-go/compare/24d21927f9af...736af9a002ec), which closes the response body when the RPC endpoint answers with an HTTP error status ([eth-go#18](https://github.com/streamingfast/eth-go/pull/18)). Before, every error response (for example a `429` from a rate-limited endpoint) leaked its connection and two goroutines, so Substreams `eth_call` and `eth_getBalance` requests to a failing endpoint grew the open file count until the process hit its limit.
+
+## v2.24.1
+
+### Changed
+
+- With continuous authentication (`?continuous=true` on the `grpc` auth plugin), each continuous `Authenticate` response now refreshes the stream's trusted headers. A stream whose first authentication returned no headers (for example an authenticator that failed open) is metered with its identity from the next continuous call on, instead of without it for its whole lifetime.
+
+- Substreams: Tier2 skips loading dependency stores and compiling WASM modules for a segment once its cached block index proves every module excludes all of the segment's blocks. It still writes the same (empty) output files as before.
+
+- Bump `firehose-core` to [v1.21.1](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.1), `dauth` to [75940c1](https://github.com/streamingfast/dauth/compare/4ab1e1d2ebc3...75940c11f03e) and `substreams` to [5ed941a](https://github.com/streamingfast/substreams/compare/d18ca66fe152...5ed941ac91dc).
+
+## v2.24.0
+
+### Added
+
 - Store URLs, such as `--common-merged-blocks-store-url`, accept `compression_config` to tune how files are written, matching the store's compression: a zstd level with an optional window in MiB (`best`, `better/32`), or a gzip level from `1` to `9`. For example `gs://bucket/merged-blocks?compression_config=best/32`. Files written with any setting are read back without configuration. An invalid value makes opening the store fail.
+
+- On zstd stores, `compression_config` also takes decoder settings, comma separated after the level or alone: `lowmem=false` gives each decoder a history buffer of twice the window, and `pool=<name>` reuses decoders across reads and across every store using that name, in place of the `default` pool. `pool=none` gives each file a decoder of its own. For example `--common-merged-blocks-store-url=gs://bucket/merged-blocks?compression_config=best/32,lowmem=false,pool=blocks` and `--substreams-state-store-url=gs://bucket/states?compression_config=better/16,pool=cache`. Substreams tier2 gets them through the URLs tier1 sends. Reading 100 MiB `best/32` merged blocks files 10 at a time, adding `lowmem=false` to the `default` pool used 70% less CPU and 57% more peak heap. `lowmem=false` only helps files larger than their window plus about 1 MiB.
 
 - `Call.input_truncated` and `Call.return_data_truncated` in `sf.ethereum.type.v2`. They flag the calls whose input was cut to its 4-byte selector, or whose return data was left out, by a tracer that limits how much call input and return data a transaction or block records. A trace without such limits never sets them.
 
@@ -37,6 +91,10 @@ for instructions to keep up to date.
 - Substreams: `--substreams-tier1-allow-pruned-chain` lets tier1 serve modules (mappers and stores) whose initial block is below `--common-first-streamable-block`, after that block was raised (the chain was pruned). They run from the first streamable block on, and their stores resume from the snapshots taken before the pruning. A request is refused when a store has no snapshot at the first streamable block to resume from, or when a store has no initial block: every store must set one, at or above the first streamable block. Tier2 must run this version before the flag is set on tier1.
 
 - Substreams `eth_call` and `eth_getBalance` calls are now sent in the metering events as `external_calls_eth_call` and `external_calls_eth_getBalance`. A batch counts for as many calls as it contains, and retries are not counted.
+
+- `fireeth tools resize-merged-blocks --fix-misplaced-blocks` rewrites a store where merged-blocks files hold blocks outside of their range, as the empty files of a gap in block numbers can (ex: near-testnet around block 53461716). Each block is written to the file of its own number, with its parent number set to the last block written. A block at or below the last block written is skipped, and one that does not have it as parent stops the process with an error. Without the flag, such a store fails with `contains block ..., beyond the configured bundle size`.
+
+- `fireeth tools substreams prune-states`, `prune-outputs` and `purge`: `--delete-rate` (default `500`) caps deletions per second, `0` removes the cap.
 
 ### Fixed
 
@@ -70,7 +128,23 @@ for instructions to keep up to date.
 
 - `index-builder` now serves its health check, over gRPC and HTTP `/healthz`, on `--index-builder-grpc-listen-addr`, which it never listened on.
 
+- Startup no longer lowers the open-files limit (`RLIMIT_NOFILE`) to 24,576 when it can't raise it to 1,000,000 and the current limit is already higher, as in containers without `CAP_SYS_RESOURCE` (k0s: 999,999, containerd 2.x: 524,288). It now keeps the current limit.
+
+- Substreams: Fix wasm calls that fail because the host ran out of file descriptors or memory (for example `Too many open files` while creating an instance) being reported as deterministic errors, which returned `InvalidArgument` and were cached for 1h. They now return `Internal`, and the shared cache runs the call again instead of handing the same error to every stream on that block.
+
+- The tools writing merged-blocks files (`resize-merged-blocks`, `download-from-firehose` and others) now fail instead of writing a block to a file whose range does not hold it. The previous bundle's last block carried into the files of a gap is still written.
+
+- Merger no longer moves canonical one-block files to the forked-blocks store when readers write the same block with a different LIB, as happens on Polygon PoS / Amoy. Only blocks with another ID at the same height are moved.
+
+- The reader now always clamps a decoded block's `lib_num` down to its own block number when the node/plugin reports `lib_num` greater than the block number (invalid; `lib_num` equal to the block number is still valid), logs an error and increments `reader_node_invalid_libnum_clamped_count`, instead of letting the bad value reach the relayer where it moved LIB past head and silently stalled it forever.
+
+- zstd stores (merged blocks, one-block files, substreams states) now close the object's HTTP stream or file when a reader is closed before the end of the file. Streams stopping mid-bundle, at their stop block or when the client goes away, used to leave it open.
+
+- `fireeth tools substreams prune-states`, `prune-outputs` and `purge` no longer fail deletions on GCS with `429 rateLimitExceeded` ("request distribution is too uneven across the key-ranges" or "request-rate on the bucket has ramped up too fast"). They now delete in random order instead of listing order, which sent every concurrent deletion to the same part of the bucket, are capped by the new `--delete-rate` flag, and retry a failed deletion 5 times over several seconds instead of twice over 50ms.
+
 ### Changed
+
+- Substreams: production-mode requests disconnected for being more than 2 segments behind the last final block now get `back-processing ended too far behind the last final block of the chain, please reconnect to process the gap in parallel` or `stream fell too far behind the last final block of the chain, please reconnect to process the gap in parallel` instead of `endpoint is shutting down, please reconnect`. Both are still `Unavailable`.
 
 - Apps running in the same process now share one session pool, created from `--common-session-plugin`, instead of each creating their own. With the `local://` plugin, firehose and substreams-tier1 running together now count against the same `max_sessions` and `max_sessions_per_organization` limits.
 
@@ -86,13 +160,35 @@ for instructions to keep up to date.
 
 - Merged blocks are read without copying their payload, which halves the memory allocated per merged-blocks file read (25.8 MiB instead of 50.8 MiB for 100 blocks of 256 KiB).
 
+- Go 1.27 or newer is now required to build.
+
+- `fireeth tools resize-merged-blocks` now accepts equal `--source-bundle-size` and `--target-bundle-size` to rewrite merged-blocks files with different settings (ex: compression), after a confirmation prompt (`--force` skips it). It also clears the deprecated `payload_kind` and `payload_buffer` fields from every block written; the block data stays in `payload`.
+
+- `firehose` and `substreams-tier1` launched in the same process now share one forkable hub instead of each holding its own copy of the live blocks; on Solana that saves about 0.5 GiB per process. Firehose still streams complete blocks only.
+
+- The firehose hub keeps as many final blocks as the substreams-tier1 hub: two merged-blocks files worth, at least 200, instead of at least 500. Clients resuming between 200 and 500 blocks below the last irreversible block now read those blocks from merged-blocks files.
+
+- zstd stores (merged blocks, one-block files, substreams states) now read with decoders kept in a process-wide `default` pool when `compression_config` names no pool, and those decoders work on the reading goroutine instead of 4 background ones. Reading 100 MiB `best/32` merged blocks files 10 at a time, that used 6% less CPU and 53% less peak heap; on 2 MiB files, 42% less CPU. `compression_config=pool=none` brings back a decoder per file.
+
+- Firehose, substreams-tier1 and the relayer now detect a relayer or reader that disappears without closing the connection (for example a host reboot) in about 40s instead of 5 minutes. They send gRPC keepalive pings after `30s` without data and drop the connection after `10s` without an answer.
+
 - `fireeth tools poller` prints each `FIRE BLOCK` line 11-15x faster and no longer allocates several times the block size to do it: the line is built once in a reused buffer, with SIMD base64 encoding.
 
-- Bump `firehose-core` to [513060d](https://github.com/streamingfast/firehose-core/compare/6706c0483339...513060df3b9d), `bstream` to [2d126b0](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...2d126b0b0009) and `substreams` to [00bc09f](https://github.com/streamingfast/substreams/compare/c14100343793...00bc09fd4f2f).
+- Bump `firehose-core` to [v1.21.0](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.0), `bstream` to [71724f9](https://github.com/streamingfast/bstream/compare/3dd2b9bd72d7...71724f9213e7) and `substreams` to [d18ca66](https://github.com/streamingfast/substreams/compare/c14100343793...d18ca66fe152).
+
+### Removed
+
+- Removed the `--firehose-discard-partial-blocks` flag. Firehose clients only receive complete blocks, and the hub firehose builds when it runs without substreams-tier1 never receives partial blocks from the relayer, so the flag no longer did anything. Operators setting it must drop it, as an unknown flag stops the process from starting.
 
 ### Deprecated
 
 - The `SOURCE_CHAN_SIZE` environment variable, replaced by `--common-live-subscriber-max-buffered-blocks`. It is still used when the flag is not set, with a warning at startup.
+
+### Security
+
+- Bump `golang.org/x/net` to `v0.61.0` to fix CVE-2026-78663 (critical), CVE-2026-78669, CVE-2026-78660 and CVE-2026-78659 (high).
+
+- Bump OpenTelemetry to `v1.47.0` to fix known vulnerabilities.
 
 ## v2.23.0
 

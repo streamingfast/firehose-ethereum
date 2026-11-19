@@ -272,20 +272,17 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 			}
 
 			var blocks []*pbbstream.Block
-			encode := func(index int, ethBlock *pbeth.Block, libNum uint64) error {
-				blocks[index], err = blockEncoder.Encode(firecore.BlockEnveloppe{Block: ethBlock, LIBNum: libNum})
-				if err != nil {
-					return fmt.Errorf("re-packing the block: %w", err)
-				}
-				return nil
+			encode := func(index int, block *pbbstream.Block, ethBlock *pbeth.Block) error {
+				blocks[index], err = repackBlock(block, ethBlock)
+				return err
 			}
 
 			// A block waiting for its withdrawals is kept decoded until its lookup ends, the
 			// others are encoded right away
 			type pendingBlock struct {
 				index    int
+				block    *pbbstream.Block
 				ethBlock *pbeth.Block
-				libNum   uint64
 				fetch    *withdrawalsFetch
 			}
 			var pending []*pendingBlock
@@ -306,7 +303,7 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 						return fmt.Errorf("adding withdrawals to block %d: %w", p.ethBlock.Number, p.fetch.err)
 					}
 					p.ethBlock.Withdrawals = p.fetch.withdrawals
-					if err := encode(p.index, p.ethBlock, p.libNum); err != nil {
+					if err := encode(p.index, p.block, p.ethBlock); err != nil {
 						return err
 					}
 				}
@@ -345,11 +342,11 @@ func createConvertToV5E(logger *zap.Logger) firecore.CommandExecutor {
 				index := len(blocks)
 				blocks = append(blocks, nil)
 				if fetch == nil {
-					if err := encode(index, ethBlock, block.LibNum); err != nil {
+					if err := encode(index, block, ethBlock); err != nil {
 						return err
 					}
 				} else {
-					pending = append(pending, &pendingBlock{index: index, ethBlock: ethBlock, libNum: block.LibNum, fetch: fetch})
+					pending = append(pending, &pendingBlock{index: index, block: block, ethBlock: ethBlock, fetch: fetch})
 				}
 
 				if err := encodePending(false); err != nil {
