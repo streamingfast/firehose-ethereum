@@ -10,6 +10,10 @@ for instructions to keep up to date.
 
 - Poller: the block fetchers of `fireeth tools poller` (`optimism`, `arb-one`, `generic-evm`, `firehose-tracer-api`) now report the chain head block number to the block poller. With a firehose-core that includes streamingfast/firehose-core#351, the poller warns `start block is above the chain head block, the poller waits until the chain reaches it` on startup instead of waiting silently.
 
+### Changed
+
+- Bump `firehose-core` to `c161cde` (`develop`, after [v1.21.2](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.2)) and `substreams` to `1661a96`. The merger health check reports not serving while the merger is stuck on a hole, substreams-tier1 retries jobs on a tier2 that went silent (`--substreams-tier1-subrequests-disappear-timeout`, default `90s`), and firehose and substreams-tier1 keep streaming when the merger falls behind. See the firehose-core `CHANGELOG.md` `Unreleased` section for the full list.
+
 ## v2.25.0
 
 ### Added
