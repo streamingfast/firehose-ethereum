@@ -13,6 +13,7 @@ for instructions to keep up to date.
 ### Changed
 
 - Bump `firehose-core` to `c161cde` (`develop`, after [v1.21.2](https://github.com/streamingfast/firehose-core/releases/tag/v1.21.2)) and `substreams` to `1661a96`. The merger health check reports not serving while the merger is stuck on a hole, substreams-tier1 retries jobs on a tier2 that went silent (`--substreams-tier1-subrequests-disappear-timeout`, default `90s`), and firehose and substreams-tier1 keep streaming when the merger falls behind. See the firehose-core `CHANGELOG.md` `Unreleased` section for the full list.
+- Bump `payment-gateway` to `14c5cb44d868`. The `tgm://` auth plugin now rejects requests whose JWT reissue is refused by the issuer (disabled or revoked API key, disabled organization), instead of accepting the old token. Issuer 5xx, 429, timeouts and network errors still accept it.
 
 ## v2.25.0
 
