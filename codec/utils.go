@@ -76,12 +76,9 @@ func DecodeHex(input string) ([]byte, error) {
 	return bytes, nil
 }
 
-// CanonicalHex receives an input and return it's canonical form,
-// i.e. the single unique well-formed which in our case is an all-lower
-// case version with even number of characters.
-//
-// The only differences with `SanitizeHexInput` here is an additional
-// call to `strings.ToLower` before returning the result.
+// CanonicalHex returns the same normalized form as SanitizeHex: it removes an
+// optional 0x prefix, pads odd-length input on the left, and lowercases it.
+// It does not validate that the remaining characters are hexadecimal.
 func CanonicalHex(input string) string {
 	return strings.ToLower(SanitizeHex(input))
 }
